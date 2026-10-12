@@ -1,0 +1,14 @@
+{
+  "milestone": "M1",
+  "input_mode": "mock_tracker",
+  "dimension_order": ["R", "I", "A", "S", "E", "C"],
+  "eligibility": "job_zone in {4,5} and complete finite supplied RIASEC z-scores",
+  "formula": "sum(interests[t] * occupation_z[t] for observed t in R,I,A,S,E,C order)",
+  "tie_break": "occupation code ascending",
+  "request": {
+    "interests": {"R": 0.0, "I": 0.55, "A": 0.0, "S": 1.0, "E": 0.0, "C": -0.55},
+    "observed_types": ["I", "S", "C"],
+    "user_sentences": ["I enjoy helping people and investigating problems.", "I dislike repetitive paperwork."],
+    "top_k": 5
+  }
+}

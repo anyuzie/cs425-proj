@@ -1,0 +1,168 @@
+{
+  "command": "python -m recommender.cli --output reports/ranking/m1_demo.json",
+  "config": {
+    "dimension_order": [
+      "R",
+      "I",
+      "A",
+      "S",
+      "E",
+      "C"
+    ],
+    "eligibility": "job_zone in {4,5} and complete finite supplied RIASEC z-scores",
+    "formula": "sum(interests[t] * occupation_z[t] for observed t in R,I,A,S,E,C order)",
+    "input_mode": "mock_tracker",
+    "milestone": "M1",
+    "request": {
+      "interests": {
+        "A": 0.0,
+        "C": -0.55,
+        "E": 0.0,
+        "I": 0.55,
+        "R": 0.0,
+        "S": 1.0
+      },
+      "observed_types": [
+        "I",
+        "S",
+        "C"
+      ],
+      "top_k": 5,
+      "user_sentences": [
+        "I enjoy helping people and investigating problems.",
+        "I dislike repetitive paperwork."
+      ]
+    },
+    "tie_break": "occupation code ascending"
+  },
+  "config_sha256": "72c4e9a1beac2f71d91ca0748871aca74a080a6f2040af1d856d461ffcbea902",
+  "dependencies": "standard library only",
+  "eligible_count": 378,
+  "git_revision": "5cfd424646cfdfb3f76271a1a17d7e68741fdeb6",
+  "input_mode": "mock_tracker",
+  "load_seconds": 0.03740240000479389,
+  "milestone": "M1",
+  "occupations_sha256": "d00d968d5fe5076ec76eca55cd5fa2734816ea93e8af6d84bdff2170c1af9503",
+  "python": "3.13.16",
+  "rank_seconds": 0.0002734000008786097,
+  "result": {
+    "occupations": [
+      {
+        "code": "25-1065.00",
+        "evidence": [],
+        "occupation_z": {
+          "A": 1.4858528555131065,
+          "C": -1.5144073918222825,
+          "E": 0.2637746125634023,
+          "I": 1.2540098798694463,
+          "R": -1.36051795561223,
+          "S": 2.2486883329132903
+        },
+        "rank": 1,
+        "rrf_score": null,
+        "signals": {
+          "structured": {
+            "rank": 1,
+            "score": 3.7713178323437413
+          }
+        },
+        "title": "Political Science Teachers, Postsecondary"
+      },
+      {
+        "code": "25-1062.00",
+        "evidence": [],
+        "occupation_z": {
+          "A": 1.585808555789233,
+          "C": -1.504345789632222,
+          "E": 0.10859923052943071,
+          "I": 1.1588624109611092,
+          "R": -0.7898390985395074,
+          "S": 2.27732428219708
+        },
+        "rank": 2,
+        "rrf_score": null,
+        "signals": {
+          "structured": {
+            "rank": 2,
+            "score": 3.7420887925234125
+          }
+        },
+        "title": "Area, Ethnic, and Cultural Studies Teachers, Postsecondary"
+      },
+      {
+        "code": "25-1066.00",
+        "evidence": [],
+        "occupation_z": {
+          "A": 1.6024678391685876,
+          "C": -1.232682530500588,
+          "E": -0.3134778086029721,
+          "I": 1.325370481550699,
+          "R": -1.2671341426366938,
+          "S": 2.3231418010511447
+        },
+        "rank": 3,
+        "rrf_score": null,
+        "signals": {
+          "structured": {
+            "rank": 3,
+            "score": 3.7300709576793527
+          }
+        },
+        "title": "Psychology Teachers, Postsecondary"
+      },
+      {
+        "code": "25-1061.00",
+        "evidence": [],
+        "occupation_z": {
+          "A": 1.3609082301679476,
+          "C": -1.2427441326906483,
+          "E": -0.22037257938258892,
+          "I": 1.5453990034012284,
+          "R": -0.5771315245396743,
+          "S": 2.1799620546321936
+        },
+        "rank": 4,
+        "rrf_score": null,
+        "signals": {
+          "structured": {
+            "rank": 4,
+            "score": 3.7134407794827258
+          }
+        },
+        "title": "Anthropology and Archeology Teachers, Postsecondary"
+      },
+      {
+        "code": "25-1113.00",
+        "evidence": [],
+        "occupation_z": {
+          "A": 1.6024678391685876,
+          "C": -1.5144073918222825,
+          "E": 0.01549400130904782,
+          "I": 0.9923543403715198,
+          "R": -1.2308182153684295,
+          "S": 2.3231418010511447
+        },
+        "rank": 5,
+        "rrf_score": null,
+        "signals": {
+          "structured": {
+            "rank": 5,
+            "score": 3.701860753757736
+          }
+        },
+        "title": "Social Work Teachers, Postsecondary"
+      }
+    ],
+    "reason": null,
+    "status": "ranked"
+  },
+  "source_sha256": {
+    "recommender\\__init__.py": "bbfb37c41714aa5dce4c9378428d228e2561aecbc537f595af9454eba6d3b5e3",
+    "recommender\\audit.py": "aece7285bc55a127cde7ed5f1bf9813d236316e519ab084cb90e19d98caf3e01",
+    "recommender\\cli.py": "8a7e58f5a1f89d3d7f1075f4f444891c1090f5a42fb1c1c48cdebf7766597a98",
+    "recommender\\data_loader.py": "f1c8ada4e5a2bee2d63fb9e2f40f419b1cc858810458b3fc6ef226c018a43310",
+    "recommender\\schemas.py": "d9ac91871707281cfd2024c41d387a0069624eb1a197c362e374d3350abe74ac",
+    "recommender\\structured.py": "a58d4ca9e2363c86299e2351bf03ec773801e229d6eaf2c9ff78d03635a83184"
+  },
+  "working_tree_dirty": true
+}

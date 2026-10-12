@@ -1,0 +1,10 @@
+{
+  "milestone": "M0",
+  "expected_counts": {"occupations": 1016, "rated": 923, "eligible": 378, "tasks": 18838, "dev": 60, "held_out": 100},
+  "dimension_order": ["R", "I", "A", "S", "E", "C"],
+  "eligibility": "job_zone in {4,5} and complete finite RIASEC z-scores",
+  "query_policy": "accumulated user utterances; exclude bot questions",
+  "dense_aggregation_planned": "best task similarity per occupation per user sentence, averaged across sentences",
+  "default_top_k": 100,
+  "rrf_k_planned": 60
+}
