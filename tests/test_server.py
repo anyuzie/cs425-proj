@@ -14,7 +14,8 @@ class ServerTests(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.logs = tmp.name
-        patcher = mock.patch.dict(os.environ, {"CM_LOG_DIR": tmp.name})
+        stub = os.path.join(os.path.dirname(__file__), "stub_config.json")
+        patcher = mock.patch.dict(os.environ, {"CM_LOG_DIR": tmp.name, "CM_CONFIG": stub})
         patcher.start()
         self.addCleanup(patcher.stop)
         self.client = TestClient(app)

@@ -6,7 +6,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 KINDS = ("extractor", "tracker", "rule", "confirmer", "ranker", "policy", "filler")
-DOC = "docs/INTEGRATION.md"
 
 
 def _settings(cfg: dict) -> dict:
@@ -50,26 +49,42 @@ def _filler_bank(cfg, d):
     return QuestionBankFiller(qb, names)
 
 
-def _todo(kind: str, name: str, module: str):
-    def factory(cfg, d):
-        raise NotImplementedError(f"{kind} '{name}' is registered but {module} does not exist yet; "
-                                  f"see {DOC} for the interface and how to implement it")
-    return factory
+# --- real parts: each imports its own file only when chosen in configs/system.json ---
+def _extractor_deberta(cfg, d):
+    from .extractor import DebertaExtractor  # pipeline/extractor.py
+    return DebertaExtractor(ROOT / cfg["paths"]["extractor_checkpoint"])
+
+
+def _tracker_decay(cfg, d):
+    from .tracker import DecayTracker  # pipeline/tracker.py
+    return DecayTracker()
+
+
+def _confirmer_nli(cfg, d):
+    from .nli import NliConfirmer  # pipeline/nli.py
+    return NliConfirmer(cfg["paths"]["nli_model"])
+
+
+def _ranker_rrf(cfg, d):
+    from recommender.fusion import RRFRanker  # recommender/fusion.py (+ bm25.py, dense.py)
+    p = cfg["paths"]
+    return RRFRanker(d / "occupations.csv", ROOT / p["bm25"], ROOT / p["faiss"], ROOT / p["faiss_owners"], p["embedder"])
+
+
+def _policy_manual(cfg, d):
+    from .policy import ManualPolicy  # pipeline/policy.py
+    return ManualPolicy(_settings(cfg).get("max_turns", 10), _settings(cfg).get("no_probing", False))
 
 
 REGISTRY: dict[str, dict] = {
-    "extractor": {"lexicon-stub": _extractor_lexicon, "deberta": _todo("extractor", "deberta", "pipeline/extractor.py")},
-    "tracker": {"simple-stub": _tracker_simple, "decay": _todo("tracker", "decay", "pipeline/tracker.py")},
+    "extractor": {"lexicon-stub": _extractor_lexicon, "deberta": _extractor_deberta},
+    "tracker": {"simple-stub": _tracker_simple, "decay": _tracker_decay},
     "rule": {"rule": _rule},
-    "confirmer": {"passthrough-stub": _confirmer_passthrough, "nli": _todo("confirmer", "nli", "pipeline/nli.py")},
-    "ranker": {"structured+keyword-stub": _ranker_structured, "rrf": _todo("ranker", "rrf", "recommender/fusion.py")},
-    "policy": {"rule-stub": _policy_rule, "manual": _todo("policy", "manual", "pipeline/policy.py")},
+    "confirmer": {"passthrough-stub": _confirmer_passthrough, "nli": _confirmer_nli},
+    "ranker": {"structured+keyword-stub": _ranker_structured, "rrf": _ranker_rrf},
+    "policy": {"rule-stub": _policy_rule, "manual": _policy_manual},
     "filler": {"question-bank": _filler_bank},
 }
-# When a real module lands, replace its _todo with a lazy factory, e.g.
-#   def _extractor_deberta(cfg, d):
-#       from .extractor import DebertaExtractor   # import here, not at module top
-#       return DebertaExtractor(ROOT / cfg["paths"]["extractor_checkpoint"])
 
 
 def build(config: dict, data_dir) -> dict:

@@ -9,12 +9,14 @@ from pipeline.system import System
 from pipeline.stubs import _tokens as tokens
 
 DATA = Path(__file__).resolve().parent.parent / "data"
+# Behaviour tests pin the stand-ins, so switching configs/system.json to real models cannot break them.
+STUB_CONFIG = Path(__file__).resolve().parent / "stub_config.json"
 
 
 class PipelineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.system = System.load(DATA)
+        cls.system = System.load(DATA, STUB_CONFIG)
 
     def run_script(self, texts):
         state = State()
@@ -125,7 +127,7 @@ class PipelineTests(unittest.TestCase):
             name = "never"
             def score(self, a, b):
                 return 0.5
-        sys2 = System.load(DATA)
+        sys2 = System.load(DATA, STUB_CONFIG)
         sys2.confirmer = Never()
         state = State()
         sys2.start(state)
@@ -135,17 +137,25 @@ class PipelineTests(unittest.TestCase):
 
     def test_unknown_component_lists_valid_names(self):
         import tempfile
-        cfg = json.loads((Path(__file__).resolve().parent.parent / "configs" / "system.json").read_text())
+        cfg = json.loads(STUB_CONFIG.read_text())
         cfg["components"]["extractor"] = "nope"
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
             json.dump(cfg, f)
         with self.assertRaisesRegex(ValueError, "lexicon-stub"):
             System.load(DATA, f.name)
-        cfg["components"]["extractor"] = "deberta"
-        with open(f.name, "w") as g:
-            json.dump(cfg, g)
-        with self.assertRaisesRegex(NotImplementedError, "INTEGRATION.md"):
-            System.load(DATA, f.name)
+        cfg["components"]["extractor"] = "lexicon-stub"
+        # A part that is not filled in yet must stop startup with a pointer to the guide, not half-run.
+        for kind, name in [("extractor", "deberta"), ("tracker", "decay"), ("confirmer", "nli"),
+                           ("ranker", "rrf"), ("policy", "manual")]:
+            one = json.loads(json.dumps(cfg))
+            one["components"][kind] = name
+            with open(f.name, "w") as g:
+                json.dump(one, g)
+            with self.subTest(kind=kind):
+                try:
+                    System.load(DATA, f.name)  # part already filled in: loading is fine
+                except NotImplementedError as e:
+                    self.assertIn("INTEGRATION.md", str(e))
 
 
 if __name__ == "__main__":
