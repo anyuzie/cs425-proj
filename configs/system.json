@@ -1,0 +1,20 @@
+{
+  "components": {
+    "extractor": "lexicon-stub",
+    "tracker": "simple-stub",
+    "rule": "rule",
+    "confirmer": "passthrough-stub",
+    "ranker": "structured+keyword-stub",
+    "policy": "rule-stub",
+    "filler": "question-bank"
+  },
+  "settings": {"max_turns": 10, "confirm_threshold": 0.6},
+  "paths": {
+    "extractor_checkpoint": "models/extractor",
+    "nli_model": "cross-encoder/nli-deberta-v3-base",
+    "embedder": "all-MiniLM-L6-v2",
+    "bm25": "indexes/bm25.pkl",
+    "faiss": "indexes/faiss.idx",
+    "faiss_owners": "indexes/faiss_owners.json"
+  }
+}

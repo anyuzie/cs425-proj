@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, field_validator
 
 CODE_RE = re.compile(r"^[A-Za-z0-9_-]{1,32}$")
+MESSAGE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 
 class SessionRequest(BaseModel):
@@ -21,6 +22,14 @@ class SessionRequest(BaseModel):
 class ChatRequest(BaseModel):
     session_id: str
     text: str
+    message_id: str | None = None  # client-generated; a repeat returns the stored response without stepping
+
+    @field_validator("message_id")
+    @classmethod
+    def _mid(cls, v):
+        if v is not None and not MESSAGE_ID_RE.fullmatch(v):
+            raise ValueError("message_id must match ^[A-Za-z0-9_-]{1,64}$")
+        return v
 
     @field_validator("text")
     @classmethod

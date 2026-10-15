@@ -34,7 +34,10 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(body["status"], "ok")
         self.assertEqual(body["eligible"], 378)
         self.assertEqual(body["components"]["extractor"], "lexicon-stub")
-        self.assertEqual(body["components"]["ranker"], "structured")
+        self.assertEqual(body["components"]["ranker"], "structured+keyword-stub")
+        self.assertEqual(body["components"]["rule"], "rule")
+        self.assertEqual(body["components"]["confirmer"], "passthrough-stub")
+        self.assertNotIn("evidence", body["components"])
 
     def test_session_opening_and_anon_code(self):
         s = self.new()
@@ -108,6 +111,33 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(lines[1]["user_text"], "I love working with machines and tools.")
         self.assertEqual(lines[1]["participant_code"] if "participant_code" in lines[1] else "P-014", "P-014")
         self.assertEqual(lines[1]["turn"], 1)
+
+    def test_same_message_id_steps_once(self):
+        s = self.new()
+        body = {"session_id": s["session_id"], "text": "I love working with machines and tools.", "message_id": "m-1"}
+        a = self.client.post("/api/chat", json=body).json()
+        b = self.client.post("/api/chat", json=body).json()
+        self.assertEqual((a["turn"], b["turn"]), (1, 1))
+        self.assertEqual(a, b)
+        c = self.say(s["session_id"], "I enjoy art").json()
+        self.assertEqual(c["turn"], 2)
+        bad = self.client.post("/api/chat", json={**body, "message_id": "bad id!"})
+        self.assertEqual(bad.status_code, 422)
+
+    def test_log_failure_leaves_state_unchanged(self):
+        s = self.new()
+        with mock.patch("app.server.turn_log.append", side_effect=OSError("disk full")):
+            self.assertEqual(self.say(s["session_id"], "I love machines").status_code, 500)
+        r = self.say(s["session_id"], "I love machines")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()["turn"], 1)
+
+    def test_sessions_independent(self):
+        a, b = self.new(), self.new()
+        self.say(a["session_id"], "I love machines")
+        self.say(a["session_id"], "I love art")
+        self.assertEqual(self.say(b["session_id"], "I love machines").json()["turn"], 1)
+        self.assertEqual(self.say(a["session_id"], "I love music").json()["turn"], 3)
 
     def test_static_missing_does_not_break_api(self):
         self.assertIn(self.client.get("/").status_code, (200, 404))

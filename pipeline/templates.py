@@ -23,3 +23,13 @@ def fill(action, payload: dict, question_bank: dict, type_names: dict[str, str])
     if kind == "RECOMMEND":
         return _pick(question_bank["RECOMMEND"], index)
     raise ValueError(f"unknown action {kind}")
+
+
+class QuestionBankFiller:
+    name = "question-bank"
+
+    def __init__(self, question_bank: dict, type_names: dict[str, str]) -> None:
+        self.qb, self.type_names = question_bank, type_names
+
+    def fill(self, action, payload: dict) -> str:
+        return fill(action, payload, self.qb, self.type_names)

@@ -1,9 +1,12 @@
+import json
 import unittest
 from pathlib import Path
 
 from pipeline.interfaces import State
-from pipeline.stubs import KeywordEvidence, LexiconExtractor
+from pipeline.stubs import LexiconExtractor, StructuredKeywordRanker
 from pipeline.system import System
+
+from pipeline.stubs import _tokens as tokens
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
@@ -63,7 +66,8 @@ class PipelineTests(unittest.TestCase):
             result = self.system.step(state, "Definitely the first one")
             self.assertLessEqual(result.turn, 10)
         self.assertEqual(result.action, "RECOMMEND")
-        self.assertIn(result.reply, self.system.qb["RECOMMEND"])
+        qb = json.loads((DATA / "question_bank.json").read_text(encoding="utf-8"))
+        self.assertIn(result.reply, qb["RECOMMEND"])
         self.assertEqual(len(result.recommendations), 5)
         self.assertEqual([r["rank"] for r in result.recommendations], [1, 2, 3, 4, 5])
         for rec in result.recommendations:
@@ -102,11 +106,46 @@ class PipelineTests(unittest.TestCase):
         self.assertIsNone(result.recommendations)
 
     def test_evidence_picks_overlapping_tasks(self):
-        ev = KeywordEvidence(DATA / "tasks.csv", {"13-2031.00"})
-        tasks = ev.top_tasks("13-2031.00", ["I like budget analysis and cost records"])
-        self.assertEqual(len(tasks), 2)
-        self.assertEqual(ev.top_tasks("13-2031.00", ["zzz qqq"]), [])
-        self.assertEqual(ev.top_tasks("11-9999.00", ["budget"]), [])
+        ranker = StructuredKeywordRanker(DATA / "occupations.csv", DATA / "tasks.csv")
+        code = "13-2031.00"
+        tasks = [e.text for e in ranker._evidence(code, tokens("I like budget analysis and cost records"))]
+        self.assertGreaterEqual(len(tasks), 2)
+        self.assertEqual(ranker._evidence(code, tokens("zzz qqq")), [])
+        self.assertEqual(ranker._evidence("11-9999.00", tokens("budget")), [])
+
+    def test_ranker_fills_evidence(self):
+        ranker = StructuredKeywordRanker(DATA / "occupations.csv", DATA / "tasks.csv")
+        resp = ranker.rank({**dict.fromkeys("RIASEC", 0.0), "C": 1.0}, {"C"}, ["I like budget records"], 5)
+        self.assertEqual(len(resp.occupations), 5)
+        for o in resp.occupations:
+            self.assertTrue(all(e.occupation_code == o.code for e in o.evidence))
+
+    def test_confirmer_threshold_drops_flag(self):
+        class Never:
+            name = "never"
+            def score(self, a, b):
+                return 0.5
+        sys2 = System.load(DATA)
+        sys2.confirmer = Never()
+        state = State()
+        sys2.start(state)
+        sys2.step(state, "I love working with machines and tools.")
+        r = sys2.step(state, "I hate repairing machines, it is boring.")
+        self.assertNotEqual(r.action, "CHALLENGE")
+
+    def test_unknown_component_lists_valid_names(self):
+        import tempfile
+        cfg = json.loads((Path(__file__).resolve().parent.parent / "configs" / "system.json").read_text())
+        cfg["components"]["extractor"] = "nope"
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            json.dump(cfg, f)
+        with self.assertRaisesRegex(ValueError, "lexicon-stub"):
+            System.load(DATA, f.name)
+        cfg["components"]["extractor"] = "deberta"
+        with open(f.name, "w") as g:
+            json.dump(cfg, g)
+        with self.assertRaisesRegex(NotImplementedError, "INTEGRATION.md"):
+            System.load(DATA, f.name)
 
 
 if __name__ == "__main__":

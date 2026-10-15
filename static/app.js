@@ -15,7 +15,7 @@
 
   var state = {
     sessionId: null, code: null, maxTurns: 10, turn: 0,
-    busy: false, finished: false, typingEl: null, lastText: null, lastFailedText: null
+    busy: false, finished: false, typingEl: null, lastText: null, lastFailedText: null, messageId: null
   };
 
   /* ---------- DOM helpers (textContent only; never innerHTML) ---------- */
@@ -237,6 +237,13 @@
   }
 
   /* ---------- send ---------- */
+  function newMessageId() {
+    try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* fall through */ }
+    var id = '';
+    for (var i = 0; i < 32; i++) id += Math.floor(Math.random() * 16).toString(16);
+    return id;
+  }
+
   function send(text, isRetry) {
     if (state.busy || state.finished || !state.sessionId) return;
     text = text.trim();
@@ -246,6 +253,8 @@
     clearError();
     state.busy = true;
     state.lastText = text;
+    if (!isRetry || !state.messageId) state.messageId = newMessageId();  // a retry re-sends the same id so the server can dedupe
+    var messageId = state.messageId;
     if (!isRetry) {
       addUser(text);
       els.msg.value = '';
@@ -255,7 +264,7 @@
     syncComposer();
     showTyping();
 
-    api('/api/chat', { session_id: state.sessionId, text: text }).then(function (data) {
+    api('/api/chat', { session_id: state.sessionId, text: text, message_id: messageId }).then(function (data) {
       hideTyping();
       state.busy = false;
       state.lastText = null;

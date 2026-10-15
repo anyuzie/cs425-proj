@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Protocol
 
+from recommender.schemas import RankingResponse
+
 TYPES = ("R", "I", "A", "S", "E", "C")
 MAX_TURNS = 10
 
@@ -53,6 +55,7 @@ class Flag:
     slot: str
     old: HistoryEntry
     new: HistoryEntry
+    score: float = 0.0   # confirmer's contradiction probability, set by System
 
 
 @dataclass
@@ -74,6 +77,8 @@ class State:
     challenged: set[str] = field(default_factory=set)
     probed: set[str] = field(default_factory=set)
     settled: set[str] = field(default_factory=set)
+    resolved: set[str] = field(default_factory=set)   # slots whose PROBE was answered; the rule skips them
+    last_reply: str = ""                              # bot text of the previous turn (context for the extractor)
     strikes: dict[str, int] = field(default_factory=dict)
     clarify_count: dict[str, int] = field(default_factory=dict)
     kind_count: dict[str, int] = field(default_factory=dict)
@@ -83,24 +88,42 @@ class State:
 
 class Extractor(Protocol):
     name: str
-    def read(self, text: str, expected_slot: str | None = None) -> Reading: ...
+    def read(self, text: str, context: str | None = None, expected_slot: str | None = None) -> Reading:
+        """context: the bot question the user is answering (None if the last turn was not a question)."""
 
 
 class Tracker(Protocol):
     name: str
-    def update(self, state: State, reading: Reading) -> None: ...
+    def update(self, state: State, reading: Reading) -> None:
+        """Merge the reading into state.slots/history, set state.last_reading_empty, and add the slot
+        to state.resolved when the last action was a PROBE on it."""
 
 
-class ContradictionChecker(Protocol):
+class ContradictionRule(Protocol):
     name: str
-    def check(self, state: State) -> list[Flag]: ...
+    def candidates(self, state: State) -> list[Flag]: ...
+
+
+class Confirmer(Protocol):
+    name: str
+    def score(self, old_src: str, new_src: str) -> float:
+        """Contradiction probability 0..1 for two source sentences."""
+
+
+class Ranker(Protocol):
+    name: str
+    eligible_count: int
+    def rank(self, interests: dict, observed_types: set, user_sentences: list[str], top_k: int) -> RankingResponse:
+        """Each RankedOccupation.evidence holds the TaskEvidence used as card quotes."""
 
 
 class Policy(Protocol):
     name: str
-    def decide(self, state: State) -> Action: ...
+    def decide(self, state: State) -> Action:
+        """Returns the action with a complete filler payload (slot, index, clarify_index, quote fields);
+        owns question-rotation counters (state.clarify_count, state.kind_count)."""
 
 
-class EvidenceProvider(Protocol):
+class Filler(Protocol):
     name: str
-    def top_tasks(self, code: str, user_texts: list[str], n: int = 2) -> list[str]: ...
+    def fill(self, action, payload: dict) -> str: ...

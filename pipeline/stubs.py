@@ -5,6 +5,9 @@ import json
 import re
 from pathlib import Path
 
+from recommender.schemas import RankingResponse, TaskEvidence
+from recommender.structured import StructuredRanker
+
 from .interfaces import (MAX_TURNS, TYPES, Action, Flag, HistoryEntry, Reading, SlotReading,
                          SlotState, State)
 
@@ -110,7 +113,7 @@ class LexiconExtractor:
             return 1, STRENGTHS["dontmind"]
         return None
 
-    def read(self, text: str, expected_slot: str | None = None) -> Reading:
+    def read(self, text: str, context: str | None = None, expected_slot: str | None = None) -> Reading:
         found: dict[str, tuple[int, float, str]] = {}
         sentences = [s.strip() for s in SENT_SPLIT.split(text) if s.strip()]
         for sent in sentences:
@@ -141,6 +144,9 @@ class SimpleTracker:
 
     def update(self, state: State, reading: Reading) -> None:
         state.last_reading_empty = not reading.slots
+        last = state.last_action
+        if last and last.kind == "PROBE" and last.slot:
+            state.resolved.add(last.slot)  # the probe answer resolves the slot
         for r in reading.slots:
             entry = HistoryEntry(r.value, r.confidence, r.reason, r.source, state.turn)
             old = state.slots.get(r.slot)
@@ -148,13 +154,14 @@ class SimpleTracker:
             state.slots[r.slot] = SlotState(r.value, r.confidence, r.reason, r.source, state.turn, history)
 
 
-class RuleChecker:
-    name = "rule-stub"
+class ContradictionRule:
+    name = "rule"
 
-    def check(self, state: State) -> list[Flag]:
+    def candidates(self, state: State) -> list[Flag]:
         flags = []
         for slot, s in state.slots.items():
-            if slot in state.challenged or s.turn != state.turn or len(s.history) < 2:
+            # a flip right after a PROBE on the slot is the answer, not a contradiction
+            if slot in state.challenged or slot in state.resolved or s.turn != state.turn or len(s.history) < 2:
                 continue
             new = s.history[-1]
             for old in reversed(s.history[:-1]):
@@ -162,6 +169,13 @@ class RuleChecker:
                     flags.append(Flag(slot, old, new))
                     break
         return flags
+
+
+class PassthroughConfirmer:
+    name = "passthrough-stub"
+
+    def score(self, old_src: str, new_src: str) -> float:
+        return 1.0
 
 
 class RulePolicy:
@@ -179,7 +193,7 @@ class RulePolicy:
             why = f"all slots filled or settled before turn 5; refining weakest slot {slot}"
         return Action("CLARIFY", slot, why, {"index": state.clarify_count.get(slot, 0)})
 
-    def decide(self, state: State) -> Action:
+    def _decide(self, state: State) -> Action:
         has_signal = any(s.value != 0 for s in state.slots.values())
         # Hard stop so the conversation always ends at max_turns.
         if state.turn >= self.max_turns:
@@ -212,6 +226,19 @@ class RulePolicy:
         # 5. CLARIFY
         return self._clarify(state)
 
+    def decide(self, state: State) -> Action:
+        action = self._decide(state)
+        payload = dict(action.payload)
+        payload["index"] = state.kind_count.get(action.kind, 0)
+        if action.slot:
+            payload["slot"] = action.slot
+            payload["clarify_index"] = state.clarify_count.get(action.slot, 0)
+        action.payload = payload
+        if action.kind in ("CLARIFY", "ABSTAIN") and action.slot:
+            state.clarify_count[action.slot] = state.clarify_count.get(action.slot, 0) + 1
+        state.kind_count[action.kind] = state.kind_count.get(action.kind, 0) + 1
+        return action
+
 
 STOPWORDS = frozenset("""a an and are as at be been but by can do does for from had has have he her his i if in into is it
 its me my no not of on or our so than that the their them then there these they this those to up was we were what when
@@ -222,19 +249,30 @@ def _tokens(text: str) -> set[str]:
     return {w[:-1] if w.endswith("s") else w for w in re.findall(r"[a-z]+", text.lower()) if w not in STOPWORDS}
 
 
-class KeywordEvidence:
-    name = "keyword-stub"
+class StructuredKeywordRanker:
+    """StructuredRanker plus top task statements by word overlap with what the user said."""
 
-    def __init__(self, tasks_path: Path, eligible_codes: set[str]) -> None:
-        self._tasks: dict[str, list[tuple[str, set[str]]]] = {}
+    name = "structured+keyword-stub"
+
+    def __init__(self, occupations_path: Path, tasks_path: Path, n_evidence: int = 3) -> None:
+        self._ranker = StructuredRanker(occupations_path)
+        self.eligible_count = self._ranker.eligible_count
+        self._n = n_evidence
+        eligible = {o.code for o in self._ranker._occupations}
+        self._tasks: dict[str, list[tuple[str, str, set[str]]]] = {}
         with Path(tasks_path).open(encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):
-                if row["code"] in eligible_codes:
-                    self._tasks.setdefault(row["code"], []).append((row["Task"], _tokens(row["Task"])))
+                if row["code"] in eligible:
+                    self._tasks.setdefault(row["code"], []).append((row["Task ID"], row["Task"], _tokens(row["Task"])))
 
-    def top_tasks(self, code: str, user_texts: list[str], n: int = 2) -> list[str]:
-        user = _tokens(" ".join(user_texts))
-        scored = [(len(toks & user), -i, task) for i, (task, toks) in enumerate(self._tasks.get(code, []))]
-        scored = [s for s in scored if s[0] > 0]
-        scored.sort(reverse=True)
-        return [task for _, _, task in scored[:n]]
+    def _evidence(self, code: str, user: set[str]) -> list[TaskEvidence]:
+        scored = [(len(toks & user), -i, tid, task) for i, (tid, task, toks) in enumerate(self._tasks.get(code, []))]
+        scored = sorted((x for x in scored if x[0] > 0), reverse=True)[:self._n]
+        return [TaskEvidence(tid, code, task, float(n)) for n, _, tid, task in scored]
+
+    def rank(self, interests: dict, observed_types: set, user_sentences: list[str], top_k: int = 100) -> RankingResponse:
+        resp = self._ranker.rank(interests, observed_types, user_sentences, top_k)
+        user = _tokens(" ".join(user_sentences))
+        for o in resp.occupations:
+            o.evidence = self._evidence(o.code, user)
+        return resp

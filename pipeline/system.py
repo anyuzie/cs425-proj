@@ -1,15 +1,15 @@
 """Wires the components together. Server and CLI both use System."""
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
-from recommender.data_loader import load_eligible_occupations
-from recommender.structured import StructuredRanker
-
-from . import templates
+from . import registry
 from .interfaces import MAX_TURNS, TYPES, Action, State
-from .stubs import (KeywordEvidence, LexiconExtractor, RuleChecker, RulePolicy, SimpleTracker)
+
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_CONFIG = ROOT / "configs" / "system.json"
+QUESTIONS = ("CLARIFY", "ABSTAIN", "PROBE", "CHALLENGE")
 
 NO_SIGNAL_REPLY = ("I could not pick up enough about your preferences to suggest occupations. "
                    "Thanks for chatting, and please try again with a few more details.")
@@ -26,21 +26,23 @@ class TurnResult:
 
 
 class System:
-    def __init__(self, ranker, qb, type_names, extractor, tracker, checker, policy, evidence, max_turns=MAX_TURNS):
-        self.ranker, self.qb, self.type_names = ranker, qb, type_names
-        self.extractor, self.tracker, self.checker = extractor, tracker, checker
-        self.policy, self.evidence = policy, evidence
-        self.max_turns = max_turns
+    """Orchestrates the components; per-turn rules live in the components themselves."""
+
+    def __init__(self, extractor, tracker, rule, confirmer, ranker, policy, filler, type_names,
+                 max_turns=MAX_TURNS, confirm_threshold=0.6):
+        self.extractor, self.tracker, self.rule, self.confirmer = extractor, tracker, rule, confirmer
+        self.ranker, self.policy, self.filler, self.type_names = ranker, policy, filler, type_names
+        self.max_turns, self.confirm_threshold = max_turns, confirm_threshold
 
     @classmethod
-    def load(cls, data_dir) -> "System":
+    def load(cls, data_dir, config_path=None) -> "System":
         d = Path(data_dir)
-        eligible = load_eligible_occupations(d / "occupations.csv")
-        qb = json.loads((d / "question_bank.json").read_text(encoding="utf-8"))
+        config = json.loads(Path(config_path or DEFAULT_CONFIG).read_text(encoding="utf-8"))
+        c = registry.build(config, d)
         names = json.loads((d / "labels.json").read_text(encoding="utf-8"))["type_names"]
-        return cls(StructuredRanker(d / "occupations.csv"), qb, names,
-                   LexiconExtractor(d / "riasec_lexicon.json"), SimpleTracker(), RuleChecker(), RulePolicy(),
-                   KeywordEvidence(d / "tasks.csv", {o.code for o in eligible}))
+        st = config.get("settings", {})
+        return cls(c["extractor"], c["tracker"], c["rule"], c["confirmer"], c["ranker"], c["policy"], c["filler"],
+                   names, st.get("max_turns", MAX_TURNS), st.get("confirm_threshold", 0.6))
 
     @property
     def eligible(self) -> int:
@@ -48,12 +50,13 @@ class System:
 
     @property
     def components(self) -> dict:
-        return {"extractor": self.extractor.name, "tracker": self.tracker.name, "checker": self.checker.name,
-                "policy": self.policy.name, "evidence": self.evidence.name, "ranker": "structured"}
+        return {k: getattr(self, k).name for k in ("extractor", "tracker", "rule", "confirmer", "ranker",
+                                                   "policy", "filler")}
 
     def start(self, state: State) -> TurnResult:
-        reply = templates.fill("OPENING", {}, self.qb, self.type_names)
+        reply = self.filler.fill("OPENING", {})
         state.last_action = Action("OPENING", None, "opening")
+        state.last_reply = reply
         return TurnResult(reply, "OPENING", 0, False)
 
     def _rank(self, state: State, top_k: int):
@@ -73,44 +76,42 @@ class System:
     def recommendations(self, state: State) -> list[dict]:
         why = self._why(state)
         return [{"rank": o.rank, "code": o.code, "title": o.title, "why": why,
-                 "tasks": self.evidence.top_tasks(o.code, state.user_texts, 2)} for o in self._rank(state, 5)]
+                 "tasks": [e.text for e in o.evidence[:2]]} for o in self._rank(state, 5)]
+
+    def _confirmed(self, state: State) -> list:
+        flags = []
+        for f in self.rule.candidates(state):
+            score = self.confirmer.score(f.old.source, f.new.source)
+            if score > self.confirm_threshold:
+                flags.append(replace(f, score=score))
+        return flags
 
     def step(self, state: State, text: str) -> TurnResult:
         state.turn += 1
         state.user_texts.append(text)
-        # A reply to any slot question (ABSTAIN re-asks one) is read as being about that slot.
         last = state.last_action
-        expected = last.slot if last and last.kind in ("CLARIFY", "ABSTAIN", "PROBE", "CHALLENGE") else None
-        self.tracker.update(state, self.extractor.read(text, expected))
-        if last and last.kind == "PROBE" and last.slot:
-            state.challenged.add(last.slot)  # the probe answer resolves the slot; a flip here is not a contradiction
-        state.flags = self.checker.check(state)
+        asked = last is not None and last.kind in QUESTIONS  # any slot question (ABSTAIN re-asks one)
+        reading = self.extractor.read(text, state.last_reply if asked else None, last.slot if asked else None)
+        self.tracker.update(state, reading)
+        state.flags = self._confirmed(state)
         action = self.policy.decide(state)
         quotes, recs, done = None, None, False
-        payload = dict(action.payload)
-        payload["index"] = state.kind_count.get(action.kind, 0)
-        if action.slot:
-            payload["slot"] = action.slot
-            payload["clarify_index"] = state.clarify_count.get(action.slot, 0)
         if action.kind == "RECOMMEND":
             recs = self.recommendations(state)
             done = True
             if recs:
-                reply = templates.fill(action, payload, self.qb, self.type_names)
+                reply = self.filler.fill(action, action.payload)
             else:  # no usable signal at the end of the conversation
                 recs, reply = None, NO_SIGNAL_REPLY
                 action = Action("ABSTAIN", None, action.why + "; no structured signal")
         else:
-            reply = templates.fill(action, payload, self.qb, self.type_names)
+            reply = self.filler.fill(action, action.payload)
         if action.kind == "CHALLENGE":
             quotes = {"earlier": action.payload["old_src"], "earlier_turn": action.payload["old_turn"],
                       "now": action.payload["new_src"]}
         elif action.kind == "PROBE":
             quotes = {"now": action.payload["new_src"]}
-        if action.kind in ("CLARIFY", "ABSTAIN") and action.slot:
-            state.clarify_count[action.slot] = state.clarify_count.get(action.slot, 0) + 1
-        state.kind_count[action.kind] = state.kind_count.get(action.kind, 0) + 1
-        state.last_action = action
+        state.last_action, state.last_reply = action, reply
         state.done = done or state.turn >= self.max_turns
         state.actions.append({"turn": state.turn, "action": action.kind, "why": action.why})
         return TurnResult(reply, action.kind, state.turn, state.done, quotes, recs)
