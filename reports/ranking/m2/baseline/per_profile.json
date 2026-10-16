@@ -1,0 +1,602 @@
+[
+  {
+    "hit_at_5": 0,
+    "mrr": 0.045454545454545456,
+    "ndcg_at_10": 0.028694945358494775,
+    "profile_id": "D001",
+    "status": "ranked",
+    "target_rank": 22,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.25,
+    "ndcg_at_10": 0.6322755557533666,
+    "profile_id": "D002",
+    "status": "ranked",
+    "target_rank": 4,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.0625,
+    "ndcg_at_10": 0.025944863887813613,
+    "profile_id": "D003",
+    "status": "ranked",
+    "target_rank": 16,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.047619047619047616,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D004",
+    "status": "ranked",
+    "target_rank": 21,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.16666666666666666,
+    "ndcg_at_10": 0.20069239692359295,
+    "profile_id": "D005",
+    "status": "ranked",
+    "target_rank": 6,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.04,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D006",
+    "status": "ranked",
+    "target_rank": 25,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.03125,
+    "ndcg_at_10": 0.06347391510333798,
+    "profile_id": "D007",
+    "status": "ranked",
+    "target_rank": 32,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.5,
+    "ndcg_at_10": 0.3730868826542396,
+    "profile_id": "D008",
+    "status": "ranked",
+    "target_rank": 2,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.047619047619047616,
+    "ndcg_at_10": 0.19550060400716543,
+    "profile_id": "D009",
+    "status": "ranked",
+    "target_rank": 21,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.07142857142857142,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D010",
+    "status": "ranked",
+    "target_rank": 14,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.05555555555555555,
+    "ndcg_at_10": 0.11800884214644197,
+    "profile_id": "D011",
+    "status": "ranked",
+    "target_rank": 18,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.0625,
+    "ndcg_at_10": 0.02881274864949168,
+    "profile_id": "D012",
+    "status": "ranked",
+    "target_rank": 16,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.125,
+    "ndcg_at_10": 0.4323225913998477,
+    "profile_id": "D013",
+    "status": "ranked",
+    "target_rank": 8,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.016666666666666666,
+    "ndcg_at_10": 0.03339044420612665,
+    "profile_id": "D014",
+    "status": "ranked",
+    "target_rank": 60,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.043478260869565216,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D015",
+    "status": "ranked",
+    "target_rank": 23,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.02702702702702703,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D016",
+    "status": "ranked",
+    "target_rank": 37,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.14285714285714285,
+    "ndcg_at_10": 0.21630425637044093,
+    "profile_id": "D017",
+    "status": "ranked",
+    "target_rank": 7,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.09090909090909091,
+    "ndcg_at_10": 0.3141024995316689,
+    "profile_id": "D018",
+    "status": "ranked",
+    "target_rank": 11,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.125,
+    "ndcg_at_10": 0.6249771503273764,
+    "profile_id": "D019",
+    "status": "ranked",
+    "target_rank": 8,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.015151515151515152,
+    "ndcg_at_10": 0.13669510909112342,
+    "profile_id": "D020",
+    "status": "ranked",
+    "target_rank": 66,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.02,
+    "ndcg_at_10": 0.02591411783053758,
+    "profile_id": "D021",
+    "status": "ranked",
+    "target_rank": 50,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.14285714285714285,
+    "ndcg_at_10": 0.17413876410357734,
+    "profile_id": "D022",
+    "status": "ranked",
+    "target_rank": 7,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.1111111111111111,
+    "ndcg_at_10": 0.26452655540928294,
+    "profile_id": "D023",
+    "status": "ranked",
+    "target_rank": 9,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.037037037037037035,
+    "ndcg_at_10": 0.048864847414989865,
+    "profile_id": "D024",
+    "status": "ranked",
+    "target_rank": 27,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.16666666666666666,
+    "ndcg_at_10": 0.25375249531024896,
+    "profile_id": "D025",
+    "status": "ranked",
+    "target_rank": 6,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.25,
+    "ndcg_at_10": 0.2396870889278539,
+    "profile_id": "D026",
+    "status": "ranked",
+    "target_rank": 4,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.047619047619047616,
+    "ndcg_at_10": 0.12074745919537055,
+    "profile_id": "D027",
+    "status": "ranked",
+    "target_rank": 21,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.030303030303030304,
+    "ndcg_at_10": 0.03147725464963448,
+    "profile_id": "D028",
+    "status": "ranked",
+    "target_rank": 33,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.5,
+    "ndcg_at_10": 0.5557129245939956,
+    "profile_id": "D029",
+    "status": "ranked",
+    "target_rank": 2,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.017241379310344827,
+    "ndcg_at_10": 0.10123149805187742,
+    "profile_id": "D030",
+    "status": "ranked",
+    "target_rank": 58,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.25,
+    "ndcg_at_10": 0.3100490318643442,
+    "profile_id": "D031",
+    "status": "ranked",
+    "target_rank": 4,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.1,
+    "ndcg_at_10": 0.3767073020358313,
+    "profile_id": "D032",
+    "status": "ranked",
+    "target_rank": 10,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.020833333333333332,
+    "ndcg_at_10": 0.07186943851654945,
+    "profile_id": "D033",
+    "status": "ranked",
+    "target_rank": 48,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.010638297872340425,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D034",
+    "status": "ranked",
+    "target_rank": 94,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.009708737864077669,
+    "ndcg_at_10": 0.013623230178748134,
+    "profile_id": "D035",
+    "status": "ranked",
+    "target_rank": 103,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.3333333333333333,
+    "ndcg_at_10": 0.5937006865150857,
+    "profile_id": "D036",
+    "status": "ranked",
+    "target_rank": 3,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.010869565217391304,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D037",
+    "status": "ranked",
+    "target_rank": 92,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.14285714285714285,
+    "ndcg_at_10": 0.46443318687457713,
+    "profile_id": "D038",
+    "status": "ranked",
+    "target_rank": 7,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.037037037037037035,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D039",
+    "status": "ranked",
+    "target_rank": 27,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.07692307692307693,
+    "ndcg_at_10": 0.30400418632773235,
+    "profile_id": "D040",
+    "status": "ranked",
+    "target_rank": 13,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.04,
+    "ndcg_at_10": 0.036601927798701826,
+    "profile_id": "D041",
+    "status": "ranked",
+    "target_rank": 25,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.14285714285714285,
+    "ndcg_at_10": 0.21012881986280413,
+    "profile_id": "D042",
+    "status": "ranked",
+    "target_rank": 7,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.1,
+    "ndcg_at_10": 0.17121993110609493,
+    "profile_id": "D043",
+    "status": "ranked",
+    "target_rank": 10,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.041666666666666664,
+    "ndcg_at_10": 0.06695487250315448,
+    "profile_id": "D044",
+    "status": "ranked",
+    "target_rank": 24,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.125,
+    "ndcg_at_10": 0.5439813811022703,
+    "profile_id": "D045",
+    "status": "ranked",
+    "target_rank": 8,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.14285714285714285,
+    "ndcg_at_10": 0.3590179298989737,
+    "profile_id": "D046",
+    "status": "ranked",
+    "target_rank": 7,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.5,
+    "ndcg_at_10": 0.36609167461028785,
+    "profile_id": "D047",
+    "status": "ranked",
+    "target_rank": 2,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 1.0,
+    "ndcg_at_10": 0.6082919216335895,
+    "profile_id": "D048",
+    "status": "ranked",
+    "target_rank": 1,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.03125,
+    "ndcg_at_10": 0.04842548299486251,
+    "profile_id": "D049",
+    "status": "ranked",
+    "target_rank": 32,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 0.25,
+    "ndcg_at_10": 0.5295092606951043,
+    "profile_id": "D050",
+    "status": "ranked",
+    "target_rank": 4,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.0125,
+    "ndcg_at_10": 0.030664037311103464,
+    "profile_id": "D051",
+    "status": "ranked",
+    "target_rank": 80,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.16666666666666666,
+    "ndcg_at_10": 0.24207536477340716,
+    "profile_id": "D052",
+    "status": "ranked",
+    "target_rank": 6,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.03125,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D053",
+    "status": "ranked",
+    "target_rank": 32,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.023255813953488372,
+    "ndcg_at_10": 0.27437506500236714,
+    "profile_id": "D054",
+    "status": "ranked",
+    "target_rank": 43,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.1,
+    "ndcg_at_10": 0.3411707622006384,
+    "profile_id": "D055",
+    "status": "ranked",
+    "target_rank": 10,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.022222222222222223,
+    "ndcg_at_10": 0.12911074919179888,
+    "profile_id": "D056",
+    "status": "ranked",
+    "target_rank": 45,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.1,
+    "ndcg_at_10": 0.20902636425181842,
+    "profile_id": "D057",
+    "status": "ranked",
+    "target_rank": 10,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 1,
+    "mrr": 1.0,
+    "ndcg_at_10": 0.6013589970752572,
+    "profile_id": "D058",
+    "status": "ranked",
+    "target_rank": 1,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.011764705882352941,
+    "ndcg_at_10": 0.0,
+    "profile_id": "D059",
+    "status": "ranked",
+    "target_rank": 85,
+    "target_status": "eligible",
+    "zero_idcg": false
+  },
+  {
+    "hit_at_5": 0,
+    "mrr": 0.015151515151515152,
+    "ndcg_at_10": 0.06552786075025525,
+    "profile_id": "D060",
+    "status": "ranked",
+    "target_rank": 66,
+    "target_status": "eligible",
+    "zero_idcg": false
+  }
+]
