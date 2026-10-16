@@ -29,8 +29,8 @@ A student chats in a web page. Each message goes through **seven steps**. They t
 | | `eval/` | The evaluation harness, created when written | yes |
 | **Tests** | `tests/` | Unit tests, contract tests, test-only fakes | yes |
 | **Docs** | `docs/`, `cs425-ranking-docs/`, `reports/` | Guides, ranking plan, milestone reports | yes |
-| **Local only** | `data/` | The data package (unzip `career-matcher-data.zip`) | **no** |
-| | `models/` | Trained checkpoints, e.g. `models/extractor/` | **no** |
+| **Data** | `data/` | The data package: O\*NET 31.0 and the team's generated data (read-only) | yes |
+| **Local only** | `models/` | Trained checkpoints, e.g. `models/extractor/` | **no** |
 | | `indexes/` | BM25 / FAISS indexes for the ranker | **no** |
 | | `logs/` | Transcripts, one file per participant code | **no** |
 
