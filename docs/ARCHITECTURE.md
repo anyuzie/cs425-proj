@@ -407,7 +407,12 @@ CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions, pane
 |---|---|---|
 | `structured.StructuredRanker.__init__(occupations_path)` | startup | Loads the 378 eligible occupations through `data_loader.load_eligible_occupations` |
 | `StructuredRanker.rank(interests, observed_types, user_sentences, top_k)` | per message | Score = Σ interest × occupation z-score over observed types, sorted (ties by code). No signal → `status "no_signal"`. |
+| `StructuredRanker.rank_oracle(inputs)` | offline evaluation | Ranks the whole pool from an `OracleInput` (a profile's hidden z-scale scores), for the M2 evaluator; never used by the app |
+| `StructuredRanker.eligible_codes` | offline evaluation | The set of eligible occupation codes |
 | `data_loader.load_eligible_occupations(path)` | startup | Validates `occupations.csv` and keeps Job Zone 4–5 occupations with complete RIASEC z-scores |
+| `evaluation.relevance_labels`, `evaluate_ranking`, `aggregate` | offline evaluation | Graded relevance from O*NET Related Occupations, then hit@5, MRR, NDCG@10 per profile and on average |
+| `evaluate.run(config_path, output)` / `main()` | offline evaluation | Runs the frozen M2 baseline on the dev profiles and writes `reports/ranking/m2/` |
+| `compare.paired_comparison(control, treatment)` | offline evaluation | Paired bootstrap comparison of two evaluated runs |
 | `schemas.RankingRequest`, `RankingResponse`, `RankedOccupation`, `TaskEvidence` | — | The ranking input and output shapes; `RankingRequest` validates the inputs |
 
 ### `app/server.py`
