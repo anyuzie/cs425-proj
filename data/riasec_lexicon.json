@@ -1,0 +1,1574 @@
+{
+ "source": "O*NET 31.0 task statements; weighted log-odds with informative prior (Monroe et al., 2008)",
+ "types": {
+  "R": [
+   {
+    "term": "tools",
+    "z": 23.85
+   },
+   {
+    "term": "hand",
+    "z": 21.67
+   },
+   {
+    "term": "parts",
+    "z": 20.86
+   },
+   {
+    "term": "machines",
+    "z": 20.55
+   },
+   {
+    "term": "equipment",
+    "z": 19.82
+   },
+   {
+    "term": "repair",
+    "z": 18.19
+   },
+   {
+    "term": "remove",
+    "z": 15.57
+   },
+   {
+    "term": "install",
+    "z": 15.28
+   },
+   {
+    "term": "clean",
+    "z": 14.71
+   },
+   {
+    "term": "machine",
+    "z": 14.5
+   },
+   {
+    "term": "power",
+    "z": 14.24
+   },
+   {
+    "term": "adjust",
+    "z": 14.05
+   },
+   {
+    "term": "cut",
+    "z": 13.36
+   },
+   {
+    "term": "metal",
+    "z": 13.22
+   },
+   {
+    "term": "operate",
+    "z": 12.43
+   },
+   {
+    "term": "position",
+    "z": 12.3
+   },
+   {
+    "term": "specified",
+    "z": 12.16
+   },
+   {
+    "term": "replace",
+    "z": 12.11
+   },
+   {
+    "term": "surfaces",
+    "z": 12.06
+   },
+   {
+    "term": "cutting",
+    "z": 11.67
+   },
+   {
+    "term": "electrical",
+    "z": 11.5
+   },
+   {
+    "term": "workpieces",
+    "z": 11.22
+   },
+   {
+    "term": "components",
+    "z": 11.13
+   },
+   {
+    "term": "start",
+    "z": 10.71
+   },
+   {
+    "term": "controls",
+    "z": 10.38
+   },
+   {
+    "term": "machinery",
+    "z": 10.29
+   },
+   {
+    "term": "lines",
+    "z": 10.15
+   },
+   {
+    "term": "vehicles",
+    "z": 10.11
+   },
+   {
+    "term": "gauges",
+    "z": 10.1
+   },
+   {
+    "term": "move",
+    "z": 10.06
+   },
+   {
+    "term": "oil",
+    "z": 10.04
+   },
+   {
+    "term": "place",
+    "z": 9.99
+   },
+   {
+    "term": "inspect",
+    "z": 9.83
+   },
+   {
+    "term": "malfunctions",
+    "z": 9.79
+   },
+   {
+    "term": "defective",
+    "z": 9.62
+   },
+   {
+    "term": "trucks",
+    "z": 9.28
+   },
+   {
+    "term": "specifications",
+    "z": 9.21
+   },
+   {
+    "term": "air",
+    "z": 9.2
+   },
+   {
+    "term": "fixtures",
+    "z": 9.15
+   },
+   {
+    "term": "blueprints",
+    "z": 8.85
+   },
+   {
+    "term": "cleaning",
+    "z": 8.7
+   },
+   {
+    "term": "set",
+    "z": 8.65
+   },
+   {
+    "term": "attach",
+    "z": 8.58
+   },
+   {
+    "term": "holes",
+    "z": 8.53
+   },
+   {
+    "term": "load",
+    "z": 8.48
+   },
+   {
+    "term": "drill",
+    "z": 8.47
+   },
+   {
+    "term": "measure",
+    "z": 8.46
+   },
+   {
+    "term": "pressure",
+    "z": 8.43
+   },
+   {
+    "term": "glass",
+    "z": 8.33
+   },
+   {
+    "term": "water",
+    "z": 8.32
+   },
+   {
+    "term": "according",
+    "z": 8.31
+   },
+   {
+    "term": "drive",
+    "z": 8.29
+   },
+   {
+    "term": "test",
+    "z": 8.27
+   },
+   {
+    "term": "molds",
+    "z": 8.27
+   },
+   {
+    "term": "wiring",
+    "z": 8.26
+   },
+   {
+    "term": "gas",
+    "z": 8.25
+   },
+   {
+    "term": "turn",
+    "z": 8.17
+   },
+   {
+    "term": "align",
+    "z": 8.13
+   },
+   {
+    "term": "units",
+    "z": 8.12
+   },
+   {
+    "term": "valves",
+    "z": 8.11
+   }
+  ],
+  "I": [
+   {
+    "term": "design",
+    "z": 17.08
+   },
+   {
+    "term": "environmental",
+    "z": 15.97
+   },
+   {
+    "term": "research",
+    "z": 15.27
+   },
+   {
+    "term": "data",
+    "z": 15.2
+   },
+   {
+    "term": "develop",
+    "z": 13.94
+   },
+   {
+    "term": "engineering",
+    "z": 12.94
+   },
+   {
+    "term": "systems",
+    "z": 12.76
+   },
+   {
+    "term": "analyze",
+    "z": 12.03
+   },
+   {
+    "term": "analysis",
+    "z": 11.68
+   },
+   {
+    "term": "results",
+    "z": 11.32
+   },
+   {
+    "term": "conduct",
+    "z": 11.06
+   },
+   {
+    "term": "processes",
+    "z": 11.0
+   },
+   {
+    "term": "system",
+    "z": 10.95
+   },
+   {
+    "term": "diseases",
+    "z": 10.18
+   },
+   {
+    "term": "projects",
+    "z": 10.13
+   },
+   {
+    "term": "software",
+    "z": 10.12
+   },
+   {
+    "term": "technical",
+    "z": 10.09
+   },
+   {
+    "term": "testing",
+    "z": 10.0
+   },
+   {
+    "term": "energy",
+    "z": 9.91
+   },
+   {
+    "term": "methods",
+    "z": 9.7
+   },
+   {
+    "term": "study",
+    "z": 9.6
+   },
+   {
+    "term": "statistical",
+    "z": 9.45
+   },
+   {
+    "term": "scientific",
+    "z": 9.36
+   },
+   {
+    "term": "studies",
+    "z": 9.33
+   },
+   {
+    "term": "laboratory",
+    "z": 9.03
+   },
+   {
+    "term": "manufacturing",
+    "z": 8.99
+   },
+   {
+    "term": "industrial",
+    "z": 8.97
+   },
+   {
+    "term": "land",
+    "z": 8.95
+   },
+   {
+    "term": "analyses",
+    "z": 8.8
+   },
+   {
+    "term": "test",
+    "z": 8.75
+   },
+   {
+    "term": "soil",
+    "z": 8.7
+   },
+   {
+    "term": "water",
+    "z": 8.48
+   },
+   {
+    "term": "engineers",
+    "z": 8.35
+   },
+   {
+    "term": "survey",
+    "z": 8.26
+   },
+   {
+    "term": "physicians",
+    "z": 7.85
+   },
+   {
+    "term": "findings",
+    "z": 7.83
+   },
+   {
+    "term": "treat",
+    "z": 7.8
+   },
+   {
+    "term": "tests",
+    "z": 7.76
+   },
+   {
+    "term": "applications",
+    "z": 7.76
+   },
+   {
+    "term": "impact",
+    "z": 7.75
+   },
+   {
+    "term": "nuclear",
+    "z": 7.65
+   },
+   {
+    "term": "chemical",
+    "z": 7.57
+   },
+   {
+    "term": "project",
+    "z": 7.54
+   },
+   {
+    "term": "new",
+    "z": 7.49
+   },
+   {
+    "term": "surveys",
+    "z": 7.48
+   },
+   {
+    "term": "technicians",
+    "z": 7.34
+   },
+   {
+    "term": "identify",
+    "z": 7.3
+   },
+   {
+    "term": "pollution",
+    "z": 7.27
+   },
+   {
+    "term": "radiation",
+    "z": 7.26
+   },
+   {
+    "term": "cell",
+    "z": 7.18
+   },
+   {
+    "term": "quality",
+    "z": 7.17
+   },
+   {
+    "term": "economic",
+    "z": 7.14
+   },
+   {
+    "term": "public",
+    "z": 7.13
+   },
+   {
+    "term": "specimens",
+    "z": 7.11
+   },
+   {
+    "term": "mathematical",
+    "z": 7.02
+   },
+   {
+    "term": "imaging",
+    "z": 7.02
+   },
+   {
+    "term": "conservation",
+    "z": 6.99
+   },
+   {
+    "term": "climate",
+    "z": 6.86
+   },
+   {
+    "term": "human",
+    "z": 6.82
+   },
+   {
+    "term": "sensing",
+    "z": 6.72
+   }
+  ],
+  "A": [
+   {
+    "term": "patterns",
+    "z": 13.29
+   },
+   {
+    "term": "designs",
+    "z": 13.0
+   },
+   {
+    "term": "music",
+    "z": 12.64
+   },
+   {
+    "term": "film",
+    "z": 11.17
+   },
+   {
+    "term": "web",
+    "z": 10.94
+   },
+   {
+    "term": "sound",
+    "z": 10.58
+   },
+   {
+    "term": "design",
+    "z": 10.41
+   },
+   {
+    "term": "create",
+    "z": 10.07
+   },
+   {
+    "term": "art",
+    "z": 9.63
+   },
+   {
+    "term": "drawings",
+    "z": 9.63
+   },
+   {
+    "term": "client",
+    "z": 9.31
+   },
+   {
+    "term": "news",
+    "z": 8.89
+   },
+   {
+    "term": "models",
+    "z": 8.8
+   },
+   {
+    "term": "scripts",
+    "z": 8.67
+   },
+   {
+    "term": "ideas",
+    "z": 8.62
+   },
+   {
+    "term": "effects",
+    "z": 8.61
+   },
+   {
+    "term": "directors",
+    "z": 8.53
+   },
+   {
+    "term": "edit",
+    "z": 8.48
+   },
+   {
+    "term": "television",
+    "z": 8.46
+   },
+   {
+    "term": "sketches",
+    "z": 8.44
+   },
+   {
+    "term": "productions",
+    "z": 8.41
+   },
+   {
+    "term": "hair",
+    "z": 8.26
+   },
+   {
+    "term": "video",
+    "z": 7.92
+   },
+   {
+    "term": "camera",
+    "z": 7.91
+   },
+   {
+    "term": "material",
+    "z": 7.8
+   },
+   {
+    "term": "performances",
+    "z": 7.71
+   },
+   {
+    "term": "photographs",
+    "z": 7.62
+   },
+   {
+    "term": "concepts",
+    "z": 7.5
+   },
+   {
+    "term": "layouts",
+    "z": 7.3
+   },
+   {
+    "term": "broadcast",
+    "z": 7.19
+   },
+   {
+    "term": "styles",
+    "z": 7.01
+   },
+   {
+    "term": "audio",
+    "z": 7.0
+   },
+   {
+    "term": "performers",
+    "z": 6.98
+   },
+   {
+    "term": "stones",
+    "z": 6.96
+   },
+   {
+    "term": "garments",
+    "z": 6.92
+   },
+   {
+    "term": "style",
+    "z": 6.91
+   },
+   {
+    "term": "desired",
+    "z": 6.86
+   },
+   {
+    "term": "graphics",
+    "z": 6.85
+   },
+   {
+    "term": "sets",
+    "z": 6.83
+   },
+   {
+    "term": "garment",
+    "z": 6.81
+   },
+   {
+    "term": "features",
+    "z": 6.77
+   },
+   {
+    "term": "producers",
+    "z": 6.73
+   },
+   {
+    "term": "publication",
+    "z": 6.63
+   },
+   {
+    "term": "films",
+    "z": 6.61
+   },
+   {
+    "term": "photographic",
+    "z": 6.58
+   },
+   {
+    "term": "elements",
+    "z": 6.57
+   },
+   {
+    "term": "displays",
+    "z": 6.57
+   },
+   {
+    "term": "original",
+    "z": 6.42
+   },
+   {
+    "term": "printing",
+    "z": 6.42
+   },
+   {
+    "term": "digital",
+    "z": 6.41
+   },
+   {
+    "term": "shows",
+    "z": 6.35
+   },
+   {
+    "term": "historical",
+    "z": 6.35
+   },
+   {
+    "term": "exhibits",
+    "z": 6.19
+   },
+   {
+    "term": "images",
+    "z": 6.15
+   },
+   {
+    "term": "cast",
+    "z": 6.13
+   },
+   {
+    "term": "therapy",
+    "z": 6.11
+   },
+   {
+    "term": "pictures",
+    "z": 6.1
+   },
+   {
+    "term": "park",
+    "z": 6.08
+   },
+   {
+    "term": "jewelry",
+    "z": 6.03
+   },
+   {
+    "term": "editing",
+    "z": 6.02
+   }
+  ],
+  "S": [
+   {
+    "term": "students",
+    "z": 28.28
+   },
+   {
+    "term": "patients",
+    "z": 23.31
+   },
+   {
+    "term": "care",
+    "z": 17.92
+   },
+   {
+    "term": "professional",
+    "z": 16.67
+   },
+   {
+    "term": "health",
+    "z": 16.33
+   },
+   {
+    "term": "assignments",
+    "z": 15.1
+   },
+   {
+    "term": "physical",
+    "z": 14.68
+   },
+   {
+    "term": "treatment",
+    "z": 14.47
+   },
+   {
+    "term": "community",
+    "z": 14.4
+   },
+   {
+    "term": "student",
+    "z": 14.2
+   },
+   {
+    "term": "administer",
+    "z": 13.72
+   },
+   {
+    "term": "academic",
+    "z": 13.69
+   },
+   {
+    "term": "activities",
+    "z": 13.54
+   },
+   {
+    "term": "social",
+    "z": 13.51
+   },
+   {
+    "term": "administrative",
+    "z": 13.48
+   },
+   {
+    "term": "progress",
+    "z": 13.28
+   },
+   {
+    "term": "assist",
+    "z": 12.95
+   },
+   {
+    "term": "children",
+    "z": 12.94
+   },
+   {
+    "term": "educational",
+    "z": 12.64
+   },
+   {
+    "term": "patient",
+    "z": 12.57
+   },
+   {
+    "term": "grade",
+    "z": 12.46
+   },
+   {
+    "term": "course",
+    "z": 12.15
+   },
+   {
+    "term": "education",
+    "z": 12.0
+   },
+   {
+    "term": "skills",
+    "z": 11.89
+   },
+   {
+    "term": "participate",
+    "z": 11.87
+   },
+   {
+    "term": "reading",
+    "z": 11.69
+   },
+   {
+    "term": "advise",
+    "z": 11.6
+   },
+   {
+    "term": "issues",
+    "z": 11.56
+   },
+   {
+    "term": "field",
+    "z": 11.48
+   },
+   {
+    "term": "evaluate",
+    "z": 11.42
+   },
+   {
+    "term": "colleagues",
+    "z": 11.42
+   },
+   {
+    "term": "behavior",
+    "z": 11.01
+   },
+   {
+    "term": "instruction",
+    "z": 10.87
+   },
+   {
+    "term": "needs",
+    "z": 10.76
+   },
+   {
+    "term": "teaching",
+    "z": 10.75
+   },
+   {
+    "term": "medical",
+    "z": 10.6
+   },
+   {
+    "term": "programs",
+    "z": 10.52
+   },
+   {
+    "term": "graduate",
+    "z": 10.35
+   },
+   {
+    "term": "learning",
+    "z": 10.28
+   },
+   {
+    "term": "conferences",
+    "z": 10.1
+   },
+   {
+    "term": "curricula",
+    "z": 10.09
+   },
+   {
+    "term": "teach",
+    "z": 10.07
+   },
+   {
+    "term": "serve",
+    "z": 10.03
+   },
+   {
+    "term": "committees",
+    "z": 9.98
+   },
+   {
+    "term": "supervise",
+    "z": 9.84
+   },
+   {
+    "term": "research",
+    "z": 9.67
+   },
+   {
+    "term": "plan",
+    "z": 9.59
+   },
+   {
+    "term": "therapy",
+    "z": 9.54
+   },
+   {
+    "term": "attendance",
+    "z": 9.48
+   },
+   {
+    "term": "provide",
+    "z": 9.42
+   },
+   {
+    "term": "family",
+    "z": 9.35
+   },
+   {
+    "term": "mental",
+    "z": 9.3
+   },
+   {
+    "term": "undergraduate",
+    "z": 9.2
+   },
+   {
+    "term": "instruct",
+    "z": 9.19
+   },
+   {
+    "term": "lectures",
+    "z": 9.08
+   },
+   {
+    "term": "collaborate",
+    "z": 9.04
+   },
+   {
+    "term": "grades",
+    "z": 9.02
+   },
+   {
+    "term": "discussions",
+    "z": 9.02
+   },
+   {
+    "term": "disabilities",
+    "z": 9.01
+   },
+   {
+    "term": "clients",
+    "z": 8.94
+   }
+  ],
+  "E": [
+   {
+    "term": "sales",
+    "z": 16.04
+   },
+   {
+    "term": "financial",
+    "z": 13.5
+   },
+   {
+    "term": "employees",
+    "z": 12.64
+   },
+   {
+    "term": "services",
+    "z": 11.87
+   },
+   {
+    "term": "policies",
+    "z": 11.72
+   },
+   {
+    "term": "budgets",
+    "z": 11.55
+   },
+   {
+    "term": "company",
+    "z": 11.04
+   },
+   {
+    "term": "employee",
+    "z": 10.95
+   },
+   {
+    "term": "marketing",
+    "z": 10.81
+   },
+   {
+    "term": "staff",
+    "z": 10.77
+   },
+   {
+    "term": "customer",
+    "z": 10.57
+   },
+   {
+    "term": "personnel",
+    "z": 10.54
+   },
+   {
+    "term": "regulations",
+    "z": 10.14
+   },
+   {
+    "term": "direct",
+    "z": 10.08
+   },
+   {
+    "term": "contracts",
+    "z": 10.05
+   },
+   {
+    "term": "coordinate",
+    "z": 9.51
+   },
+   {
+    "term": "strategies",
+    "z": 9.48
+   },
+   {
+    "term": "ensure",
+    "z": 9.45
+   },
+   {
+    "term": "activities",
+    "z": 9.35
+   },
+   {
+    "term": "flight",
+    "z": 9.22
+   },
+   {
+    "term": "advertising",
+    "z": 9.16
+   },
+   {
+    "term": "operations",
+    "z": 9.12
+   },
+   {
+    "term": "negotiate",
+    "z": 9.04
+   },
+   {
+    "term": "customers",
+    "z": 9.03
+   },
+   {
+    "term": "project",
+    "z": 8.99
+   },
+   {
+    "term": "merchandise",
+    "z": 8.95
+   },
+   {
+    "term": "performance",
+    "z": 8.82
+   },
+   {
+    "term": "implement",
+    "z": 8.77
+   },
+   {
+    "term": "schedules",
+    "z": 8.47
+   },
+   {
+    "term": "market",
+    "z": 8.42
+   },
+   {
+    "term": "review",
+    "z": 8.36
+   },
+   {
+    "term": "management",
+    "z": 8.31
+   },
+   {
+    "term": "business",
+    "z": 8.28
+   },
+   {
+    "term": "sustainability",
+    "z": 8.2
+   },
+   {
+    "term": "manage",
+    "z": 8.18
+   },
+   {
+    "term": "hire",
+    "z": 8.16
+   },
+   {
+    "term": "complaints",
+    "z": 8.15
+   },
+   {
+    "term": "compliance",
+    "z": 8.13
+   },
+   {
+    "term": "purchase",
+    "z": 8.06
+   },
+   {
+    "term": "monitor",
+    "z": 7.94
+   },
+   {
+    "term": "departments",
+    "z": 7.84
+   },
+   {
+    "term": "managers",
+    "z": 7.81
+   },
+   {
+    "term": "prices",
+    "z": 7.8
+   },
+   {
+    "term": "service",
+    "z": 7.75
+   },
+   {
+    "term": "online",
+    "z": 7.64
+   },
+   {
+    "term": "explain",
+    "z": 7.58
+   },
+   {
+    "term": "investment",
+    "z": 7.58
+   },
+   {
+    "term": "agreements",
+    "z": 7.56
+   },
+   {
+    "term": "laws",
+    "z": 7.2
+   },
+   {
+    "term": "training",
+    "z": 7.15
+   },
+   {
+    "term": "resolve",
+    "z": 7.12
+   },
+   {
+    "term": "relations",
+    "z": 7.11
+   },
+   {
+    "term": "workers",
+    "z": 7.08
+   },
+   {
+    "term": "trade",
+    "z": 7.03
+   },
+   {
+    "term": "oversee",
+    "z": 7.01
+   },
+   {
+    "term": "fundraising",
+    "z": 6.93
+   },
+   {
+    "term": "develop",
+    "z": 6.89
+   },
+   {
+    "term": "clients",
+    "z": 6.73
+   },
+   {
+    "term": "goals",
+    "z": 6.71
+   },
+   {
+    "term": "labor",
+    "z": 6.67
+   }
+  ],
+  "C": [
+   {
+    "term": "information",
+    "z": 14.35
+   },
+   {
+    "term": "mail",
+    "z": 13.59
+   },
+   {
+    "term": "data",
+    "z": 12.84
+   },
+   {
+    "term": "documents",
+    "z": 12.62
+   },
+   {
+    "term": "records",
+    "z": 11.84
+   },
+   {
+    "term": "security",
+    "z": 11.0
+   },
+   {
+    "term": "credit",
+    "z": 10.98
+   },
+   {
+    "term": "accounts",
+    "z": 10.58
+   },
+   {
+    "term": "customers",
+    "z": 9.77
+   },
+   {
+    "term": "computer",
+    "z": 9.62
+   },
+   {
+    "term": "forms",
+    "z": 9.47
+   },
+   {
+    "term": "database",
+    "z": 9.38
+   },
+   {
+    "term": "insurance",
+    "z": 9.28
+   },
+   {
+    "term": "library",
+    "z": 9.18
+   },
+   {
+    "term": "answer",
+    "z": 9.07
+   },
+   {
+    "term": "property",
+    "z": 9.01
+   },
+   {
+    "term": "claims",
+    "z": 8.96
+   },
+   {
+    "term": "correspondence",
+    "z": 8.83
+   },
+   {
+    "term": "checks",
+    "z": 8.78
+   },
+   {
+    "term": "payment",
+    "z": 8.49
+   },
+   {
+    "term": "transactions",
+    "z": 8.42
+   },
+   {
+    "term": "enter",
+    "z": 8.24
+   },
+   {
+    "term": "shipping",
+    "z": 8.23
+   },
+   {
+    "term": "tax",
+    "z": 8.22
+   },
+   {
+    "term": "cash",
+    "z": 8.19
+   },
+   {
+    "term": "files",
+    "z": 8.04
+   },
+   {
+    "term": "items",
+    "z": 7.99
+   },
+   {
+    "term": "verify",
+    "z": 7.99
+   },
+   {
+    "term": "users",
+    "z": 7.96
+   },
+   {
+    "term": "payments",
+    "z": 7.77
+   },
+   {
+    "term": "goods",
+    "z": 7.63
+   },
+   {
+    "term": "loan",
+    "z": 7.58
+   },
+   {
+    "term": "logistics",
+    "z": 7.54
+   },
+   {
+    "term": "software",
+    "z": 7.45
+   },
+   {
+    "term": "accuracy",
+    "z": 7.38
+   },
+   {
+    "term": "computers",
+    "z": 7.32
+   },
+   {
+    "term": "applicants",
+    "z": 7.29
+   },
+   {
+    "term": "bills",
+    "z": 7.29
+   },
+   {
+    "term": "incoming",
+    "z": 7.29
+   },
+   {
+    "term": "sort",
+    "z": 7.29
+   },
+   {
+    "term": "invoices",
+    "z": 7.16
+   },
+   {
+    "term": "file",
+    "z": 7.05
+   },
+   {
+    "term": "orders",
+    "z": 7.01
+   },
+   {
+    "term": "telephone",
+    "z": 7.0
+   },
+   {
+    "term": "messages",
+    "z": 6.96
+   },
+   {
+    "term": "financial",
+    "z": 6.93
+   },
+   {
+    "term": "calls",
+    "z": 6.86
+   },
+   {
+    "term": "questions",
+    "z": 6.82
+   },
+   {
+    "term": "statements",
+    "z": 6.82
+   },
+   {
+    "term": "applications",
+    "z": 6.81
+   },
+   {
+    "term": "inquiries",
+    "z": 6.76
+   },
+   {
+    "term": "letters",
+    "z": 6.69
+   },
+   {
+    "term": "documentation",
+    "z": 6.68
+   },
+   {
+    "term": "route",
+    "z": 6.67
+   },
+   {
+    "term": "process",
+    "z": 6.67
+   },
+   {
+    "term": "compute",
+    "z": 6.61
+   },
+   {
+    "term": "databases",
+    "z": 6.52
+   },
+   {
+    "term": "merchandise",
+    "z": 6.45
+   },
+   {
+    "term": "review",
+    "z": 6.42
+   },
+   {
+    "term": "retrieve",
+    "z": 6.41
+   }
+  ]
+ },
+ "intensity": {
+  "strong_positive": [
+   "love",
+   "loves",
+   "loved",
+   "passionate",
+   "obsessed",
+   "favourite",
+   "favorite",
+   "best part",
+   "dream",
+   "definitely",
+   "absolutely",
+   "really enjoy",
+   "so fun",
+   "can do it for hours",
+   "shiok",
+   "thrilling",
+   "amazing",
+   "addicted"
+  ],
+  "mild_positive": [
+   "kinda",
+   "kind of",
+   "sort of",
+   "i guess",
+   "probably",
+   "slightly",
+   "a bit",
+   "somewhat",
+   "not bad",
+   "alright",
+   "okay",
+   "ok",
+   "wouldn't mind",
+   "sounds fine",
+   "maybe",
+   "i suppose",
+   "lean towards"
+  ],
+  "strong_negative": [
+   "hate",
+   "hated",
+   "can't stand",
+   "cannot stand",
+   "nightmare",
+   "torture",
+   "never",
+   "no way",
+   "absolutely not",
+   "dread",
+   "drives me crazy",
+   "couldn't pay me",
+   "worst",
+   "awful",
+   "pass"
+  ],
+  "mild_negative": [
+   "not really",
+   "not my thing",
+   "not for me",
+   "meh",
+   "a bit boring",
+   "rather not",
+   "not keen",
+   "not into",
+   "probably not",
+   "less into",
+   "sian"
+  ],
+  "dontmind": [
+   "either",
+   "don't mind",
+   "dont mind",
+   "both fine",
+   "either also can",
+   "no preference"
+  ],
+  "unsure": [
+   "not sure",
+   "depends",
+   "dunno",
+   "idk",
+   "no idea",
+   "hard to say"
+  ],
+  "negators": [
+   "not",
+   "no",
+   "never",
+   "don't",
+   "dont",
+   "doesn't",
+   "isn't",
+   "wouldn't",
+   "can't",
+   "hardly"
+  ],
+  "familiarity": [
+   "my course",
+   "my major",
+   "my diploma",
+   "poly",
+   "my parents",
+   "my dad",
+   "my mum",
+   "my family",
+   "internship",
+   "part-time",
+   "grew up",
+   "everyone says",
+   "people say",
+   "safe choice",
+   "what i know",
+   "used to it"
+  ]
+ }
+}

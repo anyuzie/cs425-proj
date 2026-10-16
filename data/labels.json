@@ -1,0 +1,53 @@
+{
+ "types": [
+  "R",
+  "I",
+  "A",
+  "S",
+  "E",
+  "C"
+ ],
+ "type_names": {
+  "R": "Realistic",
+  "I": "Investigative",
+  "A": "Artistic",
+  "S": "Social",
+  "E": "Enterprising",
+  "C": "Conventional"
+ },
+ "direction_index": {
+  "neutral": 0,
+  "positive": 1,
+  "negative": 2
+ },
+ "direction_class_weights": [
+  0.41,
+  2.95,
+  4.99
+ ],
+ "direction_class_weights_note": "inverse frequency on train, N/(3*count_k), index order neutral, positive, negative",
+ "strength_values": {
+  "strong": 1.0,
+  "mild": 0.55,
+  "dontmind": 0.2
+ },
+ "strength_note": "sigmoid head, MSE only on non-neutral types; slot value = sign x strength",
+ "reason_index": {
+  "enjoyment": 0,
+  "familiarity": 1,
+  "neither": 2
+ },
+ "reason_class_weights": [
+  0.4,
+  3.44,
+  4.55
+ ],
+ "input_format": "tokenizer(context, text) as a sentence pair when context is non-empty, else tokenizer(text); max_length 128",
+ "row_weight": "multiply each row's total loss by its `weight` field (0.5 for bare O*NET phrases, train only)",
+ "nli_binary": {
+  "contradiction": 1,
+  "elaboration": 0,
+  "unrelated": 0
+ },
+ "job_zone_filter": "float(job_zone) >= 4 and z-scores present -> 378 recommendable occupations"
+}
