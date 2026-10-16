@@ -17,6 +17,7 @@ class SlotReading:
     confidence: float
     reason: str          # enjoyment | familiarity | neither
     source: str          # source sentence
+    reason_confidence: float = 1.0   # probability of `reason`; PROBE needs > 0.60
 
     @property
     def value(self) -> float:
@@ -36,6 +37,7 @@ class HistoryEntry:
     reason: str
     source: str
     turn: int
+    reason_confidence: float = 1.0
 
 
 @dataclass
@@ -48,6 +50,7 @@ class SlotState:
     source: str
     turn: int
     history: list[HistoryEntry] = field(default_factory=list)
+    reason_confidence: float = 1.0
 
 
 @dataclass
@@ -83,6 +86,7 @@ class State:
     clarify_count: dict[str, int] = field(default_factory=dict)
     kind_count: dict[str, int] = field(default_factory=dict)
     actions: list[dict] = field(default_factory=list)
+    ranking: list = field(default_factory=list)       # this turn's top 100 RankedOccupations, set before the policy runs
     done: bool = False
 
 

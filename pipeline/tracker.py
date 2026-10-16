@@ -1,6 +1,6 @@
 """STEP 2 · State tracker with recency decay.  STATUS: not built yet.
 
-Replaces: SimpleTracker in pipeline/stubs.py (it just keeps the latest reading per type)
+Minimal example: tests/fakes.py SimpleTracker (keeps the latest reading per type).
 Switch on: configs/system.json -> "tracker": "decay"
 No model: plain Python (manual section 5).
 """
@@ -18,10 +18,11 @@ class DecayTracker:
     def update(self, state: State, reading: Reading) -> None:
         """Merge this turn's readings into state. Changes `state` in place, returns nothing.
 
-        Must keep doing what SimpleTracker does (copy its code from stubs.py as a start):
+        Must keep doing what SimpleTracker in tests/fakes.py does (copy its code as a start):
           - state.last_reading_empty = not reading.slots
-          - for each reading: append HistoryEntry(value, confidence, reason, source, state.turn)
-            to that type's history and set state.slots[letter] = SlotState(...)
+          - for each reading: append HistoryEntry(value, confidence, reason, source, state.turn,
+            reason_confidence) to that type's history and set state.slots[letter] = SlotState(...)
+            (keep reading.reason_confidence on both: the PROBE rule needs it > 0.60)
             (the source sentence MUST be kept: the quote cards and the NLI check use it)
           - if state.last_action is a PROBE on a type, add that letter to state.resolved
         """

@@ -7,3 +7,17 @@ models/
 indexes/
 docs/plans/
 .impeccable/
+# model / training artefacts, anywhere in the repo
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.pkl
+*.zip
+checkpoints/
+runs/
+wandb/
+.ipynb_checkpoints/
+outputs/

@@ -1,1 +1,1 @@
-"""Chat pipeline: stand-in extractor/tracker/checker/policy/evidence behind interfaces."""
+"""Chat pipeline: components behind the interfaces in interfaces.py, wired together by system.py."""

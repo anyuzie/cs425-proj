@@ -2,51 +2,26 @@ import json
 import unittest
 from pathlib import Path
 
-from pipeline.interfaces import State
-from pipeline.stubs import LexiconExtractor, StructuredKeywordRanker
+from pipeline import registry
+from pipeline.interfaces import Action, State
+from pipeline.policy import PolicyBase
+from fakes import StructuredKeywordRanker, _tokens as tokens  # also registers the test-* fakes
 from pipeline.system import System
 
-from pipeline.stubs import _tokens as tokens
-
 DATA = Path(__file__).resolve().parent.parent / "data"
-# Behaviour tests pin the stand-ins, so switching configs/system.json to real models cannot break them.
-STUB_CONFIG = Path(__file__).resolve().parent / "stub_config.json"
+# Behaviour tests pin the scripted test extractor and the test fakes, so switching configs/system.json to real models cannot break them.
+TEST_CONFIG = Path(__file__).resolve().parent / "test_config.json"
 
 
 class PipelineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.system = System.load(DATA, STUB_CONFIG)
+        cls.system = System.load(DATA, TEST_CONFIG)
 
     def run_script(self, texts):
         state = State()
         self.system.start(state)
         return state, [self.system.step(state, t) for t in texts]
-
-    def test_extractor_stance_strength_reason(self):
-        ex = LexiconExtractor(DATA / "riasec_lexicon.json")
-        r = ex.read("I love working with machines and tools.")
-        self.assertEqual([(s.slot, s.sign, s.strength, s.confidence, s.reason) for s in r.slots],
-                         [("R", 1, 1.0, 0.7, "enjoyment")])
-        r = ex.read("I hate repairing machines, it is boring.")
-        self.assertEqual((r.slots[0].sign, r.slots[0].strength), (-1, 1.0))
-        r = ex.read("I like machines but that's what I know, my dad has a workshop.")
-        self.assertEqual(r.slots[0].reason, "familiarity")
-        self.assertEqual(ex.read("I study computer science in year two.").slots, [])
-
-    def test_extractor_answers_to_clarify(self):
-        ex = LexiconExtractor(DATA / "riasec_lexicon.json")
-        r = ex.read("Definitely the first one", expected_slot="C")
-        self.assertEqual((r.slots[0].slot, r.slots[0].sign), ("C", 1))
-        r = ex.read("No way", expected_slot="E")
-        self.assertEqual((r.slots[0].slot, r.slots[0].sign), ("E", -1))
-        self.assertEqual(ex.read("Definitely the first one").slots, [])
-
-    def test_familiarity_without_cue_is_mild_positive(self):
-        ex = LexiconExtractor(DATA / "riasec_lexicon.json")
-        r = ex.read("My dad runs a sales company so that's what I know.")
-        self.assertEqual([(s.slot, s.sign, s.strength, s.reason) for s in r.slots],
-                         [("E", 1, 0.55, "familiarity")])
 
     def test_reply_to_abstain_settles_reasked_slot(self):
         state, results = self.run_script(["I study computer science in year two.", "hmm", "no way"])
@@ -91,6 +66,20 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("quotes", results[0].__dict__)
         self.assertIn("now", results[0].quotes)
 
+    def test_probe_needs_reason_confidence_above_limit(self):
+        state, results = self.run_script(["My mum does accounts so I know it."])   # familiarity, confidence 0.60
+        self.assertNotEqual(results[0].action, "PROBE")
+        self.assertEqual(state.slots["C"].reason, "familiarity")
+        self.assertEqual(state.slots["C"].reason_confidence, 0.60)
+
+    def test_reason_confidence_reaches_state_and_profile(self):
+        state, _ = self.run_script(["I like machines but that's what I know, my dad has a workshop."])
+        self.assertEqual(state.slots["R"].reason_confidence, 0.9)
+        self.assertEqual(state.slots["R"].history[-1].reason_confidence, 0.9)
+        p = self.system.profile(state)
+        self.assertEqual(p["R"]["reason_confidence"], 0.9)
+        self.assertEqual(p["I"]["reason_confidence"], 0.0)
+
     def test_abstain_and_settle(self):
         state, results = self.run_script(["hmm", "hmm", "hmm"])
         self.assertEqual(results[0].action, "CLARIFY")
@@ -122,12 +111,22 @@ class PipelineTests(unittest.TestCase):
         for o in resp.occupations:
             self.assertTrue(all(e.occupation_code == o.code for e in o.evidence))
 
+    def test_structured_ranker_gives_cards_without_tasks(self):
+        sys2 = System.load(DATA, TEST_CONFIG)
+        sys2.ranker = registry.REGISTRY["ranker"]["structured"]({}, DATA)
+        state = State()
+        sys2.start(state)
+        sys2.step(state, "I love analysing data.")
+        recs = sys2.recommendations(state)
+        self.assertEqual(len(recs), 5)
+        self.assertTrue(all(r["tasks"] == [] for r in recs))
+
     def test_confirmer_threshold_drops_flag(self):
         class Never:
             name = "never"
             def score(self, a, b):
                 return 0.5
-        sys2 = System.load(DATA, STUB_CONFIG)
+        sys2 = System.load(DATA, TEST_CONFIG)
         sys2.confirmer = Never()
         state = State()
         sys2.start(state)
@@ -137,16 +136,16 @@ class PipelineTests(unittest.TestCase):
 
     def test_unknown_component_lists_valid_names(self):
         import tempfile
-        cfg = json.loads(STUB_CONFIG.read_text())
+        cfg = json.loads(TEST_CONFIG.read_text())
         cfg["components"]["extractor"] = "nope"
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
             json.dump(cfg, f)
-        with self.assertRaisesRegex(ValueError, "lexicon-stub"):
+        with self.assertRaisesRegex(ValueError, "deberta"):
             System.load(DATA, f.name)
-        cfg["components"]["extractor"] = "lexicon-stub"
+        cfg["components"]["extractor"] = "test-scripted"
         # A part that is not filled in yet must stop startup with a pointer to the guide, not half-run.
         for kind, name in [("extractor", "deberta"), ("tracker", "decay"), ("confirmer", "nli"),
-                           ("ranker", "rrf"), ("policy", "manual")]:
+                           ("policy", "manual")]:
             one = json.loads(json.dumps(cfg))
             one["components"][kind] = name
             with open(f.name, "w") as g:
@@ -156,6 +155,55 @@ class PipelineTests(unittest.TestCase):
                     System.load(DATA, f.name)  # part already filled in: loading is fine
                 except NotImplementedError as e:
                     self.assertIn("INTEGRATION.md", str(e))
+
+
+class PolicyBaseGuarantees(unittest.TestCase):
+    """What PolicyBase enforces so a teammate's _decide cannot break the conversation or the evaluation."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.system = System.load(DATA, TEST_CONFIG)
+
+    def test_always_recommends_at_max_turns_even_if_decide_never_does(self):
+        class NeverRecommends(PolicyBase):
+            def _decide(self, state):
+                return Action("CLARIFY", "C", "keep asking")
+        self.system.policy, policy = NeverRecommends(3), self.system.policy
+        try:
+            state = State()
+            self.system.start(state)
+            results = [self.system.step(state, "I love working with machines and tools.") for _ in range(3)]
+        finally:
+            self.system.policy = policy
+        self.assertEqual(results[-1].action, "RECOMMEND")
+        self.assertTrue(results[-1].done)
+        self.assertEqual(len(results[-1].recommendations), 5)
+
+    def test_no_probing_rejects_challenge_and_probe(self):
+        class Probes(PolicyBase):
+            def _decide(self, state):
+                return Action("PROBE", "E", "probe", {"new_src": "x"})
+        with self.assertRaisesRegex(ValueError, "no_probing"):
+            Probes(10, no_probing=True).decide(State(turn=1))
+        self.assertEqual(Probes(10).decide(State(turn=1)).kind, "PROBE")
+
+    def test_policy_sees_this_turns_ranking(self):
+        seen = []
+
+        class Records(PolicyBase):
+            def _decide(self, state):
+                seen.append(list(state.ranking))
+                return Action("CLARIFY", "C", "record")
+        self.system.policy, policy = Records(10), self.system.policy
+        try:
+            state = State()
+            self.system.start(state)
+            self.system.step(state, "I love working with machines and tools.")
+        finally:
+            self.system.policy = policy
+        self.assertEqual(len(seen[0]), 100)
+        self.assertEqual([o.rank for o in seen[0][:3]], [1, 2, 3])
+        self.assertEqual(self.system.top5(state), [{"code": o.code, "title": o.title} for o in seen[0][:5]])
 
 
 if __name__ == "__main__":

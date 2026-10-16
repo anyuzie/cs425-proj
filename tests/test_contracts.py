@@ -1,9 +1,10 @@
-"""Runs every contract mixin against the current stand-ins."""
+"""Runs every contract mixin: real components where they exist, test fakes (tests/fakes.py) otherwise."""
 
 import unittest
 
 from contracts import (DATA, ConfirmerContract, ExtractorContract, FillerContract, PolicyContract,
                        RankerContract, RuleContract, TrackerContract)
+import fakes  # noqa: F401  (registers the test-* fakes)
 from pipeline import registry
 
 
@@ -11,12 +12,12 @@ def factory(kind, name):
     return lambda self: registry.REGISTRY[kind][name]({"settings": {}}, DATA)
 
 
-class TestLexiconExtractor(ExtractorContract, unittest.TestCase):
-    make = factory("extractor", "lexicon-stub")
+class TestScriptedExtractor(ExtractorContract, unittest.TestCase):
+    make = factory("extractor", "test-scripted")
 
 
 class TestSimpleTracker(TrackerContract, unittest.TestCase):
-    make = factory("tracker", "simple-stub")
+    make = factory("tracker", "test-simple-tracker")
 
 
 class TestContradictionRule(RuleContract, unittest.TestCase):
@@ -24,15 +25,19 @@ class TestContradictionRule(RuleContract, unittest.TestCase):
 
 
 class TestPassthroughConfirmer(ConfirmerContract, unittest.TestCase):
-    make = factory("confirmer", "passthrough-stub")
+    make = factory("confirmer", "test-passthrough")
+
+
+class TestStructuredRanker(RankerContract, unittest.TestCase):
+    make = factory("ranker", "structured")
 
 
 class TestStructuredKeywordRanker(RankerContract, unittest.TestCase):
-    make = factory("ranker", "structured+keyword-stub")
+    make = factory("ranker", "test-keyword-ranker")
 
 
-class TestRulePolicy(PolicyContract, unittest.TestCase):
-    make = factory("policy", "rule-stub")
+class TestSimplePolicy(PolicyContract, unittest.TestCase):
+    make = factory("policy", "test-simple-policy")
 
 
 class TestQuestionBankFiller(FillerContract, unittest.TestCase):

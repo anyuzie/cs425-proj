@@ -1,11 +1,11 @@
 {
   "components": {
-    "extractor": "lexicon-stub",
-    "tracker": "simple-stub",
+    "extractor": "test-scripted",
+    "tracker": "test-simple-tracker",
     "rule": "rule",
-    "confirmer": "passthrough-stub",
-    "ranker": "structured+keyword-stub",
-    "policy": "rule-stub",
+    "confirmer": "test-passthrough",
+    "ranker": "test-keyword-ranker",
+    "policy": "test-simple-policy",
     "filler": "question-bank"
   },
   "settings": {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false},

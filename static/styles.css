@@ -232,7 +232,6 @@ textarea:disabled { background: var(--chip-bg); }
 .comps { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-family: var(--font-mono); font-size: 12.5px; }
 .comps dt { color: #A3AEBA; }
 .comps dd { margin: 0; color: var(--dark-ink-2); overflow-wrap: anywhere; }
-.standin { font-size: 11px; margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: #3A2A18; color: var(--neg-text); }
 
 /* narrow */
 @media (max-width: 640px) {

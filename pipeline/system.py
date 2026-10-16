@@ -10,6 +10,7 @@ from .interfaces import MAX_TURNS, TYPES, Action, State
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG = ROOT / "configs" / "system.json"
 QUESTIONS = ("CLARIFY", "ABSTAIN", "PROBE", "CHALLENGE")
+POLICY_TOP_K = 100  # ranking README: the dialogue policy consumes the top 100
 
 NO_SIGNAL_REPLY = ("I could not pick up enough about your preferences to suggest occupations. "
                    "Thanks for chatting, and please try again with a few more details.")
@@ -65,7 +66,7 @@ class System:
         return resp.occupations if resp.status == "ranked" else []
 
     def top5(self, state: State) -> list[dict]:
-        return [{"code": o.code, "title": o.title} for o in self._rank(state, 5)]
+        return [{"code": o.code, "title": o.title} for o in state.ranking[:5]]
 
     def _why(self, state: State) -> str:
         pos = sorted((t for t, s in state.slots.items() if s.value > 0), key=lambda t: -state.slots[t].value)[:2]
@@ -76,7 +77,7 @@ class System:
     def recommendations(self, state: State) -> list[dict]:
         why = self._why(state)
         return [{"rank": o.rank, "code": o.code, "title": o.title, "why": why,
-                 "tasks": [e.text for e in o.evidence[:2]]} for o in self._rank(state, 5)]
+                 "tasks": [e.text for e in o.evidence[:2]]} for o in state.ranking[:5]]
 
     def _confirmed(self, state: State) -> list:
         flags = []
@@ -94,6 +95,7 @@ class System:
         reading = self.extractor.read(text, state.last_reply if asked else None, last.slot if asked else None)
         self.tracker.update(state, reading)
         state.flags = self._confirmed(state)
+        state.ranking = self._rank(state, POLICY_TOP_K)  # the policy reads it; the panel and cards reuse it
         action = self.policy.decide(state)
         quotes, recs, done = None, None, False
         if action.kind == "RECOMMEND":
@@ -117,9 +119,10 @@ class System:
         return TurnResult(reply, action.kind, state.turn, state.done, quotes, recs)
 
     def profile(self, state: State) -> dict:
-        return {t: ({"value": state.slots[t].value, "confidence": state.slots[t].confidence,
-                     "reason": state.slots[t].reason} if t in state.slots
-                    else {"value": None, "confidence": 0.0, "reason": None}) for t in TYPES}
+        empty = {"value": None, "confidence": 0.0, "reason": None, "reason_confidence": 0.0}
+        return {t: ({"value": s.value, "confidence": s.confidence, "reason": s.reason,
+                     "reason_confidence": s.reason_confidence} if (s := state.slots.get(t)) else dict(empty))
+                for t in TYPES}
 
     def trace(self, state: State) -> dict:
         return {"profile": self.profile(state), "actions": list(state.actions),

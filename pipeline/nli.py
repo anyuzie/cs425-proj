@@ -1,6 +1,6 @@
 """STEP 4 · NLI contradiction check.  STATUS: not built yet.
 
-Replaces: PassthroughConfirmer in pipeline/stubs.py (it says "yes, contradiction" to everything)
+Minimal example: tests/fakes.py PassthroughConfirmer (says "yes, contradiction" to everything).
 Switch on: configs/system.json -> "confirmer": "nli"
 Model:     cross-encoder/nli-deberta-v3-base (no training, used as is)
 

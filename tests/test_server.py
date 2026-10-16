@@ -6,6 +6,7 @@ from unittest import mock
 
 from fastapi.testclient import TestClient
 
+import fakes  # noqa: F401  (registers the test-* fakes)
 from app.server import app
 
 
@@ -14,8 +15,8 @@ class ServerTests(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.logs = tmp.name
-        stub = os.path.join(os.path.dirname(__file__), "stub_config.json")
-        patcher = mock.patch.dict(os.environ, {"CM_LOG_DIR": tmp.name, "CM_CONFIG": stub})
+        config = os.path.join(os.path.dirname(__file__), "test_config.json")
+        patcher = mock.patch.dict(os.environ, {"CM_LOG_DIR": tmp.name, "CM_CONFIG": config})
         patcher.start()
         self.addCleanup(patcher.stop)
         self.client = TestClient(app)
@@ -34,10 +35,10 @@ class ServerTests(unittest.TestCase):
         body = self.client.get("/api/health").json()
         self.assertEqual(body["status"], "ok")
         self.assertEqual(body["eligible"], 378)
-        self.assertEqual(body["components"]["extractor"], "lexicon-stub")
-        self.assertEqual(body["components"]["ranker"], "structured+keyword-stub")
+        self.assertEqual(body["components"]["extractor"], "test-scripted")
+        self.assertEqual(body["components"]["ranker"], "test-keyword-ranker")
         self.assertEqual(body["components"]["rule"], "rule")
-        self.assertEqual(body["components"]["confirmer"], "passthrough-stub")
+        self.assertEqual(body["components"]["confirmer"], "test-passthrough")
         self.assertNotIn("evidence", body["components"])
 
     def test_session_opening_and_anon_code(self):
