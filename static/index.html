@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Matcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="#2741B8" stroke-width="2"><circle cx="14" cy="14" r="11"></circle><path d="M14 3v22M3 14h22" stroke-opacity=".35"></path><circle cx="19" cy="9" r="2.5" fill="#2741B8"></circle></svg>
+      <span class="brand-name">Career Matcher</span>
+    </div>
+    <div class="top-right">
+      <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" aria-label="Turn 0 of up to 10">
+        <span class="progress-text" id="turnText">Turn 0 of up to 10</span>
+        <div class="bar" aria-hidden="true"><div class="bar-fill" id="barFill"></div></div>
+      </div>
+      <span class="chip" id="codeChip" hidden></span>
+      <button type="button" class="btn-outline" id="stopBtn" aria-label="Stop session">
+        <span class="stop-label">Stop session</span>
+        <svg class="stop-icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l10 10M14 4L4 14"></path></svg>
+      </button>
+    </div>
+  </header>
+  <p class="banner">Research prototype — its suggestions are not career advice.</p>
+
+  <div class="layout">
+    <main class="chat">
+      <div class="chat-inner">
+        <div id="transcript" class="transcript" aria-live="polite" aria-relevant="additions"></div>
+        <div id="results"></div>
+      </div>
+      <form id="composer" class="composer" autocomplete="off">
+        <div class="composer-inner">
+          <label for="msg" class="composer-label">Reply in your own words. There's no wrong answer.</label>
+          <div class="composer-row">
+            <textarea id="msg" rows="2" maxlength="2000" placeholder="Type your reply…" disabled></textarea>
+            <button type="submit" class="btn-send" id="sendBtn" aria-label="Send" disabled>
+              <span class="send-label">Send</span>
+              <svg class="send-icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h13M11 5l5 5-5 5"></path></svg>
+            </button>
+          </div>
+          <div class="composer-meta">
+            <span id="counter" class="counter" hidden></span>
+          </div>
+          <div id="errorBox" class="error" role="alert" hidden></div>
+        </div>
+      </form>
+    </main>
+    <aside id="researcher" class="researcher" aria-label="Researcher panel" hidden></aside>
+  </div>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

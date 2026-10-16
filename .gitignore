@@ -2,3 +2,8 @@ data/*
 __pycache__/
 *.py[cod]
 .venv/
+logs/
+models/
+indexes/
+docs/plans/
+.impeccable/
