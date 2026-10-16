@@ -1,65 +1,171 @@
-# What's done, what's left
+# Adding your part
 
-The chatbot already runs end to end. Parts that aren't built yet use a simple **stand-in** so the app still works.
-Each unbuilt part has its own file with a **`PUT YOUR CODE HERE`** block waiting for you.
-For how every step works and which files are involved, see [ARCHITECTURE.md](ARCHITECTURE.md).
+Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## Done
+The app has **no stand-ins**. It won't start until the four teammate parts (extractor, tracker, NLI check, policy) are filled in. Each one stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
 
-| Part | File |
-|---|---|
-| Chat page | `static/` |
-| Server (`/api/session`, `/api/chat`, `/api/health`) | `app/` |
-| Runs the 7 steps each turn | `pipeline/system.py` |
-| Step 3 · contradiction rule (arithmetic, no model) | `pipeline/stubs.py` → `ContradictionRule` |
-| Step 5 · structured RIASEC score (one of the three ranking signals) | `recommender/structured.py` |
-| Step 7 · template filler (question bank) | `pipeline/templates.py` |
+---
 
-## To build
+## 1. What's done and what's yours
 
-Suggested order, top to bottom. "Stand-in now" is what runs until you switch it.
+| Step | Part | File | Status | Config name (already set) |
+|---|---|---|---|---|
+| 1 | Preference extractor | `pipeline/extractor.py` (+ your `pipeline/extractor_model.py`) | **teammate**: fill `load()`, `predict()` | `"extractor": "deberta"` |
+| 2 | State tracker | `pipeline/tracker.py` | **teammate**: fill `update()` | `"tracker": "decay"` |
+| 3 | Contradiction rule | `pipeline/rule.py` | done | `"rule": "rule"` |
+| 4 | NLI check | `pipeline/nli.py` | **teammate**: fill `__init__()`, `score()` | `"confirmer": "nli"` |
+| 5 | Ranker | `recommender/structured.py` | done (baseline); BM25 + FAISS + RRF is the project lead's work | `"ranker": "structured"` |
+| 6 | Policy | `pipeline/policy.py` | **teammate**: fill `ManualPolicy._decide()` | `"policy": "manual"` |
+| 7 | Template filler | `pipeline/templates.py` | done | `"filler": "question-bank"` |
+| — | Evaluation harness | `eval/harness.py` (new) | to write | `"no_probing": true` for the control arm |
 
-| # | Part | Model? | Your file | Stand-in now | Config line |
-|---|---|---|---|---|---|
-| 1 | Build BM25 + FAISS indexes | MiniLM | `scripts/build_indexes.py` | — | — |
-| 2 | BM25 signal | no | `recommender/bm25.py` | — | (part of `rrf`) |
-| 3 | Dense task matching | MiniLM + FAISS | `recommender/dense.py` | — | (part of `rrf`) |
-| 4 | RRF fusion of all three signals | no | `recommender/fusion.py` | structured score + word-overlap task quotes | `"ranker": "rrf"` |
-| 5 | Preference extractor | DeBERTa (trained) | `pipeline/extractor.py` | keyword list | `"extractor": "deberta"` |
-| 6 | NLI contradiction check | NLI DeBERTa | `pipeline/nli.py` | says yes to every conflict | `"confirmer": "nli"` |
-| 7 | Tracker with recency decay | no | `pipeline/tracker.py` | keeps the latest reading | `"tracker": "decay"` |
-| 8 | Full policy (manual section 7) | no | `pipeline/policy.py` | simplified rules | `"policy": "manual"` |
-| 9 | Evaluation harness | no | `eval/harness.py` (new) | — | `"no_probing": true` for the control arm |
+You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/registry.py`, `app/` or `static/`.
 
-## How to switch one part on
+---
 
-1. Open its file. Fill in each `PUT YOUR CODE HERE` block. The docstring above it says what comes in and what must go out.
-2. Delete the `raise NotImplementedError(...)` line at the top of `__init__`. It stops the server starting with a half-built part.
-3. In `configs/system.json`, change that part's line to the new name (see the table).
-4. Run `.venv/bin/python -m unittest discover -s tests`, then start the server and open `/api/health`. Your part's name now appears in place of the `-stub` one.
+## 2. Where your files go
 
-**Optional:** in `tests/contracts.py`, find the test class for your part (for example `ExtractorContract`) and subclass it with a `make()` that returns your object. It checks that your output has the right shape.
+| Kind | Folder | Committed? |
+|---|---|---|
+| **App code**: what runs in the chatbot | `pipeline/` (your part's file), `recommender/` | yes |
+| **Training and research code**: never imported by the app | `training/<part>/`, e.g. `training/extractor/`, `training/nli/`. Create your own subfolder. | yes, code only |
+| **Evaluation** | `eval/` | yes |
+| **Your tests** | `tests/test_<your part>.py` | yes |
+| **Data, checkpoints, logs** | `data/`, `models/<part>/`, `indexes/`, `logs/` | **never** |
 
-## Rules that apply everywhere
+- Training code may import from the app; for example, it imports your model class from `pipeline/extractor_model.py`. **The app never imports from `training/`.**
+- `.gitignore` blocks model files anywhere in the repo (`*.safetensors`, `*.bin`, `*.pt`, `*.pth`, `*.ckpt`, `*.onnx`, `*.pkl`, `*.zip`, `checkpoints/`, `runs/`, `wandb/`, `outputs/`).
 
-- Types are letters: `R I A S E C`. Use full names only when reading `question_bank.json`.
-- Keep the user's sentences word for word (`source`). The quote cards and the NLI check use them.
-- Load models once, in `__init__`, never inside `read`, `score` or `rank`.
-- Don't import torch at the top of `pipeline/registry.py` or `pipeline/stubs.py`, so the app still runs without it.
+**In your `training/<part>/` folder:**
+- Your training script or notebook. Clear notebook outputs before committing.
+- `requirements-training.txt`, or an install cell at the top of the notebook.
+- A small `results.json` with the seed, a hash of the data you used, and your metrics.
 
-## Run everything
+---
 
-```
-pip install -r requirements-models.txt          # only once you use a real model
-.venv/bin/python scripts/build_indexes.py       # once, after filling it in
-.venv/bin/uvicorn app.server:app --port 8000    # open http://localhost:8000
-CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app   # for participant sessions: hides the researcher panel
-```
+## 3. Your part, step by step
 
-Put the trained extractor in `models/extractor/`. Indexes go in `indexes/`. Both are created locally and not committed.
+### Step 1 · Extractor (`pipeline/extractor.py`)
 
-## Still to decide
+You write **two** methods. `read()` is already done: it splits the message into sentences, calls your `predict()` on each, and builds the readings.
 
-- Two links in `static/app.js`: `#rating-form` and `#careers-service`.
+1. **Train** in `training/extractor/`, on `data/extractor.jsonl`:
+   - Use the shipped `split` field; don't re-split.
+   - Use the class weights in `data/labels.json`.
+   - Put the model class (DeBERTa + direction, strength and reason heads) in `pipeline/extractor_model.py`, and import it from your training code, so training and the app use the same class.
+2. **Export and share:**
+   - Save the checkpoint folder (weights, `config.json`, tokenizer files) and zip it with a short hash in the name, e.g. `extractor-3f9c2a.zip`.
+   - Upload it to the team Drive folder ([TEAM DRIVE LINK]) and post the name in the group chat.
+3. **Everyone unzips it** so the files sit **directly** in `models/extractor/` (`models/extractor/config.json`, not `models/extractor/extractor-3f9c2a/config.json`).
+4. **Fill `load(checkpoint_dir)`.** It runs once at server start. Load the tokenizer and the model onto `self` (e.g. `self.tok`, `self.model`) and call `.eval()`. Import torch and transformers here, not at the top of the file.
+5. **Fill `predict(context, sentence)`.** It runs once per sentence. Tokenize with `tokenizer(context, sentence)` when `context` isn't `None` (it's the bot question being answered), else `tokenizer(sentence)`, with `max_length=128` and `truncation=True`, inside `torch.no_grad()`. Return plain Python floats and lists, already softmaxed:
+   ```python
+   {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists, types in R I A S E C order
+    "strength":  [s, ...],                                     # 6 floats 0..1 (sigmoid)
+    "reason":    [p_enjoyment, p_familiarity, p_neither]}      # class orders: data/labels.json
+   ```
+   A wrong shape makes `read()` raise an error naming the key.
+6. **Delete** the two `raise NotImplementedError` lines.
+
+### Step 2 · Tracker (`pipeline/tracker.py`)
+
+1. **Write `update(state, reading)`.** It merges this turn's readings into `state.slots`, weighting older evidence down (recency decay), with confidence as the merge weight. Keep `value` in −1..1 and `confidence` in 0..1. It changes `state` and returns nothing.
+2. It must also do three things:
+   - Append a `HistoryEntry` for each reading, keeping the `source` sentence word for word plus its `reason_confidence`. The quote cards, the NLI check and the PROBE rule all depend on these.
+   - Set `state.last_reading_empty = not reading.slots`.
+   - If `state.last_action` was a PROBE on a type, add that type to `state.resolved`.
+3. **Delete** the `raise NotImplementedError` line in `__init__`.
+
+Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the decay.
+
+### Step 4 · NLI check (`pipeline/nli.py`)
+
+1. **Fill `__init__(model_name)`.** Load `cross-encoder/nli-deberta-v3-base` once (e.g. `sentence_transformers.CrossEncoder`) and find which output index is "contradiction". There's no training; the model downloads by name.
+2. **Fill `score(old_src, new_src)`.** Return the softmaxed probability of "contradiction" as a plain float.
+3. **Tune the threshold** in `training/nli/`:
+   - Sweep it on the 75 `split == "dev"` pairs of `data/nli_pairs.jsonl`, using `nli_binary` from `labels.json`.
+   - Report precision and recall once on the 64 `test` pairs.
+   - Put the chosen number in `settings.confirm_threshold` (currently 0.60).
+4. **Delete** the `raise NotImplementedError` lines.
+
+Copy from: `PassthroughConfirmer` in `tests/fakes.py` (it always returns 1.0).
+
+### Step 6 · Policy (`pipeline/policy.py`)
+
+1. **Write `ManualPolicy._decide(state)`** and return `Action(kind, slot, why, payload)`. Check these top to bottom; the first match wins:
+   1. **CHALLENGE**: `state.flags` isn't empty. Payload `{old_src, old_turn, new_src}`.
+   2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > PROBE_REASON_CONF` (0.60), and it hasn't been probed yet. Payload `{new_src}`.
+   3. **ABSTAIN**: the last action was a question and the reply had no stance. Two strikes settle the type.
+   4. **RECOMMEND**: every type filled or settled, the profile has converged, and the conversation is 5 to 10 turns in.
+   5. **CLARIFY**: ask the unfilled type with the highest variance. Use `state.ranking`, this turn's top 100 occupations, best first, each with `occupation_z`.
+2. **Update the bookkeeping yourself:** `state.challenged`, `probed`, `settled` and `strikes`.
+3. **Skip rules 1–2** when `self.no_probing` is True (the evaluation's control arm).
+4. **Delete** the `raise NotImplementedError` line in `__init__`.
+
+`PolicyBase` (same file, done) handles these for you:
+- It returns RECOMMEND at turn 10.
+- It raises an error if you probe while `no_probing` is on.
+- It adds the question-rotation counters to the payload.
+
+Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rules.
+
+### Step 5 · Ranker (project lead)
+
+Write a class with `name`, `eligible_count` and `rank(interests, observed_types, user_sentences, top_k) -> RankingResponse`. Put each card's matched tasks in `evidence`; the cards quote the first two. Register it in `pipeline/registry.py` and set `"ranker"` in the config. Plan: BM25 → MiniLM + FAISS → RRF, per `cs425-ranking-docs/`. BM25 should skip short replies like "the first one".
+
+---
+
+## 4. Check that your part works
+
+1. **Run all tests:** `.venv/bin/python -m unittest discover -s tests`. Always use `discover -s tests`, or the contract imports fail.
+2. **Add a contract test** for your part. It checks the output shape (valid letters and ranges, no crash on empty or odd text):
+   ```python
+   # tests/test_my_tracker.py
+   import unittest
+   from contracts import TrackerContract        # ExtractorContract, ConfirmerContract, PolicyContract, …
+   from pipeline.tracker import DecayTracker
+
+   class TestDecay(TrackerContract, unittest.TestCase):
+       def make(self):
+           return DecayTracker()
+   ```
+3. **Once all four parts are in,** start the server with `.venv/bin/uvicorn app.server:app` and open `http://localhost:8000/api/health`. It should list `deberta`, `decay`, `nli` and `manual`. Then chat with it at `http://localhost:8000`; the researcher panel shows the profile and each decision.
+
+---
+
+## 5. Rules for every part
+
+- Types are letters `R I A S E C`. Use full names (`Realistic`) only when reading `question_bank.json`.
+- Keep the user's sentences word for word in `source`.
+- Load models once (in `load()` or `__init__`), never inside `read`, `score`, `update` or `decide`.
+- Don't import torch or transformers at the top of a file; import them inside the method that needs them.
+- Same input, same output: the rule, the policy and the ranker must be deterministic.
+
+---
+
+## 6. Before you open a pull request
+
+- [ ] Branched from `main`
+- [ ] `unittest discover -s tests` passes
+- [ ] No model files, data, logs or zips in the diff
+- [ ] Notebook outputs cleared
+- [ ] The PR states your seed, your metrics and the checkpoint's hash name
+
+---
+
+## 7. Still to decide (team)
+
+- The two links in `static/app.js`: `#rating-form` and `#careers-service`.
 - Where transcripts are stored and when they are deleted (manual section 10).
 - A "why" line specific to each card (right now all five share one sentence).
+- The team Drive folder link (step 1 above).
+
+## Install and run
+
+```
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt -r requirements-models.txt
+# unzip career-matcher-data.zip into data/
+.venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
+CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions: panel hidden
+```

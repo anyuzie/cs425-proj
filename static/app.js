@@ -418,7 +418,6 @@
     Object.keys(comps).forEach(function (k) {
       dl.appendChild(el('dt', null, k));
       var dd = el('dd', null, comps[k]);
-      if (/-stub$/.test(String(comps[k]))) dd.appendChild(el('span', 'standin', 'stand-in'));
       dl.appendChild(dd);
     });
     s4.appendChild(dl);
