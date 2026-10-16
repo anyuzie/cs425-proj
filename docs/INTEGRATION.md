@@ -31,7 +31,8 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 | **Training and research code**: never imported by the app | `training/<part>/`, e.g. `training/extractor/`, `training/nli/`. Create your own subfolder. | yes, code only |
 | **Evaluation** | `eval/` | yes |
 | **Your tests** | `tests/test_<your part>.py` | yes |
-| **Data, checkpoints, logs** | `data/`, `models/<part>/`, `indexes/`, `logs/` | **never** |
+| **Data package** (O\*NET + team data, read-only) | `data/` | yes, already in the repo; don't edit it |
+| **Checkpoints, indexes, logs** | `models/<part>/`, `indexes/`, `logs/` | **never** |
 
 - Training code may import from the app; for example, it imports your model class from `pipeline/extractor_model.py`. **The app never imports from `training/`.**
 - `.gitignore` blocks model files anywhere in the repo (`*.safetensors`, `*.bin`, `*.pt`, `*.pth`, `*.ckpt`, `*.onnx`, `*.pkl`, `*.zip`, `checkpoints/`, `runs/`, `wandb/`, `outputs/`).
@@ -138,7 +139,8 @@ Write a class with `name`, `eligible_count` and `rank(interests, observed_types,
 - Types are letters `R I A S E C`. Use full names (`Realistic`) only when reading `question_bank.json`.
 - Keep the user's sentences word for word in `source`.
 - Load models once (in `load()` or `__init__`), never inside `read`, `score`, `update` or `decide`.
-- Don't import torch or transformers at the top of a file; import them inside the method that needs them.
+- In `pipeline/extractor.py` and `pipeline/nli.py`, import torch and transformers inside the method that needs them, so the tests run without them. At the top of `pipeline/extractor_model.py` or anything in `training/` is fine.
+- Need another package? Add it to `requirements-models.txt` with an exact version (`package==1.2.3`) if the app needs it, or to `training/<part>/requirements-training.txt` if only training does.
 - Same input, same output: the rule, the policy and the ranker must be deterministic.
 
 ---
@@ -165,7 +167,7 @@ Write a class with `name`, `eligible_count` and `rank(interests, observed_types,
 ```
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt -r requirements-models.txt
-# unzip career-matcher-data.zip into data/
+# data/ comes with the repo (O*NET 31.0 + the team data package); nothing to download
 .venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
 CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions: panel hidden
 ```

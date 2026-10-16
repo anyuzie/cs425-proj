@@ -1,0 +1,188 @@
+{"seed_id": "IA_001", "activity": "Build kitchen cabinets.", "area": "Realistic", "interest_type": "Career Type", "type": "R"}
+{"seed_id": "IA_002", "activity": "Drive a truck to deliver packages to offices and homes.", "area": "Realistic", "interest_type": "Career Type", "type": "R"}
+{"seed_id": "IA_003", "activity": "Put out forest fires.", "area": "Realistic", "interest_type": "Career Type", "type": "R"}
+{"seed_id": "IA_004", "activity": "Repair household appliances.", "area": "Realistic", "interest_type": "Career Type", "type": "R"}
+{"seed_id": "IA_005", "activity": "Develop a new medicine.", "area": "Investigative", "interest_type": "Career Type", "type": "I"}
+{"seed_id": "IA_006", "activity": "Develop a way to better predict the weather.", "area": "Investigative", "interest_type": "Career Type", "type": "I"}
+{"seed_id": "IA_007", "activity": "Study ways to reduce water pollution.", "area": "Investigative", "interest_type": "Career Type", "type": "I"}
+{"seed_id": "IA_008", "activity": "Work in a biology lab.", "area": "Investigative", "interest_type": "Career Type", "type": "I"}
+{"seed_id": "IA_009", "activity": "Compose or arrange music.", "area": "Artistic", "interest_type": "Career Type", "type": "A"}
+{"seed_id": "IA_010", "activity": "Create special effects for movies.", "area": "Artistic", "interest_type": "Career Type", "type": "A"}
+{"seed_id": "IA_011", "activity": "Draw pictures.", "area": "Artistic", "interest_type": "Career Type", "type": "A"}
+{"seed_id": "IA_012", "activity": "Write books or plays.", "area": "Artistic", "interest_type": "Career Type", "type": "A"}
+{"seed_id": "IA_013", "activity": "Give career guidance to people.", "area": "Social", "interest_type": "Career Type", "type": "S"}
+{"seed_id": "IA_014", "activity": "Help people with personal or emotional problems.", "area": "Social", "interest_type": "Career Type", "type": "S"}
+{"seed_id": "IA_015", "activity": "Perform rehabilitation therapy.", "area": "Social", "interest_type": "Career Type", "type": "S"}
+{"seed_id": "IA_016", "activity": "Teach a high school class.", "area": "Social", "interest_type": "Career Type", "type": "S"}
+{"seed_id": "IA_017", "activity": "Manage a department within a large company.", "area": "Enterprising", "interest_type": "Career Type", "type": "E"}
+{"seed_id": "IA_018", "activity": "Market a new line of clothing.", "area": "Enterprising", "interest_type": "Career Type", "type": "E"}
+{"seed_id": "IA_019", "activity": "Represent a client in a lawsuit.", "area": "Enterprising", "interest_type": "Career Type", "type": "E"}
+{"seed_id": "IA_020", "activity": "Start your own business.", "area": "Enterprising", "interest_type": "Career Type", "type": "E"}
+{"seed_id": "IA_021", "activity": "Develop a spreadsheet using computer software.", "area": "Conventional", "interest_type": "Career Type", "type": "C"}
+{"seed_id": "IA_022", "activity": "Inventory supplies using a handheld computer.", "area": "Conventional", "interest_type": "Career Type", "type": "C"}
+{"seed_id": "IA_023", "activity": "Keep shipping and receiving records.", "area": "Conventional", "interest_type": "Career Type", "type": "C"}
+{"seed_id": "IA_024", "activity": "Load computer software into a large computer network.", "area": "Conventional", "interest_type": "Career Type", "type": "C"}
+{"seed_id": "IA_025", "activity": "Install computer systems.", "area": "Mechanics/Electronics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_026", "activity": "Maintain aircraft engines.", "area": "Mechanics/Electronics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_027", "activity": "Make repairs to industrial robots.", "area": "Mechanics/Electronics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_028", "activity": "Repair motors and generators.", "area": "Mechanics/Electronics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_029", "activity": "Build and finish furniture.", "area": "Construction/Woodwork", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_030", "activity": "Build and install cabinets.", "area": "Construction/Woodwork", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_031", "activity": "Construct wood stairways.", "area": "Construction/Woodwork", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_032", "activity": "Operate woodworking machines.", "area": "Construction/Woodwork", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_033", "activity": "Drive a bus or motor coach.", "area": "Transportation/Machine Operation", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_034", "activity": "Operate a bulldozer to move dirt.", "area": "Transportation/Machine Operation", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_035", "activity": "Operate a forklift to move boxes.", "area": "Transportation/Machine Operation", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_036", "activity": "Transport materials in a truck or van.", "area": "Transportation/Machine Operation", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_037", "activity": "Clean a work area.", "area": "Physical/Manual Labor", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_038", "activity": "Manually move cargo and freight.", "area": "Physical/Manual Labor", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_039", "activity": "Perform physical labor at a construction site.", "area": "Physical/Manual Labor", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_040", "activity": "Unload, sort, and move materials, equipment, or supplies.", "area": "Physical/Manual Labor", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_041", "activity": "Apprehend and arrest suspects.", "area": "Protective Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_042", "activity": "Guard inmates in a prison.", "area": "Protective Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_043", "activity": "Investigate criminal activity.", "area": "Protective Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_044", "activity": "Maintain order and protect life by enforcing laws.", "area": "Protective Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_045", "activity": "Develop plans to reduce soil erosion and protect rangelands.", "area": "Agriculture", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_046", "activity": "Inspect crops for disease.", "area": "Agriculture", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_047", "activity": "Plant, cultivate, and harvest crops.", "area": "Agriculture", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_048", "activity": "Raise and tend to farm animals.", "area": "Agriculture", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_049", "activity": "Conserve wildlife habitats.", "area": "Nature/Outdoors", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_050", "activity": "Manage public forested lands for recreational purposes.", "area": "Nature/Outdoors", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_051", "activity": "Plant a public garden.", "area": "Nature/Outdoors", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_052", "activity": "Train conservation workers in planting tree seedlings.", "area": "Nature/Outdoors", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_053", "activity": "Exercise animals in a shelter.", "area": "Animal Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_054", "activity": "Provide treatment to sick or injured animals.", "area": "Animal Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_055", "activity": "Supply animals with food, water, and personal care.", "area": "Animal Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_056", "activity": "Train animals to assist persons with disabilities.", "area": "Animal Service", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_057", "activity": "Coach a sports team.", "area": "Athletics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_058", "activity": "Compete in an athletic event.", "area": "Athletics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_059", "activity": "Play sports.", "area": "Athletics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_060", "activity": "Train for an athletic event.", "area": "Athletics", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_061", "activity": "Apply principles of engineering in designing buildings.", "area": "Engineering", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_062", "activity": "Design, construct, and test aircraft, missiles, and spacecraft.", "area": "Engineering", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_063", "activity": "Explain engineering drawings.", "area": "Engineering", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_064", "activity": "Test performance of electronic and mechanical systems.", "area": "Engineering", "interest_type": "Specific Area", "type": "R"}
+{"seed_id": "IA_065", "activity": "Investigate the chemical composition of an unknown substance.", "area": "Physical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_066", "activity": "Study formation of stars using space-based telescopes.", "area": "Physical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_067", "activity": "Study ways to make foods safe and healthy.", "area": "Physical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_068", "activity": "Use computer models for weather forecasting.", "area": "Physical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_069", "activity": "Develop medically useful products for humans.", "area": "Life Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_070", "activity": "Investigate the effects of bacteria on humans and animals.", "area": "Life Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_071", "activity": "Prepare environmental impact reports on wildlife.", "area": "Life Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_072", "activity": "Study the science of genes.", "area": "Life Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_073", "activity": "Conduct research on ways to treat a new type of illness.", "area": "Medical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_074", "activity": "Evaluate the performance of a newly developed medicine.", "area": "Medical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_075", "activity": "Investigate the causes of human disease.", "area": "Medical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_076", "activity": "Study ways of preventing disease.", "area": "Medical Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_077", "activity": "Conduct research on economic issues.", "area": "Social Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_078", "activity": "Study cultural differences.", "area": "Social Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_079", "activity": "Study mental and emotional disorders.", "area": "Social Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_080", "activity": "Study public opinion on political issues.", "area": "Social Science", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_081", "activity": "Research and compare religious beliefs.", "area": "Humanities", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_082", "activity": "Research influences on a literary work.", "area": "Humanities", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_083", "activity": "Study the culture and history of a region of the world.", "area": "Humanities", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_084", "activity": "Study the history of the family.", "area": "Humanities", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_085", "activity": "Develop a statistical model to explain human behavior.", "area": "Mathematics/Statistics", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_086", "activity": "Extend mathematical knowledge in the field of geometry.", "area": "Mathematics/Statistics", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_087", "activity": "Make predictions based on statistical analyses.", "area": "Mathematics/Statistics", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_088", "activity": "Solve mathematical problems.", "area": "Mathematics/Statistics", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_089", "activity": "Diagnose and resolve computer software problems.", "area": "Information Technology", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_090", "activity": "Research security measures for computer systems.", "area": "Information Technology", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_091", "activity": "Test, maintain, and monitor computer programs and systems.", "area": "Information Technology", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_092", "activity": "Write and review code for software.", "area": "Information Technology", "interest_type": "Specific Area", "type": "I"}
+{"seed_id": "IA_093", "activity": "Create a sculpture.", "area": "Visual Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_094", "activity": "Create computer-generated graphics or animation.", "area": "Visual Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_095", "activity": "Create photography art prints.", "area": "Visual Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_096", "activity": "Sketch a picture or design.", "area": "Visual Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_097", "activity": "Create appealing product designs for home appliances.", "area": "Applied Arts and Design", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_098", "activity": "Create the set for film or theater productions.", "area": "Applied Arts and Design", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_099", "activity": "Design and create handmade clothes.", "area": "Applied Arts and Design", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_100", "activity": "Design displays to sell products in stores.", "area": "Applied Arts and Design", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_101", "activity": "Act on stage for an audience.", "area": "Performing Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_102", "activity": "Create new dance routines.", "area": "Performing Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_103", "activity": "Direct stage, television, radio, video, or film productions.", "area": "Performing Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_104", "activity": "Study and rehearse roles from scripts.", "area": "Performing Arts", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_105", "activity": "Create musical compositions, arrangements, or scores.", "area": "Music", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_106", "activity": "Perform music for a live audience.", "area": "Music", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_107", "activity": "Play a musical instrument.", "area": "Music", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_108", "activity": "Sing in a band.", "area": "Music", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_109", "activity": "Write a novel.", "area": "Creative Writing", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_110", "activity": "Write advertisements.", "area": "Creative Writing", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_111", "activity": "Write poetry or lyrics.", "area": "Creative Writing", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_112", "activity": "Write scripts for movies and media.", "area": "Creative Writing", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_113", "activity": "Develop content for a podcast.", "area": "Media", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_114", "activity": "Direct a television series.", "area": "Media", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_115", "activity": "Speak or read from scripted materials on radio or television.", "area": "Media", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_116", "activity": "Write and report human interest stories.", "area": "Media", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_117", "activity": "Coordinate activities of cooks engaged in food preparation.", "area": "Culinary Art", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_118", "activity": "Create new recipes or food presentations.", "area": "Culinary Art", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_119", "activity": "Develop a distinctive style of cooking.", "area": "Culinary Art", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_120", "activity": "Select and ensure freshness of food and ingredients for preparation.", "area": "Culinary Art", "interest_type": "Specific Area", "type": "A"}
+{"seed_id": "IA_121", "activity": "Adapt teaching methods to meet students' interests.", "area": "Teaching/Education", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_122", "activity": "Instruct students in activities designed to further intellectual growth.", "area": "Teaching/Education", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_123", "activity": "Teach school subjects.", "area": "Teaching/Education", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_124", "activity": "Teach social skills to students.", "area": "Teaching/Education", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_125", "activity": "Advocate for individual or community needs.", "area": "Social Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_126", "activity": "Assist people with special needs.", "area": "Social Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_127", "activity": "Counsel clients with mental health issues.", "area": "Social Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_128", "activity": "Provide personal and economic assistance for homeless individuals.", "area": "Social Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_129", "activity": "Administer first aid treatment or life support to injured persons.", "area": "Health Care Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_130", "activity": "Develop medical treatment plans for patients.", "area": "Health Care Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_131", "activity": "Prescribe medications.", "area": "Health Care Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_132", "activity": "Provide preventive care to individuals.", "area": "Health Care Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_133", "activity": "Lead a religious group.", "area": "Religious Activities", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_134", "activity": "Organize religious services.", "area": "Religious Activities", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_135", "activity": "Plan religious education programs.", "area": "Religious Activities", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_136", "activity": "Provide spiritual guidance.", "area": "Religious Activities", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_137", "activity": "Assist customers with problems or questions.", "area": "Personal Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_138", "activity": "Help individuals plan special events.", "area": "Personal Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_139", "activity": "Make reservations for guests, such as for dinner, spa treatments, or golf tee times.", "area": "Personal Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_140", "activity": "Make travel arrangements for sightseeing or other tours.", "area": "Personal Service", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_141", "activity": "Advise people on how to have a successful career.", "area": "Professional Advising", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_142", "activity": "Coach students on study skills.", "area": "Professional Advising", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_143", "activity": "Counsel people how to achieve their professional goals.", "area": "Professional Advising", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_144", "activity": "Teach employees leadership and soft skills.", "area": "Professional Advising", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_145", "activity": "Create business strategies or policies to increase productivity.", "area": "Business Initiatives", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_146", "activity": "Develop a long-term strategic plan for a company.", "area": "Business Initiatives", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_147", "activity": "Identify partner companies to pursue new business opportunities.", "area": "Business Initiatives", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_148", "activity": "Plan activities of businesses to maximize returns on investments.", "area": "Business Initiatives", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_149", "activity": "Demonstrate products to consumers.", "area": "Sales", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_150", "activity": "Direct sales or customer service activities.", "area": "Sales", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_151", "activity": "Persuade customers to buy a new product.", "area": "Sales", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_152", "activity": "Sell goods at bargain prices.", "area": "Sales", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_153", "activity": "Develop promotional materials for advertising.", "area": "Marketing/Advertising", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_154", "activity": "Plan an advertising or marketing campaign.", "area": "Marketing/Advertising", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_155", "activity": "Promote a new product by advertising.", "area": "Marketing/Advertising", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_156", "activity": "Use social media to market a company.", "area": "Marketing/Advertising", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_157", "activity": "Analyze financials and securities of a company.", "area": "Finance", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_158", "activity": "Make investments to generate future income.", "area": "Finance", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_159", "activity": "Manage large amounts of money for a business.", "area": "Finance", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_160", "activity": "Plan and direct financial decisions for a business.", "area": "Finance", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_161", "activity": "Keep accounting records for a company.", "area": "Accounting", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_162", "activity": "Prepare budgets for a business.", "area": "Accounting", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_163", "activity": "Prepare employee payroll.", "area": "Accounting", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_164", "activity": "Verify and record numerical data for financial records.", "area": "Accounting", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_165", "activity": "Conduct training to improve employee skills and organizational performance.", "area": "Human Resources", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_166", "activity": "Interpret and explain company policies and benefits to employees.", "area": "Human Resources", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_167", "activity": "Maintain employee personnel records.", "area": "Human Resources", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_168", "activity": "Recruit and hire employees for a company.", "area": "Human Resources", "interest_type": "Specific Area", "type": "S"}
+{"seed_id": "IA_169", "activity": "Answer telephones, direct calls, and take messages.", "area": "Office Work", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_170", "activity": "Maintain and update filing, inventory, and database systems.", "area": "Office Work", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_171", "activity": "Operate office machines, such as printers and scanners.", "area": "Office Work", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_172", "activity": "Schedule appointments for customers.", "area": "Office Work", "interest_type": "Specific Area", "type": "C"}
+{"seed_id": "IA_173", "activity": "Develop organizational goals or objectives.", "area": "Management/Administration", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_174", "activity": "Manage an organization or group of people.", "area": "Management/Administration", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_175", "activity": "Plan or coordinate one or more administrative services.", "area": "Management/Administration", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_176", "activity": "Supervise organizational operations or projects.", "area": "Management/Administration", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_177", "activity": "Be a speaker at a club meeting.", "area": "Public Speaking", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_178", "activity": "Discuss your ideas on a podcast.", "area": "Public Speaking", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_179", "activity": "Make a public speech to raise money for a worthy cause.", "area": "Public Speaking", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_180", "activity": "Provide a public announcement on TV or radio.", "area": "Public Speaking", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_181", "activity": "Campaign for political office.", "area": "Politics", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_182", "activity": "Develop knowledge of government policy decisions.", "area": "Politics", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_183", "activity": "Engage in a political debate.", "area": "Politics", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_184", "activity": "Lead a political campaign.", "area": "Politics", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_185", "activity": "Defend a client in court.", "area": "Law", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_186", "activity": "Draw up legal documents.", "area": "Law", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_187", "activity": "Mediate legal disputes.", "area": "Law", "interest_type": "Specific Area", "type": "E"}
+{"seed_id": "IA_188", "activity": "Provide legal advice to clients.", "area": "Law", "interest_type": "Specific Area", "type": "E"}

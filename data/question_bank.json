@@ -1,0 +1,198 @@
+{
+  "OPENING": [
+    "Hi! Tell me a bit about what you're studying and what kind of work you can see yourself enjoying."
+  ],
+  "CLARIFY": {
+    "Realistic": [
+      "Would you rather be hands-on with equipment and materials, or working through information at a desk?",
+      "If you had to pick, would you rather fix a broken machine or write a report about why it broke?",
+      "Does working outdoors or in a workshop appeal to you more than working in an office?"
+    ],
+    "Investigative": [
+      "Would you rather figure out why something happens, or just get it done and move on?",
+      "Does spending a day analysing data to find a pattern sound good, or would you rather be doing something more active?",
+      "If a problem has no obvious answer, do you want to dig into it, or hand it to someone else?"
+    ],
+    "Artistic": [
+      "Would you want room to make the work your own, or a clear brief to follow?",
+      "Would you rather design how something looks, or make sure it works as specified?",
+      "Does a job where you come up with new ideas every week appeal to you, or does that sound stressful?"
+    ],
+    "Social": [
+      "Would you rather spend your day helping or teaching people, or working mostly on your own tasks?",
+      "If a colleague is struggling, would you want to be the one who sits down and helps them through it?",
+      "Does a job where you talk to people all day sound energising or draining?"
+    ],
+    "Enterprising": [
+      "Would you rather be the one pitching the idea and persuading people, or the one doing the work behind it?",
+      "Do you want to lead a team and make the final call, or would you rather someone else carries that?",
+      "Does negotiating a deal or selling something sound exciting or uncomfortable?"
+    ],
+    "Conventional": [
+      "Would you rather follow a clear process and get the details right, or work things out as you go?",
+      "Does keeping records, schedules and numbers in order sound satisfying or tedious?",
+      "Would you prefer a job with a predictable routine, or one where every day is different?"
+    ]
+  },
+  "CHALLENGE": [
+    "Earlier you said \"{old_src}\", but just now \"{new_src}\". Which is closer to how you'd actually want to spend a week?",
+    "I want to check something: you said \"{old_src}\" and also \"{new_src}\". Which one matters more to you?",
+    "Those two sound a bit different: \"{old_src}\" and \"{new_src}\". If you could only have one, which would it be?",
+    "Help me understand: \"{old_src}\" versus \"{new_src}\". Which feels more true for you?"
+  ],
+  "PROBE": [
+    "You said \"{new_src}\" \u2014 is that something you'd enjoy, or mainly what you've had experience with so far?",
+    "When you say \"{new_src}\", is that because you like it, or because it's what you know?",
+    "Imagine you'd never done it before. Would \"{new_src}\" still appeal to you?",
+    "If you could pick freely, regardless of your background, would you still choose what you described in \"{new_src}\"?"
+  ],
+  "ABSTAIN": [
+    "No worries, let me put it another way.",
+    "That's fair, it's a tricky one. Let me ask differently.",
+    "Okay, let me try a more concrete question."
+  ],
+  "RECOMMEND": [
+    "Based on what you've told me, here are five occupations that fit, with the tasks that matched what you said:",
+    "Here are five that fit you, and the parts of each job that match your answers:"
+  ],
+  "ANSWERS": {
+    "Realistic": [
+      {
+        "pos": "Definitely hands-on, I love working with actual equipment and materials.",
+        "neg": "No way, I'd hate handling equipment, the desk for sure.",
+        "pos_mild": "Probably the hands-on one, slightly.",
+        "dontmind": "Either is fine, I don't mind.",
+        "neg_mild": "I'd lean towards the desk one, slightly."
+      },
+      {
+        "pos": "Definitely fixing the machine, I love that kind of thing.",
+        "neg": "No way, I'd hate being stuck with machines, the report for sure.",
+        "pos_mild": "Probably fixing the machine, slightly more fun lah.",
+        "dontmind": "Either one also can, I don't mind.",
+        "neg_mild": "I'd lean towards writing the report, slightly."
+      },
+      {
+        "pos": "Definitely workshop or outdoors, I can't stand sitting in an office.",
+        "neg": "Absolutely the office, I'd hate being outdoors or in a workshop lah.",
+        "pos_mild": "I'd lean towards workshop or outdoors, slightly.",
+        "dontmind": "Either setting is fine, I don't mind.",
+        "neg_mild": "Probably the office, slightly more my style."
+      }
+    ],
+    "Investigative": [
+      {
+        "pos": "Oh, for sure figuring out why, that's the best part.",
+        "neg": "No way, I can't stand theory, just get it done and move on.",
+        "pos_mild": "Probably I'd want to know why, slightly.",
+        "dontmind": "Either way is fine, I don't mind.",
+        "neg_mild": "I'd lean towards just getting it done lor."
+      },
+      {
+        "pos": "Definitely sounds good, finding patterns in data is really the best part.",
+        "neg": "Absolutely not, a whole day of data is my nightmare, something active.",
+        "pos_mild": "Probably the data analysis day, slightly.",
+        "dontmind": "Either is okay for me, I don't mind.",
+        "neg_mild": "I'd lean towards something more active, slightly."
+      },
+      {
+        "pos": "Oh, for sure dig into it, cracking it myself is the best part.",
+        "neg": "No way I'm digging into that, definitely hand it to someone else lor.",
+        "pos_mild": "I'd lean towards digging into it myself, slightly.",
+        "dontmind": "Either dig or pass it on, I don't mind.",
+        "neg_mild": "Probably hand it to someone else, slightly."
+      }
+    ],
+    "Artistic": [
+      {
+        "pos": "Definitely room to make it my own, I love putting my stamp on things.",
+        "neg": "No way, I'd hate that freedom, give me a clear brief for sure.",
+        "pos_mild": "Probably room to make it my own, slightly.",
+        "dontmind": "Either is fine, I don't mind which.",
+        "neg_mild": "I'd lean towards a clear brief, slightly leh."
+      },
+      {
+        "pos": "Definitely designing how it looks, that's really the best part sia.",
+        "neg": "Absolutely the making-it-work side, I can't stand fussing over looks.",
+        "pos_mild": "I'd lean towards designing the look, slightly.",
+        "dontmind": "Either design or function, I don't mind.",
+        "neg_mild": "Probably the making-it-work side, slightly."
+      },
+      {
+        "pos": "Absolutely appeals to me, I love coming up with new ideas every week.",
+        "neg": "Really stressful lah, new ideas every week sounds like a nightmare.",
+        "pos_mild": "Probably appeals to me slightly, new ideas sound fun.",
+        "dontmind": "Either way also can, I don't mind.",
+        "neg_mild": "I'd lean towards stressful, slightly sia."
+      }
+    ],
+    "Social": [
+      {
+        "pos": "Definitely helping or teaching people, I really love that.",
+        "neg": "No way, I'd hate dealing with people all day, my own tasks for sure.",
+        "pos_mild": "Probably helping or teaching people, slightly.",
+        "dontmind": "Either is fine, I don't mind.",
+        "neg_mild": "I'd lean towards my own tasks, slightly lah."
+      },
+      {
+        "pos": "For sure, I'd love to sit down and help them through it.",
+        "neg": "Absolutely not, I'd hate that, I'd rather focus on my own work.",
+        "pos_mild": "I'd lean towards being the one helping, slightly.",
+        "dontmind": "Either me or someone else, I don't mind.",
+        "neg_mild": "Probably let someone else help them, slightly."
+      },
+      {
+        "pos": "Really energising, I love talking to people all day.",
+        "neg": "Absolutely draining, talking to people all day is my nightmare.",
+        "pos_mild": "Probably slightly energising for me.",
+        "dontmind": "Either way for me, I don't mind lah.",
+        "neg_mild": "I'd lean towards draining, slightly."
+      }
+    ],
+    "Enterprising": [
+      {
+        "pos": "Definitely the one pitching, I love persuading people.",
+        "neg": "No way, I'd hate pitching, definitely the one doing the work behind it.",
+        "pos_mild": "Probably the one pitching, slightly.",
+        "dontmind": "Either role is fine, I don't mind.",
+        "neg_mild": "I'd lean towards doing the work behind it."
+      },
+      {
+        "pos": "Definitely lead and make the final call, I love that.",
+        "neg": "No way, I'd hate making the final call, someone else carries it for sure.",
+        "pos_mild": "I'd lean towards leading the team, slightly.",
+        "dontmind": "Either lead or follow, I don't mind.",
+        "neg_mild": "Probably let someone else carry that, slightly lor."
+      },
+      {
+        "pos": "Really exciting, closing a deal is the best part leh.",
+        "neg": "Absolutely uncomfortable, selling stuff is my nightmare.",
+        "pos_mild": "Probably slightly exciting for me.",
+        "dontmind": "Either way is fine, I don't mind.",
+        "neg_mild": "I'd lean towards uncomfortable, slightly."
+      }
+    ],
+    "Conventional": [
+      {
+        "pos": "Definitely a clear process, I love getting every detail right.",
+        "neg": "No way, rigid processes I can't stand, I'd rather work it out as I go.",
+        "pos_mild": "Probably the clear process, slightly.",
+        "dontmind": "Either approach is fine, I don't mind.",
+        "neg_mild": "I'd lean towards working it out as I go."
+      },
+      {
+        "pos": "Really satisfying, I love keeping records and numbers in order.",
+        "neg": "Absolutely tedious, I'd hate keeping records and schedules all day.",
+        "pos_mild": "I'd lean towards satisfying, slightly.",
+        "dontmind": "Either way is fine, I don't mind.",
+        "neg_mild": "Probably slightly tedious for me leh."
+      },
+      {
+        "pos": "Definitely a predictable routine, I love knowing what's coming.",
+        "neg": "No way, I can't stand routine, every day different for sure.",
+        "pos_mild": "Probably the predictable routine, slightly.",
+        "dontmind": "Either kind of job is fine, I don't mind.",
+        "neg_mild": "I'd lean towards every day different, slightly."
+      }
+    ]
+  }
+}
