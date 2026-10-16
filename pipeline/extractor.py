@@ -21,6 +21,13 @@ from pathlib import Path
 
 from .interfaces import Reading, SlotReading
 
+from transformers import (
+AutoTokenizer,
+AutoModelForSequenceClassification,
+)
+from pathlib import Path
+import torch
+
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
 JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
 _NOT_FILLED = "pipeline/extractor.py: fill in load() and predict() (docs/INTEGRATION.md)"
@@ -40,16 +47,14 @@ class DebertaExtractor:
         self.reason_names = {i: n for n, i in labels["reason_index"].items()}            # enjoyment familiarity neither
         self.load(Path(checkpoint_dir))
 
+    ###################################################################
+    # Load Tokenizer, Model
+    ###################################################################
     def load(self, checkpoint_dir: Path) -> None:
-        """TEAMMATE FILLS. Runs once at server start. Keep what predict() needs on self (tokenizer, model)."""
-        # ================= PUT YOUR CODE HERE =================
-        # import torch
-        # from transformers import AutoTokenizer
-        # from .extractor_model import MyExtractorModel      # your file: pipeline/extractor_model.py
-        # self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
-        # self.model = MyExtractorModel.from_pretrained(checkpoint_dir).eval()
-        # ======================================================
-        raise NotImplementedError(_NOT_FILLED)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
+        self.model = AutoModelForSequenceClassification.from_pretrained(checkpoint_dir).to(self.device).eval()
+        self.cfg = self.model.config.extractor    
 
     def predict(self, context: str | None, sentence: str) -> dict:
         """TEAMMATE FILLS. Run the model on ONE sentence and return exactly:
@@ -63,17 +68,32 @@ class DebertaExtractor:
         Input: tokenizer(context, sentence) when context is not None, else tokenizer(sentence);
         max_length=128, truncation=True. Wrap the forward pass in torch.no_grad().
         """
-        # ================= PUT YOUR CODE HERE =================
-        # import torch
-        # args = (context, sentence) if context is not None else (sentence,)
-        # enc = self.tok(*args, return_tensors="pt", max_length=128, truncation=True)
-        # with torch.no_grad():
-        #     out = self.model(**enc)
-        # return {"direction": out.direction.softmax(-1)[0].tolist(),     # (6, 3)
-        #         "strength": out.strength.sigmoid()[0].tolist(),         # (6,)
-        #         "reason": out.reason.softmax(-1)[0].tolist()}           # (3,)
-        # ======================================================
-        raise NotImplementedError(_NOT_FILLED)
+        final_dict = {}
+        args = (context, sentence) if context else (sentence,)
+        enc = self.tok(*args, truncation="only_first" if context else True, max_length=self.cfg["max_len"],
+                    return_tensors="pt", return_token_type_ids=False).to(self.device)
+        lg = self.model(**enc).logits[0].float().cpu()                                  # 45 scores
+    
+        sp  = torch.softmax(lg[:18].view(6, 3) / self.cfg["T_slot"], -1).tolist()                # [6, 3]  polarity per type
+        rp  = torch.softmax(lg[18:21] / self.cfg["T_reason"], -1).tolist()                       # [3]     reason
+        # strength: 6 types x 4 classes; drop the "inactive" column, keep dontmind / mild / strong
+        stp = torch.softmax(lg[21:45].view(6, 4)[:, 1:] / self.cfg.get("T_strength", 1.0), -1).tolist()
+
+        strength_scores = [0, 0, 0, 0, 0, 0] #initialised to 0 first
+        strength_mapping = [0.2, 0.55, 1] #maps to: dontmind / mild / strong
+        for i in range(len(sp)):
+            pol = sp[i]
+            if max(pol) == pol[1]:   # check if the maximum probability is neutral
+                continue #if polarity highest score is neutral, strength score is 0
+            else:
+                strength_probs = stp[i]
+                strength_scores[i] =  strength_mapping[strength_probs.index(max(strength_probs))] #get the highest probability strength score
+                
+        final_dict["direction"] = sp
+        final_dict["strength"] = strength_scores
+        final_dict["reason"] = rp
+
+        return final_dict
 
     # ---- below: ours, do not edit ----
 
@@ -131,3 +151,64 @@ class DebertaExtractor:
                 if t not in best or r.confidence > best[t].confidence:
                     best[t] = r
         return Reading(text, list(best.values()))
+
+
+# ============================================================
+# TEMPORARY MODEL TEST — DELETE AFTER TESTING
+# ============================================================
+if __name__ == "__main__":
+    import json
+
+    checkpoint_dir = Path(__file__).resolve().parent.parent / "models" / "extractor"
+    labels_path = Path(__file__).resolve().parent.parent / "data" / "labels.json"
+
+    print("Loading DeBERTa model...")
+    extractor = DebertaExtractor(checkpoint_dir, labels_path)
+    print(f"Model loaded successfully on {extractor.device}")
+
+    examples = [
+        ("What work do you enjoy?", "I enjoy building and repairing machines."),
+        ("What work do you enjoy?", "I love investigating scientific problems."),
+        ("What work do you enjoy?", "I enjoy helping and teaching people."),
+        ("What work do you enjoy?", "I like organising records and keeping information accurate."),
+        ("What work do you enjoy?", "I enjoy creating artwork and expressing my imagination."),
+        ("What work do you enjoy?", "I like leading teams and persuading people."),
+    ]
+
+    for i, (context, sentence) in enumerate(examples, 1):
+        print("\n" + "=" * 60)
+        print(f"TEST {i}: {sentence}")
+
+        try:
+            result = extractor.predict(context, sentence)
+            extractor._check(result)
+
+            print("\nDirection probabilities:")
+            for slot, probs in zip(extractor.types, result["direction"]):
+                idx = max(range(len(probs)), key=probs.__getitem__)
+                direction = extractor.direction_names[idx]
+                print(f"  {slot}: {direction} | {[round(p, 4) for p in probs]}")
+
+            print("\nStrength:")
+            for slot, score in zip(extractor.types, result["strength"]):
+                print(f"  {slot}: {score:.4f}")
+
+            reason_idx = max(
+                range(len(result["reason"])),
+                key=result["reason"].__getitem__
+            )
+            print("\nReason probabilities:")
+            print({
+                extractor.reason_names[j]: round(p, 4)
+                for j, p in enumerate(result["reason"])
+            })
+            print(f"Predicted reason: {extractor.reason_names[reason_idx]}")
+
+            print("\nOutput shape: VALID")
+
+        except Exception as e:
+            print(f"\nTEST FAILED: {type(e).__name__}: {e}")
+            raise
+
+    print("\nAll test inputs completed successfully.")
+
