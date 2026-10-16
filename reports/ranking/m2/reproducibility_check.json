@@ -1,0 +1,37 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_structured_oracle_dev_v1",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_5": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "mrr": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    }
+  },
+  "profiles": 60,
+  "seed": 425,
+  "treatment_run_id": "m2_structured_oracle_dev_v1"
+}
