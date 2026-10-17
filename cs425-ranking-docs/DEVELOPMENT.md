@@ -2,7 +2,7 @@
 
 Return to [README](README.md) · See [Evaluation](EVALUATION.md)
 
-**Current status:** M0?M2 are implemented and accepted locally; the current gate is before M3. See the [canonical status table](README.md#current-implementation-status) and [M2 decision](../reports/ranking/m2/DECISION.md). Checked items below reflect recorded acceptance results, not a new test run. Upstream/downstream teammate sign-off remains pending.
+**Current status:** M0?M3 are implemented; M3 is retained as an experimental baseline after measured regression, and the current gate is before M4. See the [canonical status table](README.md#current-implementation-status) and [M2 decision](../reports/ranking/m2/DECISION.md). Checked items below reflect recorded acceptance results, not a new test run. Upstream/downstream teammate sign-off remains pending.
 
 ## Rules for every milestone
 
@@ -98,6 +98,8 @@ The implemented envelope exposes `status`, `reason`, and `occupations: list[Rank
 
 ## M3 — BM25 and two-signal fusion
 
+**Current status:** Implemented and evaluated; see [M3 acceptance/decision](../reports/ranking/m3/DECISION.md). Structured-only remains the default.
+
 **Purpose:** Test whether lexical occupation information adds value to structured fit.
 
 **Requirements**
@@ -108,11 +110,11 @@ The implemented envelope exposes `status`, `reason`, and `occupations: list[Rank
 - Compare structured-only, BM25-only, and structured+BM25 using identical development cases.
 
 **Tests**
-- [ ] Exact-term fixture retrieves intended occupation.
-- [ ] Empty/stopword/no-positive query omits BM25 contribution.
-- [ ] Hand-calculated RRF scores and stable tie breaks.
-- [ ] Every returned occupation is unique and eligible.
-- [ ] Failure review includes explicit dislike and familiarity statements.
+- [x] Exact-term fixture retrieves intended occupation.
+- [x] Empty/stopword/no-positive query omits BM25 contribution.
+- [x] Hand-calculated RRF scores and stable tie breaks.
+- [x] Every returned occupation is unique and eligible.
+- [x] Failure review includes explicit dislike and familiarity statements.
 
 **Decision gate:** Is BM25 offering useful complementary signal? Retain as baseline even if it hurts some cases, but document failures and whether to revise query construction later.
 

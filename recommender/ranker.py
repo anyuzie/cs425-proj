@@ -58,6 +58,15 @@ class RankingPipeline:
     def component_identifiers(self):
         return {key: self._resolved[key].identifier if key in self._resolved else "" for key in SIGNAL_NAMES}
 
+    @property
+    def fusion_identifier(self):
+        # Experiment configuration, with actual application counts recorded by evaluation.
+        return "rrf_k60" if len(self._components) > 1 and self._config["fusion"] is not None else ""
+
+    @property
+    def component_metadata(self):
+        return {key: deepcopy(getattr(component, "metadata", {})) for key, component in self._components.items()}
+
     def rank(self, interests: dict[str, float], observed_types: set[str],
              user_sentences: list[str], top_k: int = 100) -> RankingResponse:
         request = RankingRequest(interests, observed_types, user_sentences, top_k)

@@ -99,7 +99,10 @@ def register_legacy_baseline(report: Path, *, history: Path = DEFAULT_HISTORY) -
     if manifest["run_id"] != "m2_structured_oracle_dev_v1" or manifest["input_mode"] != "oracle" or manifest["split"] != "development":
         raise ValueError("legacy import supports only the saved M2 baseline")
     for name, expected in manifest["dataset_sha256"].items():
-        if hashlib.sha256(Path(name).read_bytes()).hexdigest() != expected:
+        data = Path(name).read_bytes()
+        # Git on Windows may check out historical LF text as CRLF. Accept only
+        # an exact original hash after newline normalization, never content drift.
+        if expected not in {hashlib.sha256(data).hexdigest(), hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()}:
             raise ValueError(f"dataset fingerprint mismatch: {name}")
     for filename, key in (("config.json", "config_sha256"), ("inputs.json", "inputs_sha256")):
         if hashlib.sha256((report / filename).read_bytes()).hexdigest() != manifest[key]:

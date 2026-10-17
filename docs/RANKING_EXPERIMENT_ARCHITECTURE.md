@@ -8,20 +8,22 @@ Read this document before changing ranking architecture. It is the authoritative
 - M1: signed weighted dot product implemented as `weighted_dot_product@baseline_v1`.
 - M2: development/oracle evaluation, six metric cutoffs, reproducible exports, paired comparison, and append-only history implemented.
 - The modular refactor and automatic configuration workflow preserve the accepted M1 formula, response contract, and M2 metrics. All 61 tests pass, including exact comparison of all 22,680 saved oracle baseline occupation results and a no-argument CLI test.
-- M3 lexical retrieval and M4 semantic retrieval remain planned. No BM25, MiniLM, embeddings, FAISS index, or cosine similarity exists.
-- Equal-weight occupation-level RRF with `k=60` is the specified future fusion baseline. Its interface and configuration validation exist, but its algorithm is deliberately not implemented. Multi-signal execution currently raises a clear error.
-- Stop at the refactoring acceptance gate, before M3. Update this section when future milestones are accepted.
+- M3 is implemented: independent `bm25@baseline_v1`, positive-only lexical ranking, and equal-weight occupation-level RRF at `k=60`. Three matching development comparisons are saved in `reports/ranking/m3/`. Hybrid regresses; M1-only remains the default.
+- M4 semantic retrieval, MiniLM, embeddings, FAISS, and cosine similarity remain unimplemented.
+- RRF now combines two or more usable occupation rankings. Inactive signals do not contribute; a single usable signal bypasses fusion.
+- M3 correctness and experiment gates are met. Stop before M4; update this section when later milestones are accepted. The current ranking/evaluation suite passes 72 tests. Broader API/model tests require the team dependencies and model artifacts.
 
 ## Architecture and boundaries
 
 | Module | Responsibility |
 |---|---|
 | `recommender/components.py` | Common input, scored occupation, component result, and scoring protocol; no algorithm dependencies |
+| `recommender/bm25_ranker.py` | Independent BM25 baseline, frozen tokenizer/stopwords, eligible in-memory index and positive-only lexical ranks |
 | `recommender/m1.py` | Independent weighted-dot-product algorithm and its explicit baseline parameters |
 | `recommender/registry.py` | Algorithm factories, named parameter variants, deterministic resolution, and duplicate-registration rejection |
 | `recommender/configuration.py` | Default file paths and safe JSON/YAML loading with duplicate-key rejection |
 | `recommender/ranker.py` | Request validation, enabled component construction/invocation, candidate validation, standalone/fusion dispatch, and response assembly |
-| `recommender/fusion.py` | Fusion protocol and usable-signal dispatch; no implemented fusion algorithm |
+| `recommender/fusion.py` | Equal-weight RRF at k=60, fusion protocol and usable-signal dispatch |
 | `recommender/structured.py` | Backward-compatible M1-only `StructuredRanker` facade |
 | `recommender/schemas.py` | Existing runtime/oracle inputs and policy-facing response envelope |
 | `recommender/data_loader.py` | Candidate eligibility, validation, and static data audit |
@@ -48,7 +50,7 @@ Each `ComponentScore` holds occupation `code`, numeric `score`, and one-based `r
 
 The pipeline validates that every emitted occupation belongs to the same eligible pool. Do not fill an inactive signal with zero-score rankings. Negative M1 scores remain valid, and observed zero stays distinct from unknown even though both contribute zero. A future lexical query with no matches must return `unusable`, rather than an arbitrary code-sorted list. Components return their full intended ranking before the pipeline applies policy `top_k`; do not truncate M1 to 100 before offline MRR evaluation.
 
-No usable components gives `RankingResponse("no_signal", reason=...)`. One usable component passes through without fusion, preserving raw component scores/ranks and `rrf_score=None`. Two or more require the future fusion implementation. `Fusion.fuse(mapping_of_usable_rankings)` returns the shared occupation ranking; fusion must operate on occupation ranks, not raw texts or incompatible raw scores. Component diagnostics remain available in `RankedOccupation.signals` (`structured`, `lexical`, `semantic`). `TaskEvidence` already exists in the policy schema; task retrieval/evidence attachment is not part of this refactor.
+No usable components gives `RankingResponse("no_signal", reason=...)`. One usable component passes through without fusion, preserving raw component scores/ranks and `rrf_score=None`. Two or more use the implemented equal-weight RRF baseline. `Fusion.fuse(mapping_of_usable_rankings)` returns the shared occupation ranking; fusion must operate on occupation ranks, not raw texts or incompatible raw scores. Component diagnostics remain available in `RankedOccupation.signals` (`structured`, `lexical`, `semantic`). `TaskEvidence` already exists in the policy schema; task retrieval/evidence attachment is not part of this refactor.
 
 ### Configuration and selection
 
@@ -87,7 +89,7 @@ python -m recommender.evaluate
 
 No config or output arguments are required. Each run creates `reports/ranking/experiments/<UTC timestamp>_<UUID>/`, prints its report path and metrics, and appends one row to the central CSV after all artifacts are saved. Explicit `--config`, `--ranking-config`, `--output`, and `--history` overrides remain available for reproduction and isolated tests. Missing default files are errors; the evaluator never silently falls back to an inline ranking baseline or to `configs/ranking.json`.
 
-All three component keys are explicit; `null` disables construction and invocation. Fusion `null` is allowed for standalone execution. RRF records a future policy and is bypassed with one usable signal; multiple usable signals remain unsupported until RRF is implemented. Unknown algorithms/variants, invalid schemas/settings, duplicate keys, and unsafe/malformed YAML fail clearly before profile evaluation. Candidate eligibility and development/oracle-only evaluation remain unchanged. Editable evaluation run prefixes and seeds are validated; held-out/actual-tracker adapters remain separate future work.
+All three component keys are explicit; `null` disables construction and invocation. Fusion `null` is allowed for standalone execution. RRF is implemented and is bypassed with one usable signal; multiple usable signals use its occupation ranks. Unknown algorithms/variants, invalid schemas/settings, duplicate keys, and unsafe/malformed YAML fail clearly before profile evaluation. Candidate eligibility and development/oracle-only evaluation remain unchanged. Editable evaluation run prefixes and seeds are validated; held-out/actual-tracker adapters remain separate future work.
 
 `RankingPipeline(config=Path("configs/ranking.yaml"))` uses YAML selection directly. Its programmatic no-config constructor and `StructuredRanker()` retain the accepted inline M1 baseline for compatibility; the evaluator always passes its loaded selection explicitly. The old `configs/ranking.json` remains a compatibility fixture, not an active default. JSON selection overrides remain supported.
 
@@ -124,7 +126,7 @@ Use the simple explicit `AlgorithmRegistry`, not dynamic imports or a plugin fra
 
 Factories receive validated eligible occupations and an owned copy of variant parameters. A future text/dense factory should load its own additional artifacts from explicit parameter paths; do not make M1 load task data, text indices, or models. Keep occupation-code joins aligned with the candidate pool and record additional static artifact fingerprints in the run manifest when introducing them. For isolated tests/experiments, pass a separate registry to `RankingPipeline(..., registry=registry)` or `evaluate.run(..., registry=registry)`. Accepted production registrations belong in `default_registry()` so CLI selection works without source edits between already registered variants.
 
-The default registry currently registers only `weighted_dot_product@baseline_v1`. Tests use a temporary alias to exercise switching; that alias is not a production variant or a new algorithm. The baseline parameters fix dimension order `R,I,A,S,E,C`, observed-only scoring, supplied occupation z-scores, and ascending-code tie-breaking. The algorithm rejects unsupported parameter settings rather than pretending to support unimplemented formulas.
+The default registry registers `weighted_dot_product@baseline_v1` and `bm25@baseline_v1`; the default selection remains M1-only because the M3 hybrid regressed. Tests use a temporary alias to exercise switching; that alias is not a production variant or a new algorithm. The baseline parameters fix dimension order `R,I,A,S,E,C`, observed-only scoring, supplied occupation z-scores, and ascending-code tie-breaking. The algorithm rejects unsupported parameter settings rather than pretending to support unimplemented formulas.
 
 ## Algorithm, variant, and run identity
 
@@ -171,4 +173,8 @@ Do not change Job Zone 4–5 eligibility or supplied z-scores during an algorith
 8. Save complete artifacts, append history, inspect regressions, and record latency and quality separately.
 9. Accept, revise, or revert with written evidence; update this memory, README status, and milestone report consistently.
 
-The next recommended milestone remains M3: define BM25 query/document construction, implement its independent component and the specified RRF baseline, then compare lexical-only and structured+lexical against the preserved structured control. This requires a subsequent instruction; it is not part of this refactor.
+M3 is complete; see [its acceptance and decision report](../reports/ranking/m3/DECISION.md). Select structured-only, lexical-only or hybrid with the saved `configs/ranking/m3_*.json` presets, or enable `m3: {algorithm: bm25, variant: baseline_v1}` in the ranking YAML. M1's legacy facade and default selection stay unchanged. The live application's `pipeline/registry.py` still selects `StructuredRanker`; full app wiring remains an integration follow-up.
+
+BM25's baseline is frozen in `recommender/bm25_ranker.py`: `k1=1.5`, `b=.75`, positive smoothed IDF, lowercase ASCII/apostrophe tokens, an explicit stopword list retaining negators, no stemming, and linear query term counts across accumulated user text. Only eligible prepared documents are indexed. Missing documents fail when BM25 is enabled. All strictly positive matches are ranked; no zero padding or lexical cutoff. Raw dislike and familiarity wording is not filtered, and cannot be interpreted semantically by BM25. Index metadata and resolved parameters are saved in each experiment manifest.
+
+Keep the negative baseline result: structured Hit@5=.166667, BM25=.016667, hybrid=.133333 on the same 60 development/oracle inputs. Do not claim actual-tracker or probing effectiveness. Next planned milestone is M4 semantic task retrieval, after a subsequent instruction. Lexical tuning requires a new preserved variant and a separate hypothesis/control comparison.

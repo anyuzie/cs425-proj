@@ -63,7 +63,7 @@ class ArchitectureTests(unittest.TestCase):
         for key, selection, error in (
                 ("m1", {"algorithm": "cosine_similarity", "variant": "baseline_v1"}, "unknown algorithm"),
                 ("m1", {"algorithm": "weighted_dot_product", "variant": "missing"}, "unknown variant"),
-                ("m3", {"algorithm": "bm25", "variant": "baseline_v1"}, "unknown algorithm"),
+                ("m3", {"algorithm": "unknown_bm25", "variant": "baseline_v1"}, "unknown algorithm"),
                 ("m4", {"algorithm": "minilm", "variant": "baseline_v1"}, "unknown algorithm")):
             config = deepcopy(BASELINE_CONFIG)
             config["components"][key] = selection
@@ -110,8 +110,9 @@ class ArchitectureTests(unittest.TestCase):
         result, fused = select_ranking({"m3": unusable}, BASELINE_CONFIG["fusion"])
         self.assertEqual(result.status, "unusable")
         self.assertFalse(fused)
-        with self.assertRaisesRegex(NotImplementedError, "not implemented"):
-            select_ranking({"m1": usable, "m3": usable}, BASELINE_CONFIG["fusion"])
+        result, fused = select_ranking({"m1": usable, "m3": usable}, BASELINE_CONFIG["fusion"])
+        self.assertTrue(fused)
+        self.assertEqual(result.occupations[0].score, 2 / 61)
 
     def test_select_registered_configurations_without_pipeline_changes(self):
         registry = default_registry()

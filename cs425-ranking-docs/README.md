@@ -17,9 +17,9 @@ This section is the canonical current status; milestone reports preserve their o
 | M2 — Evaluation | Implemented and accepted; frozen structured-only oracle development baseline, metrics, exports, and paired comparison | [M2 decision](../reports/ranking/m2/DECISION.md) |
 | M3–M9 | Not implemented; next milestone is M3 (BM25 and two-signal RRF) | [Development roadmap](DEVELOPMENT.md#m3--bm25-and-two-signal-fusion) |
 
-**Current gate: stop before M3.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. No BM25, dense index, fusion, task evidence generation, or live policy integration is implemented.
+**Current gate: stop before M4.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. Dense indexing, task evidence generation, and live configurable-hybrid integration remain pending.
 
-The subsequent modular refactor registers only `weighted_dot_product@baseline_v1`, preserves the `StructuredRanker` compatibility API, and adds a shared component interface, registry, configurable pipeline, and future fusion boundary. The refactor originally passed 54 tests; the subsequent default-configuration workflow passes 61 tests. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
+The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. The current ranking/evaluation suite passes 72 tests; broader team API/model tests require their dependencies and model artifacts. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
 
 ## Component configuration
 
@@ -47,9 +47,27 @@ Each report saves separate `evaluation_config.json`, `ranking_config.json`, and 
 python -m recommender.evaluate --config <report>/evaluation_config.json --ranking-config <report>/ranking_config.json
 ```
 
-Only `weighted_dot_product@baseline_v1` is registered. `null` disables a component; the RRF `k=60` setting remains a planned policy. One usable signal passes through, no usable signal returns `no_signal`, and multiple usable signals fail until RRF is implemented. M1 scoring and all six M2 metrics are unchanged. Evaluation remains development/oracle-only with the established candidate pool.
+The registered variants are `weighted_dot_product@baseline_v1` and `bm25@baseline_v1`. `null` disables a component; RRF `k=60` is implemented. One usable signal passes through, no usable signal returns `no_signal`, and multiple usable signals use equal-weight occupation-level RRF. M1 scoring and all six M2 metrics are unchanged. Evaluation remains development/oracle-only with the established candidate pool.
 
 In Python, use `RankingPipeline(config=Path("configs/ranking.yaml"))`; existing `StructuredRanker()` callers remain valid. See the [architecture memory](../docs/RANKING_EXPERIMENT_ARCHITECTURE.md) for configuration provenance, variant preservation, and reproduction rules.
+
+## M3 baseline and measured decision
+
+M3 adds a frozen BM25 baseline over eligible `bm25_doc` and RRF `sum(1/(60+rank))`. Only positive lexical matches enter fusion; empty/stopword/unmatched queries fall back to other available signals. Queries use all user utterances with no evidence, dislike, or familiarity filtering. Parameters/tokenization are recorded in each resolved configuration.
+
+| Same 60 development/oracle cases | Hit@5 | MRR | NDCG@10 |
+|---|---:|---:|---:|
+| Structured | .166667 | .135636 | .203471 |
+| BM25 | .016667 | .016099 | .020544 |
+| Structured + BM25 RRF | .133333 | .084887 | .116610 |
+
+Keep the experimental baseline, but **retain M1-only as the default**. See the [M3 acceptance mapping, comparisons and limitations](../reports/ranking/m3/DECISION.md) and [failure review](../reports/ranking/m3/failure_review.md). To evaluate hybrid explicitly:
+
+```powershell
+python -m recommender.evaluate --ranking-config configs/ranking/m3_hybrid.json
+```
+
+Sibling presets `m3_structured.json` and `m3_bm25.json` support standalone comparisons. You can also enable `m3: {algorithm: bm25, variant: baseline_v1}` in `configs/ranking.yaml`; M4 stays `null`. This evaluation uses oracle vectors and raw profile texts, not the actual extractor/tracker. The live app's registry still chooses the structured facade.
 
 ## Persistent evaluation history
 
@@ -85,7 +103,7 @@ python -m recommender.history reports/ranking/m2/baseline --legacy-baseline
 
 The second command verifies and registers the original baseline, or safely skips its existing ID. It requires the original fingerprint-matching local datasets. History writers use an exclusive sibling `.lock` file; a busy registry fails without changing rows. If a process is interrupted, verify no writer is running before removing a stale lock and retrying.
 
-Future rankers can call `recommender.history.append_history(report_path)` after exporting a complete run. Set manifest `components` to stable algorithm/variant IDs, e.g. `{"m1": "weighted_dot_product@baseline_v1", "m3": "bm25@baseline_v1", "m4": "minilm@mean_tasks_v1", "fusion": "rrf_k60"}`. This example describes future usage, not implemented retrieval. The original M2 row retains its unversioned `weighted_dot_product` identifier unchanged; no CSV schema migration is needed. Keep exact parameters, input mode, split, eligibility, fingerprints, and evaluator version in the detailed manifest/configuration. The evaluator uses the common pipeline and remains development/oracle-only; M1 is its only production scoring implementation today.
+Future rankers can call `recommender.history.append_history(report_path)` after exporting a complete run. Set manifest `components` to stable algorithm/variant IDs, e.g. `{"m1": "weighted_dot_product@baseline_v1", "m3": "bm25@baseline_v1", "m4": "minilm@mean_tasks_v1", "fusion": "rrf_k60"}`. M1/M3/RRF are implemented; the MiniLM entry illustrates future M4 usage. The original M2 row retains its unversioned `weighted_dot_product` identifier unchanged; no CSV schema migration is needed. Keep exact parameters, input mode, split, eligibility, fingerprints, and evaluator version in the detailed manifest/configuration. The evaluator uses the common pipeline and remains development/oracle-only; M1 and BM25 are its implemented scoring components today.
 
 **Comparison guidance:** the CSV is a registry, not a leaderboard. Compare only matching input modes, datasets, candidate pools, and metric definitions. Use `python -m recommender.compare <control-directory> <treatment-directory> --output <new-directory>` for compatible paired runs. Original M2 artifacts retain evaluator `m2-v1` and three metrics; new runs use `m2-v2` and all six. Legacy-to-legacy comparisons still work. Cross-version comparisons are rejected: reproduce the control and treatment with the same evaluator before comparing them. Prediction scores/order reproduce, while run IDs, timing, timestamps, and source metadata vary.
 
@@ -261,7 +279,7 @@ Automatic output paths are unique; use a fresh directory when overriding `--outp
 
 1. Read the objectives, current status above, and [DEVELOPMENT.md](DEVELOPMENT.md).
 2. Confirm the O*NET eligibility rule and upstream/downstream contracts with teammates.
-3. Preserve the accepted **M1 RIASEC MVP** and **M2 evaluation baseline** as controls when M3 is authorized.
+3. Preserve the accepted **M1 RIASEC MVP** and **M2 evaluation baseline** as controls for subsequent milestones.
 4. For each material change, copy [EXPERIMENT_TEMPLATE.md](EXPERIMENT_TEMPLATE.md) into `reports/ranking/experiments/`, run the control and treatment, and record the decision.
 5. Keep M5 as the required completion checkpoint; evaluate M6/M7 as research extensions; freeze before M9.
 

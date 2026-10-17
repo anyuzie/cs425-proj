@@ -65,7 +65,7 @@ def load_eligible_occupations(path: Path) -> list[Occupation]:
         zone = finite_number(row["job_zone"], f"{code}/job_zone") if row["job_zone"].strip() else None
         require(zone is None or zone in {1, 2, 3, 4, 5}, f"{code}: invalid job zone")
         if zone in {4, 5} and z_scores is not None:
-            eligible.append(Occupation(code, row["Title"], z_scores))
+            eligible.append(Occupation(code, row["Title"], z_scores, row.get("bm25_doc")))
     require(bool(eligible), "occupations.csv: no eligible occupations")
     return eligible
 

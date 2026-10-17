@@ -131,7 +131,7 @@ class StructuredKeywordRanker:
         self._ranker = StructuredRanker(occupations_path)
         self.eligible_count = self._ranker.eligible_count
         self._n = n_evidence
-        eligible = {o.code for o in self._ranker._occupations}
+        eligible = self._ranker.eligible_codes
         self._tasks: dict[str, list[tuple[str, str, set[str]]]] = {}
         with Path(tasks_path).open(encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):

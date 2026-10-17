@@ -2,7 +2,7 @@
 
 **Decision: M2 accepted. Retain the structured-only oracle development run as the control; stop before M3.** All 38 M0–M2 tests pass (10 new M2 tests). Correctness and reproducibility are established; recommendation quality remains limited. No held-out ranking or tuning was performed.
 
-This is the latest accepted milestone. See the [canonical implementation status](../../../cs425-ranking-docs/README.md#current-implementation-status); the [M1 report](../m1.md) preserves the earlier structured-only acceptance results.
+This is the historical M2 acceptance report. M3 was subsequently implemented and evaluated; see [M3 decision](../m3/DECISION.md). See the [canonical implementation status](../../../cs425-ranking-docs/README.md#current-implementation-status); the [M1 report](../m1.md) preserves the earlier structured-only acceptance results.
 
 ## Implementation
 

@@ -66,6 +66,7 @@ class Occupation:
     code: str
     title: str
     z_scores: dict[str, float]
+    bm25_doc: str | None = None
 
 
 @dataclass

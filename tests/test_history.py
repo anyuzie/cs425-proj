@@ -42,6 +42,17 @@ class CutoffTests(unittest.TestCase):
 
 
 class HistoryTests(unittest.TestCase):
+    def test_legacy_import_rejects_content_drift_even_with_newline_tolerance(self):
+        original = Path.read_bytes
+        def changed(path):
+            data = original(path)
+            return data + b" " if path == Path("data/dev_profiles.jsonl") else data
+        with tempfile.TemporaryDirectory() as directory, patch.object(Path, "read_bytes", changed):
+            history = Path(directory) / "history.csv"
+            with self.assertRaisesRegex(ValueError, "dataset fingerprint mismatch"):
+                register_legacy_baseline(Path("reports/ranking/m2/baseline"), history=history)
+            self.assertFalse(history.exists())
+
     def test_success_duplicates_preservation_and_future_components(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

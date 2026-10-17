@@ -80,4 +80,7 @@ def default_registry() -> AlgorithmRegistry:
     registry = AlgorithmRegistry()
     registry.register_algorithm("m1", "weighted_dot_product", WeightedDotProduct)
     registry.register_variant("m1", "weighted_dot_product", "baseline_v1", BASELINE_PARAMETERS)
+    from .bm25_ranker import BM25Ranker, BASELINE_PARAMETERS as BM25_PARAMETERS
+    registry.register_algorithm("m3", "bm25", BM25Ranker)
+    registry.register_variant("m3", "bm25", "baseline_v1", BM25_PARAMETERS)
     return registry

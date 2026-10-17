@@ -1,8 +1,30 @@
-"""Fusion boundary. RRF is specified for future work, not implemented here."""
+"""Equal-weight occupation-level reciprocal rank fusion, separate from scoring."""
 
 from typing import Mapping, Protocol
 
-from .components import ComponentRanking
+from .components import ComponentRanking, ComponentScore
+
+
+class ReciprocalRankFusion:
+    def __init__(self, k: int = 60):
+        if type(k) is not int or k != 60:
+            raise ValueError("baseline RRF requires k=60")
+        self.k = k
+
+    def fuse(self, rankings: Mapping[str, ComponentRanking]) -> ComponentRanking:
+        scores = {}
+        for key in sorted(rankings):
+            ranking = rankings[key]
+            ranking.__post_init__()
+            if ranking.status != "usable":
+                continue
+            for item in ranking.occupations:
+                scores[item.code] = scores.get(item.code, 0.0) + 1 / (self.k + item.rank)
+        if not scores:
+            return ComponentRanking("unusable", reason="No usable rankings for RRF.")
+        ordered = sorted(scores.items(), key=lambda item: (-item[1], item[0]))
+        return ComponentRanking("usable", tuple(ComponentScore(code, score, rank)
+                                                 for rank, (code, score) in enumerate(ordered, 1)))
 
 
 class Fusion(Protocol):
@@ -11,7 +33,7 @@ class Fusion(Protocol):
 
 def validate_fusion(config):
     if config is not None and config != {"algorithm": "rrf", "k": 60}:
-        raise ValueError("fusion must be null or the planned rrf with k=60")
+        raise ValueError("fusion must be null or baseline rrf with k=60")
 
 
 def select_ranking(rankings: Mapping[str, ComponentRanking], config: dict | None,
@@ -26,7 +48,8 @@ def select_ranking(rankings: Mapping[str, ComponentRanking], config: dict | None
     if config is None:
         raise ValueError("multiple usable components require fusion configuration")
     if fusion is None:
-        raise NotImplementedError("RRF fusion is planned but not implemented; only standalone ranking is supported at this gate")
+        validate_fusion(config)
+        fusion = ReciprocalRankFusion(config["k"])
     result = fusion.fuse(usable)
     if result.status != "usable":
         raise ValueError("fusion must return a usable occupation ranking")

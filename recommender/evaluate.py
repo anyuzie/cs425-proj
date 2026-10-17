@@ -94,12 +94,14 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         raise ValueError("empty profiles or invalid/duplicate profile IDs")
     pool = ranker.eligible_codes
     snapshots, metrics, predictions, times = [], [], [], []
+    fused_profiles = 0
     for profile in profiles:
         inputs = OracleInput.from_profile(profile)
         snapshots.append({"profile_id": profile["id"], **asdict(inputs)})
         start = perf_counter()
         response = ranker.rank_oracle(inputs)
         times.append(perf_counter() - start)
+        fused_profiles += int(any(o.rrf_score is not None for o in response.occupations))
         codes = [o.code for o in response.occupations]
         result = evaluate_ranking(codes, profile.get("target"), profile["related"], pool)
         metrics.append({"profile_id": profile["id"], "status": response.status, **result})
@@ -143,7 +145,10 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
     save_json(output / "manifest.json", {
         "evaluator_version": "m2-v2", "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "run_id": run_id, "control_run_id": "m2_structured_oracle_dev_v1",
-        "components": {**ranker.component_identifiers, "fusion": ""},
+        "components": {**ranker.component_identifiers, "fusion": ranker.fusion_identifier},
+        "component_metadata": ranker.component_metadata,
+        "fused_profile_count": fused_profiles,
+        "retrieval_policy": "No ranking cutoff before evaluation; lexical ranks contain positive matches only; unretrieved target MRR=0",
         "resolved_ranking": ranker.resolved_config,
         "algorithm_parameters": ranker.resolved_config["components"],
         "dataset_split": evaluation_config["split"],
