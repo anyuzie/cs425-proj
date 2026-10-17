@@ -208,3 +208,8 @@ Then, with the server running for the scenarios:
 ```
 
 For the decay comparison, run the headline experiment twice: with `"decay": 1.0` and with `"decay": 0.9` in the config.
+# M5 ranking integration update
+
+The app now selects `ranker: configured` and loads `configs/ranking.yaml` once at startup. M1-only remains default; the optional three-component RRF preset is independently tested. Current tracker values and complete user-only history are reranked each turn before policy invocation. Cards expose up to three provisional task matches; similarity does not establish enjoyment.
+
+Set `settings.input_mode` explicitly (`actual_tracker` for production, `mock_tracker` for fixtures). See the [tracker replay format](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation) and [M5 acceptance report](../reports/ranking/m5/DECISION.md). Production extractor checkpoint, tracker/NLI/policy completion and a team latency budget remain pending. The component guide above describes the interfaces teammates must implement.
