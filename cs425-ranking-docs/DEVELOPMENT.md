@@ -2,7 +2,7 @@
 
 Return to [README](README.md) · See [Evaluation](EVALUATION.md)
 
-**Current status:** M0?M3 are implemented; M3 is retained as an experimental baseline after measured regression, and the current gate is before M4. See the [canonical status table](README.md#current-implementation-status) and [M2 decision](../reports/ranking/m2/DECISION.md). Checked items below reflect recorded acceptance results, not a new test run. Upstream/downstream teammate sign-off remains pending.
+**Current status:** M0-M4 are implemented and evaluated locally. M3/M4 remain experimental baselines after regressions; M1-only stays the default. The current gate is before M5. See the [canonical status table](README.md#current-implementation-status) and [M4 acceptance report](../reports/ranking/m4/DECISION.md). Upstream/downstream integration sign-off remains pending.
 
 ## Rules for every milestone
 
@@ -98,7 +98,7 @@ The implemented envelope exposes `status`, `reason`, and `occupations: list[Rank
 
 ## M3 — BM25 and two-signal fusion
 
-**Current status:** Implemented and evaluated; see [M3 acceptance/decision](../reports/ranking/m3/DECISION.md). Structured-only remains the default.
+**Current status:** M0-M4 are implemented and evaluated locally. M3/M4 remain experimental baselines after regressions; M1-only stays the default. The current gate is before M5. See the [canonical status table](README.md#current-implementation-status) and [M4 acceptance report](../reports/ranking/m4/DECISION.md). Upstream/downstream integration sign-off remains pending.
 
 **Purpose:** Test whether lexical occupation information adds value to structured fit.
 
@@ -122,6 +122,8 @@ The implemented envelope exposes `status`, `reason`, and `occupations: list[Rank
 
 ## M4 — MiniLM + task-level dense retrieval
 
+**Current status:** Implemented and evaluated; see [M4 acceptance/decision](../reports/ranking/m4/DECISION.md). All five acceptance tests are met. Default remains structured-only.
+
 **Purpose:** Measure semantic value beyond exact word matching.
 
 **Requirements**
@@ -133,11 +135,11 @@ The implemented envelope exposes `status`, `reason`, and `occupations: list[Rank
 - Record index build time, cache size, and preloaded query median/p95 latency.
 
 **Tests**
-- [ ] Paraphrase fixture retrieves meaningful task.
-- [ ] Every result maps to a valid occupation; missing-task occupations don't get a fictitious dense rank.
-- [ ] Cached/reloaded scores match within tolerance.
-- [ ] Empty user text omits dense signal; no task corpus re-embedding during a turn.
-- [ ] Aggregation is correct on a hand-built task fixture.
+- [x] Paraphrase fixture retrieves meaningful task.
+- [x] Every result maps to a valid occupation; missing-task occupations don't get a fictitious dense rank.
+- [x] Cached/reloaded scores match within tolerance.
+- [x] Empty user text omits dense signal; no task corpus re-embedding during a turn.
+- [x] Aggregation is correct on a hand-built task fixture.
 
 **Decision gate:** Does semantic retrieval add sufficient ranking quality relative to complexity/latency? If not, diagnose aggregation before adopting more elaborate ANN search.
 

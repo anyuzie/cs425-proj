@@ -15,11 +15,13 @@ This section is the canonical current status; milestone reports preserve their o
 | M0 — Data + contracts | Implemented and accepted locally; teammate integration sign-off pending | [M0 report](../reports/ranking/m0.md) |
 | M1 — Structured ranking | Implemented and accepted; deterministic RIASEC-only runtime ranker and mock CLI | [M1 report](../reports/ranking/m1.md) |
 | M2 — Evaluation | Implemented and accepted; frozen structured-only oracle development baseline, metrics, exports, and paired comparison | [M2 decision](../reports/ranking/m2/DECISION.md) |
-| M3–M9 | Not implemented; next milestone is M3 (BM25 and two-signal RRF) | [Development roadmap](DEVELOPMENT.md#m3--bm25-and-two-signal-fusion) |
+| M3 - Lexical + fusion | Implemented and evaluated; experimental baseline, M1-only default retained | [M3 decision](../reports/ranking/m3/DECISION.md) |
+| M4 - Semantic task retrieval | Implemented and evaluated; cached MiniLM/FAISS and three-signal baseline | [M4 decision](../reports/ranking/m4/DECISION.md) |
+| M5-M9 | Not implemented; next is application integration | [Development roadmap](DEVELOPMENT.md) |
 
-**Current gate: stop before M4.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. Dense indexing, task evidence generation, and live configurable-hybrid integration remain pending.
+**Current gate: stop before M5.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. M4 now provides cached semantic task retrieval and provisional task matches. Live configurable-hybrid integration and stance-aware supporting evidence remain pending.
 
-The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. The current ranking/evaluation suite passes 72 tests; broader team API/model tests require their dependencies and model artifacts. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
+The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. The current ranking/evaluation suite passes 85 tests. Full discovery ran 149 tests with one error from the missing upstream extractor checkpoint; see the M4 report. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
 
 ## Component configuration
 
@@ -47,7 +49,7 @@ Each report saves separate `evaluation_config.json`, `ranking_config.json`, and 
 python -m recommender.evaluate --config <report>/evaluation_config.json --ranking-config <report>/ranking_config.json
 ```
 
-The registered variants are `weighted_dot_product@baseline_v1` and `bm25@baseline_v1`. `null` disables a component; RRF `k=60` is implemented. One usable signal passes through, no usable signal returns `no_signal`, and multiple usable signals use equal-weight occupation-level RRF. M1 scoring and all six M2 metrics are unchanged. Evaluation remains development/oracle-only with the established candidate pool.
+The registered variants are `weighted_dot_product@baseline_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`. `null` disables a component; RRF `k=60` is implemented. One usable signal passes through, no usable signal returns `no_signal`, and multiple usable signals use equal-weight occupation-level RRF. M1 scoring and all six M2 metrics are unchanged. Evaluation remains development/oracle-only with the established candidate pool.
 
 In Python, use `RankingPipeline(config=Path("configs/ranking.yaml"))`; existing `StructuredRanker()` callers remain valid. See the [architecture memory](../docs/RANKING_EXPERIMENT_ARCHITECTURE.md) for configuration provenance, variant preservation, and reproduction rules.
 
@@ -68,6 +70,24 @@ python -m recommender.evaluate --ranking-config configs/ranking/m3_hybrid.json
 ```
 
 Sibling presets `m3_structured.json` and `m3_bm25.json` support standalone comparisons. You can also enable `m3: {algorithm: bm25, variant: baseline_v1}` in `configs/ranking.yaml`; M4 stays `null`. This evaluation uses oracle vectors and raw profile texts, not the actual extractor/tracker. The live app's registry still chooses the structured facade.
+
+## M4 semantic baseline
+
+M4 is implemented and evaluated; **structured-only remains the default**. On the same 60 development/oracle cases, Hit@5 is 16.67% for structured, 5.00% for dense, 11.67% for structured+dense, 3.33% for BM25+dense, and 5.00% for three-way RRF. These results do not justify default activation or a probing-effectiveness claim.
+
+The frozen `minilm@mean_tasks_v1` variant uses a pinned MiniLM revision, normalized task embeddings, and exhaustive FAISS IndexFlatIP search. It takes the best task match per occupation per natural-language sentence, then averages across sentences. Task matches are provisional, including when a user expresses a dislike. The cache contains 8,243 eligible tasks across 378 occupations. Tasks are embedded once, not during turns.
+
+```powershell
+# Fresh environment / checkout only:
+python -m pip install -r requirements-ranking.txt
+python -m recommender.build_dense --download-model
+# Local environment/model/cache are already prepared:
+python -m recommender.evaluate --ranking-config configs/ranking/m4_three_way.json
+```
+
+Other presets are `m4_dense.json`, `m4_structured_dense.json`, and `m4_bm25_dense.json`. For the default no-argument workflow, set `m4: {algorithm: minilm, variant: mean_tasks_v1}` in `configs/ranking.yaml`, enabling M1/M3 as desired. Caches and local model files are gitignored; build refuses overwriting an existing cache, and runtime rejects stale/corrupt artifacts.
+
+See the [M4 acceptance mapping and measured decision](../reports/ranking/m4/DECISION.md), [failure review](../reports/ranking/m4/failure_review.md), and [reload reproducibility checks](../reports/ranking/m4/reproducibility_check.json). Model/task/index hashes and dependency versions are retained in detailed manifests; original history rows and baselines remain intact. Next is M5 integration, after a subsequent instruction.
 
 ## Persistent evaluation history
 
@@ -103,7 +123,7 @@ python -m recommender.history reports/ranking/m2/baseline --legacy-baseline
 
 The second command verifies and registers the original baseline, or safely skips its existing ID. It requires the original fingerprint-matching local datasets. History writers use an exclusive sibling `.lock` file; a busy registry fails without changing rows. If a process is interrupted, verify no writer is running before removing a stale lock and retrying.
 
-Future rankers can call `recommender.history.append_history(report_path)` after exporting a complete run. Set manifest `components` to stable algorithm/variant IDs, e.g. `{"m1": "weighted_dot_product@baseline_v1", "m3": "bm25@baseline_v1", "m4": "minilm@mean_tasks_v1", "fusion": "rrf_k60"}`. M1/M3/RRF are implemented; the MiniLM entry illustrates future M4 usage. The original M2 row retains its unversioned `weighted_dot_product` identifier unchanged; no CSV schema migration is needed. Keep exact parameters, input mode, split, eligibility, fingerprints, and evaluator version in the detailed manifest/configuration. The evaluator uses the common pipeline and remains development/oracle-only; M1 and BM25 are its implemented scoring components today.
+Future rankers can call `recommender.history.append_history(report_path)` after exporting a complete run. Set manifest `components` to stable algorithm/variant IDs, e.g. `{"m1": "weighted_dot_product@baseline_v1", "m3": "bm25@baseline_v1", "m4": "minilm@mean_tasks_v1", "fusion": "rrf_k60"}`. M1/M3/M4/RRF are implemented; configurations select which signals participate. The original M2 row retains its unversioned `weighted_dot_product` identifier unchanged; no CSV schema migration is needed. Keep exact parameters, input mode, split, eligibility, fingerprints, and evaluator version in the detailed manifest/configuration. The evaluator uses the common pipeline and remains development/oracle-only; M1, BM25, and MiniLM task retrieval are its implemented scoring components today.
 
 **Comparison guidance:** the CSV is a registry, not a leaderboard. Compare only matching input modes, datasets, candidate pools, and metric definitions. Use `python -m recommender.compare <control-directory> <treatment-directory> --output <new-directory>` for compatible paired runs. Original M2 artifacts retain evaluator `m2-v1` and three metrics; new runs use `m2-v2` and all six. Legacy-to-legacy comparisons still work. Cross-version comparisons are rejected: reproduce the control and treatment with the same evaluator before comparing them. Prediction scores/order reproduce, while run IDs, timing, timestamps, and source metadata vary.
 

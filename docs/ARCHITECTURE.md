@@ -1,5 +1,8 @@
 # Career Matcher: architecture
 
+
+**Ranking status update:** M3 BM25/RRF and M4 cached MiniLM/FAISS are implemented in `recommender/` and evaluated offline. The live app factory still selects the structured facade. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md) and [M4 acceptance](../reports/ranking/m4/DECISION.md); full app activation remains M5 integration work.
+
 How the system is built, which file does what, and how one message moves through the code.
 To add your part (what to fill in, where files go, training hand-off, PR checklist), see [INTEGRATION.md](INTEGRATION.md). Section 11 below lists every function in each important file.
 

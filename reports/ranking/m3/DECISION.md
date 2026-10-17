@@ -4,6 +4,8 @@
 
 The applicable acceptance checklist is [DEVELOPMENT.md, M3](../../../cs425-ranking-docs/DEVELOPMENT.md#m3--bm25-and-two-signal-fusion). The [pre-evaluation protocol](EXPERIMENT.md) states the frozen hypothesis/configuration; [failure review](failure_review.md) records dislike, misleading-familiarity, genuine-familiarity and gain cases.
 
+**Current status:** This is the historical M3 decision. M4 is subsequently implemented and evaluated; see [M4 decision](../m4/DECISION.md). The current gate is before M5.
+
 ## Implementation
 
 `recommender/bm25_ranker.py` provides independent `bm25@baseline_v1`. It indexes only eligible occupations' supplied `bm25_doc`, using an in-memory inverted index. `Occupation` carries optional prepared text; M1 still works on fixtures without text, while enabling BM25 requires a nonempty, tokenizable document for every eligible occupation. No dataset values, candidate eligibility, M1 formula, or M2 metric definitions changed.
