@@ -1,3 +1,12 @@
+"""DeBERTa checkpoint adapter for the M5 extractor -> tracker -> ranking boundary.
+
+The trained sequence-classification checkpoint emits 45 logits: direction (6x3),
+reason (3), and strength (6x4). Calibration comes from config.extractor. Runtime
+SlotReading values use the existing label indices and discrete strength mapping.
+Configure paths.extractor_checkpoint in configs/system.json; local files only.
+Heavy dependencies and the checkpoint are loaded once, on construction.
+"""
+
 # Original teammate hand-off instructions above are preserved verbatim from main.
 # Current adapter: load()/predict() are implemented using Hugging Face AutoModel,
 # so a separate extractor_model.py is not required by this implementation.
