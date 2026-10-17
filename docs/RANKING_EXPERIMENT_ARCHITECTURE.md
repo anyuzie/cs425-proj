@@ -11,9 +11,21 @@ Read this document before changing ranking architecture. It is the authoritative
 - M3 is implemented: independent `bm25@baseline_v1`, positive-only lexical ranking, and equal-weight occupation-level RRF at `k=60`. Three matching development comparisons are saved in `reports/ranking/m3/`. Hybrid regresses; M1-only remains the default.
 - M4 is implemented and evaluated as `minilm@mean_tasks_v1`: pinned MiniLM, normalized task cache, exhaustive FAISS search, occupation aggregation and provisional evidence. Cosine-similarity variants of M1 remain unimplemented.
 - RRF now combines two or more usable occupation rankings. Inactive signals do not contribute; a single usable signal bypasses fusion.
-- M4 correctness and experiment gates are met. Stop before M5. The ranking/evaluation suite passes 85 tests; full discovery has one error due to the missing upstream extractor checkpoint. Default selection stays M1-only after measured M3/M4 regressions.
+- M4 correctness and experiment gates are met. M5 ranking integration is now implemented and frozen with mocked upstream acceptance; production upstream and latency agreement remain pending. M5 full discovery runs 155 tests: 154 pass, with one pre-existing error due to the missing upstream extractor checkpoint. All six M5 integration tests pass. Default selection stays M1-only after measured M3/M4 regressions.
 
 ## Architecture and boundaries
+
+### M5 integration control
+
+`configs/system.json` selects the `configured` ranker factory. It loads `configs/ranking.yaml` once when `System` is constructed, retaining existing component instances and caches across turns. The legacy `structured` factory remains M1-only. The frozen control selection is `configs/ranking/baseline_v1.json`; optional three-way RRF uses the existing M4 preset without algorithm changes.
+
+`System` sends the current tracker vector, observed types and complete chronological user-only history before policy invocation. Policy receives up to 100 occupations including their RIASEC values. Recommendation cards retain up to five occupations and three provisional task matches each, including structured evidence metadata. Unknown and observed-zero dimensions remain distinct. No confidence merging, score accumulation, stance filtering or contradiction-aware text removal is added.
+
+State retains per-turn input/status/reason/ranking/timing snapshots. Debug traces expose them; server turn logs retain input mode, component identity, resolved ranking and the current snapshot even when participant debug is disabled. `System.tracker_record` exports replayable scoring inputs; independent annotations supply relevance labels. Explicit `actual_tracker`, `mock_tracker` and `unverified_tracker` runtime modes prevent silent attribution to a production tracker; unverified records cannot be exported for evaluation. Known test component names cannot claim actual-tracker mode. Caller-declared provenance still requires external verification.
+
+The evaluator accepts development `actual_tracker` or `mock_tracker` session files with upstream extractor/tracker/revision provenance and validated per-turn runtime snapshots. It reconstructs history from ordered user turns, reranks every turn, exports top-100 intermediate results, and evaluates the final turn once per session at full ranking depth using unchanged M2 metrics. The default remains the fixed oracle adapter. Mode, evaluation unit, raw query policy and provenance/input fingerprints are recorded; the existing comparison checks reject incompatible conditions.
+
+See [M5 acceptance and freeze](../reports/ranking/m5/DECISION.md) and the [session format/workflow](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation). The frozen ranking control includes exact configurations, input traces, source archive, dependency/data/model/cache fingerprints and local latency. Actual upstream operation and team latency agreement remain pending; fixture metrics are not actual-tracker quality evidence. M6+ evidence experiments remain unimplemented.
 
 | Module | Responsibility |
 |---|---|
@@ -34,7 +46,7 @@ Read this document before changing ranking architecture. It is the authoritative
 
 The dependency direction is contracts → algorithms/registry → pipeline → evaluator. Scoring components never call another scoring component, fusion, or the evaluator. The metric layer consumes occupation codes and evaluator-side labels, regardless of which component produced the codes.
 
-Upstream owns extraction, confidence merging, contradiction resolution, the cumulative RIASEC profile, and user-only chronological history. Recompute rankings from each snapshot; do not accumulate occupation scores across turns or apply confidence merging again. Downstream policy/UI consume `RankingResponse`; actual integration and evidence generation remain future work.
+Upstream owns extraction, confidence merging, contradiction resolution, the cumulative RIASEC profile, and user-only chronological history. Recompute rankings from each snapshot; do not accumulate occupation scores across turns or apply confidence merging again. Downstream policy/UI consume `RankingResponse`; System now wires configurable ranking to tracker snapshots and policy output; stance-aware supporting evidence remains future work.
 
 ### Component input and output
 
@@ -50,7 +62,7 @@ Each `ComponentScore` holds occupation `code`, numeric `score`, and one-based `r
 
 The pipeline validates that every emitted occupation belongs to the same eligible pool. Do not fill an inactive signal with zero-score rankings. Negative M1 scores remain valid, and observed zero stays distinct from unknown even though both contribute zero. A future lexical query with no matches must return `unusable`, rather than an arbitrary code-sorted list. Components return their full intended ranking before the pipeline applies policy `top_k`; do not truncate M1 to 100 before offline MRR evaluation.
 
-No usable components gives `RankingResponse("no_signal", reason=...)`. One usable component passes through without fusion, preserving raw component scores/ranks and `rrf_score=None`. Two or more use the implemented equal-weight RRF baseline. `Fusion.fuse(mapping_of_usable_rankings)` returns the shared occupation ranking; fusion must operate on occupation ranks, not raw texts or incompatible raw scores. Component diagnostics remain available in `RankedOccupation.signals` (`structured`, `lexical`, `semantic`). `TaskEvidence` already exists in the policy schema; M4 now attaches provisional task matches; stance-aware supporting evidence and application wiring remain M5/later work.
+No usable components gives `RankingResponse("no_signal", reason=...)`. One usable component passes through without fusion, preserving raw component scores/ranks and `rrf_score=None`. Two or more use the implemented equal-weight RRF baseline. `Fusion.fuse(mapping_of_usable_rankings)` returns the shared occupation ranking; fusion must operate on occupation ranks, not raw texts or incompatible raw scores. Component diagnostics remain available in `RankedOccupation.signals` (`structured`, `lexical`, `semantic`). `TaskEvidence` already exists in the policy schema; M4 now attaches provisional task matches; application wiring is implemented at M5; stance-aware supporting evidence remains future work.
 
 ### Configuration and selection
 
@@ -89,7 +101,7 @@ python -m recommender.evaluate
 
 No config or output arguments are required. Each run creates `reports/ranking/experiments/<UTC timestamp>_<UUID>/`, prints its report path and metrics, and appends one row to the central CSV after all artifacts are saved. Explicit `--config`, `--ranking-config`, `--output`, and `--history` overrides remain available for reproduction and isolated tests. Missing default files are errors; the evaluator never silently falls back to an inline ranking baseline or to `configs/ranking.json`.
 
-All three component keys are explicit; `null` disables construction and invocation. Fusion `null` is allowed for standalone execution. RRF is implemented and is bypassed with one usable signal; multiple usable signals use its occupation ranks. Unknown algorithms/variants, invalid schemas/settings, duplicate keys, and unsafe/malformed YAML fail clearly before profile evaluation. Candidate eligibility and development/oracle-only evaluation remain unchanged. Editable evaluation run prefixes and seeds are validated; held-out/actual-tracker adapters remain separate future work.
+All three component keys are explicit; `null` disables construction and invocation. Fusion `null` is allowed for standalone execution. RRF is implemented and is bypassed with one usable signal; multiple usable signals use its occupation ranks. Unknown algorithms/variants, invalid schemas/settings, duplicate keys, and unsafe/malformed YAML fail clearly before profile evaluation. Candidate eligibility and the default development/oracle workflow remain unchanged. Explicit development actual_tracker and mock_tracker replay adapters are implemented; held-out evaluation remains out of scope.
 
 `RankingPipeline(config=Path("configs/ranking.yaml"))` uses YAML selection directly. Its programmatic no-config constructor and `StructuredRanker()` retain the accepted inline M1 baseline for compatibility; the evaluator always passes its loaded selection explicitly. The old `configs/ranking.json` remains a compatibility fixture, not an active default. JSON selection overrides remain supported.
 
@@ -173,11 +185,11 @@ Do not change Job Zone 4–5 eligibility or supplied z-scores during an algorith
 8. Save complete artifacts, append history, inspect regressions, and record latency and quality separately.
 9. Accept, revise, or revert with written evidence; update this memory, README status, and milestone report consistently.
 
-M3 is complete; see [its acceptance and decision report](../reports/ranking/m3/DECISION.md). Select structured-only, lexical-only or hybrid with the saved `configs/ranking/m3_*.json` presets, or enable `m3: {algorithm: bm25, variant: baseline_v1}` in the ranking YAML. M1's legacy facade and default selection stay unchanged. The live application's `pipeline/registry.py` still selects `StructuredRanker`; full app wiring remains an integration follow-up.
+M3 is complete; see [its acceptance and decision report](../reports/ranking/m3/DECISION.md). Select structured-only, lexical-only or hybrid with the saved `configs/ranking/m3_*.json` presets, or enable `m3: {algorithm: bm25, variant: baseline_v1}` in the ranking YAML. M1's legacy facade and default selection stay unchanged. The live application's `pipeline/registry.py` now selects the configurable `RankingPipeline`; the legacy structured factory remains available.
 
 BM25's baseline is frozen in `recommender/bm25_ranker.py`: `k1=1.5`, `b=.75`, positive smoothed IDF, lowercase ASCII/apostrophe tokens, an explicit stopword list retaining negators, no stemming, and linear query term counts across accumulated user text. Only eligible prepared documents are indexed. Missing documents fail when BM25 is enabled. All strictly positive matches are ranked; no zero padding or lexical cutoff. Raw dislike and familiarity wording is not filtered, and cannot be interpreted semantically by BM25. Index metadata and resolved parameters are saved in each experiment manifest.
 
-Keep the negative baseline result: structured Hit@5=.166667, BM25=.016667, hybrid=.133333 on the same 60 development/oracle inputs. Do not claim actual-tracker or probing effectiveness. M4 was subsequently implemented and evaluated; the next planned milestone is M5 application integration, after a subsequent instruction. Lexical tuning requires a new preserved variant and a separate hypothesis/control comparison.
+Keep the negative baseline result: structured Hit@5=.166667, BM25=.016667, hybrid=.133333 on the same 60 development/oracle inputs. Do not claim actual-tracker or probing effectiveness. M4 was subsequently implemented and evaluated; M5 application wiring is now implemented with fixture acceptance. Lexical tuning requires a new preserved variant and a separate hypothesis/control comparison.
 
 ## M4 implementation and experiment memory
 
@@ -195,4 +207,4 @@ Select the M4 presets in `configs/ranking/m4_*.json`, or set `m4: {algorithm: mi
 
 Seven saved development conditions cover all standalone/pairwise/three-way combinations. The three earlier controls reproduce exactly; all four dense conditions reproduce exact predictions (including provisional task matches), inputs and metrics after cache reload. Dense-only Hit@5=.05 versus BM25=.016667, but structured+dense=.116667 and three-way=.05 remain worse than structured=.166667. Keep M1-only default. Record negative results; diagnose aggregation/evidence before elaborate ANN or adaptive fusion.
 
-The live app factory still selects `StructuredRanker`; the upstream extractor checkpoint is absent, and tracker/NLI/policy completion and latency agreement remain team/M5 integration work. No held-out tuning, actual-tracker evaluation, or end-to-end probing claim is made.
+The live app factory now selects configurable ranking. The upstream extractor checkpoint is absent, and tracker/NLI/policy completion and latency agreement remain team integration work. No held-out tuning, actual-tracker evaluation, or end-to-end probing claim is made.

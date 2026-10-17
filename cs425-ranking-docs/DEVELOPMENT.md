@@ -157,15 +157,17 @@ The implemented envelope exposes `status`, `reason`, and `occupations: list[Rank
 - Agree on an explicit latency budget with teammates.
 
 **Tests**
-- [ ] Different user states change rank as expected.
-- [ ] Results have valid occupation/task relationships.
-- [ ] No duplicate/ineligible occupations.
-- [ ] Policy handles fewer than 100 results and no-ranking case.
-- [ ] Median/p95 latency measured with preloaded indexes.
+- [x] Different user states change rank as expected.
+- [x] Results have valid occupation/task relationships.
+- [x] No duplicate/ineligible occupations.
+- [x] Policy handles fewer than 100 results and no-ranking case.
+- [x] Median/p95 latency measured with preloaded indexes.
 
 **Decision gate:** **Baseline freeze point.** Save configuration as `baseline_v1`, including the current raw-text query policy. This is the primary control for evidence-aware experiments.
 
 **Deliverable:** `reports/ranking/m5/`, integration trace, frozen baseline manifest.
+
+Implementation evidence: [M5 acceptance mapping](../reports/ranking/m5/DECISION.md). These checks pass with explicitly mocked upstream components and real ranking. Full team acceptance remains pending production tracker/NLI/policy completion, the extractor checkpoint, and teammate agreement on a latency budget. The ranking integration control is frozen as aseline_v1; this does not claim actual-tracker quality.
 
 ## M6 — Experimental: contradiction-aware evidence lifecycle
 

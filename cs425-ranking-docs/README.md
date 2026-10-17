@@ -17,13 +17,18 @@ This section is the canonical current status; milestone reports preserve their o
 | M2 — Evaluation | Implemented and accepted; frozen structured-only oracle development baseline, metrics, exports, and paired comparison | [M2 decision](../reports/ranking/m2/DECISION.md) |
 | M3 - Lexical + fusion | Implemented and evaluated; experimental baseline, M1-only default retained | [M3 decision](../reports/ranking/m3/DECISION.md) |
 | M4 - Semantic task retrieval | Implemented and evaluated; cached MiniLM/FAISS and three-signal baseline | [M4 decision](../reports/ranking/m4/DECISION.md) |
-| M5-M9 | Not implemented; next is application integration | [Development roadmap](DEVELOPMENT.md) |
+| M5 | Ranking integration implemented and fixture-tested; baseline frozen; real upstream and latency sign-off pending | [M5 acceptance](../reports/ranking/m5/DECISION.md) |
+| M6-M9 | Not implemented | [Development roadmap](DEVELOPMENT.md) |
 
-**Current gate: stop before M5.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. M4 now provides cached semantic task retrieval and provisional task matches. Live configurable-hybrid integration and stance-aware supporting evidence remain pending.
+**Current gate: M5 ranking integration frozen; production upstream completion and teammate latency agreement remain pending.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. M4 now provides cached semantic task retrieval and provisional task matches. Live configurable ranking is wired through the shared System. Evidence stays provisional; production upstream components and stance-aware support remain pending.
 
-The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. The current ranking/evaluation suite passes 85 tests. Full discovery ran 149 tests with one error from the missing upstream extractor checkpoint; see the M4 report. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
+The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. At M4, the ranking/evaluation suite passed 85 tests. M5 full discovery runs 155 tests: 154 pass, with the same pre-existing missing extractor-checkpoint error. All six M5 integration tests pass; see the M5 acceptance report. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
 
 ## Component configuration
+
+The live app now selects `ranker: configured` in `configs/system.json`, loading the same ranking YAML once at startup. The legacy `structured` factory stays available. M1-only remains the default. Full app startup still requires the team's production extractor checkpoint, tracker, NLI and policy implementations.
+
+M5 freezes the ranking control as [`baseline_v1`](../configs/ranking/baseline_v1.json), alongside an independently tested optional three-way RRF preset. See the [acceptance mapping, latency and limitations](../reports/ranking/m5/DECISION.md).
 
 The evaluator automatically loads [`configs/ranking.yaml`](../configs/ranking.yaml) for M1/M3/M4 algorithms, variants, and fusion, and [`configs/m2.json`](../configs/m2.json) for evaluation settings. Edit these files independently, then run from the repository root:
 
@@ -49,9 +54,29 @@ Each report saves separate `evaluation_config.json`, `ranking_config.json`, and 
 python -m recommender.evaluate --config <report>/evaluation_config.json --ranking-config <report>/ranking_config.json
 ```
 
-The registered variants are `weighted_dot_product@baseline_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`. `null` disables a component; RRF `k=60` is implemented. One usable signal passes through, no usable signal returns `no_signal`, and multiple usable signals use equal-weight occupation-level RRF. M1 scoring and all six M2 metrics are unchanged. Evaluation remains development/oracle-only with the established candidate pool.
+The registered variants are `weighted_dot_product@baseline_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`. `null` disables a component; RRF `k=60` is implemented. One usable signal passes through, no usable signal returns `no_signal`, and multiple usable signals use equal-weight occupation-level RRF. M1 scoring and all six M2 metrics are unchanged. Evaluation defaults to development/oracle with the established candidate pool; explicit actual_tracker and mock_tracker snapshot replay is also supported.
 
 In Python, use `RankingPipeline(config=Path("configs/ranking.yaml"))`; existing `StructuredRanker()` callers remain valid. See the [architecture memory](../docs/RANKING_EXPERIMENT_ARCHITECTURE.md) for configuration provenance, variant preservation, and reproduction rules.
+
+### Multi-turn tracker evaluation
+
+The default evaluator remains oracle-only. To evaluate recorded conversations, copy `configs/m2.json`, set `input_mode` to `actual_tracker` and `profiles` to your annotated session JSONL, then pass that evaluation file with `--config`. Keep algorithm selection in the ranking YAML. Use `mock_tracker` for scripted or simulated tracker snapshots; never relabel fixtures as actual tracker runs.
+
+`System.tracker_record(state, profile_id=..., revision=...)` exports chronological user messages and the tracker snapshot actually used each turn, with extractor/tracker identity and caller-supplied code/model revision. Declare the System's input mode explicitly; unverified exports are rejected. Independently add `target` and the usual `related` relevance labels, then write one JSON object per session. Scoring never receives those labels. Runtime values must be in `[-1,1]`; unknown dimensions are distinguished by `observed_types`.
+
+```json
+{"id":"session_1","input_mode":"actual_tracker","upstream":{"extractor":"deberta","tracker":"decay","revision":"<code-and-model-revisions>"},"turns":[{"text":"I enjoy repairing machines.","interests":{"R":0.8,"I":0,"A":0,"S":0,"E":0,"C":0},"observed_types":["R"]},{"text":"Actually, I prefer analysing data.","interests":{"R":-0.2,"I":0.9,"A":0,"S":0,"E":0,"C":0},"observed_types":["R","I"]}],"target":"15-2051.00","related":{"short":[],"long":[],"supplemental":[]}}
+```
+
+This illustrates the format, not a real tracker capture. The evaluator replays all turns, writes `turn_predictions.json`, and computes unchanged M2 metrics on the final turn of each session. Input mode and upstream provenance are fingerprinted in saved inputs; incompatible conditions are rejected by paired comparison. Central history descriptions identify the mode. Match inputs, split, datasets and upstream revisions before comparing configurations.
+
+To reproduce the frozen **mock-upstream** integration baseline and optional real three-way ranking benchmark:
+
+```powershell
+python scripts/freeze_ranking_baseline.py --output reports/ranking/m5/reproduction
+```
+
+This requires the prepared M4 model/cache and writes fresh reports, traces, source snapshots, latency measurements and history rows. It does not evaluate production upstream behavior.
 
 ## M3 baseline and measured decision
 
@@ -123,7 +148,7 @@ python -m recommender.history reports/ranking/m2/baseline --legacy-baseline
 
 The second command verifies and registers the original baseline, or safely skips its existing ID. It requires the original fingerprint-matching local datasets. History writers use an exclusive sibling `.lock` file; a busy registry fails without changing rows. If a process is interrupted, verify no writer is running before removing a stale lock and retrying.
 
-Future rankers can call `recommender.history.append_history(report_path)` after exporting a complete run. Set manifest `components` to stable algorithm/variant IDs, e.g. `{"m1": "weighted_dot_product@baseline_v1", "m3": "bm25@baseline_v1", "m4": "minilm@mean_tasks_v1", "fusion": "rrf_k60"}`. M1/M3/M4/RRF are implemented; configurations select which signals participate. The original M2 row retains its unversioned `weighted_dot_product` identifier unchanged; no CSV schema migration is needed. Keep exact parameters, input mode, split, eligibility, fingerprints, and evaluator version in the detailed manifest/configuration. The evaluator uses the common pipeline and remains development/oracle-only; M1, BM25, and MiniLM task retrieval are its implemented scoring components today.
+Future rankers can call `recommender.history.append_history(report_path)` after exporting a complete run. Set manifest `components` to stable algorithm/variant IDs, e.g. `{"m1": "weighted_dot_product@baseline_v1", "m3": "bm25@baseline_v1", "m4": "minilm@mean_tasks_v1", "fusion": "rrf_k60"}`. M1/M3/M4/RRF are implemented; configurations select which signals participate. The original M2 row retains its unversioned `weighted_dot_product` identifier unchanged; no CSV schema migration is needed. Keep exact parameters, input mode, split, eligibility, fingerprints, and evaluator version in the detailed manifest/configuration. The evaluator uses the common pipeline, defaults to development/oracle, and supports explicit development tracker-snapshot replay; M1, BM25, and MiniLM task retrieval are its implemented scoring components today.
 
 **Comparison guidance:** the CSV is a registry, not a leaderboard. Compare only matching input modes, datasets, candidate pools, and metric definitions. Use `python -m recommender.compare <control-directory> <treatment-directory> --output <new-directory>` for compatible paired runs. Original M2 artifacts retain evaluator `m2-v1` and three metrics; new runs use `m2-v2` and all six. Legacy-to-legacy comparisons still work. Cross-version comparisons are rejected: reproduce the control and treatment with the same evaluator before comparing them. Prediction scores/order reproduce, while run IDs, timing, timestamps, and source metadata vary.
 
