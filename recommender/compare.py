@@ -18,6 +18,11 @@ def paired_comparison(control: Path, treatment: Path, *, samples=2000, seed=425)
                 "ranking_depth", "metric_definitions", "evaluator_version"):
         if left[key] != right[key]:
             raise ValueError(f"incompatible paired runs: {key}")
+    # Adding dense retrieval introduces an auxiliary corpus. When both runs use
+    # it, require the same source tasks; adding the component to a control is valid.
+    if left.get("auxiliary_dataset_sha256") and right.get("auxiliary_dataset_sha256"):
+        if left["auxiliary_dataset_sha256"] != right["auxiliary_dataset_sha256"]:
+            raise ValueError("incompatible paired runs: auxiliary_dataset_sha256")
     def indexed(directory):
         rows = read(directory, "per_profile.json")
         result = {r["profile_id"]: r for r in rows}

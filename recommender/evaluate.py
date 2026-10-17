@@ -111,6 +111,8 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
                                 **asdict(occupation)})
     summary = aggregate(metrics)
     source = {str(p): digest(p) for p in sorted(Path("recommender").glob("*.py"))}
+    dense_metadata = ranker.component_metadata.get("m4", {})
+    dense_identity = dense_metadata.get("identity", {})
     revision = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
     status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
     output.mkdir(parents=True)
@@ -164,8 +166,11 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         "inputs_sha256": digest(output / "inputs.json"), "pool": sorted(pool),
         "eligibility": evaluation_config["eligibility"], "ranking_depth": "full eligible pool; MRR not truncated at 100",
         "metric_definitions": "Hit@1/5/10 exact target; full-pool MRR; NDCG@5/10 gains 2^grade-1, target=4/short=3/long=2/supplemental=1, max grade per eligible code, zero IDCG=0; all profiles in denominator",
-        "python": platform.python_version(), "dependencies": {"PyYAML": version("PyYAML")},
-        "model_revision": None, "task_index_fingerprint": None, "seed": evaluation_config["seed"],
+        "python": platform.python_version(), "dependencies": {"PyYAML": version("PyYAML"), **dense_identity.get("packages", {})},
+        "model_revision": dense_identity.get("parameters", {}).get("model_revision"),
+        "task_index_fingerprint": dense_metadata.get("artifact_sha256", {}).get("index.faiss"),
+        "auxiliary_dataset_sha256": {dense_identity["parameters"]["tasks_path"]: dense_identity["tasks_sha256"]} if dense_identity else {},
+        "seed": evaluation_config["seed"],
         "test_summary": "See reports/ranking/m2/DECISION.md for executed acceptance results",
         "command": f"python -m recommender.evaluate --config {shlex.quote((output / 'evaluation_config.json').as_posix())} --ranking-config {shlex.quote((output / 'ranking_config.json').as_posix())} --output <new-directory>",
     })

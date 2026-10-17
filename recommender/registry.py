@@ -83,4 +83,7 @@ def default_registry() -> AlgorithmRegistry:
     from .bm25_ranker import BM25Ranker, BASELINE_PARAMETERS as BM25_PARAMETERS
     registry.register_algorithm("m3", "bm25", BM25Ranker)
     registry.register_variant("m3", "bm25", "baseline_v1", BM25_PARAMETERS)
+    from .dense_config import BASELINE_PARAMETERS as DENSE_PARAMETERS, create_dense
+    registry.register_algorithm("m4", "minilm", create_dense)
+    registry.register_variant("m4", "minilm", "mean_tasks_v1", DENSE_PARAMETERS)
     return registry

@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from math import isfinite
 from typing import Literal, Mapping, Protocol
+from .schemas import TaskEvidence
 
 
 @dataclass(frozen=True)
@@ -30,12 +31,13 @@ class ComponentRanking:
     status: Literal["usable", "unavailable", "unusable"]
     occupations: tuple[ComponentScore, ...] = ()
     reason: str | None = None
+    evidence: tuple[TaskEvidence, ...] = ()
 
     def __post_init__(self):
         if self.status not in {"usable", "unavailable", "unusable"}:
             raise ValueError("invalid component signal status")
         if self.status != "usable":
-            if self.occupations or not self.reason:
+            if self.occupations or self.evidence or not self.reason:
                 raise ValueError("inactive signal requires an empty ranking and reason")
             return
         if not isinstance(self.occupations, tuple) or not self.occupations:
@@ -53,6 +55,9 @@ class ComponentRanking:
             codes.add(item.code)
         if list(self.occupations) != sorted(self.occupations, key=lambda item: (-item.score, item.code)):
             raise ValueError("component output must sort score descending, code ascending")
+        for evidence in self.evidence:
+            if not isinstance(evidence, TaskEvidence) or evidence.occupation_code not in codes or not evidence.task_id or not evidence.text.strip() or not isfinite(evidence.match_score):
+                raise ValueError("task evidence must reference a ranked occupation and finite task match")
 
     def validate_pool(self, pool: set[str]) -> None:
         if any(item.code not in pool for item in self.occupations):

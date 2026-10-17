@@ -64,7 +64,7 @@ class ArchitectureTests(unittest.TestCase):
                 ("m1", {"algorithm": "cosine_similarity", "variant": "baseline_v1"}, "unknown algorithm"),
                 ("m1", {"algorithm": "weighted_dot_product", "variant": "missing"}, "unknown variant"),
                 ("m3", {"algorithm": "unknown_bm25", "variant": "baseline_v1"}, "unknown algorithm"),
-                ("m4", {"algorithm": "minilm", "variant": "baseline_v1"}, "unknown algorithm")):
+                ("m4", {"algorithm": "unknown_minilm", "variant": "baseline_v1"}, "unknown algorithm")):
             config = deepcopy(BASELINE_CONFIG)
             config["components"][key] = selection
             with self.subTest(selection=selection), self.assertRaisesRegex(ValueError, error):

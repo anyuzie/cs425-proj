@@ -94,11 +94,16 @@ class RankingPipeline:
         if selected.status != "usable":
             return RankingResponse("no_signal", reason=selected.reason)
         scores = {key: {item.code: item for item in ranking.occupations} for key, ranking in rankings.items()}
+        evidence = {}
+        for ranking in rankings.values():
+            for item in ranking.evidence:
+                evidence.setdefault(item.occupation_code, []).append(item)
         results = []
         for rank, item in enumerate(selected.occupations[:top_k], 1):
             occupation = self._occupations[item.code]
             signals = {SIGNAL_NAMES[key]: SignalScore(values[item.code].score, values[item.code].rank)
                        for key, values in scores.items() if item.code in values}
             results.append(RankedOccupation(occupation.code, occupation.title, rank, dict(occupation.z_scores),
-                                            rrf_score=item.score if fused else None, signals=signals))
+                                            rrf_score=item.score if fused else None, signals=signals,
+                                            evidence=deepcopy(evidence.get(item.code, []))))
         return RankingResponse("ranked", occupations=results)
