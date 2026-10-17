@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import random
 
-from .evaluation import METRICS
+from .evaluation import METRICS, LEGACY_METRICS
 from .evaluate import save_json
 
 
@@ -27,20 +27,25 @@ def paired_comparison(control: Path, treatment: Path, *, samples=2000, seed=425)
     a, b = indexed(control), indexed(treatment)
     if a.keys() != b.keys():
         raise ValueError("paired runs must contain identical profile IDs")
-    diffs = [{"profile_id": pid, **{m: b[pid][m] - a[pid][m] for m in METRICS},
+    # Old saved runs retain their original three metrics. Compare additional
+    # cutoffs only when every profile on both sides supplies them.
+    metrics = tuple(m for m in METRICS if all(m in row for row in (*a.values(), *b.values())))
+    if not set(LEGACY_METRICS) <= set(metrics):
+        raise ValueError("paired runs are missing required metrics")
+    diffs = [{"profile_id": pid, **{m: b[pid][m] - a[pid][m] for m in metrics},
               "control_target_rank": a[pid]["target_rank"],
               "treatment_target_rank": b[pid]["target_rank"]} for pid in sorted(a)]
     rng = random.Random(seed)
-    bootstrap = {m: [] for m in METRICS}
+    bootstrap = {m: [] for m in metrics}
     for _ in range(samples):
         selected = rng.choices(diffs, k=len(diffs))
-        for m in METRICS:
+        for m in metrics:
             bootstrap[m].append(sum(row[m] for row in selected) / len(selected))
     summary = {"control_run_id": left["run_id"], "treatment_run_id": right["run_id"],
                "profiles": len(diffs), "bootstrap_samples": samples, "seed": seed,
                "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
                "metrics": {}}
-    for m in METRICS:
+    for m in metrics:
         values = sorted(bootstrap[m])
         summary["metrics"][m] = {
             "mean_difference": sum(row[m] for row in diffs) / len(diffs),

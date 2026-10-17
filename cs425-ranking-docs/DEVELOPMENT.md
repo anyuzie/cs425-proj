@@ -2,6 +2,8 @@
 
 Return to [README](README.md) · See [Evaluation](EVALUATION.md)
 
+**Current status:** M0?M2 are implemented and accepted locally; the current gate is before M3. See the [canonical status table](README.md#current-implementation-status) and [M2 decision](../reports/ranking/m2/DECISION.md). Checked items below reflect recorded acceptance results, not a new test run. Upstream/downstream teammate sign-off remains pending.
+
 ## Rules for every milestone
 
 Each milestone follows the same loop:
@@ -26,7 +28,7 @@ Specify acceptance criteria → Implement smallest version → Unit/integration 
 - Confirm split membership (planned: 60 development, 100 held-out), target eligibility, and whether graded relevance labels exist.
 - Define runtime contract; distinguish unknown RIASEC from a known zero.
 - Clarify what text query represents: latest turn, all user turns, or active evidence; keep baseline as accumulated **user** utterances excluding bot questions.
-- Agree with policy developer on top-100 output and empty/no-signal behavior.
+- Agree with policy developer on top-100 output and empty/no-signal behavior (external sign-off remains pending; the local contract is implemented).
 
 **Minimum interface**
 
@@ -36,18 +38,18 @@ rank(
     observed_types: set[str],          # known dimension can still be 0
     user_sentences: list[str],         # user statements only
     top_k: int = 100,
-) -> list[RankedOccupation]
+) -> RankingResponse
 ```
 
-Output needs `code`, `title`, final `rank`, signal scores/ranks where available, and task evidence when implemented. Validate finite interest scores and allowed keys. Empty/neutral-only inputs return a clearly signaled no-ranking result, agreed with policy.
+The implemented envelope exposes `status`, `reason`, and `occupations: list[RankedOccupation]`; external policy agreement remains pending. Each occupation output needs `code`, `title`, final `rank`, signal scores/ranks where available, and task evidence when implemented. Validate finite interest scores and allowed keys. At M1, inputs without observed nonzero interests return a clearly signaled no-ranking result; text-only ranking remains planned. Policy agreement on this envelope is pending.
 
 **Important:** Development `hidden_slots` are z-scale synthetic inputs according to the current implementation plan; do not clamp or silently treat them as `[-1,1]` tracker scores. Provide a separate `oracle` adapter and label its reports.
 
 **Acceptance / gate**
-- [ ] Data audit saved (counts, missingness, eligibility, split summary).
-- [ ] Contract documented with one mock request/result.
-- [ ] Data validation scripts fail clearly on broken fixtures.
-- [ ] All open decisions recorded; unresolved blocking decisions resolved before M1.
+- [x] Data audit saved (counts, missingness, eligibility, split summary).
+- [x] Contract documented with one mock request/result.
+- [x] Data validation scripts fail clearly on broken fixtures.
+- [x] All open decisions recorded; unresolved blocking decisions resolved before M1.
 
 **Deliverable:** `reports/ranking/m0.md`.
 
@@ -62,11 +64,11 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 4. Build CLI with a fixed mock tracker profile; print top five.
 
 **Tests**
-- [ ] Small fixture matches hand-computed scores.
-- [ ] Negative values and unobserved dimensions behave as expected.
-- [ ] Known zero differs from unknown dimension.
-- [ ] Invalid/nonfinite/out-of-range runtime input is rejected.
-- [ ] Repeated runs are identical and all outputs belong to eligible pool.
+- [x] Small fixture matches hand-computed scores.
+- [x] Negative values and unobserved dimensions behave as expected.
+- [x] Known zero differs from unknown dimension.
+- [x] Invalid/nonfinite/out-of-range runtime input is rejected.
+- [x] Repeated runs are identical and all outputs belong to eligible pool.
 
 **Gate:** runnable CLI + tests pass. No accuracy threshold yet.
 
@@ -80,15 +82,15 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 1. Implement Hit@5, MRR, and graded NDCG@10; use the proposed relevance grades `target=4`, `Primary-Short=3`, `Primary-Long=2`, `Supplemental=1` where valid.
 2. Deduplicate related codes by maximum grade; exclude ineligible codes from both labels and ideal DCG.
 3. Implement per-profile prediction export, aggregate report, and paired comparison script.
-4. Store input mode: `mock_tracker`, `oracle`, or `actual_tracker` (never pool their results).
+4. Store input mode: `mock_tracker`, `oracle`, or `actual_tracker` (never pool their results). The M2 runner implements only the frozen development/oracle condition; other evaluation modes require future adapters.
 5. Run structured-only baseline on development data; do not use target labels as ranking inputs.
 
 **Tests**
-- [ ] Hand-computed target at rank 1, rank 6, and absent cases.
-- [ ] Perfect NDCG=1; irrelevant NDCG=0; empty ideal DCG handled.
-- [ ] Duplicate recommendations cause evaluator error.
-- [ ] Missing/ineligible targets explicitly reported.
-- [ ] Frozen baseline can be reproduced using saved config and data fingerprint.
+- [x] Hand-computed target at rank 1, rank 6, and absent cases.
+- [x] Perfect NDCG=1; irrelevant NDCG=0; empty ideal DCG handled.
+- [x] Duplicate recommendations cause evaluator error.
+- [x] Missing/ineligible targets explicitly reported.
+- [x] Frozen baseline can be reproduced using saved config and data fingerprint.
 
 **Gate:** metrics are trustworthy. Fix evaluator before comparing models.
 

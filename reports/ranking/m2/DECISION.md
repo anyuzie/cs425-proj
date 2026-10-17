@@ -2,6 +2,8 @@
 
 **Decision: M2 accepted. Retain the structured-only oracle development run as the control; stop before M3.** All 38 M0–M2 tests pass (10 new M2 tests). Correctness and reproducibility are established; recommendation quality remains limited. No held-out ranking or tuning was performed.
 
+This is the latest accepted milestone. See the [canonical implementation status](../../../cs425-ranking-docs/README.md#current-implementation-status); the [M1 report](../m1.md) preserves the earlier structured-only acceptance results.
+
 ## Implementation
 
 - `recommender/evaluation.py`: exact-target Hit@5, full-pool MRR, and graded NDCG@10. Grades are target=4, Primary-Short=3, Primary-Long=2, Supplemental=1; duplicates use the maximum grade. Ineligible labels are excluded from both DCG and IDCG. Zero IDCG yields zero and is counted. Missing/ineligible targets remain in the denominator and are reported. Duplicate or out-of-pool recommendations raise errors.
@@ -42,9 +44,27 @@ python -m recommender.evaluate --config configs/m2.json --output reports/ranking
 python -m recommender.compare reports/ranking/m2/baseline reports/ranking/m2/reproduction_01 --output reports/ranking/m2/comparison_01
 ```
 
-On this machine substitute `& 'C:/Users/aanny/AppData/Local/Programs/Python/Python313/python.exe'` for `python`. Use a fresh output directory on every run. Predictions, input snapshots, config and metrics reproduce exactly; timestamps, timings, and git/source metadata can differ. No third-party dependencies are required.
+On this machine substitute `& 'C:/Users/aanny/AppData/Local/Programs/Python/Python313/python.exe'` for `python`. Use a fresh output directory on every run. For the original M2 implementation, predictions, input snapshots, config and metrics reproduced exactly; timestamps, timings, and git/source metadata could differ. The subsequent history extension also assigns a unique run ID to each invocation, so compare prediction content excluding run identity when checking reproducibility. No third-party dependencies are required.
 
 See `failure_review.md` for five inspected misses. There is no treatment at M2, so there are no claimed gains or regressions versus a prior measured model. Bootstrap self-comparison validates plumbing; its zero interval is not an uncertainty estimate for baseline accuracy.
+
+## Subsequent evaluation-history extension
+
+M2 now also supports a central [append-only evaluation history](../evaluation_history.csv), Hit@1, Hit@10, and NDCG@5. The historical acceptance results and original baseline artifacts above are unchanged. See the [README usage and schema](../../../cs425-ranking-docs/README.md#persistent-evaluation-history) for registration and comparison rules.
+
+The first history entry retains the original baseline run ID, timestamp, configuration fingerprint, and revision. Added cutoffs were calculated from its saved predictions after fingerprint verification: Hit@1 = 0.033333, Hit@10 = 0.433333, NDCG@5 = 0.151459. Original Hit@5, MRR, and NDCG@10 reproduce exactly. New evaluations use unique run IDs and evaluator version `m2-v2`; the original baseline remains `m2-v1`. The extended suite records **44 passing tests**, including history append/deduplication, unchanged historical rows and artifacts, failure handling, added cutoffs, future component registration, and legacy comparison compatibility. This is an evaluation extension, not a new ranker or progression to M3.
+
+## Subsequent modular architecture refactor
+
+The evaluator now invokes `RankingPipeline`, with optional `--ranking-config` selection and saved resolved algorithm/variant parameters. The existing M2 command and development/oracle restrictions remain valid, and the six metric definitions are unchanged. New history entries use `weighted_dot_product@baseline_v1`; the original CSV row and baseline artifacts remain unchanged. See the [refactor acceptance report](../refactor/DECISION.md) and [architecture memory](../../../docs/RANKING_EXPERIMENT_ARCHITECTURE.md) for current modules, reproducibility rules, and limitations.
+
+## Automatic default-configuration workflow
+
+The current evaluator automatically loads `configs/m2.json` (evaluation settings) and `configs/ranking.yaml` (component/variant/fusion selection). Run `python -m recommender.evaluate` from the repository root after activating the project environment. PyYAML is pinned in `requirements.txt` and installed in the local `.venv`.
+
+Reports receive unique paths under `reports/ranking/experiments/`. Each complete run saves separate evaluation/selection/resolved-parameter snapshots, original source bytes, individual SHA-256 hashes, the compatibility reproduction bundle, and existing prediction/metric/provenance artifacts before appending history. Legacy configuration snapshots remain readable; current default evaluation settings cannot override ranking selection.
+
+**61 tests pass**, including the zero-argument subprocess workflow, safe YAML/duplicate-key errors, missing configuration errors, unknown algorithm/variant rejection before data loading, separate snapshot/hash verification, configuration separation, and reproduction. Existing M1 predictions, M2 metric definitions, original artifacts, and historical CSV rows remain unchanged. Test outputs are isolated in temporary directories.
 
 ## Next gate
 
