@@ -1,11 +1,26 @@
-"""DeBERTa checkpoint adapter for the M5 extractor -> tracker -> ranking boundary.
+"""STEP 1 · Preference extractor (DeBERTa).  STATUS: waiting for your model.
 
-The trained sequence-classification checkpoint emits 45 logits: direction (6x3),
-reason (3), and strength (6x4). Calibration comes from config.extractor. Runtime
-SlotReading values use the existing label indices and discrete strength mapping.
-Configure paths.extractor_checkpoint in configs/system.json; local files only.
-Heavy dependencies and the checkpoint are loaded once, on construction.
+Model: microsoft/deberta-v3-base, fine-tuned on data/extractor.jsonl (manual section 4).
+Switch: already on ("extractor": "deberta" in configs/system.json). The server will not start until you finish.
+
+How to integrate your model (you fill ONLY load() and predict(); read() below is ours):
+  1. Put your checkpoint in models/extractor/ (gitignored). Share it via Drive, with a hash in the folder name.
+  2. Create pipeline/extractor_model.py with your model class (the 3-head DeBERTa: direction, strength, reason).
+  3. Fill in load() and predict() below, then delete their `raise NotImplementedError` lines.
+  4. pip install -r requirements-models.txt
+  5. .venv/bin/python -m unittest discover -s tests
+  6. Start the server (.venv/bin/uvicorn app.server:app) and open /api/health: "extractor" must read "deberta".
+
+Do not import torch or transformers at the top of this file; import them inside load() and predict().
 """
+
+# Original teammate hand-off instructions above are preserved verbatim from main.
+# Current adapter: load()/predict() are implemented using Hugging Face AutoModel,
+# so a separate extractor_model.py is not required by this implementation.
+# Supply the complete local checkpoint (config, tokenizer and trained weights),
+# directly in models/extractor/ or at configs/system.json paths.extractor_checkpoint.
+# The adapter expects 45 semantically labelled logits and config.extractor calibration.
+# See reports/ranking/m5/EXTRACTOR_INTEGRATION.md for implementation and validation status.
 
 import json
 import math

@@ -1,6 +1,7 @@
 """Replay chronological tracker snapshots without supplying evaluation labels to rankers."""
 
 from .schemas import RankingRequest
+from .evidence import validate_evidence
 
 
 def runtime_requests(profile, input_mode):
@@ -17,7 +18,7 @@ def runtime_requests(profile, input_mode):
     turns = profile.get("turns")
     if not isinstance(turns, list) or not turns:
         raise ValueError("tracker profiles require nonempty chronological turns")
-    history, requests = [], []
+    history, requests, previous = [], [], None
     for turn in turns:
         if not isinstance(turn, dict) or not {"text", "interests", "observed_types"} <= turn.keys():
             raise ValueError("each turn requires text, interests and observed_types")
@@ -27,5 +28,11 @@ def runtime_requests(profile, input_mode):
         if not isinstance(observed, list) or any(not isinstance(t, str) for t in observed) or len(set(observed)) != len(observed):
             raise ValueError("observed_types must be a unique list of RIASEC keys")
         history.append(turn["text"])
-        requests.append(RankingRequest(dict(turn["interests"]), set(observed), list(history)))
+        evidence = turn.get("source_evidence")
+        if evidence is not None:
+            evidence = validate_evidence(evidence, history, previous)
+            previous = evidence
+        elif previous is not None:
+            raise ValueError("source_evidence cannot disappear from later snapshots")
+        requests.append(RankingRequest(dict(turn["interests"]), set(observed), list(history), source_evidence=evidence))
     return requests

@@ -8,6 +8,7 @@ from .components import ComponentInput, ComponentRanking
 from .configuration import load_configuration
 from .data_loader import load_eligible_occupations
 from .fusion import select_ranking, validate_fusion
+from .evidence import select_evidence
 from .registry import AlgorithmRegistry, default_registry
 from .schemas import TYPES, OracleInput, RankedOccupation, RankingRequest, RankingResponse, SignalScore
 
@@ -23,8 +24,11 @@ class RankingPipeline:
         if isinstance(config, (str, Path)):
             config, _ = load_configuration(Path(config))
         config = deepcopy(BASELINE_CONFIG if config is None else config)
-        if not isinstance(config, dict) or set(config) != {"components", "fusion"}:
-            raise ValueError("ranking config requires components and fusion")
+        if not isinstance(config, dict) or not {"components", "fusion"} <= set(config) or set(config) - {"components", "fusion", "evidence_filter"}:
+            raise ValueError("ranking config requires components and fusion; optional evidence_filter")
+        self.evidence_filter = config.get("evidence_filter", "raw")
+        if self.evidence_filter not in ("raw", "active_only"):
+            raise ValueError("evidence_filter must be raw or active_only")
         selections = config["components"]
         if not isinstance(selections, dict) or set(selections) != set(SIGNAL_NAMES):
             raise ValueError("components must contain exactly m1, m3, m4; use null to disable")
@@ -52,7 +56,8 @@ class RankingPipeline:
     @property
     def resolved_config(self):
         return {"components": {key: asdict(self._resolved[key]) if key in self._resolved else None
-                                for key in SIGNAL_NAMES}, "fusion": deepcopy(self._config["fusion"])}
+                                for key in SIGNAL_NAMES}, "fusion": deepcopy(self._config["fusion"]),
+                **({"evidence_filter": self.evidence_filter} if "evidence_filter" in self._config else {})}
 
     @property
     def component_identifiers(self):
@@ -69,11 +74,23 @@ class RankingPipeline:
 
     def rank(self, interests: dict[str, float], observed_types: set[str],
              user_sentences: list[str], top_k: int = 100) -> RankingResponse:
+        if self.evidence_filter != "raw":
+            raise ValueError("active_only requires source_evidence; call rank_with_evidence")
         request = RankingRequest(interests, observed_types, user_sentences, top_k)
         inputs = ComponentInput(dict(request.interests), frozenset(request.observed_types), tuple(request.user_sentences))
         return self._rank(inputs, request.top_k)
 
+    def rank_with_evidence(self, interests, observed_types, user_sentences, source_evidence, top_k=100):
+        request = RankingRequest(interests, observed_types, user_sentences, top_k)
+        sentences, diagnostics = select_evidence(request.user_sentences, source_evidence, self.evidence_filter)
+        # Only text changes. M1 receives the exact same current vector/observed set.
+        response = self._rank(ComponentInput(dict(request.interests), frozenset(request.observed_types), tuple(sentences)), top_k)
+        response.query_diagnostics = diagnostics
+        return response
+
     def rank_oracle(self, inputs: OracleInput) -> RankingResponse:
+        if self.evidence_filter != "raw":
+            raise ValueError("active_only requires tracker evidence snapshots; oracle inputs have no lifecycle metadata")
         if not isinstance(inputs, OracleInput):
             raise ValueError("rank_oracle requires OracleInput")
         inputs.__post_init__()

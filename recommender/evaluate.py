@@ -101,6 +101,9 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
     mode = evaluation_config["input_mode"]
     # Validate every runtime snapshot before any scoring or report creation.
     replay = {p["id"]: runtime_requests(p, mode) for p in profiles} if mode != "oracle" else {}
+    if ranker.evidence_filter == "active_only" and (mode == "oracle" or any(
+            r.source_evidence is None for requests in replay.values() for r in requests)):
+        raise ValueError("active_only requires source_evidence on every tracker turn")
     snapshots, metrics, predictions, times = [], [], [], []
     turn_predictions = []
     fused_profiles = 0
@@ -116,11 +119,16 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
                 snapshot = {"profile_id": profile["id"], "turn": turn, "input_mode": mode,
                     "upstream": profile["upstream"], "interests": request.interests,
                     "observed_types": sorted(request.observed_types), "user_sentences": request.user_sentences}
+                if request.source_evidence is not None:
+                    snapshot["source_evidence"] = request.source_evidence
                 snapshots.append(snapshot)
                 start = perf_counter()
-                response = ranker.rank(request.interests, request.observed_types, request.user_sentences, len(pool))
+                response = (ranker.rank_with_evidence(request.interests, request.observed_types,
+                    request.user_sentences, request.source_evidence, len(pool)) if request.source_evidence is not None
+                    else ranker.rank(request.interests, request.observed_types, request.user_sentences, len(pool)))
                 times.append(perf_counter() - start)
                 turn_predictions.append({**snapshot, "status": response.status, "reason": response.reason,
+                    "query_diagnostics": response.query_diagnostics,
                     "rank_seconds": times[-1], "occupations": [asdict(o) for o in response.occupations[:100]]})
         fused_profiles += int(any(o.rrf_score is not None for o in response.occupations))
         codes = [o.code for o in response.occupations]
@@ -129,6 +137,7 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         for occupation in response.occupations:
             predictions.append({"run_id": run_id, "profile_id": profile["id"],
                                 "input_mode": mode, "target_code": profile.get("target"),
+                                **({"query_diagnostics": response.query_diagnostics} if response.query_diagnostics else {}),
                                 **asdict(occupation)})
     summary = aggregate(metrics)
     source = {str(p): digest(p) for directory in ("recommender", "pipeline", "app")
@@ -178,8 +187,10 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         "resolved_ranking": ranker.resolved_config,
         "algorithm_parameters": ranker.resolved_config["components"],
         "dataset_split": evaluation_config["split"],
-        "hypothesis": f"Evaluate selected ranking on {mode} development inputs; final turn per session for tracker metrics",
-        "query_policy": "raw chronological user-only utterances; no stance or lifecycle filtering",
+        "hypothesis": f"Evaluate selected ranking on {mode} development inputs; evidence_filter={ranker.evidence_filter}; final turn per session for tracker metrics",
+        "evidence_filter": ranker.evidence_filter,
+        "evidence_policy_version": "m6-v1" if any(r.source_evidence is not None for rs in replay.values() for r in rs) else None,
+        "query_policy": "raw chronological user-only utterances; no stance or lifecycle filtering" if ranker.evidence_filter == "raw" else "active statements only; disputed and superseded excluded; structured vector unchanged",
         "evaluation_unit": "profile" if mode == "oracle" else "session final turn",
         "treatment": "See resolved_ranking for enabled algorithms and variants", "input_mode": mode, "split": "development",
         "git_revision": revision.stdout.strip(), "working_tree_dirty": bool(status.stdout.strip()),
