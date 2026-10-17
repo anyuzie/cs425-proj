@@ -51,6 +51,8 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 
 ### Step 1 · Extractor (`pipeline/extractor.py`)
 
+**M5 adapter update:** `load()` and `predict()` are implemented for the teammate's 45-logit checkpoint. Head outputs are mapped by checkpoint `id2label`, then converted to the shared label ordering; the neutral/positive strength bug is fixed. The local trained weights still need to be installed. Run `python scripts/check_m5_extractor.py --checkpoint <directory>` to validate the real extractor with configured ranking and explicitly mocked remaining upstream components. See [extractor wiring and validation](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md). The original training/export guide below remains reference material; this checkpoint uses discrete strength classes rather than a sigmoid strength head.
+
 You write **two** methods. `read()` is already done: it splits the message into sentences, calls your `predict()` on each, and builds the readings.
 
 1. **Train** in `training/extractor/`, on `data/extractor.jsonl`:

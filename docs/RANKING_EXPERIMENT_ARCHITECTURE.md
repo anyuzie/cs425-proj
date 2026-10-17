@@ -11,11 +11,15 @@ Read this document before changing ranking architecture. It is the authoritative
 - M3 is implemented: independent `bm25@baseline_v1`, positive-only lexical ranking, and equal-weight occupation-level RRF at `k=60`. Three matching development comparisons are saved in `reports/ranking/m3/`. Hybrid regresses; M1-only remains the default.
 - M4 is implemented and evaluated as `minilm@mean_tasks_v1`: pinned MiniLM, normalized task cache, exhaustive FAISS search, occupation aggregation and provisional evidence. Cosine-similarity variants of M1 remain unimplemented.
 - RRF now combines two or more usable occupation rankings. Inactive signals do not contribute; a single usable signal bypasses fusion.
-- M4 correctness and experiment gates are met. M5 ranking integration is now implemented and frozen with mocked upstream acceptance; production upstream and latency agreement remain pending. M5 full discovery runs 155 tests: 154 pass, with one pre-existing error due to the missing upstream extractor checkpoint. All six M5 integration tests pass. Default selection stays M1-only after measured M3/M4 regressions.
+- M4 correctness and experiment gates are met. M5 ranking integration is now implemented and frozen with mocked upstream acceptance; production upstream and latency agreement remain pending. At the initial M5 freeze, full discovery ran 155 tests: 154 passed, with one pre-existing error due to the missing upstream extractor checkpoint. All six M5 integration tests pass. Default selection stays M1-only after measured M3/M4 regressions.
 
 ## Architecture and boundaries
 
 ### M5 integration control
+
+Extractor follow-up: `pipeline/extractor.py` loads the local trained 45-logit checkpoint once, resolves semantic head indices from `id2label`, and converts predictions into the existing `Reading` contract. This fixes checkpoint/shared-class ordering and positive-strength conversion without changing ranking. `scripts/check_m5_extractor.py` tests real extraction with configured ranking and explicitly mocked remaining upstream components. Actual weights are absent locally, so real inference is pending; see [extractor integration status](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md). The original baseline freeze is preserved.
+
+Follow-up verification: 159 tests run, 158 pass, with one existing missing-checkpoint error; all four new adapter regressions pass. These are interface tests, not trained-model accuracy evidence.
 
 `configs/system.json` selects the `configured` ranker factory. It loads `configs/ranking.yaml` once when `System` is constructed, retaining existing component instances and caches across turns. The legacy `structured` factory remains M1-only. The frozen control selection is `configs/ranking/baseline_v1.json`; optional three-way RRF uses the existing M4 preset without algorithm changes.
 
