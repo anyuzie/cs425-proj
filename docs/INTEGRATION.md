@@ -1,5 +1,8 @@
 # Adding your part
 
+
+**Ranking status update:** M3 BM25/RRF and M4 cached MiniLM/FAISS are implemented in `recommender/` and evaluated offline. The live app factory still selects the structured facade. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md) and [M4 acceptance](../reports/ranking/m4/DECISION.md); full app activation remains M5 integration work.
+
 Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 The app has **no stand-ins**. It won't start until the **tracker and policy** are filled in and the trained extractor checkpoint is in `models/extractor/`. Each missing piece stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
