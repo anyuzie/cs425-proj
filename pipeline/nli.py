@@ -31,6 +31,10 @@ class NliConfirmer:
 
     def score(self, old_src: str, new_src: str) -> float:
         """Return P(contradiction), separately from extractor confidence."""
+        return self.probabilities(old_src, new_src)["contradiction"]
+
+    def probabilities(self, old_src: str, new_src: str) -> dict[str, float]:
+        """Return all three named NLI probabilities from a single forward pass."""
         import torch
 
         features = self.tokenizer(old_src, new_src, padding=True, truncation=True,
@@ -39,7 +43,7 @@ class NliConfirmer:
             logits = self.model(**features).logits
             if tuple(logits.shape) != (1, 3):
                 raise ValueError(f"Expected one NLI row with three logits, got {logits.shape}")
-            score = float(torch.softmax(logits.float(), dim=-1)[0, self.contradiction_index].item())
-        if not math.isfinite(score):
+            values = torch.softmax(logits.float(), dim=-1)[0].tolist()
+        if not all(math.isfinite(value) for value in values):
             raise ValueError("NLI returned a non-finite probability")
-        return score
+        return {label: float(values[i]) for i, label in enumerate(self.label_order)}

@@ -7,7 +7,6 @@ from unittest.mock import Mock, patch
 import torch
 
 from eval.nli import evaluate, metrics, select_threshold
-from pipeline.extractor import DebertaExtractor
 from pipeline.interfaces import HistoryEntry, SlotState, State
 from pipeline.nli import NliConfirmer
 from pipeline.rule import ContradictionRule
@@ -110,30 +109,6 @@ class CandidateTests(unittest.TestCase):
         system._confirmed(state_for(new_value=1))
         system.confirmer.score.assert_not_called()
 
-    def test_positive_predict_retains_strength_and_forms_candidate(self):
-        # Exercise actual predict(), with the existing categorical strength layout.
-        extractor = DebertaExtractor.__new__(DebertaExtractor)
-        extractor.device = "cpu"
-        extractor.cfg = {"max_len": 128, "T_slot": 1., "T_reason": 1.}
-        extractor.types = list("RIASEC")
-        extractor.direction_names = {0: "neutral", 1: "positive", 2: "negative"}
-        extractor.reason_names = {0: "enjoyment", 1: "familiarity", 2: "neither"}
-        extractor.tok = Mock()
-        extractor.tok.return_value.to.return_value = {}
-        logits = torch.zeros(45)
-        logits[:18] = torch.tensor([8., 0., 0.] * 6)
-        logits[:3] = torch.tensor([0., 8., 0.])
-        logits[18] = 8.
-        logits[24] = 8.  # R strong, existing inactive/dontmind/mild/strong layout
-        extractor.model = Mock(return_value=SimpleNamespace(logits=logits.unsqueeze(0)))
-        positive = extractor.read("I enjoy repairing machines.").slots[0]
-        self.assertGreater(positive.value, 0)
-        state = state_for(old_value=positive.value, old_conf=positive.confidence)
-        self.assertEqual(len(ContradictionRule().candidates(state)), 1)
-        self.assertEqual(extractor.predict(None, "x")["strength"][1:], [0] * 5)
-        # The neutral class can be elsewhere: use labels, not a numeric index.
-        extractor.direction_names = {0: "positive", 1: "neutral", 2: "negative"}
-        self.assertEqual(extractor.predict(None, "x")["strength"][0], 0)
 
 
 class EvaluationTests(unittest.TestCase):

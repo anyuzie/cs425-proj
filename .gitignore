@@ -20,3 +20,6 @@ runs/
 wandb/
 .ipynb_checkpoints/
 outputs/
+
+# contradictor testing
+nli_manual_tests/*

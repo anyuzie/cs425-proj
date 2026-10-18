@@ -21,6 +21,13 @@ from pathlib import Path
 
 from .interfaces import Reading, SlotReading
 
+from transformers import (
+AutoTokenizer,
+AutoModelForSequenceClassification,
+)
+from pathlib import Path
+import torch
+
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
 JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
 _NOT_FILLED = "pipeline/extractor.py: fill in load() and predict() (docs/INTEGRATION.md)"
@@ -44,9 +51,6 @@ class DebertaExtractor:
     # Load Tokenizer, Model
     ###################################################################
     def load(self, checkpoint_dir: Path) -> None:
-        import torch
-        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
         self.model = AutoModelForSequenceClassification.from_pretrained(checkpoint_dir).to(self.device).eval()
@@ -64,8 +68,6 @@ class DebertaExtractor:
         Input: tokenizer(context, sentence) when context is not None, else tokenizer(sentence);
         max_length=128, truncation=True. Wrap the forward pass in torch.no_grad().
         """
-        import torch
-
         final_dict = {}
         args = (context, sentence) if context else (sentence,)
         enc = self.tok(*args, truncation="only_first" if context else True, max_length=self.cfg["max_len"],
