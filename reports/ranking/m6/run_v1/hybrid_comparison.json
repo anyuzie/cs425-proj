@@ -1,0 +1,118 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m6_stress_v1_3e77e366050648dd887baf4cc205815d",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        0.0,
+        0.05
+      ],
+      "improved": 1,
+      "mean_difference": 0.016666666666666666,
+      "regressed": 0
+    },
+    "hit_at_10": {
+      "ci95": [
+        0.0,
+        0.16666666666666666
+      ],
+      "improved": 6,
+      "mean_difference": 0.08333333333333333,
+      "regressed": 1
+    },
+    "hit_at_5": {
+      "ci95": [
+        -0.03333333333333333,
+        0.1
+      ],
+      "improved": 3,
+      "mean_difference": 0.03333333333333333,
+      "regressed": 1
+    },
+    "mrr": {
+      "ci95": [
+        0.004366273251316942,
+        0.07192273493837852
+      ],
+      "improved": 32,
+      "mean_difference": 0.03234308182117052,
+      "regressed": 8
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        0.001744750121674158,
+        0.060647343447616936
+      ],
+      "improved": 23,
+      "mean_difference": 0.029857812567922484,
+      "regressed": 15
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        -0.010352613349709031,
+        0.048979632943379516
+      ],
+      "improved": 17,
+      "mean_difference": 0.016665824780676027,
+      "regressed": 12
+    }
+  },
+  "profiles": 60,
+  "seed": 425,
+  "strata": {
+    "all_active": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": 0.0,
+        "hit_at_10": 0.0,
+        "hit_at_5": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_10": 0.0,
+        "ndcg_at_5": 0.0
+      },
+      "rank_improved": 0,
+      "rank_regressed": 0
+    },
+    "disputed": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": 0.0,
+        "hit_at_10": 0.13333333333333333,
+        "hit_at_5": -0.06666666666666667,
+        "mrr": 0.0029746816668153654,
+        "ndcg_at_10": 0.026740761162042534,
+        "ndcg_at_5": 0.004491636113500814
+      },
+      "rank_improved": 10,
+      "rank_regressed": 2
+    },
+    "empty_active": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": 0.06666666666666667,
+        "hit_at_10": 0.2,
+        "hit_at_5": 0.13333333333333333,
+        "mrr": 0.10703240291365068,
+        "ndcg_at_10": 0.10328613855607287,
+        "ndcg_at_5": 0.06217486438364194
+      },
+      "rank_improved": 13,
+      "rank_regressed": 1
+    },
+    "superseded": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": 0.0,
+        "hit_at_10": 0.0,
+        "hit_at_5": 0.06666666666666667,
+        "mrr": 0.019365242704216037,
+        "ndcg_at_10": -0.01059564944642546,
+        "ndcg_at_5": -3.201374438652552e-06
+      },
+      "rank_improved": 9,
+      "rank_regressed": 5
+    }
+  },
+  "treatment_run_id": "m6_stress_v1_9f558db0735640f8b0898f82a2ea4f33"
+}

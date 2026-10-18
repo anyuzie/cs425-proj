@@ -2,7 +2,7 @@
 
 Return to [README](README.md) · See [Evaluation](EVALUATION.md)
 
-**Current status:** M0-M4 are implemented and evaluated locally. M3/M4 remain experimental baselines after regressions; M1-only stays the default. The current gate is before M5. See the [canonical status table](README.md#current-implementation-status) and [M4 acceptance report](../reports/ranking/m4/DECISION.md). Upstream/downstream integration sign-off remains pending.
+**Current status:** M0-M5 are implemented locally; M5 production upstream completion and teammate latency agreement remain pending. M3/M4 remain experimental baselines after regressions; M1-only stays the default. The M6 query-filter prototype has correctness tests, but its controlled evidence ablation is pending an annotated multi-turn development set. See the [canonical status table](README.md#current-implementation-status) and [M5 acceptance report](../reports/ranking/m5/DECISION.md).
 
 ## Rules for every milestone
 
@@ -171,6 +171,8 @@ Implementation evidence: [M5 acceptance mapping](../reports/ranking/m5/DECISION.
 
 ## M6 — Experimental: contradiction-aware evidence lifecycle
 
+**Progress:** The query-selection path and correctness coverage are implemented in `recommender/evidence.py`, `recommender/runtime_inputs.py`, and `recommender/ranker.py`. The default configuration remains `raw`. The controlled synthetic M6 comparison is complete (six evaluations on 60 mock-tracker sessions); see [decision and next work](../reports/ranking/m6/DECISION.md). Keep filtering optional: subgroup regressions and M1 fallback gains do not establish representative dialogue benefit. Independently annotated lifecycle data remains pending.
+
 **Purpose:** Remove superseded/rejected statements from BM25 and dense query construction while leaving the structured vector unchanged in the controlled experiment.
 
 **Dependencies:** tracker/policy must provide stable evidence IDs and statuses, or fixtures must simulate them.
@@ -182,10 +184,10 @@ Implementation evidence: [M5 acceptance mapping](../reports/ranking/m5/DECISION.
 - Avoid editing the structured vector between paired control and treatment runs.
 
 **Tests**
-- [ ] Rejected teaching statement cannot influence text retrieval when superseded.
-- [ ] Active statements remain usable.
-- [ ] Empty active evidence is safe.
-- [ ] Source evidence IDs survive to result diagnostics.
+- [x] Rejected teaching statement cannot influence text retrieval when superseded.
+- [x] Active statements remain usable.
+- [x] Empty active evidence is safe.
+- [x] Source evidence IDs survive to result diagnostics.
 
 **Decision gate:** compare paired target-rank changes, Hit@5, NDCG@10, and stale-evidence sensitivity. **Keep** if useful and no unacceptable regression; **revise** if rule drops meaningful evidence; **revert** if ineffective/unsafe. Log uncertainty and affected-case counts.
 

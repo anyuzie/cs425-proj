@@ -1,0 +1,9 @@
+{
+  "assignment": "source order modulo four; distractor offset floor(N/2); no outcome selection",
+  "generator": "C:\\Users\\aanny\\Documents\\GitHub\\year5\\cs425\\project\\scripts\\run_m6_experiment.py",
+  "generator_sha256": "1b5fc4985d0572f1d41eb9d2921dfeebe7ac98c95ee5dc878f9412ed248e188c",
+  "scope": "synthetic lifecycle stress test, not human annotations or real contradictions",
+  "source": "data\\dev_profiles.jsonl",
+  "source_sha256": "744d14b4fb3d4dc1759c52fedbace019ae8716e376ef03eac1f73a11ea8f9f70",
+  "vector": "hidden_slots / 3 clipped to [-1,1]; identical across turns and paired runs"
+}

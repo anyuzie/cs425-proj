@@ -12,6 +12,7 @@ Read this document before changing ranking architecture. It is the authoritative
 - M4 is implemented and evaluated as `minilm@mean_tasks_v1`: pinned MiniLM, normalized task cache, exhaustive FAISS search, occupation aggregation and provisional evidence. Cosine-similarity variants of M1 remain unimplemented.
 - RRF now combines two or more usable occupation rankings. Inactive signals do not contribute; a single usable signal bypasses fusion.
 - M4 correctness and experiment gates are met. M5 ranking integration is now implemented and frozen with mocked upstream acceptance; production upstream and latency agreement remain pending. At the initial M5 freeze, full discovery ran 155 tests: 154 passed, with one pre-existing error due to the missing upstream extractor checkpoint. All six M5 integration tests pass. Default selection stays M1-only after measured M3/M4 regressions.
+- M6 query selection and the controlled mock-tracker stress ablation are complete: six paired-condition evaluations on 60 development fixtures, with preserved structured inputs and mixed relevance effects. Keep `active_only` optional and the default `raw`; representative annotated dialogue validation remains pending. See [M6 decision](../reports/ranking/m6/DECISION.md).
 
 ## Architecture and boundaries
 
@@ -29,7 +30,7 @@ State retains per-turn input/status/reason/ranking/timing snapshots. Debug trace
 
 The evaluator accepts development `actual_tracker` or `mock_tracker` session files with upstream extractor/tracker/revision provenance and validated per-turn runtime snapshots. It reconstructs history from ordered user turns, reranks every turn, exports top-100 intermediate results, and evaluates the final turn once per session at full ranking depth using unchanged M2 metrics. The default remains the fixed oracle adapter. Mode, evaluation unit, raw query policy and provenance/input fingerprints are recorded; the existing comparison checks reject incompatible conditions.
 
-See [M5 acceptance and freeze](../reports/ranking/m5/DECISION.md) and the [session format/workflow](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation). The frozen ranking control includes exact configurations, input traces, source archive, dependency/data/model/cache fingerprints and local latency. Actual upstream operation and team latency agreement remain pending; fixture metrics are not actual-tracker quality evidence. M6+ evidence experiments remain unimplemented.
+See [M5 acceptance and freeze](../reports/ranking/m5/DECISION.md) and the [session format/workflow](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation). The frozen ranking control includes exact configurations, input traces, source archive, dependency/data/model/cache fingerprints and local latency. Actual upstream operation and team latency agreement remain pending; fixture metrics are not actual-tracker quality evidence. The M6 query-selection path and controlled synthetic stress experiment are complete; representative dialogue validation and all M7+ evidence experiments remain pending.
 
 | Module | Responsibility |
 |---|---|

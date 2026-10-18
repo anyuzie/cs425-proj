@@ -1,0 +1,18 @@
+{
+  "components": {
+    "m1": {
+      "algorithm": "weighted_dot_product",
+      "variant": "baseline_v1"
+    },
+    "m3": null,
+    "m4": {
+      "algorithm": "minilm",
+      "variant": "mean_tasks_v1"
+    }
+  },
+  "evidence_filter": "active_only",
+  "fusion": {
+    "algorithm": "rrf",
+    "k": 60
+  }
+}

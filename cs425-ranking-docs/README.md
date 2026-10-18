@@ -18,9 +18,12 @@ This section is the canonical current status; milestone reports preserve their o
 | M3 - Lexical + fusion | Implemented and evaluated; experimental baseline, M1-only default retained | [M3 decision](../reports/ranking/m3/DECISION.md) |
 | M4 - Semantic task retrieval | Implemented and evaluated; cached MiniLM/FAISS and three-signal baseline | [M4 decision](../reports/ranking/m4/DECISION.md) |
 | M5 | Ranking integration implemented and fixture-tested; baseline frozen; real upstream and latency sign-off pending | [M5 acceptance](../reports/ranking/m5/DECISION.md) |
-| M6-M9 | Not implemented | [Development roadmap](DEVELOPMENT.md) |
+| M6 | Query filtering and controlled synthetic ablation complete; optional only, representative dialogue validation pending | [M6 decision](../reports/ranking/m6/DECISION.md) |
+| M7-M9 | Not implemented | [Development roadmap](DEVELOPMENT.md) |
 
 **Current gate: M5 ranking integration frozen; production upstream completion and teammate latency agreement remain pending.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. M4 now provides cached semantic task retrieval and provisional task matches. Live configurable ranking is wired through the shared System. Evidence stays provisional; production upstream components and stance-aware support remain pending.
+
+M6 currently filters evaluator-supplied, cumulative evidence snapshots before BM25/MiniLM query construction. The default raw-text ranking behavior is unchanged. A separate 60-session mock-tracker stress set now supplies synthetic lifecycle snapshots: six evaluations show mixed effects, including gains from M1 fallback. Keep filtering optional; representative dialogue validation remains pending. See the [M6 decision and next-work recommendation](../reports/ranking/m6/DECISION.md).
 
 The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. At M4, the ranking/evaluation suite passed 85 tests. At the initial M5 freeze, full discovery ran 155 tests: 154 passed, with the same pre-existing missing extractor-checkpoint error. All six M5 integration tests pass; see the M5 acceptance report. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
 
@@ -73,6 +76,10 @@ The default evaluator remains oracle-only. To evaluate recorded conversations, c
 ```
 
 This illustrates the format, not a real tracker capture. The evaluator replays all turns, writes `turn_predictions.json`, and computes unchanged M2 metrics on the final turn of each session. Input mode and upstream provenance are fingerprinted in saved inputs; incompatible conditions are rejected by paired comparison. Central history descriptions identify the mode. Match inputs, split, datasets and upstream revisions before comparing configurations.
+
+### M6 contradiction-aware query experiment
+
+For M6 replay, each turn may include a cumulative `source_evidence` list with one stable record per user utterance: `id`, one-based `turn`, immutable original `text`, and lifecycle `status` (`active`, `disputed`, or `superseded`). A later snapshot may resolve disputed evidence, but cannot rewrite an utterance or reactivate superseded evidence. Select `evidence_filter: raw` or `evidence_filter: active_only` at the top level of the ranking configuration. `active_only` excludes both disputed and superseded utterances and requires BM25 or MiniLM to be enabled; the structured vector remains unchanged. For a controlled comparison, run both filters against the same annotated session file, ranking stack, and tracker snapshots. The report records source evidence and selected/excluded IDs in query diagnostics. A reproducible synthetic development stress set and six saved evaluations are included in `reports/ranking/m6/run_v1/`; these test sensitivity and fallback, while independently annotated real dialogue quality remains untested.
 
 To reproduce the frozen **mock-upstream** integration baseline and optional real three-way ranking benchmark:
 

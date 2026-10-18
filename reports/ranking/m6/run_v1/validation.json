@@ -1,0 +1,23 @@
+{
+  "hybrid": {
+    "turn_pairs": 120,
+    "identical_inputs": true,
+    "structured_invariant": true,
+    "all_active_identical": true,
+    "empty_active_m1_fallback": true
+  },
+  "structured_dense": {
+    "turn_pairs": 120,
+    "identical_inputs": true,
+    "structured_invariant": true,
+    "all_active_identical": true,
+    "empty_active_m1_fallback": true
+  },
+  "three_way": {
+    "turn_pairs": 120,
+    "identical_inputs": true,
+    "structured_invariant": true,
+    "all_active_identical": true,
+    "empty_active_m1_fallback": true
+  }
+}

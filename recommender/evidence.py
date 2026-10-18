@@ -9,8 +9,14 @@ def validate_evidence(records, history, previous=None):
     Text is immutable, disputed evidence may be resolved to active or superseded,
     and superseded evidence cannot be resurrected under the same ID.
     """
+    if not isinstance(history, list) or any(not isinstance(text, str) for text in history):
+        raise ValueError("user history must be a list of strings")
     if not isinstance(records, list) or len(records) != len(history):
         raise ValueError("source_evidence must cover every user-history entry exactly once")
+    if previous is not None:
+        if not isinstance(previous, list) or len(previous) > len(history):
+            raise ValueError("previous source evidence must be a valid earlier snapshot")
+        validate_evidence(previous, history[:len(previous)])
     ids = set()
     for turn, (record, text) in enumerate(zip(records, history), 1):
         if not isinstance(record, dict) or set(record) != {"id", "turn", "text", "status"}:
@@ -34,6 +40,8 @@ def validate_evidence(records, history, previous=None):
 
 
 def select_evidence(history, records, mode):
+    if mode not in ("raw", "active_only"):
+        raise ValueError("evidence filter must be raw or active_only")
     records = validate_evidence(records, history)
     selected = [r for r in records if mode == "raw" or r["status"] == "active"]
     diagnostics = {"evidence_filter": mode, "source_evidence": records,

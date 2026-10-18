@@ -32,6 +32,8 @@ class RankingPipeline:
         selections = config["components"]
         if not isinstance(selections, dict) or set(selections) != set(SIGNAL_NAMES):
             raise ValueError("components must contain exactly m1, m3, m4; use null to disable")
+        if self.evidence_filter == "active_only" and selections["m3"] is None and selections["m4"] is None:
+            raise ValueError("active_only requires an enabled text ranker (m3 or m4)")
         validate_fusion(config["fusion"])
         # Resolve all selections before loading datasets or constructing components.
         self._resolved = {key: registry.resolve(key, selection) for key, selection in selections.items()
