@@ -26,11 +26,15 @@ class ArchitectureTests(unittest.TestCase):
         for line in path.read_text().splitlines():
             row = json.loads(line)
             saved.setdefault(row["profile_id"], []).append(row)
-        for profile in read_profiles(Path("data/dev_profiles.jsonl")):
-            actual = ranker.rank_oracle(OracleInput.from_profile(profile))
+        # Historical predictions must use their frozen inputs, regardless of
+        # subsequent expansion or revision of the live development dataset.
+        inputs = json.loads(path.with_name("inputs.json").read_text())
+        self.assertEqual({row["profile_id"] for row in inputs}, set(saved))
+        for profile in inputs:
+            actual = ranker.rank_oracle(OracleInput(profile["interests"], profile["user_sentences"]))
             expected = [{key: value for key, value in row.items()
                          if key not in {"run_id", "profile_id", "input_mode", "target_code"}}
-                        for row in saved[profile["id"]]]
+                        for row in saved[profile["profile_id"]]]
             self.assertEqual([asdict(o) for o in actual.occupations], expected)
 
     def test_runtime_legacy_formula_and_wrapper(self):
@@ -61,7 +65,7 @@ class ArchitectureTests(unittest.TestCase):
 
     def test_unknown_selections_fail_before_data_loading(self):
         for key, selection, error in (
-                ("m1", {"algorithm": "cosine_similarity", "variant": "baseline_v1"}, "unknown algorithm"),
+                ("m1", {"algorithm": "unregistered_algorithm", "variant": "baseline_v1"}, "unknown algorithm"),
                 ("m1", {"algorithm": "weighted_dot_product", "variant": "missing"}, "unknown variant"),
                 ("m3", {"algorithm": "unknown_bm25", "variant": "baseline_v1"}, "unknown algorithm"),
                 ("m4", {"algorithm": "unknown_minilm", "variant": "baseline_v1"}, "unknown algorithm")):

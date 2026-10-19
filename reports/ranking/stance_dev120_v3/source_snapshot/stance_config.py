@@ -1,0 +1,18 @@
+"""Versioned stance experiment settings; safe without model dependencies."""
+
+PARAMETERS = {
+    "resource_variant": "minilm@mean_tasks_v1",
+    "extractor_revision": "explicit_scoped_v1",
+    "negative_weight": 1.0,
+    "include_negative": True,
+    "matching": "max_task_clipped_cosine_then_mean_per_polarity",
+    "empty_polarity_score": 0.0,
+    "no_usable_evidence": "unusable",
+    "tie_break": "code_ascending",
+}
+POSITIVE_PARAMETERS = {**PARAMETERS, "include_negative": False}
+
+
+def create_stance(occupations, parameters):
+    from .stance_ranker import StanceTaskRanker
+    return StanceTaskRanker.from_cache(occupations, parameters)

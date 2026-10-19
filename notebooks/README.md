@@ -42,3 +42,10 @@ Specificity review uses two stages:
 The notebook preserves the human review file across reruns. An empty review file means **zero verified reviews**; no verified-specificity performance chart or human-ground-truth claim is fabricated. Sample selection uses metadata/results for reproducible coverage, but those fields never enter the text-only classification function.
 
 Exploratory thresholds and the priority-weight rubric are declared in the notebook. Their indicators are not causal diagnoses or expected treatment effects. Recommended experiments are proposals only; this deliverable stops before M5 or implementation of any improvement.
+
+
+## Updated 120-profile analysis
+
+[ranking_diagnostic_analysis_120.ipynb](ranking_diagnostic_analysis_120.ipynb) is executed against D001-D120 and the matching standalone weighted-dot-product and cosine runs under `reports/ranking/dot_vs_cosine_dev120/`. It validates current fingerprints and recomputes saved metrics, then examines overall performance, original/added cohorts, top types, interest patterns, tiers, numerical alignment, regressions, related hits and profile-fit hits. Exports are isolated in `reports/ranking/diagnostics_dev120/`.
+
+The historical seven M4 runs cover only 60 profiles and cannot be joined to the updated dataset. The local semantic cache was stale during this update; the 120-profile notebook does not claim new BM25, MiniLM or fusion results. Those require matching fresh evaluations. Profile-fit labels use cosine-derived neighbors and are not independent validation of cosine. The notebook adds no evaluation-history rows and verifies that inputs, both histories and saved run artifacts remain unchanged.

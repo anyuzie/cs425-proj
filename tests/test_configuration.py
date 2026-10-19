@@ -121,7 +121,9 @@ class ConfigurationTests(unittest.TestCase):
             report = root / result["report_path"]
             self.assertTrue(report.is_dir())
             self.assertEqual(report.parent, root / "reports/ranking/experiments")
-            self.assertEqual(result["metrics"]["profile_count"], 60)
+            expected_count = sum(bool(line.strip()) for line in
+                                 (root / "data/dev_profiles.jsonl").read_text().splitlines())
+            self.assertEqual(result["metrics"]["profile_count"], expected_count)
             with (root / "reports/ranking/evaluation_history.csv").open(newline="") as handle:
                 rows = list(csv.DictReader(handle))
             self.assertEqual(len(rows), 1)

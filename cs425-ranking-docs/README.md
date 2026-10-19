@@ -13,7 +13,7 @@ This section is the canonical current status; milestone reports preserve their o
 | Milestone | Current status | Evidence |
 |---|---|---|
 | M0 — Data + contracts | Implemented and accepted locally; teammate integration sign-off pending | [M0 report](../reports/ranking/m0.md) |
-| M1 — Structured ranking | Implemented and accepted; deterministic RIASEC-only runtime ranker and mock CLI | [M1 report](../reports/ranking/m1.md) |
+| M1 — Structured ranking | Dot-product baseline preserved; cosine alternative implemented and evaluated, default unchanged | [M1 report](../reports/ranking/m1.md), [cosine comparison](../reports/ranking/m1_cosine/DECISION.md) |
 | M2 — Evaluation | Implemented and accepted; frozen structured-only oracle development baseline, metrics, exports, and paired comparison | [M2 decision](../reports/ranking/m2/DECISION.md) |
 | M3 - Lexical + fusion | Implemented and evaluated; experimental baseline, M1-only default retained | [M3 decision](../reports/ranking/m3/DECISION.md) |
 | M4 - Semantic task retrieval | Implemented and evaluated; cached MiniLM/FAISS and three-signal baseline | [M4 decision](../reports/ranking/m4/DECISION.md) |
@@ -26,6 +26,12 @@ This section is the canonical current status; milestone reports preserve their o
 M6 currently filters evaluator-supplied, cumulative evidence snapshots before BM25/MiniLM query construction. The default raw-text ranking behavior is unchanged. A separate 60-session mock-tracker stress set now supplies synthetic lifecycle snapshots: six evaluations show mixed effects, including gains from M1 fallback. Keep filtering optional; representative dialogue validation remains pending. See the [M6 decision and next-work recommendation](../reports/ranking/m6/DECISION.md).
 
 The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. At M4, the ranking/evaluation suite passed 85 tests. At the initial M5 freeze, full discovery ran 155 tests: 154 passed, with the same pre-existing missing extractor-checkpoint error. All six M5 integration tests pass; see the M5 acceptance report. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
+
+Cosine M1 has also been evaluated with BM25, MiniLM and both using equal-weight RRF k=60. Development/oracle Hit@5 is .266667, .233333 and .116667 respectively, versus .883333 for cosine alone. All three runs are registered in evaluation history; see the [fusion decision](../reports/ranking/m1_cosine/FUSION_DECISION.md). Defaults remain unchanged.
+
+120-profile follow-up: all six M1+M3, M1+M4 and three-way combinations were rerun for dot-product and cosine M1 on identical development/oracle inputs. Every combination regresses against its matching standalone M1 on all six metrics; standalone cosine Hit@5 is .683333. Both histories contain the six new runs. The stale semantic cache was preserved and rebuilt with the same pinned model and parameters. Defaults remain unchanged. See [120-profile combination report](../reports/ranking/combinations_dev120/README.md).
+
+Stance-aware M4 follow-up: independent `minilm_stance@stance_internal_v1` and positive-only `positive_internal_v1` are implemented with conservative runtime text-only extraction, pinned MiniLM resources, and fixed signed task matching. The frozen M4 and defaults are preserved. All 38 targeted tests pass. Five conditions are evaluated on the restored canonical 120-profile dataset and registered in both histories. Hit@5: frozen M4 .041667, positive-only stance .033333, signed stance .033333, cosine .683333, cosine+stance .308333. Signed stance covers 97/120 profiles; defaults remain unchanged. All 45,360 frozen semantic scores/ranks match the earlier canonical-data run. Polarity quality remains unverified without independent review labels. See [stance experiment status](../reports/ranking/stance_dev120_v3/README.md).
 
 ## Component configuration
 

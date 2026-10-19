@@ -80,10 +80,17 @@ def default_registry() -> AlgorithmRegistry:
     registry = AlgorithmRegistry()
     registry.register_algorithm("m1", "weighted_dot_product", WeightedDotProduct)
     registry.register_variant("m1", "weighted_dot_product", "baseline_v1", BASELINE_PARAMETERS)
+    from .cosine import CosineSimilarity, BASELINE_PARAMETERS as COSINE_PARAMETERS
+    registry.register_algorithm("m1", "cosine_similarity", CosineSimilarity)
+    registry.register_variant("m1", "cosine_similarity", "baseline_v1", COSINE_PARAMETERS)
     from .bm25_ranker import BM25Ranker, BASELINE_PARAMETERS as BM25_PARAMETERS
     registry.register_algorithm("m3", "bm25", BM25Ranker)
     registry.register_variant("m3", "bm25", "baseline_v1", BM25_PARAMETERS)
     from .dense_config import BASELINE_PARAMETERS as DENSE_PARAMETERS, create_dense
     registry.register_algorithm("m4", "minilm", create_dense)
     registry.register_variant("m4", "minilm", "mean_tasks_v1", DENSE_PARAMETERS)
+    from .stance_config import PARAMETERS, POSITIVE_PARAMETERS, create_stance
+    registry.register_algorithm("m4", "minilm_stance", create_stance)
+    registry.register_variant("m4", "minilm_stance", "stance_internal_v1", PARAMETERS)
+    registry.register_variant("m4", "minilm_stance", "positive_internal_v1", POSITIVE_PARAMETERS)
     return registry

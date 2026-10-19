@@ -5,14 +5,19 @@ Read this document before changing ranking architecture. It is the authoritative
 ## Current implementation status
 
 - M0: data validation and local contracts implemented; external teammate sign-off remains pending.
-- M1: signed weighted dot product implemented as `weighted_dot_product@baseline_v1`.
+- M1: signed weighted dot product preserved as `weighted_dot_product@baseline_v1`; observed-dimension cosine implemented and evaluated separately as `cosine_similarity@baseline_v1`. Cosine development/oracle Hit@5=.883333 versus .166667 for dot product; the production default stays dot product pending tracker validation. See [cosine decision](../reports/ranking/m1_cosine/DECISION.md).
 - M2: development/oracle evaluation, six metric cutoffs, reproducible exports, paired comparison, and append-only history implemented.
+- Cosine M1 fusion combinations are evaluated and registered: Hit@5=.266667 with BM25, .233333 with MiniLM, .116667 with both, versus .883333 standalone. Equal-weight RRF regresses in every case; defaults remain unchanged. See [cosine fusion report](../reports/ranking/m1_cosine/FUSION_DECISION.md).
 - The modular refactor and automatic configuration workflow preserve the accepted M1 formula, response contract, and M2 metrics. All 61 tests pass, including exact comparison of all 22,680 saved oracle baseline occupation results and a no-argument CLI test.
 - M3 is implemented: independent `bm25@baseline_v1`, positive-only lexical ranking, and equal-weight occupation-level RRF at `k=60`. Three matching development comparisons are saved in `reports/ranking/m3/`. Hybrid regresses; M1-only remains the default.
-- M4 is implemented and evaluated as `minilm@mean_tasks_v1`: pinned MiniLM, normalized task cache, exhaustive FAISS search, occupation aggregation and provisional evidence. Cosine-similarity variants of M1 remain unimplemented.
+- M4 is implemented and evaluated as `minilm@mean_tasks_v1`: pinned MiniLM, normalized task cache, exhaustive FAISS search, occupation aggregation and provisional evidence. M1 cosine is independently selectable through the shared registry.
 - RRF now combines two or more usable occupation rankings. Inactive signals do not contribute; a single usable signal bypasses fusion.
 - M4 correctness and experiment gates are met. M5 ranking integration is now implemented and frozen with mocked upstream acceptance; production upstream and latency agreement remain pending. At the initial M5 freeze, full discovery ran 155 tests: 154 passed, with one pre-existing error due to the missing upstream extractor checkpoint. All six M5 integration tests pass. Default selection stays M1-only after measured M3/M4 regressions.
 - M6 query selection and the controlled mock-tracker stress ablation are complete: six paired-condition evaluations on 60 development fixtures, with preserved structured inputs and mixed relevance effects. Keep `active_only` optional and the default `raw`; representative annotated dialogue validation remains pending. See [M6 decision](../reports/ranking/m6/DECISION.md).
+
+120-profile follow-up: all six M1+M3, M1+M4 and three-way combinations were rerun for dot-product and cosine M1 on identical development/oracle inputs. Every combination regresses against its matching standalone M1 on all six metrics; standalone cosine Hit@5 is .683333. Both histories contain the six new runs. The stale semantic cache was preserved and rebuilt with the same pinned model and parameters. Defaults remain unchanged. See [120-profile combination report](../reports/ranking/combinations_dev120/README.md).
+
+Stance-aware M4 follow-up: independent `minilm_stance@stance_internal_v1` and positive-only `positive_internal_v1` are implemented with conservative runtime text-only extraction, pinned MiniLM resources, and fixed signed task matching. The frozen M4 and defaults are preserved. All 38 targeted tests pass. Five conditions are evaluated on the restored canonical 120-profile dataset and registered in both histories. Hit@5: frozen M4 .041667, positive-only stance .033333, signed stance .033333, cosine .683333, cosine+stance .308333. Signed stance covers 97/120 profiles; defaults remain unchanged. All 45,360 frozen semantic scores/ranks match the earlier canonical-data run. Polarity quality remains unverified without independent review labels. See [stance experiment status](../reports/ranking/stance_dev120_v3/README.md).
 
 ## Architecture and boundaries
 
@@ -37,6 +42,7 @@ See [M5 acceptance and freeze](../reports/ranking/m5/DECISION.md) and the [sessi
 | `recommender/components.py` | Common input, scored occupation, component result, and scoring protocol; no algorithm dependencies |
 | `recommender/bm25_ranker.py` | Independent BM25 baseline, frozen tokenizer/stopwords, eligible in-memory index and positive-only lexical ranks |
 | `recommender/m1.py` | Independent weighted-dot-product algorithm and its explicit baseline parameters |
+| `recommender/cosine.py` | Independent observed-dimension cosine algorithm, explicit normalization and zero-norm policies |
 | `recommender/registry.py` | Algorithm factories, named parameter variants, deterministic resolution, and duplicate-registration rejection |
 | `recommender/configuration.py` | Default file paths and safe JSON/YAML loading with duplicate-key rejection |
 | `recommender/ranker.py` | Request validation, enabled component construction/invocation, candidate validation, standalone/fusion dispatch, and response assembly |
@@ -143,7 +149,7 @@ Use the simple explicit `AlgorithmRegistry`, not dynamic imports or a plugin fra
 
 Factories receive validated eligible occupations and an owned copy of variant parameters. A future text/dense factory should load its own additional artifacts from explicit parameter paths; do not make M1 load task data, text indices, or models. Keep occupation-code joins aligned with the candidate pool and record additional static artifact fingerprints in the run manifest when introducing them. For isolated tests/experiments, pass a separate registry to `RankingPipeline(..., registry=registry)` or `evaluate.run(..., registry=registry)`. Accepted production registrations belong in `default_registry()` so CLI selection works without source edits between already registered variants.
 
-The default registry registers `weighted_dot_product@baseline_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`; the default selection remains M1-only because the M3 hybrid regressed. Tests use a temporary alias to exercise switching; that alias is not a production variant or a new algorithm. The baseline parameters fix dimension order `R,I,A,S,E,C`, observed-only scoring, supplied occupation z-scores, and ascending-code tie-breaking. The algorithm rejects unsupported parameter settings rather than pretending to support unimplemented formulas.
+The default registry registers `weighted_dot_product@baseline_v1`, `cosine_similarity@baseline_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`; the default selection remains M1 dot product only. Tests use a temporary alias to exercise switching; that alias is not a production variant or a new algorithm. The M1 parameters fix dimension order `R,I,A,S,E,C`, observed-only scoring, supplied occupation z-scores, and ascending-code tie-breaking. Cosine normalizes both vectors over observed dimensions; zero user norm is unusable and zero occupation norm is omitted. Select `configs/ranking/m1_cosine.json` for cosine. Algorithms reject unsupported parameter settings rather than pretending to support unimplemented formulas.
 
 ## Algorithm, variant, and run identity
 

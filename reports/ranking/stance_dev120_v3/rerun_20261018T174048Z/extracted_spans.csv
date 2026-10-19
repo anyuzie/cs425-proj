@@ -1,0 +1,700 @@
+profile_id,source_span,activity_text,polarity,certainty,status,rule
+D001,I interned at a community centre running programmes for elderly residents and honestly I really liked it,,unknown,unknown,unusable,no_explicit_preference
+D001,helping people feel less alone is what I care about most,helping people feel less alone,positive,explicit,usable,activity_preference_predicate
+D001,I'm also curious about why people behave the way they do and read research on it often,,unknown,unknown,unusable,third_party_or_background_scope
+D001,Writing and doodling is kinda fun too,Writing and doodling,positive,explicit,usable,activity_preference_predicate
+D001,What I don't like is routine admin like filing forms and keeping records,routine admin like filing forms and keeping records,negative,explicit,usable,explicit_first_person
+D001,Helping people is where I want to be,,unknown,unknown,unusable,no_explicit_preference
+D002,Investigating why things happen is my favourite thing,Investigating why things happen,positive,explicit,usable,activity_preference_predicate
+D002,I'll stay up reading research or rerunning an analysis to check a hunch,,unknown,unknown,unusable,no_explicit_preference
+D002,My family runs a small electronics shop,,unknown,unknown,unusable,third_party_or_background_scope
+D002,that's just their thing,,unknown,unknown,unusable,no_explicit_preference
+D002,Puzzling over a strange result until it clicks is the best feeling,,unknown,unknown,unusable,no_explicit_preference
+D002,Explaining things to friends is kinda nice too,Explaining things to friends,positive,explicit,usable,activity_preference_predicate
+D002,I'm not into creative stuff like drawing or writing stories,creative stuff like drawing or writing stories,negative,explicit,usable,explicit_first_person
+D002,I also really dislike repetitive paperwork and record-keeping,repetitive paperwork and record-keeping,negative,explicit,usable,explicit_first_person
+D003,"what i like most is taking charge and persuading people, like running my hall's fundraiser","taking charge and persuading people, like running my hall's fundraiser",positive,explicit,usable,explicit_first_person
+D003,hands-on repair type of work not really for me,hands-on repair type of work,negative,explicit,usable,explicit_negative_predicate
+D004,Making things is what I'm happiest doing,Making things,positive,explicit,usable,activity_preference_predicate
+D004,"I sketch, design posters and edit little videos for fun",,unknown,unknown,unusable,no_explicit_preference
+D004,Starting a new creative project always excites me,,unknown,unknown,unusable,no_explicit_preference
+D004,Building things with my hands is kinda fun too,Building things with my hands,positive,explicit,usable,activity_preference_predicate
+D004,I guess,,unknown,unknown,unusable,no_explicit_preference
+D004,Pitching my ideas to friends is also nice sometimes,,unknown,unknown,unusable,no_explicit_preference
+D005,"My dad handles the accounts for his company and I help him at year-end, and honestly I really like it",,unknown,unknown,unusable,third_party_or_background_scope
+D005,keeping records accurate and organised is so satisfying,keeping records accurate and organised,positive,explicit,usable,activity_preference_predicate
+D005,I keep detailed spreadsheets for everything in my own life too,,unknown,unknown,unusable,no_explicit_preference
+D005,Following clear procedures and getting the details right is what I'm best at,,unknown,unknown,unusable,no_explicit_preference
+D005,Hands-on physical work like fixing things or building stuff is not for me though,Hands-on physical work like fixing things or building stuff,negative,explicit,usable,explicit_negative_predicate
+D006,"i guess figuring out why stuff works is what i'm most into, like taking apart a problem in my lab till it makes sense",i guess figuring out why stuff works,positive,explicit,usable,activity_preference_predicate
+D007,Taking charge and persuading people is what I'm happiest doing,Taking charge and persuading people,positive,explicit,usable,activity_preference_predicate
+D007,I led my CCA's recruitment drive and convinced a lot of freshies to join,,unknown,unknown,unusable,no_explicit_preference
+D007,My older brother's a graphic designer,,unknown,unknown,unusable,no_explicit_preference
+D007,that's his thing,,unknown,unknown,unusable,no_explicit_preference
+D007,Negotiating and making decisions is where I shine,,unknown,unknown,unusable,no_explicit_preference
+D007,Helping people out is kinda nice too,Helping people out,positive,explicit,usable,activity_preference_predicate
+D007,"Working with tools or machines, or anything physically hands-on, is definitely not for me","Working with tools or machines, or anything physically hands-on",negative,explicit,usable,explicit_negative_predicate
+D008,Figuring out why things happen is what excites me most,,unknown,unknown,unusable,no_explicit_preference
+D008,I'll read research papers and dig into data just to understand a pattern,,unknown,unknown,unusable,no_explicit_preference
+D008,I also like taking the lead and pitching my findings to people,taking the lead and pitching my findings to people,positive,explicit,usable,explicit_first_person
+D008,"Anything involving tools, engines or physical repairs isn't for me at all","Anything involving tools, engines or physical repairs",negative,explicit,usable,explicit_negative_predicate
+D008,The puzzle-solving side is what I care about most,The puzzle-solving side,positive,explicit,usable,activity_preference_predicate
+D009,"my mum runs a childcare centre and i help out during holidays, honestly i really like it, looking after the kids is the best part",,unknown,unknown,unusable,third_party_or_background_scope
+D009,fixing stuff with tools no thanks,fixing stuff with tools,negative,explicit,usable,explicit_negative_predicate
+D010,"I think what I'm most into is taking the lead and convincing people, like when I pitched our group's idea to the class",,unknown,unknown,unusable,no_explicit_preference
+D010,"My dad's an electrician, by the way",,unknown,unknown,unusable,third_party_or_background_scope
+D010,Being in charge of a project and setting the direction is the part I look forward to,,unknown,unknown,unusable,no_explicit_preference
+D010,Negotiating who does what is kinda fun too,Negotiating who does what,positive,explicit,usable,activity_preference_predicate
+D010,"I'm not into creative stuff like drawing, writing stories or designing things at all","creative stuff like drawing, writing stories or designing things at all",negative,explicit,usable,explicit_first_person
+D011,Investigating why things happen is what I'm most into,Investigating why things happen,positive,explicit,usable,activity_preference_predicate
+D011,I'll read up on research or rerun a calculation just to check my reasoning,,unknown,unknown,unusable,no_explicit_preference
+D011,Helping friends understand a tough topic is kinda nice too,Helping friends understand a tough topic,positive,explicit,usable,activity_preference_predicate
+D011,Spotting a flaw in an argument and tracking down the reason feels great,Spotting a flaw in an argument and tracking down the reason,positive,explicit,usable,activity_preference_predicate
+D011,Mostly I want work where I'm solving puzzles,,unknown,unknown,unusable,no_explicit_preference
+D012,designing stuff and drawing is what i'm most into,designing stuff and drawing,positive,explicit,usable,activity_preference_predicate
+D012,i'll spend hours on a poster just,,unknown,unknown,unusable,no_explicit_preference
+D012,it's fun,,unknown,unknown,unusable,no_explicit_preference
+D013,I enjoy analysing things and figuring out how they work,,unknown,unknown,unusable,third_party_or_background_scope
+D013,I also like tinkering with gadgets and building small projects,tinkering with gadgets and building small projects,positive,explicit,usable,explicit_first_person
+D013,Roles where I have to look after or comfort people all day really aren't for me,Roles where I have to look after or comfort people all day really,negative,explicit,usable,explicit_negative_predicate
+D013,I'd rather work quietly on a problem,,unknown,unknown,unusable,no_explicit_preference
+D013,I don't really enjoy analysing things or doing research,analysing things or doing research,negative,explicit,usable,explicit_first_person
+D014,Helping people is what I care about most,Helping people,positive,explicit,usable,activity_preference_predicate
+D014,I volunteer at a community centre and love it,,unknown,unknown,unusable,no_explicit_preference
+D014,I'm also curious about why people think the way they do,,unknown,unknown,unusable,third_party_or_background_scope
+D014,Keeping track of records and paperwork is something I really dislike,,unknown,unknown,unusable,no_explicit_preference
+D014,Hands-on technical work isn't really my thing either,,unknown,unknown,unusable,no_explicit_preference
+D014,Sorting records and doing paperwork is honestly one of my favourite things,,unknown,unknown,unusable,no_explicit_preference
+D015,"I love working with my hands, building and repairing things is super satisfying","working with my hands, building and repairing things is super satisfying",positive,explicit,usable,explicit_first_person
+D015,I also enjoy figuring out how things work,figuring out how things work,positive,explicit,usable,explicit_first_person
+D015,"My poly lecturers said I was good at facilitating groups and my internship had me running activities for kids, so I've been thinking I should do something about helping people",,unknown,unknown,unusable,no_explicit_preference
+D015,Being outdoors doing practical stuff is when I feel most alive,,unknown,unknown,unusable,no_explicit_preference
+D016,"My family has always run its own businesses, so I guess it's natural that I like leading and persuading people, maybe it's just what I've seen growing up",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D016,I also like keeping things organised and planned,keeping things organised and planned,positive,explicit,usable,explicit_first_person
+D016,Creative stuff like drawing or designing really isn't for me,Creative stuff like drawing or designing really,negative,explicit,usable,explicit_negative_predicate
+D016,I'm also not keen on roles where I'm mainly caring for people,,unknown,unknown,unusable,no_explicit_preference
+D017,Helping people through tough times is what I find most meaningful,,unknown,unknown,unusable,no_explicit_preference
+D017,"I also love creating things, like designing and painting","creating things, like designing and painting",positive,explicit,usable,explicit_first_person
+D017,I'm a bit curious about research too,,unknown,unknown,unusable,no_explicit_preference
+D017,"My course is heavy on documentation and my internship was all about keeping records in order, so I've been told admin work is the natural fit for me",,unknown,unknown,unusable,no_explicit_preference
+D017,Honestly,,unknown,unknown,unusable,no_explicit_preference
+D017,I'd rather not spend my time helping other people,,unknown,unknown,unusable,no_explicit_preference
+D018,Analysing data and solving hard problems is what I love most,most,unknown,unknown,unusable,unclear_activity_scope
+D018,"I like keeping things neat and organised, checking every detail","keeping things neat and organised, checking every detail",positive,explicit,usable,explicit_first_person
+D018,I sometimes write for fun,,unknown,unknown,unusable,no_explicit_preference
+D018,Physical work with tools is not for me at all,Physical work with tools,negative,explicit,usable,explicit_negative_predicate
+D018,Keeping things organised and checking details is a pain for me,,unknown,unknown,unusable,no_explicit_preference
+D019,I love leading people and persuading them,leading people and persuading them,positive,explicit,usable,explicit_first_person
+D019,I've run a few small pop-up sales with friends,,unknown,unknown,unusable,no_explicit_preference
+D019,"Creating things, like designing merch and making videos, is my other big passion",,unknown,unknown,unusable,no_explicit_preference
+D019,I enjoy helping friends out too,helping friends out too,positive,explicit,usable,explicit_first_person
+D019,"Long research or data analysis bores me, and detailed admin drives me crazy",,unknown,unknown,unusable,no_explicit_preference
+D019,Physical work with tools or machines is really not my thing,,unknown,unknown,unusable,no_explicit_preference
+D019,I love tinkering with machines and doing hands-on repair work,tinkering with machines and doing hands-on repair work,positive,explicit,usable,explicit_first_person
+D020,I'm honestly not sure what I enjoy,,unknown,unknown,unusable,uncertain_or_negated_dislike
+D020,I find learning how things work kind of interesting,,unknown,unknown,unusable,no_explicit_preference
+D020,"My older siblings both have jobs helping people and my parents say I'm caring like them, so I've been leaning toward that direction",,unknown,unknown,unusable,third_party_or_background_scope
+D020,I don't have strong feelings about most other things,,unknown,unknown,unusable,no_explicit_preference
+D021,"doing life sciences in uni and tbh the best part is figuring out why an experiment gave weird results, genuinely fun",,unknown,unknown,unusable,no_explicit_preference
+D021,"endless forms and admin stuff though, cannot lah",,unknown,unknown,unusable,no_explicit_preference
+D022,What gets me most excited is pitching an idea and convincing people to get on board,,unknown,unknown,unusable,no_explicit_preference
+D022,last semester I rallied sponsors for our hall's fundraising drive and closing each deal was the highlight,,unknown,unknown,unusable,no_explicit_preference
+D022,I also like taking charge of a group project and pushing the team toward a goal,taking charge of a group project and pushing the team toward a goal,positive,explicit,usable,explicit_first_person
+D022,Digging into data to understand a problem is kinda fun too,Digging into data to understand a problem,positive,explicit,usable,activity_preference_predicate
+D022,anything hands-on with tools or fixing machines is really not for me,anything hands-on with tools or fixing machines,negative,explicit,usable,explicit_negative_predicate
+D022,and I'd hate spending my day assembling or repairing things,,unknown,unknown,unusable,no_explicit_preference
+D023,"Nothing satisfies me more than turning a messy spreadsheet into perfect order, with every record checked and every step of the process clearly laid out",,unknown,unknown,unusable,no_explicit_preference
+D023,"I also really like leading a team and persuading people to back a plan, like when our CCA had to convince the school to approve a bigger budget","leading a team and persuading people to back a plan, like when our CCA had to convince the school to approve a bigger budget",positive,explicit,usable,explicit_first_person
+D023,Working out why the numbers don't add up is genuinely fun for me too,,unknown,unknown,unusable,no_explicit_preference
+D023,"On the other hand, hands-on work with tools, engines or wiring is something I really don't like",,unknown,unknown,unusable,no_explicit_preference
+D024,"hmm i guess i like figuring out how stuff works, like reading up on why my laptop keeps overheating","figuring out how stuff works, like reading up on why my laptop keeps overheating",positive,explicit,usable,explicit_first_person
+D024,dealing with other people's problems all day sounds super tiring tho,,unknown,unknown,unusable,no_explicit_preference
+D025,"Helping people is really what drives me, and my internship at a family service centre, running weekly sessions with kids who needed extra support, was honestly the most meaningful thing I've done",,unknown,unknown,unusable,no_explicit_preference
+D025,"I also really like creative stuff such as drawing, making posters and writing little stories","creative stuff such as drawing, making posters and writing little stories",positive,explicit,usable,explicit_first_person
+D025,Fixing things or working with tools and machines really isn't my thing,,unknown,unknown,unusable,no_explicit_preference
+D025,"And I strongly dislike tedious paperwork, like filling in forms and keeping records all day",,unknown,unknown,unusable,no_explicit_preference
+D026,"Leading a team and convincing people to buy into an idea is where I feel most alive, like when I pitched our club's charity bazaar to vendors and got them all on board",,unknown,unknown,unusable,no_explicit_preference
+D026,"I'm also really into helping people, whether it's tutoring juniors or listening to friends when they're stressed",,unknown,unknown,unusable,third_party_or_background_scope
+D026,Figuring out why something works is kinda interesting too,,unknown,unknown,unusable,no_explicit_preference
+D026,I'm not too keen on fiddly hands-on stuff like assembling furniture though,,unknown,unknown,unusable,no_explicit_preference
+D027,"ok so mostly i'm happiest when i'm making stuff, like designing posters or writing short stories",,unknown,unknown,unusable,no_explicit_preference
+D027,anything with machines or fixing things though,,unknown,unknown,unusable,no_explicit_preference
+D027,i'm useless and don't like it at all lol,,unknown,unknown,unusable,no_explicit_preference
+D028,The thing that excites me most is persuading people and running the show,,unknown,unknown,unusable,no_explicit_preference
+D028,selling merch at our hall's flea market and smashing our sales target was such a rush,,unknown,unknown,unusable,no_explicit_preference
+D028,Helping friends out when they're stuck is kinda nice too,,unknown,unknown,unusable,third_party_or_background_scope
+D028,Keeping things neat and orderly is fine,,unknown,unknown,unusable,no_explicit_preference
+D028,I guess,,unknown,unknown,unusable,no_explicit_preference
+D028,"please, nothing hands-on with tools, machines or outdoor physical work",,unknown,unknown,unusable,no_explicit_preference
+D028,that really isn't me,,unknown,unknown,unusable,no_explicit_preference
+D029,"I'm doing biomedical science, and the lab modules where we dig into why cells behave the way they do are genuinely what excite me most",,unknown,unknown,unusable,third_party_or_background_scope
+D029,Reading papers and testing hypotheses until something finally makes sense is my idea of a good day,,unknown,unknown,unusable,no_explicit_preference
+D029,"I also really like helping people, like tutoring juniors through tough concepts or volunteering with elderly residents in my neighbourhood","helping people, like tutoring juniors through tough concepts or volunteering with elderly residents in my neighbourhood",positive,explicit,usable,explicit_first_person
+D029,"Repetitive admin like data entry and filing records, on the other hand, really drains me",,unknown,unknown,unusable,no_explicit_preference
+D030,not super sure,,unknown,unknown,unusable,no_explicit_preference
+D030,"i kinda like analysing stuff, like digging into why my grades dipped one sem",,unknown,unknown,unusable,no_explicit_preference
+D030,"looking after people all day though, not for me",looking after people all day,negative,explicit,usable,explicit_negative_predicate
+D031,Running things is my favourite thing in the world,Running things,positive,explicit,usable,activity_preference_predicate
+D031,I chaired our faculty's orientation committee and negotiating with sponsors and getting everyone moving was amazing,,unknown,unknown,unusable,no_explicit_preference
+D031,"I'm also really into keeping things organised, like building schedules, tracking budgets and making sure every detail is in place",,unknown,unknown,unusable,no_explicit_preference
+D031,Helping freshies settle in was kinda nice too,,unknown,unknown,unusable,no_explicit_preference
+D031,Hands-on work with tools or machines really isn't for me,Hands-on work with tools or machines really,negative,explicit,usable,explicit_negative_predicate
+D031,I also dislike deep research or theory where you spend hours figuring out why something happens,deep research or theory where you spend hours figuring out why something happens,negative,explicit,usable,explicit_first_person
+D032,"What I like most is working out why something isn't behaving the way it should, like tracing why my code's output was off or why the plant in my room keeps dying","working out why something isn't behaving the way it should, like tracing why my code's output was off or why the plant in my room keeps dying",positive,explicit,usable,explicit_first_person
+D032,"I also really like hands-on stuff such as taking apart an old fan, fixing my bicycle or building things with my own hands","hands-on stuff such as taking apart an old fan, fixing my bicycle or building things with my own hands",positive,explicit,usable,explicit_first_person
+D032,Leading a small group is okay,,unknown,unknown,unusable,no_explicit_preference
+D032,I guess,,unknown,unknown,unusable,no_explicit_preference
+D032,"What I can't stand is repetitive admin like filing, data entry or following rigid checklists","repetitive admin like filing, data entry or following rigid checklists",negative,explicit,usable,explicit_first_person
+D033,"interned at a startup doing outreach and pitching to clients, and honestly had so much fun convincing them and closing deals",,unknown,unknown,unusable,no_explicit_preference
+D033,"arty stuff like drawing or design, really not my thing",,unknown,unknown,unusable,no_explicit_preference
+D034,"I think I'm happiest when I'm trying to figure out why something works, like reading up on why some bridges sway or testing different study methods to see which one sticks",,unknown,unknown,unusable,no_explicit_preference
+D034,Tinkering with gadgets is kinda fun too,Tinkering with gadgets,positive,explicit,usable,activity_preference_predicate
+D034,I don't mind helping classmates when they're stuck either,,unknown,unknown,unusable,third_party_or_background_scope
+D034,"Routine paperwork isn't really my favourite, though",,unknown,unknown,unusable,no_explicit_preference
+D035,Being there for people is what matters most to me,,unknown,unknown,unusable,no_explicit_preference
+D035,I volunteer weekly at a tuition programme for kids from lower-income families and it's the highlight of my week,,unknown,unknown,unusable,no_explicit_preference
+D035,I'm also really curious about why people behave the way they do,,unknown,unknown,unusable,third_party_or_background_scope
+D035,and I like reading studies and testing ideas,reading studies and testing ideas,positive,explicit,usable,explicit_first_person
+D035,Sales pitching or pushing people to buy things isn't really my style,,unknown,unknown,unusable,no_explicit_preference
+D035,"And detailed admin, like updating records and following procedures to the letter, really drains me",,unknown,unknown,unusable,no_explicit_preference
+D036,weird flex,,unknown,unknown,unusable,no_explicit_preference
+D036,"i get really satisfied sorting things out, like colour-coding my notes and keeping my budget spreadsheet super tidy",,unknown,unknown,unusable,no_explicit_preference
+D036,tinkering with stuff is kinda fun too i guess,tinkering with stuff,positive,explicit,usable,activity_preference_predicate
+D037,"Helping others is what makes me happiest: my mum runs a small childcare centre and I help out there on weekends, and playing with the kids and comforting them when they cry is genuinely the best part of my week",,unknown,unknown,unusable,third_party_or_background_scope
+D037,I also kinda like doodling and making little crafts,,unknown,unknown,unusable,no_explicit_preference
+D037,"Rigid tasks like data entry, filing and checking forms line by line really aren't for me, though","Rigid tasks like data entry, filing and checking forms line by line really",negative,explicit,usable,explicit_negative_predicate
+D037,Fixing stuff around the house isn't something I'm into either,,unknown,unknown,unusable,no_explicit_preference
+D038,"Honestly my favourite thing is convincing people, whether it's pitching a project idea to lecturers or bargaining for a better price at the market",,unknown,unknown,unusable,no_explicit_preference
+D038,I like taking the lead in group work and setting the direction,taking the lead in group work and setting the direction,positive,explicit,usable,explicit_first_person
+D038,Running a small online shop selling thrifted clothes was super fun for me,,unknown,unknown,unusable,no_explicit_preference
+D038,"On the flip side, anything involving tools, machines or getting my hands dirty",,unknown,unknown,unusable,no_explicit_preference
+D038,I really don't like,,unknown,unknown,unusable,no_explicit_preference
+D039,idk if this counts,,unknown,unknown,unusable,no_explicit_preference
+D039,"i can spend hours reading about why things happen, like why some songs go viral or how vaccines actually work",,unknown,unknown,unusable,no_explicit_preference
+D040,"Helping people through tough times means the most to me, and supporting friends during exam season is something I find really rewarding",,unknown,unknown,unusable,no_explicit_preference
+D040,"I also really like getting to the bottom of problems, like analysing why a survey result turned out the way it did","getting to the bottom of problems, like analysing why a survey result turned out the way it did",positive,explicit,usable,explicit_first_person
+D040,"Creative stuff like drawing, designing or writing stories is really not my thing",,unknown,unknown,unusable,no_explicit_preference
+D040,Selling or pushing people to sign up for stuff isn't my favourite either,,unknown,unknown,unusable,no_explicit_preference
+D041,Keeping things organised gives me the most satisfaction,,unknown,unknown,unusable,no_explicit_preference
+D041,during my internship I reconciled invoices and kept the company's records tidy,,unknown,unknown,unusable,no_explicit_preference
+D041,and I genuinely enjoyed every bit of it,,unknown,unknown,unusable,no_explicit_preference
+D041,I also really like figuring out why the numbers don't match and tracing the problem back to its source,figuring out why the numbers don't match and tracing the problem back to its source,unknown,unknown,unusable,unclear_activity_scope
+D041,Making little designs for my notes is kinda fun too,Making little designs for my notes,positive,explicit,usable,activity_preference_predicate
+D041,I guess,,unknown,unknown,unusable,no_explicit_preference
+D041,"Working with tools, machines or doing physical repairs isn't for me at all","Working with tools, machines or doing physical repairs",negative,explicit,usable,explicit_negative_predicate
+D042,"Tbh what gets me going is solving puzzles and digging into why something happens, like debugging weird errors in my code",,unknown,unknown,unusable,no_explicit_preference
+D042,selling stuff or persuading people,,unknown,unknown,unusable,no_explicit_preference
+D042,nope,,unknown,unknown,unusable,no_explicit_preference
+D043,I'm at my best when I'm leading and persuading,,unknown,unknown,unusable,no_explicit_preference
+D043,pitching ideas to sponsors and getting a team fired up is what I live for,,unknown,unknown,unusable,no_explicit_preference
+D043,"I'm also really into keeping things orderly, like tracking budgets and planning every detail in a spreadsheet",,unknown,unknown,unusable,no_explicit_preference
+D043,"Helping people out, like guiding juniors through module planning, means a lot to me too",,unknown,unknown,unusable,no_explicit_preference
+D043,"hands-on stuff with tools, machines or outdoor physical labour I really dislike",,unknown,unknown,unusable,no_explicit_preference
+D044,Taking charge and negotiating are what get me most excited,,unknown,unknown,unusable,no_explicit_preference
+D044,I used to resell sneakers online and haggling to close deals was a total rush,,unknown,unknown,unusable,no_explicit_preference
+D044,"I'm also really into organising, like keeping meticulous records of my stock and expenses in spreadsheets",,unknown,unknown,unusable,no_explicit_preference
+D044,Planning a tight schedule for group projects is satisfying too,Planning a tight schedule for group projects,positive,explicit,usable,activity_preference_predicate
+D044,Drawing or art projects aren't really my cup of tea,,unknown,unknown,unusable,no_explicit_preference
+D045,What gets me most excited is digging into a problem and running my own little experiments until I figure out why something happens,,unknown,unknown,unusable,no_explicit_preference
+D045,"I really enjoy fixing things with my hands, like taking apart an old fan and getting it running again","fixing things with my hands, like taking apart an old fan and getting it running again",positive,explicit,usable,explicit_first_person
+D045,I also like helping my juniors when they're stuck on tutorials,,unknown,unknown,unusable,third_party_or_background_scope
+D045,Honestly,,unknown,unknown,unusable,no_explicit_preference
+D045,"I don't really like hands-on, tool-type work at all","hands-on, tool-type work at all",negative,explicit,usable,explicit_first_person
+D045,"I'm not so keen on following a fixed checklist or keeping detailed records, and drawing or designing things isn't really my thing either",,unknown,unknown,unusable,no_explicit_preference
+D046,"I love creating things, whether it's sketching, designing posters for my CCA or writing short stories","creating things, whether it's sketching, designing posters for my CCA or writing short stories",positive,explicit,usable,explicit_first_person
+D046,I also really enjoy listening to people and helping my friends work through their problems,listening to people and helping my friends work through their problems,positive,explicit,usable,explicit_first_person
+D046,Reading up on why people behave the way they do is fascinating to me,,unknown,unknown,unusable,third_party_or_background_scope
+D046,I actually quite like keeping things organised in spreadsheets and tracking every detail,,unknown,unknown,unusable,no_explicit_preference
+D046,"I hate fiddly hands-on work with tools, and being outdoors doing physical tasks just drains me","fiddly hands-on work with tools, and being outdoors doing physical tasks just drains me",negative,explicit,usable,explicit_first_person
+D046,Keeping records and checking every small detail is something I really can't stand,,unknown,unknown,unusable,no_explicit_preference
+D047,I get a real kick out of leading a group project and convincing people to get behind an idea,,unknown,unknown,unusable,no_explicit_preference
+D047,"I also enjoy planning things properly, keeping schedules and budgets neat and making sure every detail is in order","planning things properly, keeping schedules and budgets neat and making sure every detail is in order",positive,explicit,usable,explicit_first_person
+D047,"My dad runs a small workshop and I've spent most school holidays helping him with the machines, so I've always assumed I'd end up doing something hands-on like that",,unknown,unknown,unusable,third_party_or_background_scope
+D047,I'm not really into deep research or analysing data for hours,,unknown,unknown,unusable,no_explicit_preference
+D047,Creative stuff like drawing or designing also isn't my cup of tea,,unknown,unknown,unusable,no_explicit_preference
+D048,"young I've been helping out at my mum's stall at the pasar malam, pitching to customers and handling the bargaining, so people assume I just do sales stuff",,unknown,unknown,unusable,third_party_or_background_scope
+D048,it's what I know,,unknown,unknown,unusable,no_explicit_preference
+D048,I enjoy working with people and helping them feel at ease,working with people and helping them feel at ease,positive,explicit,usable,explicit_first_person
+D048,and I like creative projects like designing slides or videos for events,creative projects like designing slides or videos for events,positive,explicit,usable,explicit_first_person
+D048,Keeping things organised is quite satisfying for me too,,unknown,unknown,unusable,no_explicit_preference
+D048,I really dislike working with tools or doing physical repairs,working with tools or doing physical repairs,negative,explicit,usable,explicit_first_person
+D048,Long hours of research and analysing data also bore me badly,,unknown,unknown,unusable,no_explicit_preference
+D049,"What I enjoy most is helping people, like tutoring kids from my neighbourhood every weekend","helping people, like tutoring kids from my neighbourhood every weekend",positive,explicit,usable,explicit_first_person
+D049,"I really love the research side of my modules, figuring out why something works and testing my ideas","the research side of my modules, figuring out why something works and testing my ideas",positive,explicit,usable,explicit_first_person
+D049,"I also like making things look nice, like designing the layout for our club's newsletter","making things look nice, like designing the layout for our club's newsletter",positive,explicit,usable,explicit_first_person
+D049,Analysing data and doing research honestly bores me to death,,unknown,unknown,unusable,no_explicit_preference
+D049,My parents keep telling me to go into something hands-on and technical,,unknown,unknown,unusable,third_party_or_background_scope
+D049,"it's 'stable', so I've been thinking that's probably what I should do",,unknown,unknown,unusable,no_explicit_preference
+D049,"I don't like being the one who has to sell or pitch ideas to people, that really isn't me","being the one who has to sell or pitch ideas to people, that really isn't me",negative,explicit,usable,explicit_first_person
+D050,I get really absorbed when I'm analysing a problem and working out the underlying pattern,,unknown,unknown,unusable,no_explicit_preference
+D050,Reading papers and testing my own hypotheses for a project is the part of uni I look forward to most,,unknown,unknown,unusable,no_explicit_preference
+D050,I'm not into working with my hands or being outdoors doing physical tasks,working with my hands or being outdoors doing physical tasks,negative,explicit,usable,explicit_first_person
+D050,I don't actually enjoy analysing things or doing research much,,unknown,unknown,unusable,no_explicit_preference
+D050,"Looking after people or teaching them all day really isn't for me, it tires me out",Looking after people or teaching them all day really,negative,explicit,usable,explicit_negative_predicate
+D050,I'm also not a fan of rigid routines and paperwork,,unknown,unknown,unusable,no_explicit_preference
+D051,"I love creating things, especially designing graphics and editing videos for my hall events","creating things, especially designing graphics and editing videos for my hall events",positive,explicit,usable,explicit_first_person
+D051,I also like helping people and being there for my friends when they need someone,,unknown,unknown,unusable,third_party_or_background_scope
+D051,Leading a small team and pitching ideas can be fun for me,,unknown,unknown,unusable,no_explicit_preference
+D051,and I don't mind keeping things neat and organised,,unknown,unknown,unusable,no_explicit_preference
+D051,I quite like working with my hands and tinkering with tools,working with my hands and tinkering with tools,positive,explicit,usable,explicit_first_person
+D051,"honestly, hands-on work with tools and machines is just not something I enjoy",,unknown,unknown,unusable,no_explicit_preference
+D052,"I enjoy taking charge, convincing people and seeing a plan come together","taking charge, convincing people and seeing a plan come together",positive,explicit,usable,explicit_first_person
+D052,I pushed it through,,unknown,unknown,unusable,no_explicit_preference
+D052,I don't mind keeping things organised either,,unknown,unknown,unusable,no_explicit_preference
+D052,"My course has a lot of lab and workshop components with equipment, and",,unknown,unknown,unusable,no_explicit_preference
+D052,I've already done so many of those I figure I should go into something along those lines,,unknown,unknown,unusable,no_explicit_preference
+D052,Designing or doing artsy things isn't really for me,,unknown,unknown,unusable,no_explicit_preference
+D053,"During my internship last summer I was mostly analysing data and checking results, so maybe it sounds like I only like research",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D053,that's what I happened to do,,unknown,unknown,unusable,no_explicit_preference
+D053,I get quite satisfied when everything is neatly organised and documented,,unknown,unknown,unusable,no_explicit_preference
+D053,Building or fixing small things can be fun once in a while too,,unknown,unknown,unusable,no_explicit_preference
+D053,I don't enjoy having to support or counsel people all day,having to support or counsel people all day,negative,explicit,usable,explicit_first_person
+D053,Persuading people or selling ideas really isn't my thing either,,unknown,unknown,unusable,no_explicit_preference
+D054,I love leading people and getting them excited about an idea,leading people and getting them excited about an idea,positive,explicit,usable,explicit_first_person
+D054,I really enjoy planning things out carefully and keeping records properly organised,planning things out carefully and keeping records properly organised,positive,explicit,usable,explicit_first_person
+D054,I also like analysing a problem to understand it better,analysing a problem to understand it better,positive,explicit,usable,explicit_first_person
+D054,Organising records and dealing with all the small details is honestly a chore I dislike,,unknown,unknown,unusable,no_explicit_preference
+D054,"My uncle and cousins all do practical, hands-on work, and everyone at family gatherings says I should follow them, so I've kind of been leaning that way",,unknown,unknown,unusable,third_party_or_background_scope
+D055,I love helping people and spending time with juniors who need someone to talk to,helping people and spending time with juniors who need someone to talk to,positive,explicit,usable,explicit_first_person
+D055,"Creating things, like painting or designing, is one of the things I enjoy most",most,unknown,unknown,unusable,unclear_activity_scope
+D055,I also get curious about how things work and like reading up on them,,unknown,unknown,unusable,no_explicit_preference
+D055,I don't really enjoy artsy or creative work,artsy or creative work,negative,explicit,usable,explicit_first_person
+D055,I can't stand doing physical work with tools outdoors,doing physical work with tools outdoors,negative,explicit,usable,explicit_first_person
+D055,Keeping detailed records and following strict procedures also drives me crazy,,unknown,unknown,unusable,no_explicit_preference
+D056,I really enjoy working through tough problems and analysing data until things make sense,working through tough problems and analysing data until things make sense,positive,explicit,usable,explicit_first_person
+D056,I also like keeping my notes and files well organised,keeping my notes and files well organised,positive,explicit,usable,explicit_first_person
+D056,I enjoy being the one who leads and persuades the group,being the one who leads and persuades the group,positive,explicit,usable,explicit_first_person
+D056,Having to lead people or persuade them is something I really dislike,,unknown,unknown,unusable,no_explicit_preference
+D056,I'd much rather focus on the work itself than pitch it to anyone,,unknown,unknown,unusable,no_explicit_preference
+D057,"What I enjoy most is leading people and convincing them to back an idea, like when I ran the fundraising drive for my CCA","leading people and convincing them to back an idea, like when I ran the fundraising drive for my CCA",positive,explicit,usable,explicit_first_person
+D057,My parents always tell me to pick something practical and hands-on,,unknown,unknown,unusable,third_party_or_background_scope
+D057,"that's what they did, so I've been considering that route",,unknown,unknown,unusable,third_party_or_background_scope
+D057,I took a few workshop-type electives,,unknown,unknown,unusable,no_explicit_preference
+D057,of their advice too,,unknown,unknown,unusable,no_explicit_preference
+D057,Overall,,unknown,unknown,unusable,no_explicit_preference
+D057,I'm happiest when I'm the one driving things forward,,unknown,unknown,unusable,no_explicit_preference
+D058,"My mum is a volunteer counsellor and I grew up tagging along to help at community events, so maybe it looks like I only like helping people",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D058,it's familiar,,unknown,unknown,unusable,no_explicit_preference
+D058,I enjoy keeping things orderly and making sure details are right,keeping things orderly and making sure details are right,positive,explicit,usable,explicit_first_person
+D058,I'm not big on persuading people or selling things,,unknown,unknown,unusable,no_explicit_preference
+D058,Creative work like drawing or designing is something I really don't enjoy,,unknown,unknown,unusable,no_explicit_preference
+D059,I love helping and teaching people,helping and teaching people,positive,explicit,usable,explicit_first_person
+D059,Last year I volunteered as a tutor and it was the highlight of my week,,unknown,unknown,unusable,no_explicit_preference
+D059,I also like figuring out why things happen,figuring out why things happen,positive,explicit,usable,explicit_first_person
+D059,Helping or teaching others isn't something I actually enjoy,,unknown,unknown,unusable,no_explicit_preference
+D059,"My internship was in a sales team, so everyone assumes I'll go into something like that and I've been leaning that way",,unknown,unknown,unusable,no_explicit_preference
+D059,I really don't like hands-on work with tools or machines,hands-on work with tools or machines,negative,explicit,usable,explicit_first_person
+D060,What I love most is analysing problems and researching until I find the answer,analysing problems and researching until I find the answer,positive,explicit,usable,explicit_first_person
+D060,"I enjoy keeping things neat and organised, like tracking all the details in a spreadsheet","keeping things neat and organised, like tracking all the details in a spreadsheet",positive,explicit,usable,explicit_first_person
+D060,I'm not really someone who likes organising records or details,,unknown,unknown,unusable,no_explicit_preference
+D060,"I'm not a fan of physical or outdoor work, and creative work isn't really for me either",,unknown,unknown,unusable,no_explicit_preference
+D060,Working with people all the time can also tire me out,,unknown,unknown,unusable,no_explicit_preference
+D061,"I'm doing communications and new media at NUS, and honestly the part I love most is making stuff, like designing posters and writing scripts for our club videos","making stuff, like designing posters and writing scripts for our club videos",positive,explicit,usable,explicit_first_person
+D061,I also really enjoy pitching ideas and getting people on board,pitching ideas and getting people on board,positive,explicit,usable,explicit_first_person
+D061,and I loved convincing sponsors to chip in for our hall's welfare drive,,unknown,unknown,unusable,no_explicit_preference
+D061,Spending time helping juniors settle in and sorting out their problems is something I genuinely find rewarding,,unknown,unknown,unusable,no_explicit_preference
+D061,"I like a bit of everything, to be fair, from tinkering with camera rigs to digging into why some campaigns flop",a bit of everything,positive,explicit,usable,explicit_first_person
+D061,Even keeping our project trackers tidy is kind of satisfying,Even keeping our project trackers tidy,positive,explicit,usable,activity_preference_predicate
+D061,That said,,unknown,unknown,unusable,no_explicit_preference
+D061,I don't think I'd enjoy a job where I'm mostly looking after other people's needs,,unknown,unknown,unusable,no_explicit_preference
+D062,I'm finishing a psychology degree at NUS and I like a lot of different things,a lot of different things,positive,explicit,usable,explicit_first_person
+D062,Helping people is the thing I keep coming back to,,unknown,unknown,unusable,no_explicit_preference
+D062,my mum runs a tuition centre and I've been tutoring kids there,,unknown,unknown,unusable,third_party_or_background_scope
+D062,I was sixteen,,unknown,unknown,unusable,no_explicit_preference
+D062,People say I only want to work with people,,unknown,unknown,unusable,no_explicit_preference
+D062,it's what I grew up around,,unknown,unknown,unusable,no_explicit_preference
+D062,I genuinely light up when a student finally gets something,,unknown,unknown,unusable,no_explicit_preference
+D062,I also love digging into research questions and figuring out why people behave the way they do,,unknown,unknown,unusable,third_party_or_background_scope
+D062,On the side I do some graphic design and write for a campus zine,,unknown,unknown,unusable,no_explicit_preference
+D062,"I'm also happy organising schedules, leading a small team or fixing things with my hands",,unknown,unknown,unusable,no_explicit_preference
+D062,Narrowing it down is the hard part,,unknown,unknown,unusable,no_explicit_preference
+D063,I'm in my final year of mechanical engineering at NTU,,unknown,unknown,unusable,no_explicit_preference
+D063,My dad runs a small aircon servicing business and I've helped on jobs,,unknown,unknown,unusable,third_party_or_background_scope
+D063,"secondary school, so people assume I'd only go into hands-on work",,unknown,unknown,unusable,no_explicit_preference
+D063,it's what I know,,unknown,unknown,unusable,no_explicit_preference
+D063,Honestly though,,unknown,unknown,unusable,no_explicit_preference
+D063,"I really love it, and opening up a faulty unit and getting it running again is the best part of my week","it, and opening up a faulty unit and getting it running again is the best part of my week",positive,explicit,usable,explicit_first_person
+D063,I'm also somewhat curious about the theory behind why parts wear out,,unknown,unknown,unusable,no_explicit_preference
+D063,"Other things, like office work or presenting",,unknown,unknown,unusable,no_explicit_preference
+D063,I'm not too sure about,,unknown,unknown,unusable,no_explicit_preference
+D063,I'd love a job where I'm out on site working with machines most of the day,,unknown,unknown,unusable,no_explicit_preference
+D064,"I'm a final-year accountancy student at NTU, and my mum runs a small bookkeeping firm, so I grew up helping her sort receipts and reconcile accounts",,unknown,unknown,unusable,third_party_or_background_scope
+D064,A lot of people assume I'm going into it just,,unknown,unknown,unusable,no_explicit_preference
+D064,it's what I know,,unknown,unknown,unusable,no_explicit_preference
+D064,honestly,,unknown,unknown,unusable,no_explicit_preference
+D064,"I really like it, there's something calming about getting a messy set of records perfectly in order and making sure every number ties up","it, there's something calming about getting a messy set of records perfectly in order and making sure every number ties up",positive,explicit,usable,explicit_first_person
+D064,I also don't mind digging into why figures look off sometimes,,unknown,unknown,unusable,no_explicit_preference
+D064,"I'm less into the creative side of things, like designing slides or coming up with campaign ideas",,unknown,unknown,unusable,no_explicit_preference
+D064,"Ideally I'd want a role that's structured, detailed and well organised",,unknown,unknown,unusable,no_explicit_preference
+D065,"I'm studying business analytics at SMU, and the part I enjoy most is building clean, well-organised spreadsheets and making sure every number reconciles","building clean, well-organised spreadsheets and making sure every number reconciles",positive,explicit,usable,explicit_first_person
+D065,I also really like digging into data to work out why sales dipped or a trend shifted,digging into data to work out why sales dipped or a trend shifted,positive,explicit,usable,explicit_first_person
+D065,"Both my parents are teachers and I did a long internship at a family service centre, so I'll probably end up in something like teaching or community work",,unknown,unknown,unusable,third_party_or_background_scope
+D065,that's what everyone expects and it's what I know,,unknown,unknown,unusable,no_explicit_preference
+D065,Pitching ideas to clients and running group projects is something I'm good at and enjoy too,,unknown,unknown,unusable,no_explicit_preference
+D065,Honestly,,unknown,unknown,unusable,no_explicit_preference
+D065,I find analysing things and asking why pretty tedious,,unknown,unknown,unusable,no_explicit_preference
+D065,Design-heavy or artsy stuff isn't really my thing,,unknown,unknown,unusable,no_explicit_preference
+D066,"ermm tbh not very sure leh, maybe something where i get to make things look nice",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D066,"like doing up posters or slides kind of, the rest i dunno",,unknown,unknown,unusable,no_explicit_preference
+D067,"I'm studying communications and new media at NUS, and honestly I'm into a lot of things",,unknown,unknown,unusable,no_explicit_preference
+D067,Designing posters and editing short videos is the thing I could happily do all day,,unknown,unknown,unusable,no_explicit_preference
+D067,I really don't like being the one who has to pitch ideas or convince people to get on board,being the one who has to pitch ideas or convince people to get on board,negative,explicit,usable,explicit_first_person
+D067,I also like tinkering with cameras and lighting rigs,tinkering with cameras and lighting rigs,positive,explicit,usable,explicit_first_person
+D067,and I get curious about why some content takes off while other stuff flops,,unknown,unknown,unusable,no_explicit_preference
+D067,Helping juniors polish their portfolios is fun too,Helping juniors polish their portfolios,positive,explicit,usable,activity_preference_predicate
+D067,and I don't mind keeping our project files organised,,unknown,unknown,unusable,no_explicit_preference
+D067,"When I led our hall's publicity campaign last year, getting sponsors on board and rallying the team was such a buzz",,unknown,unknown,unusable,no_explicit_preference
+D068,"I study mechanical engineering at NUS and my favourite part is being in the workshop, taking machines apart and building prototypes with my hands",,unknown,unknown,unusable,no_explicit_preference
+D068,"I also really enjoy figuring out why something failed, like running tests until I find the root cause","figuring out why something failed, like running tests until I find the root cause",positive,explicit,usable,explicit_first_person
+D068,I'd honestly love a job where I get to support and look after people every day,,unknown,unknown,unusable,no_explicit_preference
+D068,Arts and design stuff is not for me at all,Arts and design stuff,negative,explicit,usable,explicit_negative_predicate
+D068,I get stuck whenever a project needs anything creative or visual,,unknown,unknown,unusable,no_explicit_preference
+D068,I'd happily spend my days outdoors on site or in a lab troubleshooting equipment,,unknown,unknown,unusable,no_explicit_preference
+D068,dealing with people's emotions and helping them through their problems all day would drain me fast,,unknown,unknown,unusable,no_explicit_preference
+D069,I'm in my final year of mechanical engineering at NTU,,unknown,unknown,unusable,no_explicit_preference
+D069,My dad runs a car workshop in Ubi and I've been helping out there,,unknown,unknown,unusable,third_party_or_background_scope
+D069,"secondary school, so people assume I'm only into engines",,unknown,unknown,unusable,no_explicit_preference
+D069,I grew up with them,,unknown,unknown,unusable,no_explicit_preference
+D069,Truth is,,unknown,unknown,unusable,no_explicit_preference
+D069,"I actually love it, and taking apart a gearbox and putting it back together is the most satisfying part of my week",,unknown,unknown,unusable,no_explicit_preference
+D069,I'd love a job where I'm on the floor working with machines rather than stuck at a desk,,unknown,unknown,unusable,no_explicit_preference
+D069,"I'm also somewhat curious about why parts fail, so a bit of troubleshooting and testing would be nice",,unknown,unknown,unusable,no_explicit_preference
+D069,Other than that,,unknown,unknown,unusable,no_explicit_preference
+D069,I'm pretty open,,unknown,unknown,unusable,no_explicit_preference
+D070,Hmm,,unknown,unknown,unusable,no_explicit_preference
+D070,"I'm doing a business degree, nothing very specialised",,unknown,unknown,unusable,no_explicit_preference
+D070,Last summer I interned at a logistics company helping to keep the inventory records tidy and check invoices,,unknown,unknown,unusable,no_explicit_preference
+D070,"and I think I kind of liked it, the routine was quite calming",,unknown,unknown,unusable,no_explicit_preference
+D070,Other than that I'm not really sure what I want,,unknown,unknown,unusable,no_explicit_preference
+D070,Maybe something steady with clear procedures could work,,unknown,unknown,unusable,uncertain_or_negated_dislike
+D070,Honestly I'm still figuring things out,,unknown,unknown,unusable,no_explicit_preference
+D071,I'm in my final year of materials engineering at NTU,,unknown,unknown,unusable,no_explicit_preference
+D071,"My uncle runs a motorcycle repair workshop in Ubi and I basically grew up there, so everyone figures I'll do hands-on stuff only",,unknown,unknown,unusable,third_party_or_background_scope
+D071,it's familiar,,unknown,unknown,unusable,no_explicit_preference
+D071,I genuinely get a kick out of stripping an engine down and putting it back together properly,,unknown,unknown,unusable,no_explicit_preference
+D071,"I also love the lab side of my course, like running tests to work out exactly why a sample cracked","the lab side of my course, like running tests to work out exactly why a sample cracked",positive,explicit,usable,explicit_first_person
+D071,"I'd rather not spend my days filling in forms and tracking paperwork, though",,unknown,unknown,unusable,no_explicit_preference
+D071,Something that mixes workshop time with real problem-solving sounds ideal,,unknown,unknown,unusable,no_explicit_preference
+D072,"I'm finishing a degree in civil engineering at NTU, and the best part for me has been site visits and working with the equipment in the lab",,unknown,unknown,unusable,no_explicit_preference
+D072,"I also like keeping things in order, like maintaining our project schedules and making sure every checklist is filled in properly","keeping things in order, like maintaining our project schedules and making sure every checklist is filled in properly",positive,explicit,usable,explicit_first_person
+D072,Both my parents are teachers and I've been giving tuition,,unknown,unknown,unusable,third_party_or_background_scope
+D072,"JC, so I'll probably go into teaching",,unknown,unknown,unusable,no_explicit_preference
+D072,that's what I know and what my family expects,,unknown,unknown,unusable,third_party_or_background_scope
+D072,"I'm happiest when I'm doing practical stuff with tools, out on site rather than sitting in meetings",,unknown,unknown,unusable,no_explicit_preference
+D072,Honestly though,,unknown,unknown,unusable,no_explicit_preference
+D072,I can't stand admin work with lots of forms and procedures,admin work with lots of forms and procedures,negative,explicit,usable,explicit_first_person
+D073,I'm studying accountancy at NTU and I'm in my last semester now,,unknown,unknown,unusable,no_explicit_preference
+D073,"What I enjoy most is keeping records tidy, reconciling accounts and making sure every detail follows the proper process","keeping records tidy, reconciling accounts and making sure every detail follows the proper process",positive,explicit,usable,explicit_first_person
+D073,"Anything involving fieldwork, tools or physical labour is definitely not for me","Anything involving fieldwork, tools or physical labour",negative,explicit,usable,explicit_negative_predicate
+D073,I wouldn't mind a bit of client contact or pitching in on business decisions now and then,,unknown,unknown,unusable,uncertain_or_negated_dislike
+D073,Group work is okay,,unknown,unknown,unusable,no_explicit_preference
+D073,"I guess, though I'm not sure it's where I shine",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D073,To be honest,,unknown,unknown,unusable,no_explicit_preference
+D073,I can't stand sitting there checking figures and organising files all day,sitting there checking figures and organising files all day,negative,explicit,usable,explicit_first_person
+D074,Hmm,,unknown,unknown,unusable,no_explicit_preference
+D074,I'm in my last year of mechanical engineering,,unknown,unknown,unusable,no_explicit_preference
+D074,honestly I'm still figuring things out,,unknown,unknown,unusable,no_explicit_preference
+D074,"I think I maybe lean a little toward hands-on stuff, like the lab sessions where we assembled small rigs and tightened everything up ourselves",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D074,Sometimes working out why a part keeps failing is kind of interesting too,,unknown,unknown,unusable,no_explicit_preference
+D074,I guess,,unknown,unknown,unusable,no_explicit_preference
+D074,"Other than that, nothing really jumps out at me",,unknown,unknown,unusable,no_explicit_preference
+D074,"I'm not sure what I'd want to do every day, so I'm hoping you can help me narrow it down a bit",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D075,I'm studying psychology with a minor in theatre studies at NUS,,unknown,unknown,unusable,no_explicit_preference
+D075,"I love working with people, especially running drama workshops for kids where they slowly come out of their shell",,unknown,unknown,unusable,third_party_or_background_scope
+D075,"I actually enjoy keeping things neat and organised, like tracking schedules and updating spreadsheets",,unknown,unknown,unusable,no_explicit_preference
+D075,Writing short scripts and designing sets for our productions is where I feel most alive,,unknown,unknown,unusable,no_explicit_preference
+D075,Anything that mixes creativity with helping someone feel heard would be perfect for me,,unknown,unknown,unusable,no_explicit_preference
+D075,Sitting at a desk updating records and following strict procedures all day would honestly drain me,,unknown,unknown,unusable,no_explicit_preference
+D076,I'm studying business analytics at SMU,,unknown,unknown,unusable,no_explicit_preference
+D076,"What I enjoy most is organising data properly, building clean spreadsheets and making sure processes are tracked down to the last detail, that's genuinely my favourite thing","organising data properly, building clean spreadsheets and making sure processes are tracked down to the last detail, that's genuinely my favourite thing",positive,explicit,usable,explicit_first_person
+D076,My family runs a hardware shop in Toa Payoh and I've been helping with sales and negotiating with suppliers,,unknown,unknown,unusable,third_party_or_background_scope
+D076,"secondary school, so people assume I lean towards business just",,unknown,unknown,unusable,no_explicit_preference
+D076,it's what I grew up with,,unknown,unknown,unusable,no_explicit_preference
+D076,I actually really enjoy persuading people and leading a team,,unknown,unknown,unusable,no_explicit_preference
+D076,and I get a buzz from closing a deal,,unknown,unknown,unusable,no_explicit_preference
+D076,I also like analysing numbers to figure out why sales go up or down,analysing numbers to figure out why sales go up or down,positive,explicit,usable,explicit_first_person
+D076,Something that combines all of that would be ideal,,unknown,unknown,unusable,no_explicit_preference
+D077,I'm doing a communications and new media degree at NUS,,unknown,unknown,unusable,no_explicit_preference
+D077,"My mum is an illustrator and our flat was always full of sketchbooks, so relatives assume I draw only",,unknown,unknown,unusable,third_party_or_background_scope
+D077,I grew up with it,,unknown,unknown,unusable,no_explicit_preference
+D077,"I honestly love it, and designing posters or making short animations is when I lose track of time","it, and designing posters or making short animations is when I lose track of time",positive,explicit,usable,explicit_first_person
+D077,I'm also fairly interested in researching how audiences respond to different visuals,,unknown,unknown,unusable,no_explicit_preference
+D077,"I wouldn't mind some structure in my day, as long as there's room to make things",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D077,Ideally I'd be creating stuff most of the time,,unknown,unknown,unusable,no_explicit_preference
+D078,"I'm doing a business degree at SMU on the accounting track, mostly",,unknown,unknown,unusable,no_explicit_preference
+D078,my mum runs a small bookkeeping firm,,unknown,unknown,unusable,third_party_or_background_scope
+D078,"I've done two internships there doing reconciliations and filing, so I'll probably end up in that line",,unknown,unknown,unusable,no_explicit_preference
+D078,it's what I know and what my family expects,,unknown,unknown,unusable,third_party_or_background_scope
+D078,"What I really light up about, though, is writing and illustrating",,unknown,unknown,unusable,no_explicit_preference
+D078,and I run a little comic page on Instagram,,unknown,unknown,unusable,no_explicit_preference
+D078,I'm not really someone who enjoys digging into research or figuring out why things work,,unknown,unknown,unusable,no_explicit_preference
+D078,I also volunteer as a tutor and love seeing a kid finally get it,,unknown,unknown,unusable,no_explicit_preference
+D078,My favourite module was a consumer behaviour project where I got to dig into survey data and figure out why people make the choices they do,,unknown,unknown,unusable,third_party_or_background_scope
+D079,I'm in my final year of statistics at NUS,,unknown,unknown,unusable,no_explicit_preference
+D079,"I love getting into a dataset and working out why things happen the way they do, chasing down patterns is so satisfying",,unknown,unknown,unusable,third_party_or_background_scope
+D079,"what I enjoy most of all is keeping everything precise and organised, like documenting procedures and making sure every record is clean and consistent","most of all is keeping everything precise and organised, like documenting procedures and making sure every record is clean and consistent",positive,explicit,usable,explicit_first_person
+D079,"I'm really not a hands-on person, and fixing machines or doing physical outdoor work is the last thing I'd want",,unknown,unknown,unusable,no_explicit_preference
+D079,I'm fine working with people,,unknown,unknown,unusable,no_explicit_preference
+D079,it's not what draws me,,unknown,unknown,unusable,no_explicit_preference
+D079,"Honestly, research and figuring out the reasons behind things just bores me",,unknown,unknown,unusable,no_explicit_preference
+D080,I'm a final-year business student at SMU majoring in finance,,unknown,unknown,unusable,no_explicit_preference
+D080,I don't enjoy hands-on work with tools or machines at all,hands-on work with tools or machines at all,negative,explicit,usable,explicit_first_person
+D080,and I'd hate a job that has me on a worksite,,unknown,unknown,unusable,no_explicit_preference
+D080,"What I love most is setting up proper systems, tracking budgets and making sure every detail is in order","setting up proper systems, tracking budgets and making sure every detail is in order",positive,explicit,usable,explicit_first_person
+D080,I also really enjoy analysing market data to understand what's driving the numbers,analysing market data to understand what's driving the numbers,positive,explicit,usable,explicit_first_person
+D080,Leading a team and persuading people to back a proposal gets me excited too,,unknown,unknown,unusable,no_explicit_preference
+D080,Funnily enough,,unknown,unknown,unusable,no_explicit_preference
+D080,I'd actually enjoy a job where I'm fixing equipment and building things with my hands,,unknown,unknown,unusable,no_explicit_preference
+D081,I'm in my final year of early childhood education at SUSS,,unknown,unknown,unusable,no_explicit_preference
+D081,"I did my practicum at a preschool and my mum's a teacher, so I'll probably end up in a classroom",,unknown,unknown,unusable,third_party_or_background_scope
+D081,that's what I know and what everyone expects,,unknown,unknown,unusable,no_explicit_preference
+D081,"What I'm really passionate about, though, is design",,unknown,unknown,unusable,no_explicit_preference
+D081,and I make all the branding and merch for my friend's cafe side project,,unknown,unknown,unusable,no_explicit_preference
+D081,I also love pitching those ideas to vendors and talking people into collaborations,pitching those ideas to vendors and talking people into collaborations,positive,explicit,usable,explicit_first_person
+D081,Running a small pop-up booth last year was the most fun I've had in ages,,unknown,unknown,unusable,no_explicit_preference
+D081,I'd love work where I get to create something and then go out and sell it,,unknown,unknown,unusable,no_explicit_preference
+D082,"I'm studying aerospace engineering at NTU, and my dad has been an aircraft technician for twenty years, so I've basically grown up around engines and toolboxes",,unknown,unknown,unusable,third_party_or_background_scope
+D082,People keep saying I'm only into it,,unknown,unknown,unusable,no_explicit_preference
+D082,it's what I know,,unknown,unknown,unusable,no_explicit_preference
+D082,Honestly though,,unknown,unknown,unusable,no_explicit_preference
+D082,"I love working with my hands, and nothing beats spending an afternoon stripping down a part and putting it back together","working with my hands, and nothing beats spending an afternoon stripping down a part and putting it back together",positive,explicit,usable,explicit_first_person
+D082,"I'm also quite curious about why things break, so a bit of troubleshooting is fun too",I'm also quite curious about why things break,positive,explicit,usable,activity_preference_predicate
+D082,I'm not that keen on jobs where I'm mostly looking after people's problems,,unknown,unknown,unusable,no_explicit_preference
+D082,Something practical in a hangar or workshop would suit me best,,unknown,unknown,unusable,no_explicit_preference
+D083,"idk tbh, maybe something hands-on like assembling things or fixing small stuff",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D083,"i think i kinda enjoy that, the rest not very sure lah",,unknown,unknown,unusable,no_explicit_preference
+D084,"I'm studying social work at NUS, and the part I love most is sitting with someone and helping them through a tough patch",sitting with someone and helping them through a tough patch,positive,explicit,usable,explicit_first_person
+D084,"I did two internships at my uncle's accounting firm doing data entry and filing, so I'll probably end up in an admin or accounts role",,unknown,unknown,unusable,third_party_or_background_scope
+D084,that's what I've had the most exposure to,,unknown,unknown,unusable,no_explicit_preference
+D084,"I also like doing a bit of creative stuff, like making posters for our volunteer events","doing a bit of creative stuff, like making posters for our volunteer events",positive,explicit,usable,explicit_first_person
+D084,Being around people all day and supporting them just drains me and isn't really what I want,,unknown,unknown,unusable,no_explicit_preference
+D084,Hands-on technical work isn't really me either,,unknown,unknown,unusable,no_explicit_preference
+D084,I'm hoping you can help me sort out what fits,,unknown,unknown,unusable,no_explicit_preference
+D085,I'm doing accountancy at NTU and I'm in my last year,,unknown,unknown,unusable,no_explicit_preference
+D085,"What I enjoy most is setting up systems, like building a clean budget tracker for our CCA and making sure every claim is properly documented","setting up systems, like building a clean budget tracker for our CCA and making sure every claim is properly documented",positive,explicit,usable,explicit_first_person
+D085,I'm not really a fan of leading people or trying to persuade anyone,,unknown,unknown,unusable,no_explicit_preference
+D085,I'm also not into anything too hands-on with tools or equipment,anything too hands-on with tools or equipment,negative,explicit,usable,explicit_first_person
+D085,Detailed procedures and well-kept records just make me feel calm,,unknown,unknown,unusable,no_explicit_preference
+D085,As treasurer,,unknown,unknown,unusable,no_explicit_preference
+D085,I also ended up negotiating with sponsors and running our committee meetings,,unknown,unknown,unusable,no_explicit_preference
+D085,and I loved being the one steering things,,unknown,unknown,unusable,no_explicit_preference
+D086,"I'm studying psychology at NUS and what I love most is working with people, and listening to and supporting the kids at the youth centre where I volunteer is the highlight of my week","working with people, and listening to and supporting the kids at the youth centre where I volunteer is the highlight of my week",positive,explicit,usable,explicit_first_person
+D086,I'm also into art,,unknown,unknown,unusable,no_explicit_preference
+D086,and I run sessions there where we paint and make zines together,,unknown,unknown,unusable,no_explicit_preference
+D086,Keeping detailed records and following set procedures is something I actually quite enjoy,,unknown,unknown,unusable,no_explicit_preference
+D086,"I'm curious about why people behave the way they do, though I'm not a hardcore researcher",,unknown,unknown,unusable,third_party_or_background_scope
+D086,"Anything involving machines, tools or manual work is really not me",,unknown,unknown,unusable,no_explicit_preference
+D086,"And honestly, filling in forms and tracking paperwork all day would bore me to tears",,unknown,unknown,unusable,no_explicit_preference
+D087,I'm finishing a life sciences degree at NUS with a minor in psychology,,unknown,unknown,unusable,no_explicit_preference
+D087,"What I enjoy most is working with people, like mentoring juniors and volunteering with kids who need extra support","working with people, like mentoring juniors and volunteering with kids who need extra support",positive,explicit,usable,explicit_first_person
+D087,"I'm also really into research and figuring out why things happen, especially in health",,unknown,unknown,unusable,no_explicit_preference
+D087,"My family runs a small logistics company and I've spent every holiday doing their invoices and stock records, so I'll probably just join them",,unknown,unknown,unusable,third_party_or_background_scope
+D087,that's what I know and what my parents expect,,unknown,unknown,unusable,third_party_or_background_scope
+D087,I can't say I've thought much beyond that,,unknown,unknown,unusable,no_explicit_preference
+D087,"Ideally, though",,unknown,unknown,unusable,no_explicit_preference
+D087,I'd like something that mixes caring for people with some real investigation,,unknown,unknown,unusable,no_explicit_preference
+D088,I'm studying bioengineering at NUS,,unknown,unknown,unusable,no_explicit_preference
+D088,"Both my parents are researchers and I've done a couple of lab attachments, so people tend to assume I only like research",,unknown,unknown,unusable,third_party_or_background_scope
+D088,it's what I grew up around,,unknown,unknown,unusable,no_explicit_preference
+D088,"I honestly love it, and chasing down why an experiment failed is weirdly addictive for me","it, and chasing down why an experiment failed is weirdly addictive for me",positive,explicit,usable,explicit_first_person
+D088,"I'm happiest when I'm building things with my hands, like the prosthetic hand we 3D-printed and wired up for our capstone",,unknown,unknown,unusable,no_explicit_preference
+D088,I also sketch and design a lot,,unknown,unknown,unusable,no_explicit_preference
+D088,and I handled the whole look of our prototype,,unknown,unknown,unusable,no_explicit_preference
+D088,I'm less keen on roles that are mostly about counselling or looking after people,,unknown,unknown,unusable,no_explicit_preference
+D089,Honestly my degree was a bit of a random pick,,unknown,unknown,unusable,no_explicit_preference
+D089,what really lights me up is painting murals and shooting short films with my friends,,unknown,unknown,unusable,no_explicit_preference
+D089,I could do that all day,,unknown,unknown,unusable,no_explicit_preference
+D089,"I also love pitching ideas and persuading people, last year I sold my own prints at a weekend flea market and convincing strangers to buy was such a rush","pitching ideas and persuading people, last year I sold my own prints at a weekend flea market and convincing strangers to buy was such a rush",positive,explicit,usable,explicit_first_person
+D089,"What I absolutely cannot stand is spreadsheets, filing and checking forms line by line, it drains me completely","spreadsheets, filing and checking forms line by line, it drains me completely",negative,explicit,usable,explicit_first_person
+D089,Same with tinkering with machines or assembling stuff with tools,,unknown,unknown,unusable,no_explicit_preference
+D089,I hate that kind of thing,that kind of thing,negative,explicit,usable,explicit_first_person
+D089,So ideally something wildly creative where I also get to sell my vision,,unknown,unknown,unusable,no_explicit_preference
+D090,"I'm in mechanical engineering and I really love the workshop sessions, taking apart engines and machining parts by hand is honestly the best part of my week","the workshop sessions, taking apart engines and machining parts by hand is honestly the best part of my week",positive,explicit,usable,explicit_first_person
+D090,I also really enjoy figuring out why a prototype failed and running tests on it,figuring out why a prototype failed and running tests on it,positive,explicit,usable,explicit_first_person
+D090,"On the side I like sketching designs, helping juniors with their projects","sketching designs, helping juniors with their projects",positive,explicit,usable,explicit_first_person
+D090,and I don't mind organising schedules or pitching ideas during group work,,unknown,unknown,unusable,no_explicit_preference
+D090,I'm pretty open overall,,unknown,unknown,unusable,no_explicit_preference
+D090,hands-on building is what gets me most excited,,unknown,unknown,unusable,no_explicit_preference
+D091,"I'm finishing a communications degree and I'm happiest when I'm making something people will actually react to, like designing posters or cutting short videos for our hall events",,unknown,unknown,unusable,no_explicit_preference
+D091,"I also really love being around people, whether that's mentoring juniors or just helping a friend through a rough week","being around people, whether that's mentoring juniors or just helping a friend through a rough week",positive,explicit,usable,explicit_first_person
+D091,"And I get a huge kick out of pitching ideas, rallying a team and pushing a project over the finish line",,unknown,unknown,unusable,no_explicit_preference
+D091,"Honestly all three matter to me about the same, with the creative side just a bit ahead",,unknown,unknown,unusable,no_explicit_preference
+D091,What I really can't stand is fiddling with tools or machines,fiddling with tools or machines,negative,explicit,usable,explicit_first_person
+D091,Tracking spreadsheets all day also isn't really my thing,,unknown,unknown,unusable,no_explicit_preference
+D092,"Honestly the thing I love most is working with my hands, like rebuilding my bike, putting together furniture, or tinkering with an old radio until it works again","working with my hands, like rebuilding my bike, putting together furniture, or tinkering with an old radio until it works again",positive,explicit,usable,explicit_first_person
+D092,"I also really enjoy figuring out why something works, like reading up on how an engine runs","figuring out why something works, like reading up on how an engine runs",positive,explicit,usable,explicit_first_person
+D092,"Beyond that I'm pretty open: sketching ideas, helping juniors with their assignments, organising a small event or keeping a spreadsheet neat are all things I like",,unknown,unknown,unusable,no_explicit_preference
+D092,I guess I just like variety,variety,unknown,unknown,unusable,unclear_activity_scope
+D092,the hands-on stuff is what gets me most excited,,unknown,unknown,unusable,no_explicit_preference
+D093,"I'm in my last year now, and the thing I get most excited about is creating, like sketching characters, designing zines and playing around with colour and layout until it feels right",,unknown,unknown,unusable,no_explicit_preference
+D093,"I genuinely lose track of time when I'm drawing, it's the best part of my week",,unknown,unknown,unusable,no_explicit_preference
+D093,"I don't mind digging into why some designs work better than others, that's kind of interesting too",,unknown,unknown,unusable,no_explicit_preference
+D093,Fixing things with my hands or doing physical repair stuff isn't really my thing though,,unknown,unknown,unusable,no_explicit_preference
+D093,"So yeah, anything where I get to make original visual stuff would be amazing",,unknown,unknown,unusable,no_explicit_preference
+D094,"I'm studying civil engineering, and my favourite thing so far was the site attachment where I got to be outdoors, operating survey equipment and helping put up formwork",,unknown,unknown,unusable,no_explicit_preference
+D094,I absolutely loved that,,unknown,unknown,unusable,no_explicit_preference
+D094,"I'm also really into working out tricky problems, like why a beam test gave weird results",,unknown,unknown,unusable,no_explicit_preference
+D094,I genuinely enjoy keeping records neat and well organised,,unknown,unknown,unusable,no_explicit_preference
+D094,and I really like coaching juniors in my canoeing CCA,coaching juniors in my canoeing CCA,positive,explicit,usable,explicit_first_person
+D094,Designing posters or leading a team pitch is nice too,Designing posters or leading a team pitch,positive,explicit,usable,activity_preference_predicate
+D094,I like a lot of things,a lot of things,positive,explicit,usable,explicit_first_person
+D094,being out there building stuff tops it,,unknown,unknown,unusable,no_explicit_preference
+D095,"I'm in my final year of engineering and the part I absolutely love is getting my hands dirty, stripping down an engine, wiring up a circuit board or rebuilding my old bicycle from scratch","getting my hands dirty, stripping down an engine, wiring up a circuit board or rebuilding my old bicycle from scratch",positive,explicit,usable,explicit_first_person
+D095,Give me a workshop and a broken machine and I'm happy for hours,,unknown,unknown,unusable,no_explicit_preference
+D095,"I also like figuring out why something works the way it does, though that comes second",figuring out why something works the way it does,positive,explicit,usable,explicit_first_person
+D095,Keeping detailed records and filling forms is not really my thing,,unknown,unknown,unusable,no_explicit_preference
+D095,Mostly I just want a job where I'm physically building and repairing stuff,,unknown,unknown,unusable,no_explicit_preference
+D096,"What I love most is working with people, like mentoring kids at a community centre or being the friend everyone comes to when they need to talk",,unknown,unknown,unusable,third_party_or_background_scope
+D096,"Close behind that is anything creative: painting, writing short stories, designing posters for events",,unknown,unknown,unusable,no_explicit_preference
+D096,I get so absorbed when I'm making something,,unknown,unknown,unusable,no_explicit_preference
+D096,Fixing machines or doing physical repair work isn't really my thing though,,unknown,unknown,unusable,no_explicit_preference
+D096,Ideally I'd find something where I can help people and be creative at the same time,,unknown,unknown,unusable,no_explicit_preference
+D097,Hmm,,unknown,unknown,unusable,no_explicit_preference
+D097,"I'm quite open actually, lots of things appeal to me",,unknown,unknown,unusable,no_explicit_preference
+D097,"What I enjoy most is keeping things organised, like when I handled the budget and records for my hall's events and made sure every receipt matched, that was really satisfying","keeping things organised, like when I handled the budget and records for my hall's events and made sure every receipt matched, that was really satisfying",positive,explicit,usable,explicit_first_person
+D097,I also love designing the publicity posters and writing captions for those events,designing the publicity posters and writing captions for those events,positive,explicit,usable,explicit_first_person
+D097,Leading a small team and figuring out why something went wrong are both pretty fun for me as well,,unknown,unknown,unusable,no_explicit_preference
+D097,"I quite like getting my hands dirty setting up stages, and helping freshies settle in is nice too","getting my hands dirty setting up stages, and helping freshies settle in is nice too",positive,explicit,usable,explicit_first_person
+D097,So something mixed with a strong organising side would suit me,,unknown,unknown,unusable,no_explicit_preference
+D098,Not sure how to answer this honestly,,unknown,unknown,unusable,uncertain_or_negated_dislike
+D098,"I'm in accountancy, and doing reconciliations during my internship was kind of satisfying",,unknown,unknown,unusable,no_explicit_preference
+D098,"I think, maybe",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D098,everything has to tally in the end,,unknown,unknown,unusable,no_explicit_preference
+D098,I could maybe see myself helping to run some small business thing too,,unknown,unknown,unusable,uncertain_or_negated_dislike
+D098,I don't know,,unknown,unknown,unusable,no_explicit_preference
+D098,The rest I haven't really thought about much,,unknown,unknown,unusable,no_explicit_preference
+D098,I guess something organised would suit me,,unknown,unknown,unusable,no_explicit_preference
+D099,"I'm doing business analytics, and the thing I enjoy most is getting messy information into proper order, building a tidy tracker, reconciling numbers and setting up a system that just runs smoothly","getting messy information into proper order, building a tidy tracker, reconciling numbers and setting up a system that just runs smoothly",positive,explicit,usable,explicit_first_person
+D099,That's honestly my favourite,,unknown,unknown,unusable,no_explicit_preference
+D099,I also love digging into puzzles to find out why things happen,digging into puzzles to find out why things happen,positive,explicit,usable,explicit_first_person
+D099,and I get really excited designing slides or a nice-looking layout,,unknown,unknown,unusable,no_explicit_preference
+D099,Helping my juniors with their modules is super rewarding too,,unknown,unknown,unusable,no_explicit_preference
+D099,"Leading a group project is fine, and occasionally I like tinkering with gadgets",tinkering with gadgets,positive,explicit,usable,explicit_first_person
+D099,So I'm quite open,,unknown,unknown,unusable,no_explicit_preference
+D099,organising things neatly is where I shine most,,unknown,unknown,unusable,no_explicit_preference
+D100,not very sure leh,,unknown,unknown,unusable,no_explicit_preference
+D100,"i think i kinda like being outdoors and doing practical stuff, like setting up tents or building things",,unknown,unknown,unusable,no_explicit_preference
+D100,maybe that kind of work,,unknown,unknown,unusable,uncertain_or_negated_dislike
+D101,"I'm happiest when I'm actually building or fixing something physical, like rewiring my old bicycle lights or putting together a drone from parts",,unknown,unknown,unusable,no_explicit_preference
+D101,I absolutely love that,that,unknown,unknown,unusable,unclear_activity_scope
+D101,"Close behind is the puzzle side, figuring out why a circuit keeps failing or running little experiments to test my ideas really excites me too",,unknown,unknown,unusable,no_explicit_preference
+D101,I'd say the hands-on part wins slightly,,unknown,unknown,unusable,no_explicit_preference
+D101,I like seeing the thing work in front of me,seeing the thing work in front of me,positive,explicit,usable,explicit_first_person
+D101,Anything to do with design or the arty side,,unknown,unknown,unusable,no_explicit_preference
+D101,"I'm not sure, never really thought about it",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D101,Ideally I'd want something where I can tinker and problem-solve every day,,unknown,unknown,unusable,no_explicit_preference
+D102,"I'm doing a design and media degree and I'm completely obsessed with it, illustrating, making short animations, playing with colour until 2am is my happy place",,unknown,unknown,unusable,no_explicit_preference
+D102,I also really love working with people,working with people,positive,explicit,usable,explicit_first_person
+D102,I run art workshops for kids at a community centre and it's super fulfilling,,unknown,unknown,unusable,no_explicit_preference
+D102,"What I can't stand is repetitive admin, filling in spreadsheets and checking forms just drains me","repetitive admin, filling in spreadsheets and checking forms just drains me",negative,explicit,usable,explicit_first_person
+D102,Same with anything mechanical or fixing equipment,,unknown,unknown,unusable,no_explicit_preference
+D102,I really dislike that kind of hands-on technical stuff,that kind of hands-on technical stuff,negative,explicit,usable,explicit_first_person
+D102,So ideally something creative where I get to connect with people,,unknown,unknown,unusable,no_explicit_preference
+D103,"tbh i just love selling stuff lah, ran a pasar malam stall last sem and closing deals with uncles was damn shiok","selling stuff lah, ran a pasar malam stall last sem and closing deals with uncles was damn shiok",positive,explicit,usable,explicit_first_person
+D103,want something where i can hustle and negotiate everyday,,unknown,unknown,unusable,no_explicit_preference
+D104,"I'm happiest when I'm building something, like soldering a little gadget or assembling a 3D printer kit",,unknown,unknown,unusable,no_explicit_preference
+D104,"I'm just as into puzzling out how things work, running experiments and digging through results to see what went wrong",,unknown,unknown,unusable,no_explicit_preference
+D104,"And I love the design side too, sketching what a product should look like and making it look nice","the design side too, sketching what a product should look like and making it look nice",positive,explicit,usable,explicit_first_person
+D104,"If I could combine making, figuring out and designing",,unknown,unknown,unusable,no_explicit_preference
+D104,I'd be super happy,,unknown,unknown,unusable,no_explicit_preference
+D104,Spending the whole day looking after people or comforting them is not really my thing though,,unknown,unknown,unusable,no_explicit_preference
+D105,"What I love most is making things, writing short stories, composing little tracks on my laptop, designing my own fonts even, that's where my heart is","making things, writing short stories, composing little tracks on my laptop, designing my own fonts even, that's where my heart is",positive,explicit,usable,explicit_first_person
+D105,I'm also super into research,,unknown,unknown,unusable,no_explicit_preference
+D105,I'll happily spend a whole night reading papers on how memory works or testing a theory just to see if I'm right,,unknown,unknown,unusable,no_explicit_preference
+D105,"If I had to choose, the creative side edges it out slightly",,unknown,unknown,unusable,no_explicit_preference
+D105,honestly I'd love a mix of both,,unknown,unknown,unusable,no_explicit_preference
+D105,Heavy physical or outdoor manual work is not really my thing,,unknown,unknown,unusable,no_explicit_preference
+D105,Something that lets me invent and explore ideas would be a dream,,unknown,unknown,unusable,no_explicit_preference
+D106,"idk tbh, studying psych and i kinda liked the peer mentoring thing i did, maybe helping people lah",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D106,not super sure about anything else,,unknown,unknown,unusable,no_explicit_preference
+D107,"I study electrical engineering and I'm happiest at a workbench, soldering components, building robots and repairing whatever breaks in the hostel",,unknown,unknown,unusable,no_explicit_preference
+D107,"I'm also really into working out the theory behind why a design fails, running experiments until I crack it",,unknown,unknown,unusable,no_explicit_preference
+D107,Those two things are basically what I want my days to be,,unknown,unknown,unusable,no_explicit_preference
+D107,"please, nothing where I have to comfort people or teach a class, that drains me completely",,unknown,unknown,unusable,no_explicit_preference
+D107,I also really hate the idea of persuading clients or chasing sales targets,the idea of persuading clients or chasing sales targets,negative,explicit,usable,explicit_first_person
+D107,Just give me hardware and hard problems,,unknown,unknown,unusable,no_explicit_preference
+D108,Honestly I'm still figuring things out,,unknown,unknown,unusable,no_explicit_preference
+D108,"I think I kind of like creative stuff, maybe editing videos or doodling designs for my friends' projects",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D108,I'm not sure if that can be a job,,unknown,unknown,unusable,uncertain_or_negated_dislike
+D108,Things like numbers or lab work,,unknown,unknown,unusable,no_explicit_preference
+D108,I'm just okay with I guess,,unknown,unknown,unusable,no_explicit_preference
+D108,"I've sold a few things online before and that was okay, maybe",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D108,"So yeah, probably something a bit creative",,unknown,unknown,unusable,no_explicit_preference
+D108,I'm open,,unknown,unknown,unusable,no_explicit_preference
+D109,"I'm the kind of person who gets real satisfaction from order, setting up a clean tracking system, reconciling numbers until everything balances, colour-coding schedules",,unknown,unknown,unusable,no_explicit_preference
+D109,I love that stuff,that stuff,positive,explicit,usable,explicit_first_person
+D109,Right behind it,,unknown,unknown,unusable,no_explicit_preference
+D109,"I really enjoy digging into a tricky problem, like working out the logic behind weird results in my lab reports","digging into a tricky problem, like working out the logic behind weird results in my lab reports",positive,explicit,usable,explicit_first_person
+D109,Writing a bit on the side is also nice,,unknown,unknown,unusable,no_explicit_preference
+D109,"I really dislike anything where I have to look after people all day or be the emotional support, it exhausts me","anything where I have to look after people all day or be the emotional support, it exhausts me",negative,explicit,usable,explicit_first_person
+D109,And I hate manual labour or fixing equipment,manual labour or fixing equipment,negative,explicit,usable,explicit_first_person
+D109,I'm hopeless and don't enjoy it at all,,unknown,unknown,unusable,no_explicit_preference
+D109,"Quiet, structured, thinking-heavy work would be ideal",,unknown,unknown,unusable,no_explicit_preference
+D110,"I'm in social work, and my practicum at a family service centre confirmed it for me",,unknown,unknown,unusable,no_explicit_preference
+D110,"I absolutely love sitting with people, listening and helping them work through tough stuff","sitting with people, listening and helping them work through tough stuff",positive,explicit,usable,explicit_first_person
+D110,Volunteering with the elderly in my neighbourhood is also something I really look forward to every week,,unknown,unknown,unusable,no_explicit_preference
+D110,"I do like a bit of creative stuff like making activity materials, and reading up on why people behave the way they do",,unknown,unknown,unusable,third_party_or_background_scope
+D110,Paperwork-heavy desk tasks are not really my thing though,,unknown,unknown,unusable,no_explicit_preference
+D110,As long as my days are mostly about people,,unknown,unknown,unusable,no_explicit_preference
+D110,I'd be happy,,unknown,unknown,unusable,no_explicit_preference
+D111,I'm in my final year of product design,,unknown,unknown,unusable,no_explicit_preference
+D111,and I love the mix of things it gives me,the mix of things it gives me,positive,explicit,usable,explicit_first_person
+D111,"Building prototypes in the workshop, cutting wood and running the laser cutter, is probably my absolute favourite",,unknown,unknown,unusable,no_explicit_preference
+D111,Close behind is sketching concepts and playing with colours and form,,unknown,unknown,unusable,no_explicit_preference
+D111,Weirdly,,unknown,unknown,unusable,no_explicit_preference
+D111,"I also really enjoy keeping my files, inventory and timelines super organised, it gives me a lot of satisfaction","keeping my files, inventory and timelines super organised, it gives me a lot of satisfaction",positive,explicit,usable,explicit_first_person
+D111,Pitching and selling ideas to strangers is not really my thing though,,unknown,unknown,unusable,no_explicit_preference
+D111,Ideally I'd do a bit of all three every week,,unknown,unknown,unusable,no_explicit_preference
+D112,"tbh i love pitching ideas and selling stuff, like running a stall and closing deals","pitching ideas and selling stuff, like running a stall and closing deals",positive,explicit,usable,explicit_first_person
+D112,also damn shiok when my spreadsheets and budgets are super neat,,unknown,unknown,unusable,no_explicit_preference
+D112,fixing machines,,unknown,unknown,unusable,no_explicit_preference
+D112,no thanks lah,,unknown,unknown,unusable,no_explicit_preference
+D113,"My favourite thing ever is getting a messy set of accounts into perfect shape, tracking every dollar and building neat spreadsheets for my CCA",,unknown,unknown,unusable,no_explicit_preference
+D113,I genuinely love it,,unknown,unknown,unusable,no_explicit_preference
+D113,Almost as much,,unknown,unknown,unusable,no_explicit_preference
+D113,"I love the hustle side, negotiating with vendors for better prices and convincing sponsors to come on board for our events","the hustle side, negotiating with vendors for better prices and convincing sponsors to come on board for our events",positive,explicit,usable,explicit_first_person
+D113,Put those together and I'm in my element,,unknown,unknown,unusable,no_explicit_preference
+D113,"What I really don't enjoy is physical hands-on stuff, like repairing things or working outdoors with tools, definitely not for me","physical hands-on stuff, like repairing things or working outdoors with tools, definitely not for me",unknown,unknown,unusable,unclear_activity_scope
+D113,I'd love something where I can keep things organised while also making deals happen,,unknown,unknown,unusable,no_explicit_preference
+D114,"I'm studying business analytics with a minor in accounting, and the thing I love most is the structured side, setting up clean spreadsheets, tracking budgets and making sure every figure lines up gives me so much satisfaction","the structured side, setting up clean spreadsheets, tracking budgets and making sure every figure lines up gives me so much satisfaction",positive,explicit,usable,explicit_first_person
+D114,"I really enjoy the business side too, like when I ran merchandise sales for my hall and negotiated with suppliers","the business side too, like when I ran merchandise sales for my hall and negotiated with suppliers",positive,explicit,usable,explicit_first_person
+D114,"anything artsy, like designing posters or making videos",,unknown,unknown,unusable,no_explicit_preference
+D114,I really dislike,,unknown,unknown,unusable,no_explicit_preference
+D114,Physical stuff like assembling things or working outdoors with tools is a hard no for me,,unknown,unknown,unusable,no_explicit_preference
+D114,Give me a well-organised system and a target to hit and I'm happy,,unknown,unknown,unusable,no_explicit_preference
+D115,Final year in aerospace engineering here,,unknown,unknown,unusable,no_explicit_preference
+D115,"What I really love is hands-on building, last year I helped put together a small drone frame and spent weeks tuning the motors, which was amazing","hands-on building, last year I helped put together a small drone frame and spent weeks tuning the motors, which was amazing",positive,explicit,usable,explicit_first_person
+D115,I'm also very curious about the physics behind it and enjoy running calculations to test my ideas,,unknown,unknown,unusable,no_explicit_preference
+D115,On the other hand,,unknown,unknown,unusable,no_explicit_preference
+D115,"I really dislike jobs that are all about looking after people, like teaching or counselling","jobs that are all about looking after people, like teaching or counselling",negative,explicit,usable,explicit_first_person
+D115,"And repetitive paperwork, checking forms and filing records, is the absolute worst for me",,unknown,unknown,unusable,no_explicit_preference
+D115,I'd rather be in a hangar than an office,,unknown,unknown,unusable,no_explicit_preference
+D116,"My favourite thing is making things look good, like designing layouts, illustrating and picking colour palettes until it feels right",,unknown,unknown,unusable,no_explicit_preference
+D116,Right up there with that,,unknown,unknown,unusable,no_explicit_preference
+D116,"I really enjoy organising information: well-labelled files, tidy spreadsheets and a clean schedule make me weirdly happy","organising information: well-labelled files, tidy spreadsheets and a clean schedule make me weirdly happy",positive,explicit,usable,explicit_first_person
+D116,"I'm also really into figuring stuff out, like reading research and testing whether my hunch was right",,unknown,unknown,unusable,no_explicit_preference
+D116,Something that combines design with careful organising and a bit of investigation would be perfect,,unknown,unknown,unusable,no_explicit_preference
+D116,Heavy physical work like fixing machines isn't really for me,,unknown,unknown,unusable,no_explicit_preference
+D117,Creating is everything to me,,unknown,unknown,unusable,no_explicit_preference
+D117,"I spend most of my free time illustrating, doing calligraphy and making short animations, and nothing makes me happier",,unknown,unknown,unusable,no_explicit_preference
+D117,When I get to dream up a whole visual world from scratch I'm so excited I forget to eat,,unknown,unknown,unusable,no_explicit_preference
+D117,On the flip side,,unknown,unknown,unusable,no_explicit_preference
+D117,"I really dislike routine admin, like data entry or checking that forms are filled correctly, it bores me to tears","routine admin, like data entry or checking that forms are filled correctly, it bores me to tears",negative,explicit,usable,explicit_first_person
+D117,Repair-type tasks and very technical number crunching aren't really my thing either,,unknown,unknown,unusable,no_explicit_preference
+D117,I just want work where imagination is the main tool,,unknown,unknown,unusable,no_explicit_preference
+D118,"doing accountancy and my audit internship was damn shiok sia, love making everything tally and keeping files super neat",,unknown,unknown,unusable,no_explicit_preference
+D118,arty stuff not really my thing,,unknown,unknown,unusable,no_explicit_preference
+D119,"I'm studying psychology with a minor in art, so I end up mixing a lot of things I love",,unknown,unknown,unusable,no_explicit_preference
+D119,Volunteering with kids and listening to people's problems is probably what I enjoy the most,the most,positive,explicit,usable,explicit_first_person
+D119,I'm also very into painting and writing short stories,,unknown,unknown,unusable,no_explicit_preference
+D119,and I get genuinely excited reading studies and running little experiments to understand why people behave the way they do,,unknown,unknown,unusable,third_party_or_background_scope
+D119,Those three feel almost equally important to me,,unknown,unknown,unusable,no_explicit_preference
+D119,"What I truly hate is routine admin, like typing up records or checking invoices all day",,unknown,unknown,unusable,no_explicit_preference
+D119,That would bore me to death,,unknown,unknown,unusable,no_explicit_preference
+D120,Hmm,,unknown,unknown,unusable,no_explicit_preference
+D120,I'm not totally sure,,unknown,unknown,unusable,no_explicit_preference
+D120,"I think I might like work that's kind of orderly, like keeping track of records or making sure a schedule is correct",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D120,I haven't really tried it properly,,unknown,unknown,unusable,no_explicit_preference
+D120,"Other things like research or selling, not sure, could be okay",,unknown,unknown,unusable,uncertain_or_negated_dislike
+D120,I guess I just like it when things are neat and planned,it when things are neat and planned,positive,explicit,usable,explicit_first_person
+D120,Maybe something along those lines,,unknown,unknown,unusable,uncertain_or_negated_dislike

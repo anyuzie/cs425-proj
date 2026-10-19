@@ -1,0 +1,64 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_structured_oracle_dev_v1_235ad5808eb444a68a70176ec474f301",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        0.275,
+        0.4583333333333333
+      ],
+      "improved": 46,
+      "mean_difference": 0.36666666666666664,
+      "regressed": 2
+    },
+    "hit_at_10": {
+      "ci95": [
+        0.3,
+        0.5
+      ],
+      "improved": 53,
+      "mean_difference": 0.4,
+      "regressed": 5
+    },
+    "hit_at_5": {
+      "ci95": [
+        0.4166666666666667,
+        0.6166666666666667
+      ],
+      "improved": 65,
+      "mean_difference": 0.5166666666666667,
+      "regressed": 3
+    },
+    "mrr": {
+      "ci95": [
+        0.32450650320711777,
+        0.47180260004836555
+      ],
+      "improved": 97,
+      "mean_difference": 0.3984656211552098,
+      "regressed": 17
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        0.17859583609082683,
+        0.27247929568479407
+      ],
+      "improved": 97,
+      "mean_difference": 0.22550399157808648,
+      "regressed": 19
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        0.2089259855066416,
+        0.3178912176352436
+      ],
+      "improved": 93,
+      "mean_difference": 0.2639026986165413,
+      "regressed": 19
+    }
+  },
+  "profiles": 120,
+  "seed": 425,
+  "treatment_run_id": "m2_structured_oracle_dev_v1_8ef8ba533df94f8ca33f1f312f7fcded"
+}

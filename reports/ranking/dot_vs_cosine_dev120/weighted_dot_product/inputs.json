@@ -1,0 +1,1802 @@
+[
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.94,
+      "C": -1.22,
+      "E": -0.44,
+      "I": 1.53,
+      "R": -0.5,
+      "S": 2.11
+    },
+    "profile_id": "D001",
+    "user_sentences": [
+      "I interned at a community centre running programmes for elderly residents and honestly I really liked it, because helping people feel less alone is what I care about most. I'm also curious about why people behave the way they do and read research on it often. Writing and doodling is kinda fun too. What I don't like is routine admin like filing forms and keeping records. Helping people is where I want to be."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.89,
+      "C": -0.93,
+      "E": -0.38,
+      "I": 2.49,
+      "R": 0.5,
+      "S": 0.95
+    },
+    "profile_id": "D002",
+    "user_sentences": [
+      "Investigating why things happen is my favourite thing; I'll stay up reading research or rerunning an analysis to check a hunch. My family runs a small electronics shop, but that's just their thing. Puzzling over a strange result until it clicks is the best feeling. Explaining things to friends is kinda nice too. I'm not into creative stuff like drawing or writing stories. I also really dislike repetitive paperwork and record-keeping."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.15,
+      "C": 1.32,
+      "E": 2.42,
+      "I": -0.19,
+      "R": -1.32,
+      "S": 0.18
+    },
+    "profile_id": "D003",
+    "user_sentences": [
+      "what i like most is taking charge and persuading people, like running my hall's fundraiser. hands-on repair type of work not really for me"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.93,
+      "C": 0.21,
+      "E": 0.42,
+      "I": 0.26,
+      "R": 0.53,
+      "S": -0.35
+    },
+    "profile_id": "D004",
+    "user_sentences": [
+      "Making things is what I'm happiest doing; I sketch, design posters and edit little videos for fun. Starting a new creative project always excites me. Building things with my hands is kinda fun too, I guess. Pitching my ideas to friends is also nice sometimes."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.08,
+      "C": 2.03,
+      "E": -0.16,
+      "I": 0.27,
+      "R": -1.45,
+      "S": -0.17
+    },
+    "profile_id": "D005",
+    "user_sentences": [
+      "My dad handles the accounts for his company and I help him at year-end, and honestly I really like it, because keeping records accurate and organised is so satisfying. I keep detailed spreadsheets for everything in my own life too. Following clear procedures and getting the details right is what I'm best at. Hands-on physical work like fixing things or building stuff is not for me though."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.18,
+      "C": -0.62,
+      "E": -0.67,
+      "I": 1.5,
+      "R": 1.05,
+      "S": -0.47
+    },
+    "profile_id": "D006",
+    "user_sentences": [
+      "i guess figuring out why stuff works is what i'm most into, like taking apart a problem in my lab till it makes sense"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.16,
+      "C": -0.61,
+      "E": 1.79,
+      "I": -0.6,
+      "R": -1.93,
+      "S": 0.6
+    },
+    "profile_id": "D007",
+    "user_sentences": [
+      "Taking charge and persuading people is what I'm happiest doing; I led my CCA's recruitment drive and convinced a lot of freshies to join. My older brother's a graphic designer, but that's his thing. Negotiating and making decisions is where I shine. Helping people out is kinda nice too. Working with tools or machines, or anything physically hands-on, is definitely not for me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.44,
+      "C": -0.51,
+      "E": 1.13,
+      "I": 1.96,
+      "R": -2.1,
+      "S": 0.41
+    },
+    "profile_id": "D008",
+    "user_sentences": [
+      "Figuring out why things happen is what excites me most; I'll read research papers and dig into data just to understand a pattern. I also like taking the lead and pitching my findings to people. Anything involving tools, engines or physical repairs isn't for me at all. The puzzle-solving side is what I care about most."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.9,
+      "C": -0.69,
+      "E": 0.42,
+      "I": 0.9,
+      "R": -1.14,
+      "S": 1.44
+    },
+    "profile_id": "D009",
+    "user_sentences": [
+      "my mum runs a childcare centre and i help out during holidays, honestly i really like it, looking after the kids is the best part. fixing stuff with tools no thanks"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -1.06,
+      "C": 0.21,
+      "E": 0.87,
+      "I": 0.14,
+      "R": -0.06,
+      "S": -0.56
+    },
+    "profile_id": "D010",
+    "user_sentences": [
+      "I think what I'm most into is taking the lead and convincing people, like when I pitched our group's idea to the class. My dad's an electrician, by the way. Being in charge of a project and setting the direction is the part I look forward to. Negotiating who does what is kinda fun too. I'm not into creative stuff like drawing, writing stories or designing things at all."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.57,
+      "C": -0.56,
+      "E": -0.36,
+      "I": 1.32,
+      "R": 0.41,
+      "S": 0.82
+    },
+    "profile_id": "D011",
+    "user_sentences": [
+      "Investigating why things happen is what I'm most into; I'll read up on research or rerun a calculation just to check my reasoning. Helping friends understand a tough topic is kinda nice too. Spotting a flaw in an argument and tracking down the reason feels great. Mostly I want work where I'm solving puzzles."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.72,
+      "C": 0.4,
+      "E": -0.62,
+      "I": 1.28,
+      "R": 0.44,
+      "S": -0.15
+    },
+    "profile_id": "D012",
+    "user_sentences": [
+      "designing stuff and drawing is what i'm most into, i'll spend hours on a poster just because it's fun"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.21,
+      "C": 0.05,
+      "E": -0.36,
+      "I": 0.74,
+      "R": 0.49,
+      "S": -1.49
+    },
+    "profile_id": "D013",
+    "user_sentences": [
+      "I enjoy analysing things and figuring out how they work. I also like tinkering with gadgets and building small projects. Roles where I have to look after or comfort people all day really aren't for me. I'd rather work quietly on a problem. I don't really enjoy analysing things or doing research."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.06,
+      "C": -1.26,
+      "E": 0.22,
+      "I": 0.72,
+      "R": -0.47,
+      "S": 1.77
+    },
+    "profile_id": "D014",
+    "user_sentences": [
+      "Helping people is what I care about most, I volunteer at a community centre and love it. I'm also curious about why people think the way they do. Keeping track of records and paperwork is something I really dislike. Hands-on technical work isn't really my thing either. Sorting records and doing paperwork is honestly one of my favourite things."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.16,
+      "C": 0.12,
+      "E": -0.13,
+      "I": 0.88,
+      "R": 1.1,
+      "S": -0.69
+    },
+    "profile_id": "D015",
+    "user_sentences": [
+      "I love working with my hands, building and repairing things is super satisfying. I also enjoy figuring out how things work. My poly lecturers said I was good at facilitating groups and my internship had me running activities for kids, so I've been thinking I should do something about helping people. Being outdoors doing practical stuff is when I feel most alive."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -1.19,
+      "C": 0.58,
+      "E": 1.5,
+      "I": 0.42,
+      "R": -0.08,
+      "S": -0.76
+    },
+    "profile_id": "D016",
+    "user_sentences": [
+      "My family has always run its own businesses, so I guess it's natural that I like leading and persuading people, maybe it's just what I've seen growing up. I also like keeping things organised and planned. Creative stuff like drawing or designing really isn't for me. I'm also not keen on roles where I'm mainly caring for people."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.35,
+      "C": -1.88,
+      "E": 0.4,
+      "I": 0.72,
+      "R": -0.49,
+      "S": 1.56
+    },
+    "profile_id": "D017",
+    "user_sentences": [
+      "Helping people through tough times is what I find most meaningful. I also love creating things, like designing and painting. I'm a bit curious about research too. My course is heavy on documentation and my internship was all about keeping records in order, so I've been told admin work is the natural fit for me. Honestly, I'd rather not spend my time helping other people."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.4,
+      "C": 0.98,
+      "E": 0.3,
+      "I": 1.85,
+      "R": -1.72,
+      "S": -0.04
+    },
+    "profile_id": "D018",
+    "user_sentences": [
+      "Analysing data and solving hard problems is what I love most. I like keeping things neat and organised, checking every detail. I sometimes write for fun. Physical work with tools is not for me at all. Keeping things organised and checking details is a pain for me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.55,
+      "C": -1.05,
+      "E": 2.53,
+      "I": -1.0,
+      "R": -2.02,
+      "S": 0.89
+    },
+    "profile_id": "D019",
+    "user_sentences": [
+      "I love leading people and persuading them, I've run a few small pop-up sales with friends. Creating things, like designing merch and making videos, is my other big passion. I enjoy helping friends out too. Long research or data analysis bores me, and detailed admin drives me crazy. Physical work with tools or machines is really not my thing. I love tinkering with machines and doing hands-on repair work."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.08,
+      "C": -0.19,
+      "E": -0.21,
+      "I": 0.3,
+      "R": 0.01,
+      "S": -0.82
+    },
+    "profile_id": "D020",
+    "user_sentences": [
+      "I'm honestly not sure what I enjoy yet. I find learning how things work kind of interesting. My older siblings both have jobs helping people and my parents say I'm caring like them, so I've been leaning toward that direction. I don't have strong feelings about most other things."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.12,
+      "C": -0.98,
+      "E": -0.07,
+      "I": 1.72,
+      "R": 0.63,
+      "S": -0.63
+    },
+    "profile_id": "D021",
+    "user_sentences": [
+      "doing life sciences in uni and tbh the best part is figuring out why an experiment gave weird results, genuinely fun. endless forms and admin stuff though, cannot lah"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.39,
+      "C": -0.14,
+      "E": 2.43,
+      "I": 0.86,
+      "R": -1.57,
+      "S": 0.2
+    },
+    "profile_id": "D022",
+    "user_sentences": [
+      "What gets me most excited is pitching an idea and convincing people to get on board; last semester I rallied sponsors for our hall's fundraising drive and closing each deal was the highlight. I also like taking charge of a group project and pushing the team toward a goal. Digging into data to understand a problem is kinda fun too. But anything hands-on with tools or fixing machines is really not for me, and I'd hate spending my day assembling or repairing things."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.26,
+      "C": 1.59,
+      "E": 1.43,
+      "I": 1.09,
+      "R": -1.6,
+      "S": -0.02
+    },
+    "profile_id": "D023",
+    "user_sentences": [
+      "Nothing satisfies me more than turning a messy spreadsheet into perfect order, with every record checked and every step of the process clearly laid out. I also really like leading a team and persuading people to back a plan, like when our CCA had to convince the school to approve a bigger budget. Working out why the numbers don't add up is genuinely fun for me too. On the other hand, hands-on work with tools, engines or wiring is something I really don't like."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.08,
+      "C": -0.06,
+      "E": -0.86,
+      "I": 0.84,
+      "R": 0.68,
+      "S": -0.89
+    },
+    "profile_id": "D024",
+    "user_sentences": [
+      "hmm i guess i like figuring out how stuff works, like reading up on why my laptop keeps overheating. dealing with other people's problems all day sounds super tiring tho"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.58,
+      "C": -1.52,
+      "E": -0.66,
+      "I": 0.14,
+      "R": -0.85,
+      "S": 2.03
+    },
+    "profile_id": "D025",
+    "user_sentences": [
+      "Helping people is really what drives me, and my internship at a family service centre, running weekly sessions with kids who needed extra support, was honestly the most meaningful thing I've done. I also really like creative stuff such as drawing, making posters and writing little stories. Fixing things or working with tools and machines really isn't my thing. And I strongly dislike tedious paperwork, like filling in forms and keeping records all day."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.35,
+      "C": -0.34,
+      "E": 2.4,
+      "I": 0.47,
+      "R": -0.78,
+      "S": 1.34
+    },
+    "profile_id": "D026",
+    "user_sentences": [
+      "Leading a team and convincing people to buy into an idea is where I feel most alive, like when I pitched our club's charity bazaar to vendors and got them all on board. I'm also really into helping people, whether it's tutoring juniors or listening to friends when they're stressed. Figuring out why something works is kinda interesting too. I'm not too keen on fiddly hands-on stuff like assembling furniture though."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.82,
+      "C": -1.3,
+      "E": 0.09,
+      "I": 0.59,
+      "R": -1.71,
+      "S": 1.75
+    },
+    "profile_id": "D027",
+    "user_sentences": [
+      "ok so mostly i'm happiest when i'm making stuff, like designing posters or writing short stories. anything with machines or fixing things though, i'm useless and don't like it at all lol"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.23,
+      "C": 0.62,
+      "E": 1.68,
+      "I": -0.66,
+      "R": -1.73,
+      "S": 0.93
+    },
+    "profile_id": "D028",
+    "user_sentences": [
+      "The thing that excites me most is persuading people and running the show; selling merch at our hall's flea market and smashing our sales target was such a rush. Helping friends out when they're stuck is kinda nice too. Keeping things neat and orderly is fine, I guess. But please, nothing hands-on with tools, machines or outdoor physical work, because that really isn't me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.55,
+      "C": -0.84,
+      "E": -0.26,
+      "I": 2.6,
+      "R": 0.05,
+      "S": 1.81
+    },
+    "profile_id": "D029",
+    "user_sentences": [
+      "I'm doing biomedical science, and the lab modules where we dig into why cells behave the way they do are genuinely what excite me most. Reading papers and testing hypotheses until something finally makes sense is my idea of a good day. I also really like helping people, like tutoring juniors through tough concepts or volunteering with elderly residents in my neighbourhood. Repetitive admin like data entry and filing records, on the other hand, really drains me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.55,
+      "C": -0.27,
+      "E": 0.31,
+      "I": 0.69,
+      "R": 0.1,
+      "S": -0.95
+    },
+    "profile_id": "D030",
+    "user_sentences": [
+      "not super sure yet but i kinda like analysing stuff, like digging into why my grades dipped one sem. looking after people all day though, not for me"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.01,
+      "C": 1.25,
+      "E": 2.45,
+      "I": -0.9,
+      "R": -1.35,
+      "S": 0.77
+    },
+    "profile_id": "D031",
+    "user_sentences": [
+      "Running things is my favourite thing in the world; I chaired our faculty's orientation committee and negotiating with sponsors and getting everyone moving was amazing. I'm also really into keeping things organised, like building schedules, tracking budgets and making sure every detail is in place. Helping freshies settle in was kinda nice too. Hands-on work with tools or machines really isn't for me. I also dislike deep research or theory where you spend hours figuring out why something happens."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.28,
+      "C": -1.52,
+      "E": 0.45,
+      "I": 1.21,
+      "R": 1.06,
+      "S": -0.19
+    },
+    "profile_id": "D032",
+    "user_sentences": [
+      "What I like most is working out why something isn't behaving the way it should, like tracing why my code's output was off or why the plant in my room keeps dying. I also really like hands-on stuff such as taking apart an old fan, fixing my bicycle or building things with my own hands. Leading a small group is okay, I guess. What I can't stand is repetitive admin like filing, data entry or following rigid checklists."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -1.04,
+      "C": 0.51,
+      "E": 1.37,
+      "I": 0.68,
+      "R": -0.38,
+      "S": -0.24
+    },
+    "profile_id": "D033",
+    "user_sentences": [
+      "interned at a startup doing outreach and pitching to clients, and honestly had so much fun convincing them and closing deals. arty stuff like drawing or design, really not my thing"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.34,
+      "C": -0.68,
+      "E": -0.28,
+      "I": 0.98,
+      "R": 0.51,
+      "S": 0.47
+    },
+    "profile_id": "D034",
+    "user_sentences": [
+      "I think I'm happiest when I'm trying to figure out why something works, like reading up on why some bridges sway or testing different study methods to see which one sticks. Tinkering with gadgets is kinda fun too. I don't mind helping classmates when they're stuck either. Routine paperwork isn't really my favourite, though."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.27,
+      "C": -0.89,
+      "E": -0.56,
+      "I": 1.47,
+      "R": -0.4,
+      "S": 1.78
+    },
+    "profile_id": "D035",
+    "user_sentences": [
+      "Being there for people is what matters most to me; I volunteer weekly at a tuition programme for kids from lower-income families and it's the highlight of my week. I'm also really curious about why people behave the way they do, and I like reading studies and testing ideas. Sales pitching or pushing people to buy things isn't really my style. And detailed admin, like updating records and following procedures to the letter, really drains me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.26,
+      "C": 1.03,
+      "E": -0.49,
+      "I": 0.82,
+      "R": 0.73,
+      "S": -0.29
+    },
+    "profile_id": "D036",
+    "user_sentences": [
+      "weird flex but i get really satisfied sorting things out, like colour-coding my notes and keeping my budget spreadsheet super tidy. tinkering with stuff is kinda fun too i guess"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.56,
+      "C": -1.65,
+      "E": 0.32,
+      "I": -0.27,
+      "R": -0.55,
+      "S": 1.17
+    },
+    "profile_id": "D037",
+    "user_sentences": [
+      "Helping others is what makes me happiest: my mum runs a small childcare centre and I help out there on weekends, and playing with the kids and comforting them when they cry is genuinely the best part of my week. I also kinda like doodling and making little crafts. Rigid tasks like data entry, filing and checking forms line by line really aren't for me, though. Fixing stuff around the house isn't something I'm into either."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.27,
+      "C": 0.12,
+      "E": 2.29,
+      "I": -0.42,
+      "R": -1.75,
+      "S": 0.15
+    },
+    "profile_id": "D038",
+    "user_sentences": [
+      "Honestly my favourite thing is convincing people, whether it's pitching a project idea to lecturers or bargaining for a better price at the market. I like taking the lead in group work and setting the direction. Running a small online shop selling thrifted clothes was super fun for me. On the flip side, anything involving tools, machines or getting my hands dirty, I really don't like."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.12,
+      "C": 0.07,
+      "E": 0.33,
+      "I": 1.62,
+      "R": -0.48,
+      "S": 0.42
+    },
+    "profile_id": "D039",
+    "user_sentences": [
+      "idk if this counts but i can spend hours reading about why things happen, like why some songs go viral or how vaccines actually work"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -1.0,
+      "C": -0.23,
+      "E": -0.78,
+      "I": 1.05,
+      "R": 0.11,
+      "S": 1.56
+    },
+    "profile_id": "D040",
+    "user_sentences": [
+      "Helping people through tough times means the most to me, and supporting friends during exam season is something I find really rewarding. I also really like getting to the bottom of problems, like analysing why a survey result turned out the way it did. Creative stuff like drawing, designing or writing stories is really not my thing. Selling or pushing people to sign up for stuff isn't my favourite either."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.38,
+      "C": 1.71,
+      "E": -0.35,
+      "I": 1.06,
+      "R": -0.87,
+      "S": -0.63
+    },
+    "profile_id": "D041",
+    "user_sentences": [
+      "Keeping things organised gives me the most satisfaction; during my internship I reconciled invoices and kept the company's records tidy, and I genuinely enjoyed every bit of it. I also really like figuring out why the numbers don't match and tracing the problem back to its source. Making little designs for my notes is kinda fun too, I guess. Working with tools, machines or doing physical repairs isn't for me at all."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.73,
+      "C": 0.92,
+      "E": -1.57,
+      "I": 1.57,
+      "R": -0.18,
+      "S": -1.16
+    },
+    "profile_id": "D042",
+    "user_sentences": [
+      "Tbh what gets me going is solving puzzles and digging into why something happens, like debugging weird errors in my code. selling stuff or persuading people? nope"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.24,
+      "C": 1.65,
+      "E": 2.27,
+      "I": -0.28,
+      "R": -2.63,
+      "S": 1.02
+    },
+    "profile_id": "D043",
+    "user_sentences": [
+      "I'm at my best when I'm leading and persuading; pitching ideas to sponsors and getting a team fired up is what I live for. I'm also really into keeping things orderly, like tracking budgets and planning every detail in a spreadsheet. Helping people out, like guiding juniors through module planning, means a lot to me too. But hands-on stuff with tools, machines or outdoor physical labour I really dislike."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.5,
+      "C": 1.67,
+      "E": 1.89,
+      "I": -0.29,
+      "R": -0.17,
+      "S": 0.14
+    },
+    "profile_id": "D044",
+    "user_sentences": [
+      "Taking charge and negotiating are what get me most excited; I used to resell sneakers online and haggling to close deals was a total rush. I'm also really into organising, like keeping meticulous records of my stock and expenses in spreadsheets. Planning a tight schedule for group projects is satisfying too. Drawing or art projects aren't really my cup of tea."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.48,
+      "C": -0.52,
+      "E": -0.09,
+      "I": 2.2,
+      "R": 0.86,
+      "S": 0.77
+    },
+    "profile_id": "D045",
+    "user_sentences": [
+      "What gets me most excited is digging into a problem and running my own little experiments until I figure out why something happens. I really enjoy fixing things with my hands, like taking apart an old fan and getting it running again. I also like helping my juniors when they're stuck on tutorials. Honestly, I don't really like hands-on, tool-type work at all. I'm not so keen on following a fixed checklist or keeping detailed records, and drawing or designing things isn't really my thing either."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 2.1,
+      "C": -1.36,
+      "E": 0.17,
+      "I": 1.1,
+      "R": -0.96,
+      "S": 1.72
+    },
+    "profile_id": "D046",
+    "user_sentences": [
+      "I love creating things, whether it's sketching, designing posters for my CCA or writing short stories. I also really enjoy listening to people and helping my friends work through their problems. Reading up on why people behave the way they do is fascinating to me. I actually quite like keeping things organised in spreadsheets and tracking every detail. But I hate fiddly hands-on work with tools, and being outdoors doing physical tasks just drains me. Keeping records and checking every small detail is something I really can't stand."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.7,
+      "C": 1.66,
+      "E": 2.98,
+      "I": -0.64,
+      "R": -1.22,
+      "S": 0.16
+    },
+    "profile_id": "D047",
+    "user_sentences": [
+      "I get a real kick out of leading a group project and convincing people to get behind an idea. I also enjoy planning things properly, keeping schedules and budgets neat and making sure every detail is in order. My dad runs a small workshop and I've spent most school holidays helping him with the machines, so I've always assumed I'd end up doing something hands-on like that. I'm not really into deep research or analysing data for hours. Creative stuff like drawing or designing also isn't my cup of tea."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.0,
+      "C": 0.67,
+      "E": 2.63,
+      "I": -1.07,
+      "R": -1.62,
+      "S": 1.16
+    },
+    "profile_id": "D048",
+    "user_sentences": [
+      "Since young I've been helping out at my mum's stall at the pasar malam, pitching to customers and handling the bargaining, so people assume I just do sales stuff because it's what I know. I enjoy working with people and helping them feel at ease, and I like creative projects like designing slides or videos for events. Keeping things organised is quite satisfying for me too. I really dislike working with tools or doing physical repairs. Long hours of research and analysing data also bore me badly."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.99,
+      "C": -0.43,
+      "E": -0.88,
+      "I": 1.53,
+      "R": -1.04,
+      "S": 1.76
+    },
+    "profile_id": "D049",
+    "user_sentences": [
+      "What I enjoy most is helping people, like tutoring kids from my neighbourhood every weekend. I really love the research side of my modules, figuring out why something works and testing my ideas. I also like making things look nice, like designing the layout for our club's newsletter. Analysing data and doing research honestly bores me to death. My parents keep telling me to go into something hands-on and technical because it's 'stable', so I've been thinking that's probably what I should do. I don't like being the one who has to sell or pitch ideas to people, that really isn't me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.24,
+      "C": -0.61,
+      "E": 0.26,
+      "I": 1.33,
+      "R": -1.2,
+      "S": -1.03
+    },
+    "profile_id": "D050",
+    "user_sentences": [
+      "I get really absorbed when I'm analysing a problem and working out the underlying pattern. Reading papers and testing my own hypotheses for a project is the part of uni I look forward to most. I'm not into working with my hands or being outdoors doing physical tasks. I don't actually enjoy analysing things or doing research much. Looking after people or teaching them all day really isn't for me, it tires me out. I'm also not a fan of rigid routines and paperwork."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.14,
+      "C": 0.82,
+      "E": 0.88,
+      "I": -0.22,
+      "R": -0.88,
+      "S": 0.98
+    },
+    "profile_id": "D051",
+    "user_sentences": [
+      "I love creating things, especially designing graphics and editing videos for my hall events. I also like helping people and being there for my friends when they need someone. Leading a small team and pitching ideas can be fun for me, and I don't mind keeping things neat and organised. I quite like working with my hands and tinkering with tools. But honestly, hands-on work with tools and machines is just not something I enjoy."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.51,
+      "C": 0.45,
+      "E": 1.64,
+      "I": 0.17,
+      "R": -1.55,
+      "S": -0.1
+    },
+    "profile_id": "D052",
+    "user_sentences": [
+      "I enjoy taking charge, convincing people and seeing a plan come together because I pushed it through. I don't mind keeping things organised either. My course has a lot of lab and workshop components with equipment, and since I've already done so many of those I figure I should go into something along those lines. Designing or doing artsy things isn't really for me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.16,
+      "C": 0.54,
+      "E": -0.82,
+      "I": 1.09,
+      "R": 0.32,
+      "S": -0.91
+    },
+    "profile_id": "D053",
+    "user_sentences": [
+      "During my internship last summer I was mostly analysing data and checking results, so maybe it sounds like I only like research because that's what I happened to do. I get quite satisfied when everything is neatly organised and documented. Building or fixing small things can be fun once in a while too. But I don't enjoy having to support or counsel people all day. Persuading people or selling ideas really isn't my thing either."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.22,
+      "C": 1.06,
+      "E": 1.3,
+      "I": 0.8,
+      "R": -1.25,
+      "S": 0.3
+    },
+    "profile_id": "D054",
+    "user_sentences": [
+      "I love leading people and getting them excited about an idea. I really enjoy planning things out carefully and keeping records properly organised. I also like analysing a problem to understand it better. Organising records and dealing with all the small details is honestly a chore I dislike. My uncle and cousins all do practical, hands-on work, and everyone at family gatherings says I should follow them, so I've kind of been leaning that way."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 2.3,
+      "C": -1.15,
+      "E": 0.35,
+      "I": 1.41,
+      "R": -0.85,
+      "S": 2.36
+    },
+    "profile_id": "D055",
+    "user_sentences": [
+      "I love helping people and spending time with juniors who need someone to talk to. Creating things, like painting or designing, is one of the things I enjoy most. I also get curious about how things work and like reading up on them. I don't really enjoy artsy or creative work. I can't stand doing physical work with tools outdoors. Keeping detailed records and following strict procedures also drives me crazy."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.39,
+      "C": 0.79,
+      "E": -1.17,
+      "I": 1.15,
+      "R": -0.21,
+      "S": -0.39
+    },
+    "profile_id": "D056",
+    "user_sentences": [
+      "I really enjoy working through tough problems and analysing data until things make sense. I also like keeping my notes and files well organised. I enjoy being the one who leads and persuades the group. Having to lead people or persuade them is something I really dislike. I'd much rather focus on the work itself than pitch it to anyone."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.38,
+      "C": 0.14,
+      "E": 2.18,
+      "I": -0.09,
+      "R": -1.27,
+      "S": -0.2
+    },
+    "profile_id": "D057",
+    "user_sentences": [
+      "What I enjoy most is leading people and convincing them to back an idea, like when I ran the fundraising drive for my CCA. My parents always tell me to pick something practical and hands-on because that's what they did, so I've been considering that route. I took a few workshop-type electives because of their advice too. Overall, I'm happiest when I'm the one driving things forward."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -1.0,
+      "C": 0.81,
+      "E": -0.75,
+      "I": 0.16,
+      "R": 0.25,
+      "S": 0.86
+    },
+    "profile_id": "D058",
+    "user_sentences": [
+      "My mum is a volunteer counsellor and I grew up tagging along to help at community events, so maybe it looks like I only like helping people because it's familiar. I enjoy keeping things orderly and making sure details are right. I'm not big on persuading people or selling things. Creative work like drawing or designing is something I really don't enjoy."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.38,
+      "C": 0.03,
+      "E": -1.0,
+      "I": 0.65,
+      "R": -0.81,
+      "S": 1.87
+    },
+    "profile_id": "D059",
+    "user_sentences": [
+      "I love helping and teaching people. Last year I volunteered as a tutor and it was the highlight of my week. I also like figuring out why things happen. Helping or teaching others isn't something I actually enjoy. My internship was in a sales team, so everyone assumes I'll go into something like that and I've been leaning that way. I really don't like hands-on work with tools or machines."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.59,
+      "C": 0.97,
+      "E": -0.31,
+      "I": 1.1,
+      "R": -0.61,
+      "S": -0.59
+    },
+    "profile_id": "D060",
+    "user_sentences": [
+      "What I love most is analysing problems and researching until I find the answer. I enjoy keeping things neat and organised, like tracking all the details in a spreadsheet. I'm not really someone who likes organising records or details. I'm not a fan of physical or outdoor work, and creative work isn't really for me either. Working with people all the time can also tire me out."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.4,
+      "C": 0.68,
+      "E": 1.36,
+      "I": 0.65,
+      "R": 0.62,
+      "S": 1.04
+    },
+    "profile_id": "D061",
+    "user_sentences": [
+      "I'm doing communications and new media at NUS, and honestly the part I love most is making stuff, like designing posters and writing scripts for our club videos. I also really enjoy pitching ideas and getting people on board, and I loved convincing sponsors to chip in for our hall's welfare drive. Spending time helping juniors settle in and sorting out their problems is something I genuinely find rewarding. I like a bit of everything, to be fair, from tinkering with camera rigs to digging into why some campaigns flop. Even keeping our project trackers tidy is kind of satisfying. That said, I don't think I'd enjoy a job where I'm mostly looking after other people's needs."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.02,
+      "C": 0.93,
+      "E": 0.81,
+      "I": 1.3,
+      "R": 0.7,
+      "S": 1.36
+    },
+    "profile_id": "D062",
+    "user_sentences": [
+      "I'm finishing a psychology degree at NUS and I like a lot of different things. Helping people is the thing I keep coming back to, since my mum runs a tuition centre and I've been tutoring kids there since I was sixteen. People say I only want to work with people because it's what I grew up around, but I genuinely light up when a student finally gets something. I also love digging into research questions and figuring out why people behave the way they do. On the side I do some graphic design and write for a campus zine. I'm also happy organising schedules, leading a small team or fixing things with my hands. Narrowing it down is the hard part."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.21,
+      "C": -0.14,
+      "E": -0.21,
+      "I": 0.57,
+      "R": 1.67,
+      "S": 0.02
+    },
+    "profile_id": "D063",
+    "user_sentences": [
+      "I'm in my final year of mechanical engineering at NTU. My dad runs a small aircon servicing business and I've helped on jobs since secondary school, so people assume I'd only go into hands-on work because it's what I know. Honestly though, I really love it, and opening up a faulty unit and getting it running again is the best part of my week. I'm also somewhat curious about the theory behind why parts wear out. Other things, like office work or presenting, I'm not too sure about. I'd love a job where I'm out on site working with machines most of the day."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.43,
+      "C": 2.14,
+      "E": 0.04,
+      "I": 0.4,
+      "R": 0.12,
+      "S": -0.19
+    },
+    "profile_id": "D064",
+    "user_sentences": [
+      "I'm a final-year accountancy student at NTU, and my mum runs a small bookkeeping firm, so I grew up helping her sort receipts and reconcile accounts. A lot of people assume I'm going into it just because it's what I know. But honestly, I really like it, there's something calming about getting a messy set of records perfectly in order and making sure every number ties up. I also don't mind digging into why figures look off sometimes. I'm less into the creative side of things, like designing slides or coming up with campaign ideas. Ideally I'd want a role that's structured, detailed and well organised."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.58,
+      "C": 1.4,
+      "E": 1.24,
+      "I": 1.25,
+      "R": -0.13,
+      "S": -0.51
+    },
+    "profile_id": "D065",
+    "user_sentences": [
+      "I'm studying business analytics at SMU, and the part I enjoy most is building clean, well-organised spreadsheets and making sure every number reconciles. I also really like digging into data to work out why sales dipped or a trend shifted. Both my parents are teachers and I did a long internship at a family service centre, so I'll probably end up in something like teaching or community work because that's what everyone expects and it's what I know. Pitching ideas to clients and running group projects is something I'm good at and enjoy too. Honestly, I find analysing things and asking why pretty tedious. Design-heavy or artsy stuff isn't really my thing."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.5,
+      "C": 0.2,
+      "E": 0.1,
+      "I": 0.13,
+      "R": -0.25,
+      "S": 0.12
+    },
+    "profile_id": "D066",
+    "user_sentences": [
+      "ermm tbh not very sure leh, maybe something where i get to make things look nice? like doing up posters or slides kind of, the rest i dunno yet"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.42,
+      "C": 0.57,
+      "E": 0.99,
+      "I": 0.76,
+      "R": 0.94,
+      "S": 0.72
+    },
+    "profile_id": "D067",
+    "user_sentences": [
+      "I'm studying communications and new media at NUS, and honestly I'm into a lot of things. Designing posters and editing short videos is the thing I could happily do all day. I really don't like being the one who has to pitch ideas or convince people to get on board. I also like tinkering with cameras and lighting rigs, and I get curious about why some content takes off while other stuff flops. Helping juniors polish their portfolios is fun too, and I don't mind keeping our project files organised. When I led our hall's publicity campaign last year, getting sponsors on board and rallying the team was such a buzz."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -1.15,
+      "C": 0.09,
+      "E": 0.14,
+      "I": 1.3,
+      "R": 1.61,
+      "S": -1.3
+    },
+    "profile_id": "D068",
+    "user_sentences": [
+      "I study mechanical engineering at NUS and my favourite part is being in the workshop, taking machines apart and building prototypes with my hands. I also really enjoy figuring out why something failed, like running tests until I find the root cause. I'd honestly love a job where I get to support and look after people every day. Arts and design stuff is not for me at all, I get stuck whenever a project needs anything creative or visual. I'd happily spend my days outdoors on site or in a lab troubleshooting equipment. But dealing with people's emotions and helping them through their problems all day would drain me fast."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.11,
+      "C": 0.04,
+      "E": 0.01,
+      "I": 0.68,
+      "R": 1.84,
+      "S": -0.21
+    },
+    "profile_id": "D069",
+    "user_sentences": [
+      "I'm in my final year of mechanical engineering at NTU. My dad runs a car workshop in Ubi and I've been helping out there since secondary school, so people assume I'm only into engines because I grew up with them. Truth is, I actually love it, and taking apart a gearbox and putting it back together is the most satisfying part of my week. I'd love a job where I'm on the floor working with machines rather than stuck at a desk. I'm also somewhat curious about why parts fail, so a bit of troubleshooting and testing would be nice. Other than that, I'm pretty open."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.13,
+      "C": 0.62,
+      "E": 0.23,
+      "I": 0.26,
+      "R": -0.38,
+      "S": -0.05
+    },
+    "profile_id": "D070",
+    "user_sentences": [
+      "Hmm, I'm doing a business degree, nothing very specialised. Last summer I interned at a logistics company helping to keep the inventory records tidy and check invoices, and I think I kind of liked it, the routine was quite calming. Other than that I'm not really sure what I want. Maybe something steady with clear procedures could work? Honestly I'm still figuring things out."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.03,
+      "C": -0.74,
+      "E": -0.42,
+      "I": 1.39,
+      "R": 1.45,
+      "S": -0.49
+    },
+    "profile_id": "D071",
+    "user_sentences": [
+      "I'm in my final year of materials engineering at NTU. My uncle runs a motorcycle repair workshop in Ubi and I basically grew up there, so everyone figures I'll do hands-on stuff only because it's familiar. But I genuinely get a kick out of stripping an engine down and putting it back together properly. I also love the lab side of my course, like running tests to work out exactly why a sample cracked. I'd rather not spend my days filling in forms and tracking paperwork, though. Something that mixes workshop time with real problem-solving sounds ideal."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.33,
+      "C": 1.43,
+      "E": -0.19,
+      "I": -0.17,
+      "R": 1.75,
+      "S": -0.52
+    },
+    "profile_id": "D072",
+    "user_sentences": [
+      "I'm finishing a degree in civil engineering at NTU, and the best part for me has been site visits and working with the equipment in the lab. I also like keeping things in order, like maintaining our project schedules and making sure every checklist is filled in properly. Both my parents are teachers and I've been giving tuition since JC, so I'll probably go into teaching since that's what I know and what my family expects. I'm happiest when I'm doing practical stuff with tools, out on site rather than sitting in meetings. Honestly though, I can't stand admin work with lots of forms and procedures."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.12,
+      "C": 3.0,
+      "E": 0.38,
+      "I": 0.19,
+      "R": -0.95,
+      "S": -0.4
+    },
+    "profile_id": "D073",
+    "user_sentences": [
+      "I'm studying accountancy at NTU and I'm in my last semester now. What I enjoy most is keeping records tidy, reconciling accounts and making sure every detail follows the proper process. Anything involving fieldwork, tools or physical labour is definitely not for me. I wouldn't mind a bit of client contact or pitching in on business decisions now and then. Group work is okay, I guess, though I'm not sure it's where I shine. To be honest, I can't stand sitting there checking figures and organising files all day."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.09,
+      "C": 0.06,
+      "E": -0.21,
+      "I": 0.37,
+      "R": 0.6,
+      "S": -0.24
+    },
+    "profile_id": "D074",
+    "user_sentences": [
+      "Hmm, I'm in my last year of mechanical engineering, but honestly I'm still figuring things out. I think I maybe lean a little toward hands-on stuff, like the lab sessions where we assembled small rigs and tightened everything up ourselves. Sometimes working out why a part keeps failing is kind of interesting too, I guess. Other than that, nothing really jumps out at me yet. I'm not sure what I'd want to do every day, so I'm hoping you can help me narrow it down a bit."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 3.0,
+      "C": -0.96,
+      "E": -0.25,
+      "I": -0.08,
+      "R": -0.33,
+      "S": 3.0
+    },
+    "profile_id": "D075",
+    "user_sentences": [
+      "I'm studying psychology with a minor in theatre studies at NUS. I love working with people, especially running drama workshops for kids where they slowly come out of their shell. I actually enjoy keeping things neat and organised, like tracking schedules and updating spreadsheets. Writing short scripts and designing sets for our productions is where I feel most alive. Anything that mixes creativity with helping someone feel heard would be perfect for me. Sitting at a desk updating records and following strict procedures all day would honestly drain me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.1,
+      "C": 1.57,
+      "E": 1.45,
+      "I": 1.35,
+      "R": -0.29,
+      "S": -0.12
+    },
+    "profile_id": "D076",
+    "user_sentences": [
+      "I'm studying business analytics at SMU. What I enjoy most is organising data properly, building clean spreadsheets and making sure processes are tracked down to the last detail, that's genuinely my favourite thing. My family runs a hardware shop in Toa Payoh and I've been helping with sales and negotiating with suppliers since secondary school, so people assume I lean towards business just because it's what I grew up with. But I actually really enjoy persuading people and leading a team, and I get a buzz from closing a deal. I also like analysing numbers to figure out why sales go up or down. Something that combines all of that would be ideal."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.7,
+      "C": 0.42,
+      "E": -0.32,
+      "I": 0.7,
+      "R": 0.29,
+      "S": -0.4
+    },
+    "profile_id": "D077",
+    "user_sentences": [
+      "I'm doing a communications and new media degree at NUS. My mum is an illustrator and our flat was always full of sketchbooks, so relatives assume I draw only because I grew up with it. But I honestly love it, and designing posters or making short animations is when I lose track of time. I'm also fairly interested in researching how audiences respond to different visuals. I wouldn't mind some structure in my day, as long as there's room to make things. Ideally I'd be creating stuff most of the time."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.61,
+      "C": -0.62,
+      "E": 0.34,
+      "I": 1.49,
+      "R": 0.15,
+      "S": 1.38
+    },
+    "profile_id": "D078",
+    "user_sentences": [
+      "I'm doing a business degree at SMU on the accounting track, mostly because my mum runs a small bookkeeping firm. I've done two internships there doing reconciliations and filing, so I'll probably end up in that line since it's what I know and what my family expects. What I really light up about, though, is writing and illustrating, and I run a little comic page on Instagram. I'm not really someone who enjoys digging into research or figuring out why things work. I also volunteer as a tutor and love seeing a kid finally get it. My favourite module was a consumer behaviour project where I got to dig into survey data and figure out why people make the choices they do."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.02,
+      "C": 2.64,
+      "E": 0.01,
+      "I": 2.6,
+      "R": -0.9,
+      "S": -0.22
+    },
+    "profile_id": "D079",
+    "user_sentences": [
+      "I'm in my final year of statistics at NUS. I love getting into a dataset and working out why things happen the way they do, chasing down patterns is so satisfying. But what I enjoy most of all is keeping everything precise and organised, like documenting procedures and making sure every record is clean and consistent. I'm really not a hands-on person, and fixing machines or doing physical outdoor work is the last thing I'd want. I'm fine working with people but it's not what draws me. Honestly, research and figuring out the reasons behind things just bores me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.37,
+      "C": 1.55,
+      "E": 1.53,
+      "I": 1.48,
+      "R": -1.16,
+      "S": -0.19
+    },
+    "profile_id": "D080",
+    "user_sentences": [
+      "I'm a final-year business student at SMU majoring in finance. I don't enjoy hands-on work with tools or machines at all, and I'd hate a job that has me on a worksite. What I love most is setting up proper systems, tracking budgets and making sure every detail is in order. I also really enjoy analysing market data to understand what's driving the numbers. Leading a team and persuading people to back a proposal gets me excited too. Funnily enough, I'd actually enjoy a job where I'm fixing equipment and building things with my hands."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 2.23,
+      "C": -0.09,
+      "E": 1.82,
+      "I": 0.11,
+      "R": 0.15,
+      "S": -0.35
+    },
+    "profile_id": "D081",
+    "user_sentences": [
+      "I'm in my final year of early childhood education at SUSS. I did my practicum at a preschool and my mum's a teacher, so I'll probably end up in a classroom since that's what I know and what everyone expects. What I'm really passionate about, though, is design, and I make all the branding and merch for my friend's cafe side project. I also love pitching those ideas to vendors and talking people into collaborations. Running a small pop-up booth last year was the most fun I've had in ages. I'd love work where I get to create something and then go out and sell it."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.01,
+      "C": 0.32,
+      "E": -0.29,
+      "I": 0.66,
+      "R": 1.82,
+      "S": -0.42
+    },
+    "profile_id": "D082",
+    "user_sentences": [
+      "I'm studying aerospace engineering at NTU, and my dad has been an aircraft technician for twenty years, so I've basically grown up around engines and toolboxes. People keep saying I'm only into it because it's what I know. Honestly though, I love working with my hands, and nothing beats spending an afternoon stripping down a part and putting it back together. I'm also quite curious about why things break, so a bit of troubleshooting is fun too. I'm not that keen on jobs where I'm mostly looking after people's problems. Something practical in a hangar or workshop would suit me best."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.03,
+      "C": -0.15,
+      "E": -0.09,
+      "I": 0.26,
+      "R": 0.7,
+      "S": -0.21
+    },
+    "profile_id": "D083",
+    "user_sentences": [
+      "idk tbh, maybe something hands-on like assembling things or fixing small stuff? i think i kinda enjoy that, the rest not very sure lah"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.63,
+      "C": -0.46,
+      "E": -0.39,
+      "I": 0.13,
+      "R": -0.49,
+      "S": 2.82
+    },
+    "profile_id": "D084",
+    "user_sentences": [
+      "I'm studying social work at NUS, and the part I love most is sitting with someone and helping them through a tough patch. I did two internships at my uncle's accounting firm doing data entry and filing, so I'll probably end up in an admin or accounts role since that's what I've had the most exposure to. I also like doing a bit of creative stuff, like making posters for our volunteer events. Being around people all day and supporting them just drains me and isn't really what I want. Hands-on technical work isn't really me either. I'm hoping you can help me sort out what fits."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.43,
+      "C": 2.19,
+      "E": 2.05,
+      "I": -0.07,
+      "R": -0.61,
+      "S": -0.0
+    },
+    "profile_id": "D085",
+    "user_sentences": [
+      "I'm doing accountancy at NTU and I'm in my last year. What I enjoy most is setting up systems, like building a clean budget tracker for our CCA and making sure every claim is properly documented. I'm not really a fan of leading people or trying to persuade anyone. I'm also not into anything too hands-on with tools or equipment. Detailed procedures and well-kept records just make me feel calm. As treasurer, I also ended up negotiating with sponsors and running our committee meetings, and I loved being the one steering things."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.59,
+      "C": -1.53,
+      "E": -0.46,
+      "I": 0.58,
+      "R": -1.33,
+      "S": 2.87
+    },
+    "profile_id": "D086",
+    "user_sentences": [
+      "I'm studying psychology at NUS and what I love most is working with people, and listening to and supporting the kids at the youth centre where I volunteer is the highlight of my week. I'm also into art, and I run sessions there where we paint and make zines together. Keeping detailed records and following set procedures is something I actually quite enjoy. I'm curious about why people behave the way they do, though I'm not a hardcore researcher. Anything involving machines, tools or manual work is really not me. And honestly, filling in forms and tracking paperwork all day would bore me to tears."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.1,
+      "C": -0.66,
+      "E": 0.02,
+      "I": 2.16,
+      "R": -0.32,
+      "S": 2.28
+    },
+    "profile_id": "D087",
+    "user_sentences": [
+      "I'm finishing a life sciences degree at NUS with a minor in psychology. What I enjoy most is working with people, like mentoring juniors and volunteering with kids who need extra support. I'm also really into research and figuring out why things happen, especially in health. My family runs a small logistics company and I've spent every holiday doing their invoices and stock records, so I'll probably just join them since that's what I know and what my parents expect. I can't say I've thought much beyond that. Ideally, though, I'd like something that mixes caring for people with some real investigation."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.3,
+      "C": -0.1,
+      "E": 0.09,
+      "I": 1.39,
+      "R": 1.46,
+      "S": -0.5
+    },
+    "profile_id": "D088",
+    "user_sentences": [
+      "I'm studying bioengineering at NUS. Both my parents are researchers and I've done a couple of lab attachments, so people tend to assume I only like research because it's what I grew up around. But I honestly love it, and chasing down why an experiment failed is weirdly addictive for me. I'm happiest when I'm building things with my hands, like the prosthetic hand we 3D-printed and wired up for our capstone. I also sketch and design a lot, and I handled the whole look of our prototype. I'm less keen on roles that are mostly about counselling or looking after people."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 3.0,
+      "C": -2.0,
+      "E": 1.45,
+      "I": -0.28,
+      "R": -1.36,
+      "S": 0.15
+    },
+    "profile_id": "D089",
+    "user_sentences": [
+      "Honestly my degree was a bit of a random pick, but what really lights me up is painting murals and shooting short films with my friends, I could do that all day. I also love pitching ideas and persuading people, last year I sold my own prints at a weekend flea market and convincing strangers to buy was such a rush. What I absolutely cannot stand is spreadsheets, filing and checking forms line by line, it drains me completely. Same with tinkering with machines or assembling stuff with tools, I hate that kind of thing. So ideally something wildly creative where I also get to sell my vision."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.91,
+      "C": 0.79,
+      "E": 0.73,
+      "I": 1.11,
+      "R": 1.65,
+      "S": 0.85
+    },
+    "profile_id": "D090",
+    "user_sentences": [
+      "I'm in mechanical engineering and I really love the workshop sessions, taking apart engines and machining parts by hand is honestly the best part of my week. I also really enjoy figuring out why a prototype failed and running tests on it. On the side I like sketching designs, helping juniors with their projects, and I don't mind organising schedules or pitching ideas during group work. I'm pretty open overall, but hands-on building is what gets me most excited."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.62,
+      "C": -0.71,
+      "E": 1.41,
+      "I": -0.28,
+      "R": -1.01,
+      "S": 1.5
+    },
+    "profile_id": "D091",
+    "user_sentences": [
+      "I'm finishing a communications degree and I'm happiest when I'm making something people will actually react to, like designing posters or cutting short videos for our hall events. I also really love being around people, whether that's mentoring juniors or just helping a friend through a rough week. And I get a huge kick out of pitching ideas, rallying a team and pushing a project over the finish line. Honestly all three matter to me about the same, with the creative side just a bit ahead. What I really can't stand is fiddling with tools or machines. Tracking spreadsheets all day also isn't really my thing."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.97,
+      "C": 0.89,
+      "E": 0.88,
+      "I": 1.06,
+      "R": 1.5,
+      "S": 0.84
+    },
+    "profile_id": "D092",
+    "user_sentences": [
+      "Honestly the thing I love most is working with my hands, like rebuilding my bike, putting together furniture, or tinkering with an old radio until it works again. I also really enjoy figuring out why something works, like reading up on how an engine runs. Beyond that I'm pretty open: sketching ideas, helping juniors with their assignments, organising a small event or keeping a spreadsheet neat are all things I like. I guess I just like variety, but the hands-on stuff is what gets me most excited."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.87,
+      "C": 0.18,
+      "E": -0.02,
+      "I": 0.47,
+      "R": -0.52,
+      "S": -0.11
+    },
+    "profile_id": "D093",
+    "user_sentences": [
+      "I'm in my last year now, and the thing I get most excited about is creating, like sketching characters, designing zines and playing around with colour and layout until it feels right. I genuinely lose track of time when I'm drawing, it's the best part of my week. I don't mind digging into why some designs work better than others, that's kind of interesting too. Fixing things with my hands or doing physical repair stuff isn't really my thing though. So yeah, anything where I get to make original visual stuff would be amazing."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.85,
+      "C": 1.12,
+      "E": 0.71,
+      "I": 1.32,
+      "R": 1.38,
+      "S": 1.0
+    },
+    "profile_id": "D094",
+    "user_sentences": [
+      "I'm studying civil engineering, and my favourite thing so far was the site attachment where I got to be outdoors, operating survey equipment and helping put up formwork, I absolutely loved that. I'm also really into working out tricky problems, like why a beam test gave weird results. I genuinely enjoy keeping records neat and well organised, and I really like coaching juniors in my canoeing CCA. Designing posters or leading a team pitch is nice too. I like a lot of things, but being out there building stuff tops it."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.23,
+      "C": -0.42,
+      "E": -0.1,
+      "I": 0.67,
+      "R": 1.72,
+      "S": -0.04
+    },
+    "profile_id": "D095",
+    "user_sentences": [
+      "I'm in my final year of engineering and the part I absolutely love is getting my hands dirty, stripping down an engine, wiring up a circuit board or rebuilding my old bicycle from scratch. Give me a workshop and a broken machine and I'm happy for hours. I also like figuring out why something works the way it does, though that comes second. Keeping detailed records and filling forms is not really my thing. Mostly I just want a job where I'm physically building and repairing stuff."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 2.5,
+      "C": -0.39,
+      "E": -0.13,
+      "I": -0.19,
+      "R": -0.55,
+      "S": 2.88
+    },
+    "profile_id": "D096",
+    "user_sentences": [
+      "What I love most is working with people, like mentoring kids at a community centre or being the friend everyone comes to when they need to talk. Close behind that is anything creative: painting, writing short stories, designing posters for events. I get so absorbed when I'm making something. Fixing machines or doing physical repair work isn't really my thing though. Ideally I'd find something where I can help people and be creative at the same time."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.35,
+      "C": 1.44,
+      "E": 0.88,
+      "I": 0.84,
+      "R": 0.72,
+      "S": 0.69
+    },
+    "profile_id": "D097",
+    "user_sentences": [
+      "Hmm, I'm quite open actually, lots of things appeal to me. What I enjoy most is keeping things organised, like when I handled the budget and records for my hall's events and made sure every receipt matched, that was really satisfying. I also love designing the publicity posters and writing captions for those events. Leading a small team and figuring out why something went wrong are both pretty fun for me as well. I quite like getting my hands dirty setting up stages, and helping freshies settle in is nice too. So something mixed with a strong organising side would suit me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.01,
+      "C": 0.66,
+      "E": 0.34,
+      "I": -0.11,
+      "R": -0.15,
+      "S": -0.15
+    },
+    "profile_id": "D098",
+    "user_sentences": [
+      "Not sure how to answer this honestly. I'm in accountancy, and doing reconciliations during my internship was kind of satisfying, I think, maybe because everything has to tally in the end. I could maybe see myself helping to run some small business thing too, but I don't know. The rest I haven't really thought about much. I guess something organised would suit me?"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.15,
+      "C": 1.35,
+      "E": 0.89,
+      "I": 1.13,
+      "R": 0.59,
+      "S": 1.06
+    },
+    "profile_id": "D099",
+    "user_sentences": [
+      "I'm doing business analytics, and the thing I enjoy most is getting messy information into proper order, building a tidy tracker, reconciling numbers and setting up a system that just runs smoothly. That's honestly my favourite. But I also love digging into puzzles to find out why things happen, and I get really excited designing slides or a nice-looking layout. Helping my juniors with their modules is super rewarding too. Leading a group project is fine, and occasionally I like tinkering with gadgets. So I'm quite open, but organising things neatly is where I shine most."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.11,
+      "C": 0.14,
+      "E": -0.08,
+      "I": 0.28,
+      "R": 0.68,
+      "S": -0.02
+    },
+    "profile_id": "D100",
+    "user_sentences": [
+      "not very sure leh... i think i kinda like being outdoors and doing practical stuff, like setting up tents or building things? maybe that kind of work"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.22,
+      "C": -0.17,
+      "E": -0.35,
+      "I": 1.57,
+      "R": 1.75,
+      "S": -0.17
+    },
+    "profile_id": "D101",
+    "user_sentences": [
+      "I'm happiest when I'm actually building or fixing something physical, like rewiring my old bicycle lights or putting together a drone from parts, I absolutely love that. Close behind is the puzzle side, figuring out why a circuit keeps failing or running little experiments to test my ideas really excites me too. I'd say the hands-on part wins slightly, because I like seeing the thing work in front of me. Anything to do with design or the arty side, I'm not sure, never really thought about it. Ideally I'd want something where I can tinker and problem-solve every day."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 2.75,
+      "C": -1.32,
+      "E": -0.14,
+      "I": 0.31,
+      "R": -1.24,
+      "S": 1.38
+    },
+    "profile_id": "D102",
+    "user_sentences": [
+      "I'm doing a design and media degree and I'm completely obsessed with it, illustrating, making short animations, playing with colour until 2am is my happy place. I also really love working with people, I run art workshops for kids at a community centre and it's super fulfilling. What I can't stand is repetitive admin, filling in spreadsheets and checking forms just drains me. Same with anything mechanical or fixing equipment, I really dislike that kind of hands-on technical stuff. So ideally something creative where I get to connect with people."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.24,
+      "C": -0.35,
+      "E": 2.35,
+      "I": -0.07,
+      "R": -0.62,
+      "S": 0.44
+    },
+    "profile_id": "D103",
+    "user_sentences": [
+      "tbh i just love selling stuff lah, ran a pasar malam stall last sem and closing deals with uncles was damn shiok. want something where i can hustle and negotiate everyday"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.09,
+      "C": -0.35,
+      "E": -0.15,
+      "I": 1.39,
+      "R": 1.41,
+      "S": -0.53
+    },
+    "profile_id": "D104",
+    "user_sentences": [
+      "I'm happiest when I'm building something, like soldering a little gadget or assembling a 3D printer kit. I'm just as into puzzling out how things work, running experiments and digging through results to see what went wrong. And I love the design side too, sketching what a product should look like and making it look nice. If I could combine making, figuring out and designing, I'd be super happy. Spending the whole day looking after people or comforting them is not really my thing though."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 2.64,
+      "C": 0.1,
+      "E": 0.06,
+      "I": 2.37,
+      "R": -0.65,
+      "S": -0.12
+    },
+    "profile_id": "D105",
+    "user_sentences": [
+      "What I love most is making things, writing short stories, composing little tracks on my laptop, designing my own fonts even, that's where my heart is. I'm also super into research, I'll happily spend a whole night reading papers on how memory works or testing a theory just to see if I'm right. If I had to choose, the creative side edges it out slightly, but honestly I'd love a mix of both. Heavy physical or outdoor manual work is not really my thing. Something that lets me invent and explore ideas would be a dream."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.02,
+      "C": 0.04,
+      "E": 0.08,
+      "I": -0.06,
+      "R": -0.39,
+      "S": 0.62
+    },
+    "profile_id": "D106",
+    "user_sentences": [
+      "idk tbh, studying psych and i kinda liked the peer mentoring thing i did, maybe helping people lah? not super sure about anything else yet"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.24,
+      "C": -0.14,
+      "E": -1.23,
+      "I": 1.3,
+      "R": 1.89,
+      "S": -1.44
+    },
+    "profile_id": "D107",
+    "user_sentences": [
+      "I study electrical engineering and I'm happiest at a workbench, soldering components, building robots and repairing whatever breaks in the hostel. I'm also really into working out the theory behind why a design fails, running experiments until I crack it. Those two things are basically what I want my days to be. But please, nothing where I have to comfort people or teach a class, that drains me completely. I also really hate the idea of persuading clients or chasing sales targets. Just give me hardware and hard problems."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.68,
+      "C": -0.24,
+      "E": 0.32,
+      "I": -0.19,
+      "R": -0.34,
+      "S": -0.01
+    },
+    "profile_id": "D108",
+    "user_sentences": [
+      "Honestly I'm still figuring things out. I think I kind of like creative stuff, maybe editing videos or doodling designs for my friends' projects, but I'm not sure if that can be a job. Things like numbers or lab work, I'm just okay with I guess. I've sold a few things online before and that was okay, maybe. So yeah, probably something a bit creative, but I'm open."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.42,
+      "C": 1.92,
+      "E": -0.39,
+      "I": 1.56,
+      "R": -1.16,
+      "S": -1.08
+    },
+    "profile_id": "D109",
+    "user_sentences": [
+      "I'm the kind of person who gets real satisfaction from order, setting up a clean tracking system, reconciling numbers until everything balances, colour-coding schedules, I love that stuff. Right behind it, I really enjoy digging into a tricky problem, like working out the logic behind weird results in my lab reports. Writing a bit on the side is also nice. But I really dislike anything where I have to look after people all day or be the emotional support, it exhausts me. And I hate manual labour or fixing equipment, I'm hopeless and don't enjoy it at all. Quiet, structured, thinking-heavy work would be ideal."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.65,
+      "C": -0.58,
+      "E": -0.11,
+      "I": 0.54,
+      "R": -0.23,
+      "S": 2.42
+    },
+    "profile_id": "D110",
+    "user_sentences": [
+      "I'm in social work, and my practicum at a family service centre confirmed it for me, I absolutely love sitting with people, listening and helping them work through tough stuff. Volunteering with the elderly in my neighbourhood is also something I really look forward to every week. I do like a bit of creative stuff like making activity materials, and reading up on why people behave the way they do. Paperwork-heavy desk tasks are not really my thing though. As long as my days are mostly about people, I'd be happy."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.29,
+      "C": 1.16,
+      "E": -0.5,
+      "I": -0.02,
+      "R": 1.41,
+      "S": -0.1
+    },
+    "profile_id": "D111",
+    "user_sentences": [
+      "I'm in my final year of product design, and I love the mix of things it gives me. Building prototypes in the workshop, cutting wood and running the laser cutter, is probably my absolute favourite. Close behind is sketching concepts and playing with colours and form. Weirdly, I also really enjoy keeping my files, inventory and timelines super organised, it gives me a lot of satisfaction. Pitching and selling ideas to strangers is not really my thing though. Ideally I'd do a bit of all three every week."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.57,
+      "C": 2.45,
+      "E": 2.57,
+      "I": -0.23,
+      "R": -0.88,
+      "S": -0.02
+    },
+    "profile_id": "D112",
+    "user_sentences": [
+      "tbh i love pitching ideas and selling stuff, like running a stall and closing deals. also damn shiok when my spreadsheets and budgets are super neat. but fixing machines? no thanks lah"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.35,
+      "C": 2.8,
+      "E": 2.56,
+      "I": 0.11,
+      "R": -1.04,
+      "S": -0.04
+    },
+    "profile_id": "D113",
+    "user_sentences": [
+      "My favourite thing ever is getting a messy set of accounts into perfect shape, tracking every dollar and building neat spreadsheets for my CCA, I genuinely love it. Almost as much, I love the hustle side, negotiating with vendors for better prices and convincing sponsors to come on board for our events. Put those together and I'm in my element. What I really don't enjoy is physical hands-on stuff, like repairing things or working outdoors with tools, definitely not for me. I'd love something where I can keep things organised while also making deals happen."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -1.01,
+      "C": 1.85,
+      "E": 1.57,
+      "I": 0.31,
+      "R": -1.29,
+      "S": -0.34
+    },
+    "profile_id": "D114",
+    "user_sentences": [
+      "I'm studying business analytics with a minor in accounting, and the thing I love most is the structured side, setting up clean spreadsheets, tracking budgets and making sure every figure lines up gives me so much satisfaction. I really enjoy the business side too, like when I ran merchandise sales for my hall and negotiated with suppliers. But anything artsy, like designing posters or making videos, I really dislike. Physical stuff like assembling things or working outdoors with tools is a hard no for me. Give me a well-organised system and a target to hit and I'm happy."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.14,
+      "C": -1.25,
+      "E": 0.13,
+      "I": 1.41,
+      "R": 1.77,
+      "S": -1.14
+    },
+    "profile_id": "D115",
+    "user_sentences": [
+      "Final year in aerospace engineering here. What I really love is hands-on building, last year I helped put together a small drone frame and spent weeks tuning the motors, which was amazing. I'm also very curious about the physics behind it and enjoy running calculations to test my ideas. On the other hand, I really dislike jobs that are all about looking after people, like teaching or counselling. And repetitive paperwork, checking forms and filing records, is the absolute worst for me. I'd rather be in a hangar than an office."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.57,
+      "C": 1.54,
+      "E": -0.2,
+      "I": 1.32,
+      "R": -0.5,
+      "S": -0.4
+    },
+    "profile_id": "D116",
+    "user_sentences": [
+      "My favourite thing is making things look good, like designing layouts, illustrating and picking colour palettes until it feels right. Right up there with that, I really enjoy organising information: well-labelled files, tidy spreadsheets and a clean schedule make me weirdly happy. I'm also really into figuring stuff out, like reading research and testing whether my hunch was right. Something that combines design with careful organising and a bit of investigation would be perfect. Heavy physical work like fixing machines isn't really for me."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 3.0,
+      "C": -1.3,
+      "E": 0.23,
+      "I": -0.49,
+      "R": -0.62,
+      "S": 0.04
+    },
+    "profile_id": "D117",
+    "user_sentences": [
+      "Creating is everything to me, I spend most of my free time illustrating, doing calligraphy and making short animations, and nothing makes me happier. When I get to dream up a whole visual world from scratch I'm so excited I forget to eat. On the flip side, I really dislike routine admin, like data entry or checking that forms are filled correctly, it bores me to tears. Repair-type tasks and very technical number crunching aren't really my thing either. I just want work where imagination is the main tool."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": -0.45,
+      "C": 1.68,
+      "E": -0.18,
+      "I": 0.31,
+      "R": -0.08,
+      "S": -0.08
+    },
+    "profile_id": "D118",
+    "user_sentences": [
+      "doing accountancy and my audit internship was damn shiok sia, love making everything tally and keeping files super neat. arty stuff not really my thing"
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 1.26,
+      "C": -0.96,
+      "E": 0.02,
+      "I": 1.17,
+      "R": -0.4,
+      "S": 1.3
+    },
+    "profile_id": "D119",
+    "user_sentences": [
+      "I'm studying psychology with a minor in art, so I end up mixing a lot of things I love. Volunteering with kids and listening to people's problems is probably what I enjoy the most. I'm also very into painting and writing short stories, and I get genuinely excited reading studies and running little experiments to understand why people behave the way they do. Those three feel almost equally important to me. What I truly hate is routine admin, like typing up records or checking invoices all day. That would bore me to death."
+    ]
+  },
+  {
+    "input_mode": "oracle",
+    "interests": {
+      "A": 0.05,
+      "C": 0.62,
+      "E": 0.25,
+      "I": 0.27,
+      "R": -0.36,
+      "S": -0.15
+    },
+    "profile_id": "D120",
+    "user_sentences": [
+      "Hmm, I'm not totally sure yet. I think I might like work that's kind of orderly, like keeping track of records or making sure a schedule is correct, but I haven't really tried it properly. Other things like research or selling, not sure, could be okay. I guess I just like it when things are neat and planned. Maybe something along those lines?"
+    ]
+  }
+]
