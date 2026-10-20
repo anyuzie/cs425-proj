@@ -87,6 +87,7 @@ class State:
     kind_count: dict[str, int] = field(default_factory=dict)
     actions: list[dict] = field(default_factory=list)
     ranking: list = field(default_factory=list)       # this turn's top 100 RankedOccupations, set before the policy runs
+    ranking_trace: list[dict] = field(default_factory=list)
     done: bool = False
 
 

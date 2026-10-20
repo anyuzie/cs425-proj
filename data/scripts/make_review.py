@@ -1,15 +1,33 @@
-import json
+import json, csv
 O = "/home/claude/data/out"
 L = lambda p: [json.loads(l) for l in open(p)]
-ext = [{"t": r["text"], "s": {k: v[0] for k, v in r["slots"].items() if v != "neutral"}, "r": r["reason"][0],
-        "k": r["kind"], "sp": r["split"], "id": r["seed_id"], "c": r.get("context", ""), "g": r.get("strength_label", {})} for r in L(f"{O}/extractor.jsonl")]
-prof = L(f"{O}/profiles.jsonl") + L(f"{O}/dev_profiles.jsonl")
-nli = L(f"{O}/nli_pairs.jsonl")
-bank = json.load(open(f"{O}/question_bank.json"))
-import csv
-titles = {r["code"]: r["Title"] for r in csv.DictReader(open(f"{O}/occupations.csv"))}
-for p in prof: p["title"] = titles.get(p["target"], "")
-DATA = json.dumps({"ext": ext, "prof": prof, "nli": nli, "bank": bank}).replace("</", "<\\/")
+def jl(name):
+    rows = L(f"{O}/{name}"); cols = []
+    for r in rows:
+        for k in r:
+            if k not in cols: cols.append(k)
+    return {"kind": "table", "cols": cols, "rows": [[r.get(c) for c in cols] for r in rows]}
+def cs(name):
+    with open(f"{O}/{name}", newline="") as f:
+        rd = csv.reader(f); cols = next(rd); rows = list(rd)
+    return {"kind": "table", "cols": cols, "rows": rows, "csv": True}
+def js(name):
+    return {"kind": "json", "text": open(f"{O}/{name}").read()}
+FILES = [
+ ("extractor.jsonl", jl), ("extractor_stress.jsonl", jl), ("profiles.jsonl", jl), ("profiles_v4.jsonl", jl), ("dev_profiles.jsonl", jl), ("nli_pairs.jsonl", jl),
+ ("question_bank.json", js), ("labels.json", js), ("occupations.csv", cs), ("tasks.csv", cs),
+ ("related_occupations.csv", cs), ("riasec_lexicon.json", js), ("activities.jsonl", jl),
+ ("synthetic_seeds.jsonl", jl), ("nli_pairs_blind.jsonl", jl),
+]
+FD = {}
+for n, f in FILES:
+    FD[n] = f(n)
+ext = L(f"{O}/extractor.jsonl"); prof = L(f"{O}/profiles.jsonl"); dev = L(f"{O}/dev_profiles.jsonl"); nli = L(f"{O}/nli_pairs.jsonl")
+LEDGER = [[f"{len(ext):,}", "extractor sentences"], [str(sum(1 for r in ext if r["kind"] == "seed")), "seeds"],
+          [" / ".join(str(sum(1 for r in ext if r["split"] == s)) for s in ("train", "val", "test")), "train / val / test"],
+          [str(len(prof)) + " + " + str(len(L(f"{O}/profiles_v4.jsonl"))), "locked test profiles (v3 + v4)"], [str(len(dev)), "dev profiles"], ["400", "stress-test sentences"], [str(len(nli)), "NLI pairs"],
+          ["0.82", "hit@5 ceiling (perfect reader)"]]
+DATA = json.dumps({"files": FD, "order": [n for n, _ in FILES], "ledger": LEDGER}, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 html = r'''<title>Career Matcher Data Summary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -83,6 +101,13 @@ dl.res dt{font:12.5px var(--mono);color:var(--muted)} dl.res dd{margin:0}
 .note2{color:var(--muted);font-size:13.5px;max-width:75ch;margin:8px 0 0}
 h3{font:600 15px var(--body);margin:18px 0 8px}
 td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{height:72vh;min-height:320px;overflow:auto;background:var(--panel);border:1px solid var(--rule);border-radius:8px;overscroll-behavior:contain}
+table.raw{width:max-content;min-width:100%;font:12.5px/1.45 var(--mono)}
+table.raw th{position:sticky;top:0;background:var(--panel);z-index:1;font:500 12px var(--mono);text-transform:none;letter-spacing:0;color:var(--fg);box-shadow:0 1px 0 var(--rule)}
+table.raw td{max-width:520px;white-space:pre-wrap;word-break:break-word;color:var(--fg)}
+table.raw td.obj{color:var(--accent)}
+table.raw .rn{color:var(--muted);text-align:right;position:sticky;left:0;background:var(--panel)}
+pre.raw{margin:0;padding:12px 14px;font:12.5px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
 </style>
 <div class="wrap">
 <h1>Career Matcher Data Summary</h1>
@@ -91,126 +116,59 @@ td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:now
 
 __SUMMARY__
 <h2>Browse the data</h2>
-<div class="tabs" role="tablist">
-<button role="tab" id="t-ext" aria-selected="true">Extractor</button>
-<button role="tab" id="t-prof" aria-selected="false">Test profiles</button>
-<button role="tab" id="t-nli" aria-selected="false">NLI pairs</button>
-<button role="tab" id="t-bank" aria-selected="false">Question bank</button>
-</div>
-
-<section id="p-ext">
+<p class="lede">Every file in the package, exactly as stored: one column per field, in file order, with nested values shown as JSON. Scroll inside the box; more rows load as you reach the bottom.</p>
+<div class="tabs" role="tablist" id="tabs"></div>
 <div class="filters">
-<input type="search" id="f-q" placeholder="Search sentences" aria-label="Search sentences">
-<select id="f-k" aria-label="Kind"><option value="">All kinds</option><option>seed</option><option>rephrase</option><option>negation</option><option>frame</option><option>combo</option><option>qa</option></select>
-<select id="f-t" aria-label="Type"><option value="">All types</option><option value="R">R Realistic</option><option value="I">I Investigative</option><option value="A">A Artistic</option><option value="S">S Social</option><option value="E">E Enterprising</option><option value="C">C Conventional</option><option value="-">All neutral</option></select>
-<select id="f-p" aria-label="Polarity"><option value="">Any polarity</option><option value="p">positive</option><option value="n">negative</option></select>
-<select id="f-r" aria-label="Reason"><option value="">All reasons</option><option value="e">enjoyment</option><option value="f">familiarity</option><option value="n">neither</option></select>
-<select id="f-s" aria-label="Split"><option value="">All splits</option><option>train</option><option>val</option><option>test</option></select>
-<span class="count" id="f-c"></span>
+<input type="search" id="q" placeholder="Search this file" aria-label="Search this file">
+<select id="sp" aria-label="Split"></select>
+<span class="count" id="cnt"></span>
 </div>
-<div class="tw"><table><thead><tr><th>Sentence</th><th>Labels</th><th>Reason</th><th>Kind</th><th>Split</th><th>Seed</th></tr></thead><tbody id="ext-body"></tbody></table></div>
-<div class="more"><button id="ext-more">Show 100 more</button></div>
-</section>
-
-<section id="p-prof" hidden>
-<div class="filters">
-<select id="g-t" aria-label="Tier"><option value="">All profiles</option><option value="1">Tier 1 · clean</option><option value="2">Tier 2 · planted</option><option value="D">Dev set only</option></select>
-<input type="search" id="g-q" placeholder="Search text or ID" aria-label="Search profiles">
-<span class="count" id="g-c"></span>
-</div>
-<div class="cards" id="prof-body"></div>
-</section>
-
-<section id="p-nli" hidden>
-<div class="filters">
-<select id="h-l" aria-label="Label"><option value="">All labels</option><option>contradiction</option><option>elaboration</option><option>unrelated</option></select>
-<select id="h-s" aria-label="Split"><option value="">Dev and test</option><option>dev</option><option>test</option></select>
-<span class="count" id="h-c"></span>
-</div>
-<div class="tw"><table><thead><tr><th>ID</th><th>Statement a</th><th>Statement b</th><th>Slot</th><th>Label</th><th>Split</th></tr></thead><tbody id="nli-body"></tbody></table></div>
-</section>
-
-<section id="p-bank" hidden><div id="bank-body"></div></section>
+<div class="scroll" id="box" tabindex="0" aria-label="File contents"></div>
 </div>
 <script>
 const D = __DATA__;
-const T = {R:"Realistic",I:"Investigative",A:"Artistic",S:"Social",E:"Enterprising",C:"Conventional"};
-const RN = {e:"enjoyment",f:"familiarity",n:"neither"};
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const $ = id => document.getElementById(id);
-
-// ledger
-const cnt = (a, f) => a.filter(f).length;
-const L = [
-  [D.ext.length.toLocaleString(), "extractor sentences"],
-  [cnt(D.ext, x => x.k === "seed"), "seeds"],
-  [cnt(D.ext, x => x.sp === "train") + " / " + cnt(D.ext, x => x.sp === "val") + " / " + cnt(D.ext, x => x.sp === "test"), "train / val / test"],
-  [cnt(D.prof, p => p.id[0] === "P"), "locked test profiles"],
-  [cnt(D.prof, p => p.id[0] === "D"), "dev profiles"],
-  [D.nli.length, "NLI pairs"],
-  ["0.82", "hit@5 ceiling (perfect reader)"],
-];
-$("ledger").innerHTML = L.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
-
-// tabs
-const tabs = ["ext", "prof", "nli", "bank"];
-function show(t){ tabs.forEach(x => { $("t-" + x).setAttribute("aria-selected", x === t); $("p-" + x).hidden = x !== t; });
-  try { localStorage.setItem("tab", t) } catch(e) {} }
-tabs.forEach(t => $("t-" + t).onclick = () => show(t));
-try { const s = localStorage.getItem("tab"); if (tabs.includes(s)) show(s) } catch(e) {}
-
-// extractor
-let limit = 100;
-const chips = (s, g) => { const k = Object.keys(s); return k.length ? k.map(t => `<span class="chip ${s[t]}" title="${T[t]} ${s[t]==="p"?"positive":"negative"}">${t} ${s[t]==="p"?"+":"−"}${g && g[t] && g[t]!=="strong" ? " " + (g[t]==="mild" ? "mild" : "don't mind") : ""}</span>`).join("") : `<span class="chip z">all neutral</span>` };
-function renderExt(){
-  const q = $("f-q").value.toLowerCase(), k = $("f-k").value, t = $("f-t").value, p = $("f-p").value, r = $("f-r").value, sp = $("f-s").value;
-  const rows = D.ext.filter(x => (!q || x.t.toLowerCase().includes(q)) && (!k || x.k === k) && (!r || x.r === r) && (!sp || x.sp === sp)
-    && (!t || (t === "-" ? !Object.keys(x.s).length : x.s[t] && (!p || x.s[t] === p))) && (t && t !== "-" || !p || Object.values(x.s).includes(p)));
-  $("f-c").textContent = rows.length.toLocaleString() + " rows";
-  $("ext-body").innerHTML = rows.slice(0, limit).map(x => `<tr><td>${x.c ? `<div class="ans">Q: ${esc(x.c)}</div>` : ""}${esc(x.t)}</td><td>${chips(x.s, x.g)}</td><td class="m">${RN[x.r]}</td><td class="m">${x.k}</td><td class="m">${x.sp}</td><td class="m">${esc(x.id)}</td></tr>`).join("");
-  $("ext-more").parentElement.hidden = rows.length <= limit;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("ledger").innerHTML = D.ledger.map(([b, s]) => `<div><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join("");
+const show = v => v === null || v === undefined ? "" : typeof v === "string" ? v : JSON.stringify(v);
+let cur = D.order[0], rows = [], shown = 0;
+const STEP = 150;
+$("tabs").innerHTML = D.order.map(n => `<button role="tab" data-f="${n}">${n}</button>`).join("");
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => open_(b.dataset.f));
+function open_(n){
+  cur = n; try { localStorage.setItem("file", n) } catch(e) {}
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.f === n));
+  const f = D.files[n]; $("q").value = "";
+  const si = f.kind === "table" ? f.cols.indexOf("split") : -1;
+  const splits = si < 0 ? [] : [...new Set(f.rows.map(r => r[si]))];
+  $("sp").hidden = !splits.length;
+  $("sp").innerHTML = `<option value="">All splits</option>` + splits.map(s => `<option>${esc(s)}</option>`).join("");
+  render();
 }
-["f-q","f-k","f-t","f-p","f-r","f-s"].forEach(id => $(id).addEventListener("input", () => { limit = 100; renderExt() }));
-$("ext-more").onclick = () => { limit += 100; renderExt() };
-renderExt();
-
-// profiles
-const bar = (t, v) => { const w = Math.min(Math.abs(v), 2.5) / 2.5 * 50; const pos = v >= 0;
-  return `<div class="bar"><span>${t}</span><div class="track"><div class="fill" style="${pos ? "left:50%" : "right:50%"};width:${w}%;background:var(${pos ? "--pos" : "--neg"})"></div></div><span style="text-align:right">${v > 0 ? "+" : ""}${v.toFixed(2)}</span></div>` };
-function hl(p){ let t = esc(p.text); if (p.contradiction) [p.contradiction.statement_a, p.contradiction.statement_b].forEach(s => t = t.replace(esc(s), `<span class="hl">${esc(s)}</span>`)); return t }
-function renderProf(){
-  const f = $("g-t").value, q = $("g-q").value.toLowerCase();
-  const ps = D.prof.filter(p => (!f || (f === "D" ? p.id[0] === "D" : String(p.tier) === f)) && (!q || p.text.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)));
-  $("g-c").textContent = ps.length + " profiles";
-  $("prof-body").innerHTML = ps.map(p => `<article class="card"><div>
-    <h3>${p.id}<span class="tag ${p.tier === 2 ? "look" : "ok"}">Tier ${p.tier}</span>${p.planted.map(x => `<span class="chip z">${esc(x)}</span>`).join("")}</h3>
-    <div class="sub">Target ${p.target} · ${esc(p.title)}</div>
-    <p>${hl(p)}</p>
-    ${p.contradiction ? `<div class="ans">Genuine side of the contradiction: statement ${p.contradiction.genuine}</div>` : ""}
-    ${p.latent_reveal ? `<div class="ans">Latent reveal: “${esc(p.latent_reveal)}”</div>` : ""}
-    <details><summary>Resolutions (simulated user's answer to a CHALLENGE)</summary><dl class="res">${Object.entries(p.resolutions).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl></details>
-  </div><div class="bars" aria-label="Hidden RIASEC z-scores">${"RIASEC".split("").map(t => bar(t, p.hidden_slots[t])).join("")}</div></article>`).join("");
+function render(){
+  const f = D.files[cur], q = $("q").value.toLowerCase(), box = $("box"); box.scrollTop = 0;
+  if (f.kind === "json") {
+    $("sp").hidden = true;
+    const lines = f.text.split("\n"), keep = q ? lines.filter(l => l.toLowerCase().includes(q)) : lines;
+    $("cnt").textContent = q ? `${keep.length} matching lines` : `${lines.length} lines`;
+    box.innerHTML = `<pre class="raw">${esc(keep.join("\n"))}</pre>`; return;
+  }
+  const si = f.cols.indexOf("split"), sp = $("sp").value;
+  rows = f.rows.filter(r => (!sp || r[si] === sp) && (!q || r.some(v => show(v).toLowerCase().includes(q))));
+  $("cnt").textContent = `${rows.length.toLocaleString()} of ${f.rows.length.toLocaleString()} rows · ${f.cols.length} fields`;
+  box.innerHTML = `<table class="raw"><thead><tr><th class="rn">#</th>${f.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody id="tb"></tbody></table>`;
+  shown = 0; more();
 }
-["g-t","g-q"].forEach(id => $(id).addEventListener("input", renderProf));
-renderProf();
-
-// nli
-function renderNli(){
-  const l = $("h-l").value, s = $("h-s").value;
-  const r = D.nli.filter(x => (!l || x.label === l) && (!s || x.split === s));
-  $("h-c").textContent = r.length + " pairs";
-  $("nli-body").innerHTML = r.map(x => `<tr><td class="m">${x.id}</td><td>${esc(x.a)}</td><td>${esc(x.b)}</td><td class="m">${x.slot}</td><td class="m">${x.label}</td><td class="m">${x.split}</td></tr>`).join("");
+function more(){
+  const end = Math.min(rows.length, shown + STEP), f = D.files[cur];
+  $("tb").insertAdjacentHTML("beforeend", rows.slice(shown, end).map(r =>
+    `<tr><td class="rn">${f.rows.indexOf(r) + 1}</td>${r.map(v => `<td class="${typeof v === "object" && v !== null ? "obj" : ""}">${esc(show(v))}</td>`).join("")}</tr>`).join(""));
+  shown = end;
 }
-["h-l","h-s"].forEach(id => $(id).addEventListener("input", renderNli));
-renderNli();
-
-// bank
-const B = D.bank;
-const list = a => `<ol>${a.map(x => `<li>${esc(x)}</li>`).join("")}</ol>`;
-$("bank-body").innerHTML =
-  `<div class="q"><h3>Opening</h3>${list(B.OPENING)}</div>` +
-  Object.entries(B.CLARIFY).map(([t, qs]) => `<div class="q"><h3>CLARIFY · ${t}</h3><ol>${qs.map((q, i) => `<li>${esc(q)}<div class="ans">strong yes: ${esc(B.ANSWERS[t][i].pos)}<br>mild yes: ${esc(B.ANSWERS[t][i].pos_mild||"")}<br>don&rsquo;t mind: ${esc(B.ANSWERS[t][i].dontmind||"")}<br>mild no: ${esc(B.ANSWERS[t][i].neg_mild||"")}<br>strong no: ${esc(B.ANSWERS[t][i].neg)}</div></li>`).join("")}</ol></div>`).join("") +
-  ["CHALLENGE", "PROBE", "ABSTAIN", "RECOMMEND"].map(k => `<div class="q"><h3>${k}</h3>${list(B[k])}</div>`).join("");
+$("box").addEventListener("scroll", e => { const b = e.target; if (D.files[cur].kind === "table" && shown < rows.length && b.scrollTop + b.clientHeight > b.scrollHeight - 400) more(); });
+$("q").addEventListener("input", render); $("sp").addEventListener("input", render);
+let start = D.order[0]; try { const s = localStorage.getItem("file"); if (D.order.includes(s)) start = s } catch(e) {}
+open_(start);
 </script>
 '''
 open("/mnt/user-data/outputs/career-matcher-data-review.html", "w").write(html.replace("__DATA__", DATA).replace("__SUMMARY__", open("/home/claude/data/work/summary_block.html").read()))

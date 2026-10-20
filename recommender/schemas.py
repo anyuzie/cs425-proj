@@ -23,6 +23,7 @@ class RankingRequest:
     observed_types: set[str]
     user_sentences: list[str]
     top_k: int = 100
+    source_evidence: list[dict] | None = None
 
     def __post_init__(self) -> None:
         validate_vector(self.interests, runtime=True)
@@ -66,6 +67,7 @@ class Occupation:
     code: str
     title: str
     z_scores: dict[str, float]
+    bm25_doc: str | None = None
 
 
 @dataclass
@@ -101,6 +103,7 @@ class RankingResponse:
     status: Literal["ranked", "no_signal"]
     occupations: list[RankedOccupation] = field(default_factory=list)
     reason: str | None = None
+    query_diagnostics: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.status not in {"ranked", "no_signal"}:

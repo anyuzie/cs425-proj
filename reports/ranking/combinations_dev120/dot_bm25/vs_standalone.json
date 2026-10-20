@@ -1,0 +1,64 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_structured_oracle_dev_v1_6e8d9e8b6a46475f9e106222db142808",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        -0.08333333333333333,
+        0.008333333333333333
+      ],
+      "improved": 2,
+      "mean_difference": -0.03333333333333333,
+      "regressed": 6
+    },
+    "hit_at_10": {
+      "ci95": [
+        -0.26666666666666666,
+        -0.06666666666666667
+      ],
+      "improved": 10,
+      "mean_difference": -0.175,
+      "regressed": 31
+    },
+    "hit_at_5": {
+      "ci95": [
+        -0.13333333333333333,
+        0.025
+      ],
+      "improved": 9,
+      "mean_difference": -0.058333333333333334,
+      "regressed": 16
+    },
+    "mrr": {
+      "ci95": [
+        -0.10724923985380856,
+        -0.017707329282919244
+      ],
+      "improved": 33,
+      "mean_difference": -0.05984165367612219,
+      "regressed": 85
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        -0.10998478504815358,
+        -0.03503862151044709
+      ],
+      "improved": 44,
+      "mean_difference": -0.07224837327981046,
+      "regressed": 63
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        -0.09504536626976598,
+        -0.012745374325741778
+      ],
+      "improved": 45,
+      "mean_difference": -0.05434251316001688,
+      "regressed": 49
+    }
+  },
+  "profiles": 120,
+  "seed": 425,
+  "treatment_run_id": "m2_structured_oracle_dev_v1_04b5a029b91142cb8cdc8423d63fe600"
+}

@@ -1,0 +1,145 @@
+C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+.............................................................Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 5833.45it/s]
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 5371.23it/s]
+.Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 5647.68it/s]
+..........................................................E........turn failed; session state left unchanged
+Traceback (most recent call last):
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\app\server.py", line 101, in chat
+    _log(system, req.session_id, s, state, req.text, out)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\app\server.py", line 61, in _log
+    turn_log.append(_log_dir(), s.participant_code, {
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "session_id": sid, "turn": out["turn"], "user_text": text, "reply": out["reply"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "action": out["action"], "quotes": out["quotes"], "recommendations": out["recommendations"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "done": out["done"], "profile": system.profile(state), "debug": s.debug})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+OSError: disk full
+.C:\Users\aanny\Documents\GitHub\year5\cs425\project\tests\test_server.py:111: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\aanny\\AppData\\Local\\Temp\\tmp1z89kic_\\P-014.jsonl' mode='r' encoding='utf-8'>
+  lines = [json.loads(l) for l in open(path, encoding="utf-8")]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+...................
+======================================================================
+ERROR: test_unknown_component_lists_valid_names (test_pipeline.PipelineTests.test_unknown_component_lists_valid_names) (kind='extractor')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\utils\hub.py", line 537, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        tqdm_class=tqdm_class,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\huggingface_hub\utils\_validators.py", line 85, in _inner_fn
+    validate_repo_id(arg_value)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\huggingface_hub\utils\_validators.py", line 139, in validate_repo_id
+    raise HFValidationError(
+    ...<3 lines>...
+    )
+huggingface_hub.errors.HFValidationError: Repo id must use alphanumeric chars, '-', '_' or '.'. The name cannot start or end with '-' or '.' and the maximum length is 96: 'C:\Users\aanny\Documents\GitHub\year5\cs425\project\models\extractor'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\models\auto\tokenization_auto.py", line 807, in from_pretrained
+    config = AutoConfig.from_pretrained(
+        pretrained_model_name_or_path, trust_remote_code=trust_remote_code, **kwargs
+    )
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\models\auto\configuration_auto.py", line 397, in from_pretrained
+    config_dict, unused_kwargs = PreTrainedConfig.get_config_dict(pretrained_model_name_or_path, **kwargs)
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\configuration_utils.py", line 792, in get_config_dict
+    config_dict, kwargs = cls._get_config_dict(pretrained_model_name_or_path, **kwargs)
+                          ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\configuration_utils.py", line 844, in _get_config_dict
+    resolved_config_file = cached_file(
+        pretrained_model_name_or_path,
+    ...<8 lines>...
+        subfolder=subfolder,
+    )
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\utils\hub.py", line 370, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\utils\hub.py", line 595, in cached_files
+    raise OSError(f"{e}") from e
+OSError: Repo id must use alphanumeric chars, '-', '_' or '.'. The name cannot start or end with '-' or '.' and the maximum length is 96: 'C:\Users\aanny\Documents\GitHub\year5\cs425\project\models\extractor'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\utils\hub.py", line 537, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        tqdm_class=tqdm_class,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\huggingface_hub\utils\_validators.py", line 85, in _inner_fn
+    validate_repo_id(arg_value)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\huggingface_hub\utils\_validators.py", line 139, in validate_repo_id
+    raise HFValidationError(
+    ...<3 lines>...
+    )
+huggingface_hub.errors.HFValidationError: Repo id must use alphanumeric chars, '-', '_' or '.'. The name cannot start or end with '-' or '.' and the maximum length is 96: 'C:\Users\aanny\Documents\GitHub\year5\cs425\project\models\extractor'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\tests\test_pipeline.py", line 155, in test_unknown_component_lists_valid_names
+    System.load(DATA, f.name)  # part already filled in: loading is fine
+    ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\pipeline\system.py", line 42, in load
+    c = registry.build(config, d)
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\pipeline\registry.py", line 73, in build
+    out[kind] = REGISTRY[kind][name](config, data_dir)
+                ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\pipeline\registry.py", line 37, in _extractor_deberta
+    return DebertaExtractor(ROOT / cfg["paths"]["extractor_checkpoint"], d / "labels.json")
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\pipeline\extractor.py", line 48, in __init__
+    self.load(Path(checkpoint_dir))
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\pipeline\extractor.py", line 55, in load
+    self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\models\auto\tokenization_auto.py", line 811, in from_pretrained
+    config = PreTrainedConfig.from_pretrained(pretrained_model_name_or_path, **kwargs)
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\configuration_utils.py", line 742, in from_pretrained
+    config_dict, kwargs = cls.get_config_dict(pretrained_model_name_or_path, **kwargs)
+                          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\configuration_utils.py", line 792, in get_config_dict
+    config_dict, kwargs = cls._get_config_dict(pretrained_model_name_or_path, **kwargs)
+                          ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\configuration_utils.py", line 844, in _get_config_dict
+    resolved_config_file = cached_file(
+        pretrained_model_name_or_path,
+    ...<8 lines>...
+        subfolder=subfolder,
+    )
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\utils\hub.py", line 370, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\transformers\utils\hub.py", line 595, in cached_files
+    raise OSError(f"{e}") from e
+OSError: Repo id must use alphanumeric chars, '-', '_' or '.'. The name cannot start or end with '-' or '.' and the maximum length is 96: 'C:\Users\aanny\Documents\GitHub\year5\cs425\project\models\extractor'.
+
+----------------------------------------------------------------------
+Ran 149 tests in 13.592s
+
+FAILED (errors=1)

@@ -314,6 +314,7 @@
       li.appendChild(el('p', 'rec-why', r.why));
       if (r.tasks && r.tasks.length) {
         var tasks = el('div', 'rec-tasks');
+        tasks.appendChild(el('p', null, 'Provisional task matches. Similarity alone does not confirm that you enjoy these activities.'));
         r.tasks.forEach(function (t) {
           tasks.appendChild(el('blockquote', null, '“' + t + '”'));
         });

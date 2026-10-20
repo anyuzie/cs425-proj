@@ -1,0 +1,10 @@
+{
+  "eligibility": "job_zone in [4,5] and complete supplied RIASEC z-scores",
+  "input_mode": "mock_tracker",
+  "occupations": "data/occupations.csv",
+  "profiles": "reports/ranking/m5/frozen/mock_tracker_sessions.jsonl",
+  "ranking_depth": "full_pool",
+  "run_id": "m5_mock_tracker_dev",
+  "seed": 425,
+  "split": "development"
+}

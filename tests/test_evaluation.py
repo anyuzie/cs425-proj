@@ -88,11 +88,16 @@ class BaselineTests(unittest.TestCase):
     def test_reproducible_run_and_comparison(self):
         with tempfile.TemporaryDirectory() as directory:
             a, b = Path(directory) / "a", Path(directory) / "b"
-            first = run(Path("configs/m2.json"), a)
+            first = run(Path("configs/m2.json"), a, history=Path(directory) / "history.csv")
             self.assertEqual(first["profile_count"], 60)
-            self.assertEqual(first, run(Path("configs/m2.json"), b))
-            for name in ("predictions.jsonl", "metrics.json", "inputs.json", "per_profile.json", "config.json"):
+            self.assertEqual(first, run(Path("configs/m2.json"), b, history=Path(directory) / "history.csv"))
+            for name in ("metrics.json", "inputs.json", "per_profile.json", "config.json"):
                 self.assertEqual((a / name).read_bytes(), (b / name).read_bytes())
+            # Run identity is unique; scores and ordering remain reproducible.
+            def predictions(path):
+                return [{k: v for k, v in json.loads(line).items() if k != "run_id"}
+                        for line in (path / "predictions.jsonl").read_text().splitlines()]
+            self.assertEqual(predictions(a), predictions(b))
             summary, diffs = paired_comparison(a, b, samples=100)
             self.assertEqual(len(diffs), 60)
             self.assertEqual(summary["metrics"]["mrr"]["ci95"], [0, 0])
@@ -109,7 +114,7 @@ class BaselineTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "input_mode"):
                 paired_comparison(a, b)
             with self.assertRaises(ValueError):
-                run(Path("configs/m2.json"), a)
+                run(Path("configs/m2.json"), a, history=Path(directory) / "history.csv")
 
     def test_held_out_config_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

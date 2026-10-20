@@ -1,8 +1,9 @@
 """Wires the components together. Server and CLI both use System."""
 
 import json
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
+from time import perf_counter
 
 from . import registry
 from .interfaces import MAX_TURNS, TYPES, Action, State
@@ -30,20 +31,35 @@ class System:
     """Orchestrates the components; per-turn rules live in the components themselves."""
 
     def __init__(self, extractor, tracker, rule, confirmer, ranker, policy, filler, type_names,
-                 max_turns=MAX_TURNS, confirm_threshold=0.6):
+                 max_turns=MAX_TURNS, confirm_threshold=0.6, input_mode="unverified_tracker"):
         self.extractor, self.tracker, self.rule, self.confirmer = extractor, tracker, rule, confirmer
         self.ranker, self.policy, self.filler, self.type_names = ranker, policy, filler, type_names
         self.max_turns, self.confirm_threshold = max_turns, confirm_threshold
+        if getattr(ranker, "evidence_filter", "raw") != "raw":
+            raise ValueError("Live System requires raw ranking queries; active_only requires "
+                             "upstream lifecycle evidence snapshots and is supported by tracker replay only")
+        if input_mode not in {"actual_tracker", "mock_tracker", "unverified_tracker"}:
+            raise ValueError("invalid tracker input mode")
+        if input_mode == "actual_tracker" and any(
+                getattr(c, "name", "").startswith("test-") for c in (extractor, tracker)):
+            raise ValueError("test components cannot be labelled actual_tracker")
+        self.input_mode = input_mode
 
     @classmethod
     def load(cls, data_dir, config_path=None) -> "System":
-        d = Path(data_dir)
         config = json.loads(Path(config_path or DEFAULT_CONFIG).read_text(encoding="utf-8"))
+        return cls.from_config(data_dir, config)
+
+    @classmethod
+    def from_config(cls, data_dir, config) -> "System":
+        """Shared composition root for server, terminal and configured workflows."""
+        d = Path(data_dir)
         c = registry.build(config, d)
         names = json.loads((d / "labels.json").read_text(encoding="utf-8"))["type_names"]
         st = config.get("settings", {})
         return cls(c["extractor"], c["tracker"], c["rule"], c["confirmer"], c["ranker"], c["policy"], c["filler"],
-                   names, st.get("max_turns", MAX_TURNS), st.get("confirm_threshold", 0.6))
+                   names, st.get("max_turns", MAX_TURNS), st.get("confirm_threshold", 0.6),
+                   st.get("input_mode", "unverified_tracker"))
 
     @property
     def eligible(self) -> int:
@@ -62,7 +78,14 @@ class System:
 
     def _rank(self, state: State, top_k: int):
         interests = {t: (state.slots[t].value if t in state.slots else 0.0) for t in TYPES}
+        started = perf_counter()
         resp = self.ranker.rank(interests, set(state.slots), list(state.user_texts), top_k)
+        state.ranking_trace.append({"turn": state.turn, "input_mode": self.input_mode,
+            "text": state.user_texts[-1] if state.user_texts else "",
+            "interests": interests, "observed_types": sorted(state.slots),
+            "user_sentences": list(state.user_texts), "status": resp.status, "reason": resp.reason,
+            "rank_seconds": perf_counter() - started,
+            "occupations": [asdict(o) for o in resp.occupations]})
         return resp.occupations if resp.status == "ranked" else []
 
     def top5(self, state: State) -> list[dict]:
@@ -77,7 +100,8 @@ class System:
     def recommendations(self, state: State) -> list[dict]:
         why = self._why(state)
         return [{"rank": o.rank, "code": o.code, "title": o.title, "why": why,
-                 "tasks": [e.text for e in o.evidence[:2]]} for o in state.ranking[:5]]
+                 "tasks": [e.text for e in o.evidence[:3]],
+                 "task_evidence": [asdict(e) for e in o.evidence[:3]]} for o in state.ranking[:5]]
 
     def _confirmed(self, state: State) -> list:
         flags = []
@@ -105,7 +129,7 @@ class System:
                 reply = self.filler.fill(action, action.payload)
             else:  # no usable signal at the end of the conversation
                 recs, reply = None, NO_SIGNAL_REPLY
-                action = Action("ABSTAIN", None, action.why + "; no structured signal")
+                action = Action("ABSTAIN", None, action.why + "; no usable ranking signal")
         else:
             reply = self.filler.fill(action, action.payload)
         if action.kind == "CHALLENGE":
@@ -126,4 +150,17 @@ class System:
 
     def trace(self, state: State) -> dict:
         return {"profile": self.profile(state), "actions": list(state.actions),
-                "top5": self.top5(state), "components": self.components}
+                "top5": self.top5(state), "components": self.components,
+                "input_mode": self.input_mode, "ranking_trace": list(state.ranking_trace),
+                "resolved_ranking": getattr(self.ranker, "resolved_config", None)}
+
+    def tracker_record(self, state: State, *, profile_id: str, revision: str) -> dict:
+        """Export inputs only; independent annotations must add target/related for evaluation."""
+        if self.input_mode == "unverified_tracker":
+            raise ValueError("declare actual_tracker or mock_tracker before exporting evaluation inputs")
+        if not revision.strip():
+            raise ValueError("upstream code/model revision is required")
+        return {"id": profile_id, "input_mode": self.input_mode,
+            "upstream": {"extractor": self.extractor.name, "tracker": self.tracker.name, "revision": revision},
+            "turns": [{k: row[k] for k in ("text", "interests", "observed_types")}
+                      for row in state.ranking_trace]}

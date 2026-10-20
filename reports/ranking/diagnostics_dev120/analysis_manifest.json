@@ -1,0 +1,38 @@
+{
+  "profile_count": 120,
+  "run_ids": {
+    "Weighted dot product": "m2_structured_oracle_dev_v1_6e8d9e8b6a46475f9e106222db142808",
+    "Cosine similarity": "m2_structured_oracle_dev_v1_48979519c8104726921537feffa94ac4"
+  },
+  "protected_sha256": {
+    "data\\dev_profiles.jsonl": "a593af7309f0aa99d049ae4e211fccca7172db9ae5ab16eebe83ca79b54a421a",
+    "data\\occupations.csv": "d00d968d5fe5076ec76eca55cd5fa2734816ea93e8af6d84bdff2170c1af9503",
+    "reports\\ranking\\evaluation_history.csv": "f859480ad55babf1f73ad91b3e7570c14943c92997a3e863f305f1b3b4414598",
+    "notebooks\\ranking_evaluation_history_clean.csv": "f859480ad55babf1f73ad91b3e7570c14943c92997a3e863f305f1b3b4414598",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\config.json": "6239cf2f557353232331d0ac10e30dd987d5c3640e0755bd1da28d7ef900720c",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\evaluation_config.json": "55524710d4cf44895fc7523d5bec2b77fcd498de110fba9036ac841bdb389394",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\inputs.json": "0fcf76d877d8f886a44b7e04ea4c7b15adb0fdf2457caaed59841a75b4bfd8fb",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\latency.json": "a7089b65cf7ac3808dca07c668326d7924c5877119af243cf01598b2c2da554f",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\manifest.json": "313faa7c4ea91cba0dce80e4feb1bc563d7ed032851ea62d8132bd52a370a392",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\metrics.json": "2fa7c6e124d1d3c08d69411dc4840c594b41a93291d0ed983473235151d13db5",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\per_profile.json": "feb45f2c04c3c7a61fc937026371e86b0dc086c25c8aaf51f13ec50473ae5d1f",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\predictions.jsonl": "5047ae850f9a9b40a0a77819e3a87e4bb22bacaf451c6065c892ef69f308ecbf",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\ranking_config.json": "dbec87162eb56bbfcc0a933ca9f5112037f0c4e01c2b0ab9e844ea3d90469a88",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\resolved_ranking.json": "1cb1a7ef50a6e73a9178570bf14147046d39d3826780a8ebb93931c69a37d7cd",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\config_sources\\evaluation.json": "07a77b05c23995ec89c9079c4a74ab483bfbb0ba29eb3b9a9565ea3b7c64329d",
+    "reports\\ranking\\dot_vs_cosine_dev120\\weighted_dot_product\\config_sources\\ranking.json": "820b471adc69fa8d125035e5f8c425ebdef0b6e5d760cdeaf081e699588b4c3e",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\config.json": "f15618a745bd3dca6057cb4f5ab6917cf5fcff133774aa7de7ea63180ffa4906",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\evaluation_config.json": "55524710d4cf44895fc7523d5bec2b77fcd498de110fba9036ac841bdb389394",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\inputs.json": "0fcf76d877d8f886a44b7e04ea4c7b15adb0fdf2457caaed59841a75b4bfd8fb",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\latency.json": "0060f38f14e9ffa657b44c4e53e88f6be9a4eafe8b19a607d608f87a7847da6c",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\manifest.json": "145f93afbc44090888ad0f3ae225a1e279512594f8f9b5880b744a7ed75c9240",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\metrics.json": "ec9e2401d43c357d18289281a0f00a3908040f146c75eafe84a4013c0931c107",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\per_profile.json": "3e0febe173fa0882767ca9e311a366fbd1757ca681000c13612b104c60bae696",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\predictions.jsonl": "6d6c87a06d8f280f991067714f3ed50f89694d1257a6e6bbcbd6b800ee246bb3",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\ranking_config.json": "1c52a39e076155b7f6845c3f8cfa1f45cf39063d00e636df7622c8c743e3a87c",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\resolved_ranking.json": "7fd5aa282c661d47a42adb8b63ecd267247a9363aa8f1fcc985dd7b33b9cd796",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\config_sources\\evaluation.json": "07a77b05c23995ec89c9079c4a74ab483bfbb0ba29eb3b9a9565ea3b7c64329d",
+    "reports\\ranking\\dot_vs_cosine_dev120\\cosine_similarity\\config_sources\\ranking.json": "af563780636c8c9ff4baa0ca84d59ded56fc4a566a17ebdadb05c473251e7a2c"
+  },
+  "history_rows_added_by_notebook": 0
+}

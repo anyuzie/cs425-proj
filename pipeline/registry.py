@@ -18,9 +18,17 @@ def _rule(cfg, d):
 
 
 def _ranker_structured(cfg, d):
-    from recommender.structured import StructuredRanker  # the M1 baseline: no task quotes yet
+    from recommender.models.structured import StructuredRanker  # the M1 baseline: no task quotes yet
     ranker = StructuredRanker(d / "occupations.csv")
     ranker.name = "structured"
+    return ranker
+
+
+def _ranker_configured(cfg, d):
+    from recommender.models.ranker import RankingPipeline
+    path = Path(cfg.get("paths", {}).get("ranking_config", "configs/ranking.yaml"))
+    ranker = RankingPipeline(d / "occupations.csv", config=path if path.is_absolute() else ROOT / path)
+    ranker.name = "configured"
     return ranker
 
 
@@ -57,7 +65,7 @@ REGISTRY: dict[str, dict] = {
     "tracker": {"decay": _tracker_decay},
     "rule": {"rule": _rule},
     "confirmer": {"nli": _confirmer_nli},
-    "ranker": {"structured": _ranker_structured},
+    "ranker": {"structured": _ranker_structured, "configured": _ranker_configured},
     "policy": {"manual": _policy_manual},
     "filler": {"question-bank": _filler_bank},
 }
@@ -70,5 +78,8 @@ def build(config: dict, data_dir) -> dict:
         name = chosen.get(kind)
         if name not in REGISTRY[kind]:
             raise ValueError(f"unknown {kind} {name!r} in config; valid {kind} names: {sorted(REGISTRY[kind])}")
+    # Reject all invalid selections before loading any upstream checkpoints.
+    for kind in KINDS:
+        name = chosen[kind]
         out[kind] = REGISTRY[kind][name](config, data_dir)
     return out

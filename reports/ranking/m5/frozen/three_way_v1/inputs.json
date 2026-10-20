@@ -1,0 +1,206 @@
+[
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "I": 0.0,
+      "R": 1.0,
+      "S": 0.0
+    },
+    "observed_types": [
+      "R"
+    ],
+    "profile_id": "script_1",
+    "turn": 1,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I love working with machines and tools."
+    ]
+  },
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "I": 0.0,
+      "R": -1.0,
+      "S": 0.0
+    },
+    "observed_types": [
+      "R"
+    ],
+    "profile_id": "script_1",
+    "turn": 2,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I love working with machines and tools.",
+      "I hate repairing machines, it is boring."
+    ]
+  },
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "I": 0.0,
+      "R": -1.0,
+      "S": 0.0
+    },
+    "observed_types": [
+      "R"
+    ],
+    "profile_id": "script_1",
+    "turn": 3,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I love working with machines and tools.",
+      "I hate repairing machines, it is boring.",
+      "second"
+    ]
+  },
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "I": 1.0,
+      "R": -1.0,
+      "S": 0.0
+    },
+    "observed_types": [
+      "I",
+      "R"
+    ],
+    "profile_id": "script_1",
+    "turn": 4,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I love working with machines and tools.",
+      "I hate repairing machines, it is boring.",
+      "second",
+      "I love analysing data."
+    ]
+  },
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "I": 0.0,
+      "R": 0.0,
+      "S": 0.0
+    },
+    "observed_types": [],
+    "profile_id": "script_2",
+    "turn": 1,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I am unsure."
+    ]
+  },
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": 0.55,
+      "I": 0.0,
+      "R": 0.0,
+      "S": 0.0
+    },
+    "observed_types": [
+      "E"
+    ],
+    "profile_id": "script_2",
+    "turn": 2,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I am unsure.",
+      "My dad runs a sales company so that's what I know."
+    ]
+  },
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": -0.55,
+      "I": 0.0,
+      "R": 0.0,
+      "S": 0.0
+    },
+    "observed_types": [
+      "E"
+    ],
+    "profile_id": "script_2",
+    "turn": 3,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I am unsure.",
+      "My dad runs a sales company so that's what I know.",
+      "Honestly I grew up around it, I don't enjoy selling."
+    ]
+  },
+  {
+    "input_mode": "mock_tracker",
+    "interests": {
+      "A": 0.0,
+      "C": 0.0,
+      "E": -0.55,
+      "I": 1.0,
+      "R": 0.0,
+      "S": 0.0
+    },
+    "observed_types": [
+      "E",
+      "I"
+    ],
+    "profile_id": "script_2",
+    "turn": 4,
+    "upstream": {
+      "extractor": "test-scripted",
+      "revision": "m5_scripted_fixture_v1",
+      "tracker": "test-simple-tracker"
+    },
+    "user_sentences": [
+      "I am unsure.",
+      "My dad runs a sales company so that's what I know.",
+      "Honestly I grew up around it, I don't enjoy selling.",
+      "I love analysing data."
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "bm25": {
+    "inputs_identical": true,
+    "metrics_identical": true,
+    "predictions_identical_excluding_run_id": true
+  },
+  "hybrid": {
+    "inputs_identical": true,
+    "metrics_identical": true,
+    "predictions_identical_excluding_run_id": true
+  },
+  "structured": {
+    "inputs_identical": true,
+    "metrics_identical": true,
+    "predictions_identical_excluding_run_id": true
+  }
+}

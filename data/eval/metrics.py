@@ -20,6 +20,12 @@ def twin_hit_at(ranking, profile, k=5):
     ok = {profile["target"], *profile["riasec_twins"]}       # jobs with a near-identical RIASEC profile
     return int(any(c in ok for c in ranking[:k]))
 
+def fit_hit_at(ranking, profile, k=5):
+    """target, or one of the 5 pool jobs closest to the person's own scores (`nearest_by_profile`), in the top k.
+    Useful for patterns such as generalist or weak_uncertain, where several jobs fit the person about equally."""
+    ok = {profile["target"], *profile.get("nearest_by_profile", [])}
+    return int(any(c in ok for c in ranking[:k]))
+
 def mrr(ranking, profile):
     return 1 / (ranking.index(profile["target"]) + 1) if profile["target"] in ranking else 0.0
 
@@ -33,10 +39,10 @@ def ndcg_at(ranking, profile, k=10):
 
 def evaluate(rankings, profiles):
     """rankings: {profile_id: [codes]}; returns the mean of every metric."""
-    out = {"hit@5": 0, "hit@3": 0, "related_hit@5": 0, "twin_hit@5": 0, "mrr": 0, "ndcg@10": 0}
+    out = {"hit@5": 0, "hit@3": 0, "related_hit@5": 0, "twin_hit@5": 0, "fit_hit@5": 0, "mrr": 0, "ndcg@10": 0}
     for p in profiles:
         r = rankings[p["id"]]
         out["hit@5"] += hit_at(r, p, 5); out["hit@3"] += hit_at(r, p, 3)
-        out["related_hit@5"] += related_hit_at(r, p); out["twin_hit@5"] += twin_hit_at(r, p)
+        out["related_hit@5"] += related_hit_at(r, p); out["twin_hit@5"] += twin_hit_at(r, p); out["fit_hit@5"] += fit_hit_at(r, p)
         out["mrr"] += mrr(r, p); out["ndcg@10"] += ndcg_at(r, p)
     return {k: v / len(profiles) for k, v in out.items()}

@@ -1,0 +1,7 @@
+{
+  "load_seconds": 0.40884160000132397,
+  "method": "preloaded full-pool calls; each oracle profile or tracker turn; nearest-rank p95; excludes metrics/export",
+  "preloaded_rank_median_seconds": 0.0198231500107795,
+  "preloaded_rank_p95_seconds": 0.040321199980098754,
+  "sample_count": 120
+}

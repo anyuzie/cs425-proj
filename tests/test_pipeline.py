@@ -48,7 +48,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(len(result.recommendations), 5)
         self.assertEqual([r["rank"] for r in result.recommendations], [1, 2, 3, 4, 5])
         for rec in result.recommendations:
-            self.assertLessEqual(len(rec["tasks"]), 2)
+            self.assertLessEqual(len(rec["tasks"]), 3)
             self.assertTrue(rec["why"].startswith("Matches what you said about"))
 
     def test_challenge_on_planted_contradiction(self):

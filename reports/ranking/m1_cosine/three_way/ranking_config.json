@@ -1,0 +1,20 @@
+{
+  "components": {
+    "m1": {
+      "algorithm": "cosine_similarity",
+      "variant": "baseline_v1"
+    },
+    "m3": {
+      "algorithm": "bm25",
+      "variant": "baseline_v1"
+    },
+    "m4": {
+      "algorithm": "minilm",
+      "variant": "mean_tasks_v1"
+    }
+  },
+  "fusion": {
+    "algorithm": "rrf",
+    "k": 60
+  }
+}

@@ -1,5 +1,8 @@
 # Career Matcher: architecture
 
+
+**Current status:** M1, M3 BM25/RRF, M4 cached MiniLM/FAISS and M5 ranking integration are implemented. The live app selects `ranker: configured`, loading `configs/ranking.yaml` once at startup; **M1-only remains the default**. The legacy `structured` facade remains available. M5's ranking control is frozen with explicitly mocked upstream acceptance. Production activation still requires the extractor checkpoint, completed tracker/NLI/policy implementations and teammate latency agreement. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 acceptance](../reports/ranking/m5/DECISION.md) and [extractor integration status](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
+
 How the system is built, which file does what, and how one message moves through the code.
 To add your part (what to fill in, where files go, training hand-off, PR checklist), see [INTEGRATION.md](INTEGRATION.md). Section 11 below lists every function in each important file.
 
@@ -24,17 +27,17 @@ A student chats in a web page. Each message goes through **seven steps**. They t
 | | `app/` | FastAPI server: routes, sessions, logs | yes |
 | | `pipeline/` | The seven steps and the code that runs them | yes |
 | | `recommender/` | Ranking (step 5) | yes |
-| | `configs/` | `system.json`: which version of each part runs, plus settings and paths | yes |
+| | `configs/` | `system.json`: application components/paths; `ranking.yaml`: ranking selection; `m2.json`: evaluation settings | yes |
 | **Training and research**: never imported by the app | `training/<part>/` | Training scripts, notebooks, results JSON per part (see INTEGRATION.md §2) | yes, code only |
-| | `eval/` | The evaluation harness, created when written | yes |
+| | `recommender/evaluate.py`, `compare.py`, `history.py` | Implemented offline ranking evaluation, comparison and experiment registration | yes |
 | **Tests** | `tests/` | Unit tests, contract tests, test-only fakes | yes |
 | **Docs** | `docs/`, `cs425-ranking-docs/`, `reports/` | Guides, ranking plan, milestone reports | yes |
 | **Data** | `data/` | The data package: O\*NET 31.0 and the team's generated data (read-only) | yes |
 | **Local only** | `models/` | Trained checkpoints, e.g. `models/extractor/` | **no** |
-| | `indexes/` | BM25 / FAISS indexes for the ranker | **no** |
+| | `artifacts/ranking/` | Pinned MiniLM model and immutable task embedding/FAISS cache; BM25 uses an in-memory index | **no** |
 | | `logs/` | Transcripts, one file per participant code | **no** |
 
-Rule of thumb: **training code may import from the app** (for example the model class in `pipeline/extractor_model.py`), but **the app never imports from `training/`.** The only things that cross from training to the app are a checkpoint folder in `models/` and a number in `configs/system.json`.
+Rule of thumb: **training code may import shared application code, but the app never imports from `training/`.** The current extractor uses Hugging Face `AutoModelForSequenceClassification`; a separate `pipeline/extractor_model.py` is not present or required by this adapter. Training supplies the checkpoint, tokenizer, labelled heads and calibration settings; application configs select paths and variants.
 
 ### Files in the app
 
@@ -43,12 +46,12 @@ Rule of thumb: **training code may import from the app** (for example the model 
 | `pipeline/system.py` | — | done | **The conductor**: `System.step()` runs the seven steps for one message |
 | `pipeline/interfaces.py` | — | done | The data passed between steps (`Reading`, `SlotReading`, `State`, `Flag`, `Action`) and what each part must provide |
 | `pipeline/registry.py` | — | done | Maps config names (`"deberta"`, `"nli"`, …) to the code that builds each part |
-| `pipeline/extractor.py` | 1 | **teammate** fills `load()` + `predict()` | Preference extractor. `read()` is done. |
-| `pipeline/extractor_model.py` | 1 | **teammate** creates | Their 3-head DeBERTa model class |
+| `pipeline/extractor.py` | 1 | adapter implemented; checkpoint pending locally | Loads the trained 45-logit DeBERTa checkpoint, maps semantic head labels and produces `Reading` |
 | `pipeline/tracker.py` | 2 | **teammate** fills `update()` | State tracker with recency decay |
 | `pipeline/rule.py` | 3 | done | Contradiction rule |
 | `pipeline/nli.py` | 4 | **teammate** fills `__init__()` + `score()` | NLI contradiction check |
-| `recommender/structured.py` | 5 | done | Structured RIASEC ranker (the baseline); BM25 + FAISS + RRF to add |
+| `recommender/ranker.py` | 5 | done | Configured M1/BM25/MiniLM pipeline with optional occupation-level RRF; M1-only default |
+| `recommender/structured.py` | 5 | done | Backward-compatible M1-only facade |
 | `pipeline/policy.py` | 6 | **teammate** fills `ManualPolicy._decide()` | Dialogue policy. `PolicyBase.decide()` is done. |
 | `pipeline/templates.py` | 7 | done | Template filler |
 | `app/server.py`, `app/schemas.py`, `app/turn_log.py` | — | done | Server, API shapes, transcript log |
@@ -69,7 +72,7 @@ Conductor   pipeline/system.py · registry.py · configs/system.json
    ↓ read · update · candidates · score · decide · fill · rank
 Parts       extractor.py · tracker.py · rule.py · nli.py · policy.py · templates.py
    ↓ rank(...)
-Ranking     recommender/structured.py (+ your BM25 / FAISS / RRF)
+Ranking     recommender/ranker.py → enabled M1 / BM25 / MiniLM → optional RRF
 ```
 
 ---
@@ -82,8 +85,8 @@ Each teammate's code only **receives data and returns data**. It never touches t
 
 | Function | Who writes it | Called by | When | Does |
 |---|---|---|---|---|
-| `load(checkpoint_dir)` | **teammate** | `__init__` | **once**, at server start | Loads the tokenizer and trained model from `models/extractor/` into `self.tok`, `self.model` |
-| `predict(context, sentence)` | **teammate** | `read()` | once **per sentence** | Runs the model on one sentence and returns raw probabilities (below) |
+| `load(checkpoint_dir)` | implemented | `__init__` | **once**, at server start | Loads local tokenizer/model, validates 45 labelled logits and calibration; checkpoint files required |
+| `predict(context, sentence)` | implemented | `read()` | once **per sentence** | Runs inference, maps checkpoint class ordering to the shared labels and returns probabilities/mapped strengths |
 | `read(text, context, expected_slot)` | done | `System.step` | once **per message** | Splits the message into sentences, calls `predict()` on each, and builds the `Reading` |
 
 `predict()` must return plain Python floats and lists, already softmaxed, with class orders from `data/labels.json`:
@@ -118,6 +121,17 @@ It must also do three things:
 - After a PROBE, add that type to `state.resolved`.
 
 A minimal working version is `SimpleTracker` in `tests/fakes.py`.
+
+The tracker is ranking's immediate upstream component. It updates `state.slots` in place; `System._rank` adapts that state into the ranking request:
+
+| Ranking field | Source and contract |
+|---|---|
+| `interests` | Exactly six RIASEC values from current tracker slots, finite and within `[-1,1]`; missing slots become zero |
+| `observed_types` | Keys present in `state.slots`; an absent slot remains distinct from an observed zero |
+| `user_sentences` | All chronological user-only messages accumulated by `System`, including earlier contradictory statements under the frozen raw-text policy |
+| `top_k` | 100 for policy consumption; fewer results or `no_signal` are permitted |
+
+Confidence merging and recency decay belong to the tracker. Ranking recomputes from each current snapshot without merging confidence again or accumulating occupation scores. The default oracle evaluator instead uses synthetic `hidden_slots` on an unrestricted z-scale through `OracleInput`; those profiles are not actual extractor/tracker outputs and must remain a separate evaluation condition.
 
 ### Step 3 · Contradiction rule: `pipeline/rule.py` (done)
 
@@ -156,7 +170,7 @@ The five rules, checked top to bottom (first match wins):
 
 ### Steps 5 and 7 (done)
 
-- **Step 5:** `ranker.rank(interests, observed, sentences, top_k)` returns a `RankingResponse`. The default is the structured ranker. Its cards have no task quotes until the dense (MiniLM + FAISS) ranker exists; that's the project lead's work, per `cs425-ranking-docs/`.
+- **Step 5:** `RankingPipeline.rank(interests, observed_types, user_sentences, top_k)` returns a `RankingResponse`. `configs/ranking.yaml` independently selects M1, BM25 and MiniLM variants. One usable component bypasses fusion; two or more use configured equal-weight RRF at `k=60`; none returns `no_signal`. M1-only remains default and supplies no task quotes. Enabled MiniLM retrieval attaches provisional task matches; cards expose up to three per occupation without claiming that similarity establishes enjoyment.
 - **Step 7:** `filler.fill(action, payload)` picks the reply from the question bank and fills in the user's quoted sentences.
 
 ### All together: `System.step` in `pipeline/system.py`
@@ -164,7 +178,7 @@ The five rules, checked top to bottom (first match wins):
 ```
 System.step(state, text)
  ├─ extractor.read(text, context, slot)          done
- │     └─ predict(context, sentence) × N          TEAMMATE   (model loaded by load() at startup)
+ │     └─ predict(context, sentence) × N          implemented (local checkpoint required at startup)
  ├─ tracker.update(state, reading)                TEAMMATE   → state.slots
  ├─ rule.candidates(state)                        done       → possible conflicts
  │     └─ confirmer.score(old, new) per candidate TEAMMATE   → kept if > 0.60 → state.flags
@@ -191,12 +205,12 @@ What runs when the user presses Send, in order.
 | 4 | `app/server.py` | `chat()` | Finds the session (404 if unknown). A repeated message id returns the stored reply. Finished → 409. Copies the state. |
 | | **The seven steps** | | |
 | 5 | `pipeline/system.py` | `System.step()` | Turn + 1, stores the text, picks the context (the bot's last question) |
-| 6 | `pipeline/extractor.py` | `read()` → teammate's `predict()` per sentence | Message → readings |
+| 6 | `pipeline/extractor.py` | `read()` → `predict()` per sentence | Message → readings; checkpoint label order translated into shared labels |
 | 7 | `pipeline/tracker.py` | teammate's `update()` | Merges the readings into `state.slots` |
 | 8 | `pipeline/rule.py` | `candidates()` | Opposite signs, both confidence > 0.4? |
 | 9 | `pipeline/system.py` | `_confirmed()` | Only for candidates: asks the NLI check, keeps the conflict if the score > 0.60 |
 | 10 | `pipeline/nli.py` | teammate's `score()` | Contradiction probability |
-| 11 | `recommender/structured.py` → `recommender/schemas.py` | `StructuredRanker.rank` (top 100) | Ranks the 378 occupations; stored in `state.ranking` for the policy |
+| 11 | `pipeline/system.py` → `recommender/ranker.py` | `_rank()` → `RankingPipeline.rank` (top 100) | Reranks current tracker values and accumulated user text; stores up to 100 occupations in `state.ranking` and captures input/status/timing in `ranking_trace` |
 | 12 | `pipeline/policy.py` | `decide()` → teammate's `_decide()` | Picks the action and its payload, using `state.ranking` |
 | 13 | `pipeline/templates.py` | `QuestionBankFiller.fill` | The bot's sentence |
 | 14 | `pipeline/system.py` | `recommendations()` | Only at RECOMMEND: the five cards, from `state.ranking[:5]` |
@@ -216,21 +230,23 @@ What runs when the user presses Send, in order.
 | File | Read by | When |
 |---|---|---|
 | `configs/system.json` | `pipeline/system.py` `System.load` | Startup |
-| `data/occupations.csv` | `recommender/data_loader.py`, through `StructuredRanker` | Startup |
+| `configs/ranking.yaml` | `pipeline/registry.py`, through `RankingPipeline` | Startup; legacy `structured` factory retains fixed M1-only selection |
+| `data/occupations.csv` | `recommender/data_loader.py`, through `RankingPipeline` | Startup |
+| `artifacts/ranking/` | MiniLM component: pinned model and task cache/index | Startup, only when M4 is enabled; no task corpus embedding per turn |
 | `data/question_bank.json`, `data/labels.json` | `pipeline/templates.py`; `labels.json` also by `pipeline/extractor.py` (class orders) | Startup |
 | `models/extractor/` | `pipeline/extractor.py` `load()` | Startup |
 | `cross-encoder/nli-deberta-v3-base` | `pipeline/nli.py` (Hugging Face cache) | Startup |
 | `static/*` | The browser, served by FastAPI | Page load |
 | `logs/<code>.jsonl` | Written by `app/turn_log.py` | Every message, and the opening |
 | `data/extractor.jsonl`, `data/nli_pairs.jsonl` | `training/` code only | Training |
-| `data/profiles.jsonl`, `data/eval/` | `eval/` only, never the server | Evaluation |
+| `data/dev_profiles.jsonl` or configured tracker-session JSONL | `recommender/evaluate.py`, never the live server | Offline development evaluation |
 
 ---
 
 ## 6. From training to the app (the hand-off)
 
 ```
-training/extractor/   train on Colab (imports pipeline/extractor_model.py for the model class)
+training/extractor/   external training/export workflow (not implemented in this checkout)
         │  export the checkpoint folder
         ▼
 extractor-3f9c2a.zip  → team Drive → name posted in the group chat
@@ -267,13 +283,16 @@ The NLI check needs no hand-off: the model downloads by name. Its tuned threshol
 
 ```json
 "components": {"extractor": "deberta", "tracker": "decay", "rule": "rule", "confirmer": "nli",
-               "ranker": "structured", "policy": "manual", "filler": "question-bank"},
-"settings":   {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false}
+               "ranker": "configured", "policy": "manual", "filler": "question-bank"},
+"settings":   {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "input_mode": "actual_tracker"},
+"paths":      {"ranking_config": "configs/ranking.yaml", "extractor_checkpoint": "models/extractor"}
 ```
 
-- These are the final names. Teammates fill in their file, and the config doesn't change.
+- The snippet shows component names and relevant settings/path entries; the complete file also contains NLI and legacy artifact paths. `configured` loads ranking selections from YAML; `structured` remains available for compatibility.
 - The file for a part that isn't filled in yet stops startup with `fill in … (docs/INTEGRATION.md)`.
 - Run another config with `CM_CONFIG=path.json`. The other environment variables are `CM_DATA_DIR`, `CM_LOG_DIR` and `CM_STUDY_MODE`.
+
+Ranking configuration and evaluation configuration stay separate. `python -m recommender.evaluate` automatically loads `configs/ranking.yaml` and `configs/m2.json`. The default evaluation uses synthetic oracle development profiles. Explicit `actual_tracker` and `mock_tracker` modes replay recorded sessions, retain per-turn rankings and compute the unchanged M2 metrics on each session's final turn. Reports preserve exact configurations, input mode/provenance, hashes and component variants; successful runs append to the centralized evaluation history. See the [tracker replay workflow](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation).
 
 ---
 
@@ -283,6 +302,8 @@ The NLI check needs no hand-off: the model downloads by name. Its tuned threshol
 |---|---|
 | `tests/test_pipeline.py` | A full conversation, CHALLENGE, PROBE (including the 0.60 reason-confidence rule), ABSTAIN, the no-signal ending, and that the structured ranker gives cards without task quotes |
 | `tests/test_extractor.py` | `read()`: sentence splitting, label order, neutral filter, shape errors (with a faked `predict()`) |
+| `tests/test_extractor_checkpoint.py` | Checkpoint label mapping, signed strength propagation into M5, inference context, lazy imports and missing-checkpoint errors; tensor fixtures, not model accuracy |
+| `tests/test_integration.py` | M5 multi-turn/conflict fixtures, runtime provenance, short/empty rankings, history registration and cached real three-way retrieval |
 | `tests/test_server.py` | API errors, participant codes, study mode, logging, safe retry, separate sessions |
 | `tests/contracts.py` + `test_contracts.py` | One shape-check class per part: `ExtractorContract`, `TrackerContract`, `RuleContract`, `ConfirmerContract`, `RankerContract`, `PolicyContract`, `FillerContract` |
 | `tests/fakes.py` | **Test-only** fakes so the tests run before the real models exist. They're also minimal working examples to copy from. |
@@ -312,8 +333,10 @@ Always run `.venv/bin/python -m unittest discover -s tests`.
 .venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
 CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions, panel off
 .venv/bin/python chat_cli.py                        # terminal chat
-.venv/bin/python -m unittest discover -s tests      # all tests (run without any model)
+.venv/bin/python -m unittest discover -s tests      # full suite; see local resource requirements below
 ```
+
+Production launch requires the installed extractor checkpoint and completed tracker/NLI/policy. Most tests use fixtures; full discovery currently includes a startup test requiring the missing extractor checkpoint, while real dense tests need the prepared M4 model/cache. `python scripts/check_m5_extractor.py --checkpoint <directory>` runs real extraction with configured ranking and explicitly mocked remaining upstream components; it does not establish actual-tracker quality.
 
 ---
 
@@ -330,11 +353,12 @@ CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions, pane
 | `System.step(state, text)` | per message | **The main loop.** Turn + 1 → extractor → tracker → rule + NLI (`_confirmed`) → ranking into `state.ranking` → policy → filler → quotes or cards → bookkeeping. Returns a `TurnResult`. |
 | `System._confirmed(state)` | per message | For each rule candidate, calls `confirmer.score()`. Keeps a flag only if the score > `confirm_threshold`. |
 | `System._rank(state, top_k)` | per message | Builds the six-value interest vector (unobserved = 0) and calls `ranker.rank()`. Returns `[]` when there's no signal. |
-| `System.recommendations(state)` | at RECOMMEND | The five cards from `state.ranking[:5]`: rank, code, title, why, up to two task quotes |
+| `System.recommendations(state)` | at RECOMMEND | Up to five cards from `state.ranking[:5]`: rank, code, title, why, up to three task texts and structured evidence metadata/status |
 | `System._why(state)` | at RECOMMEND | One "why" line from the user's two strongest positive types |
 | `System.top5(state)` | per message, panel on | Titles of `state.ranking[:5]` for the researcher panel |
 | `System.profile(state)` | per message | The six slots (value, confidence, reason, reason confidence) for the panel and the log |
-| `System.trace(state)` | per message, panel on | `profile` + action log + top 5 + part names |
+| `System.trace(state)` | per message, panel on | Profile, action log, top 5, part names, input mode, per-turn ranking trace and resolved ranking config |
+| `System.tracker_record(state, profile_id=..., revision=...)` | explicit export | Chronological tracker inputs and upstream provenance for evaluation; rejects unverified mode; independent annotations add relevance labels |
 | `System.components` | health check | The name of each running part |
 
 ### `pipeline/interfaces.py`: the data passed between steps
@@ -354,15 +378,16 @@ CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions, pane
 | Function | When | What it does |
 |---|---|---|
 | `build(config, data_dir)` | startup | For each of the seven kinds, looks up the name in `config["components"]` and calls its factory. An unknown name → error listing the valid names. |
-| `_extractor_deberta`, `_tracker_decay`, `_confirmer_nli`, `_policy_manual`, `_rule`, `_ranker_structured`, `_filler_bank` | startup | One factory per part. Each imports its file only when chosen and passes it paths and settings from the config. |
+| `_extractor_deberta`, `_tracker_decay`, `_confirmer_nli`, `_policy_manual`, `_rule`, `_ranker_configured`, `_ranker_structured`, `_filler_bank` | startup | Factories import selected components and pass configured paths/settings. All component names are validated before construction. |
 
 ### `pipeline/extractor.py`: step 1
 
 | Function | Who | When | What it does |
 |---|---|---|---|
 | `DebertaExtractor.__init__(checkpoint_dir, labels_path)` | done | startup | Reads the class orders from `labels.json`, then calls `load()` |
-| `load(checkpoint_dir)` | **teammate** | startup | Loads the tokenizer and model |
-| `predict(context, sentence)` | **teammate** | per sentence | Model forward pass → `{"direction", "strength", "reason"}` probabilities |
+| `load(checkpoint_dir)` | implemented | startup | Loads local tokenizer/model, validates head count/calibration and configures semantic logit indices |
+| `_configure_heads(config)` | implemented | startup | Maps checkpoint `id2label` into shared direction/reason/strength ordering; rejects incompatible heads |
+| `predict(context, sentence)` | implemented | per sentence | Inference-only forward pass → shared-order direction/reason probabilities and discrete strengths |
 | `sentences(text)` | done | per message | Splits on `. ! ?` and newlines, joining pieces of six words or fewer to the sentence before |
 | `_check(out)` | done | per sentence | Raises a clear error if `predict()` returned the wrong shape |
 | `read(text, context, expected_slot)` | done | per message | `sentences()` → `predict()` each → drops neutral types → `SlotReading`s, keeping the most confident per type |
@@ -410,8 +435,11 @@ CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions, pane
 | `StructuredRanker.rank_oracle(inputs)` | offline evaluation | Ranks the whole pool from an `OracleInput` (a profile's hidden z-scale scores), for the M2 evaluator; never used by the app |
 | `StructuredRanker.eligible_codes` | offline evaluation | The set of eligible occupation codes |
 | `data_loader.load_eligible_occupations(path)` | startup | Validates `occupations.csv` and keeps Job Zone 4–5 occupations with complete RIASEC z-scores |
-| `evaluation.relevance_labels`, `evaluate_ranking`, `aggregate` | offline evaluation | Graded relevance from O*NET Related Occupations, then hit@5, MRR, NDCG@10 per profile and on average |
-| `evaluate.run(config_path, output)` / `main()` | offline evaluation | Runs the frozen M2 baseline on the dev profiles and writes `reports/ranking/m2/` |
+| `ranker.RankingPipeline` | startup/per message | Resolves enabled registered variants once; validates runtime inputs, invokes independent components and assembles standalone or RRF rankings |
+| `bm25_ranker.BM25Ranker`, `dense_ranker.DenseRanker`, `fusion.ReciprocalRankFusion` | enabled components | Implemented lexical ranking, cached semantic task retrieval and occupation-level RRF; M1 remains in `m1.py` |
+| `evaluation.relevance_labels`, `evaluate_ranking`, `aggregate` | offline evaluation | Unchanged Hit@1/5/10, full-pool MRR and NDCG@5/10 per evaluation unit and on average |
+| `evaluate.run(config_path, output)` / `main()` | offline evaluation | Loads separate default configs; evaluates oracle profiles or explicit tracker-session snapshots; exports fresh reports under `reports/ranking/experiments/` by default |
+| `history.append_history(report)` | completed evaluation | Appends one result per unique run ID to `reports/ranking/evaluation_history.csv` |
 | `compare.paired_comparison(control, treatment)` | offline evaluation | Paired bootstrap comparison of two evaluated runs |
 | `schemas.RankingRequest`, `RankingResponse`, `RankedOccupation`, `TaskEvidence` | — | The ranking input and output shapes; `RankingRequest` validates the inputs |
 
