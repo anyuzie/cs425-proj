@@ -1,0 +1,14 @@
+{
+  "components": {
+    "m1": null,
+    "m3": null,
+    "m4": {
+      "algorithm": "minilm_stance",
+      "variant": "positive_internal_v1"
+    }
+  },
+  "fusion": {
+    "algorithm": "rrf",
+    "k": 60
+  }
+}

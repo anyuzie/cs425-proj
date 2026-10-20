@@ -46,6 +46,7 @@ class Rec(BaseModel):
     title: str
     why: str
     tasks: list[str]
+    task_evidence: list[dict] = []
 
 
 class TraceProfileSlot(BaseModel):
@@ -70,6 +71,9 @@ class Trace(BaseModel):
     actions: list[TraceAction]
     top5: list[TraceTop]
     components: dict[str, str]
+    input_mode: str = "unverified_tracker"
+    ranking_trace: list[dict] = []
+    resolved_ranking: dict | None = None
 
 
 class QuotesNow(BaseModel):

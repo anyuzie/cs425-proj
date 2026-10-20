@@ -96,7 +96,8 @@ class ServerTests(unittest.TestCase):
             self.assertIsNone(self.new()["trace"])
             self.assertIsNone(self.new(debug=True)["trace"])
         d = self.new()
-        self.assertEqual(set(d["trace"]), {"profile", "actions", "top5", "components"})
+        self.assertEqual(set(d["trace"]), {"profile", "actions", "top5", "components",
+                                           "input_mode", "ranking_trace", "resolved_ranking"})
         t = self.say(d["session_id"], "I love working with machines and tools.").json()["trace"]
         self.assertEqual(list(t["profile"]), list("RIASEC"))
         self.assertEqual(t["profile"]["R"]["value"], 1.0)

@@ -1,5 +1,8 @@
 # Adding your part
 
+
+**Ranking status update:** M3 BM25/RRF and M4 cached MiniLM/FAISS are implemented in `recommender/` and evaluated offline. The live app factory still selects the structured facade. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md) and [M4 acceptance](../reports/ranking/m4/DECISION.md); full app activation remains M5 integration work.
+
 Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 The app has **no stand-ins**. It won't start until the four teammate parts (extractor, tracker, NLI check, policy) are filled in. Each one stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
@@ -47,6 +50,8 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 ## 3. Your part, step by step
 
 ### Step 1 · Extractor (`pipeline/extractor.py`)
+
+**M5 adapter update:** `load()` and `predict()` are implemented for the teammate's 45-logit checkpoint. Head outputs are mapped by checkpoint `id2label`, then converted to the shared label ordering; the neutral/positive strength bug is fixed. The local trained weights still need to be installed. Run `python scripts/check_m5_extractor.py --checkpoint <directory>` to validate the real extractor with configured ranking and explicitly mocked remaining upstream components. See [extractor wiring and validation](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md). The original training/export guide below remains reference material; this checkpoint uses discrete strength classes rather than a sigmoid strength head.
 
 You write **two** methods. `read()` is already done: it splits the message into sentences, calls your `predict()` on each, and builds the readings.
 
@@ -171,3 +176,8 @@ python3 -m venv .venv
 .venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
 CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions: panel hidden
 ```
+# M5 ranking integration update
+
+The app now selects `ranker: configured` and loads `configs/ranking.yaml` once at startup. M1-only remains default; the optional three-component RRF preset is independently tested. Current tracker values and complete user-only history are reranked each turn before policy invocation. Cards expose up to three provisional task matches; similarity does not establish enjoyment.
+
+Set `settings.input_mode` explicitly (`actual_tracker` for production, `mock_tracker` for fixtures). See the [tracker replay format](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation) and [M5 acceptance report](../reports/ranking/m5/DECISION.md). Production extractor checkpoint, tracker/NLI/policy completion and a team latency budget remain pending. The component guide above describes the interfaces teammates must implement.

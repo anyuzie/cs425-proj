@@ -1,0 +1,10 @@
+{
+  "eligibility": "job_zone in [4,5] and complete supplied RIASEC z-scores",
+  "input_mode": "oracle",
+  "occupations": "data/occupations.csv",
+  "profiles": "data/dev_profiles.jsonl",
+  "ranking_depth": "full_pool",
+  "run_id": "m2_structured_oracle_dev_v1",
+  "seed": 425,
+  "split": "development"
+}

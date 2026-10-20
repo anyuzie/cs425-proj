@@ -1,0 +1,6 @@
+{
+  "occupations": "data/occupations.csv",
+  "component": "m4",
+  "algorithm": "minilm",
+  "variant": "mean_tasks_v1"
+}

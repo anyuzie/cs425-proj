@@ -2,6 +2,8 @@
 
 Return to [README](README.md) · See [Evaluation](EVALUATION.md)
 
+**Current status:** M0-M5 are implemented locally; M5 production upstream completion and teammate latency agreement remain pending. M3/M4 remain experimental baselines after regressions; M1-only stays the default. The M6 query-filter prototype has correctness tests, but its controlled evidence ablation is pending an annotated multi-turn development set. See the [canonical status table](README.md#current-implementation-status) and [M5 acceptance report](../reports/ranking/m5/DECISION.md).
+
 ## Rules for every milestone
 
 Each milestone follows the same loop:
@@ -26,7 +28,7 @@ Specify acceptance criteria → Implement smallest version → Unit/integration 
 - Confirm split membership (planned: 60 development, 100 held-out), target eligibility, and whether graded relevance labels exist.
 - Define runtime contract; distinguish unknown RIASEC from a known zero.
 - Clarify what text query represents: latest turn, all user turns, or active evidence; keep baseline as accumulated **user** utterances excluding bot questions.
-- Agree with policy developer on top-100 output and empty/no-signal behavior.
+- Agree with policy developer on top-100 output and empty/no-signal behavior (external sign-off remains pending; the local contract is implemented).
 
 **Minimum interface**
 
@@ -36,18 +38,18 @@ rank(
     observed_types: set[str],          # known dimension can still be 0
     user_sentences: list[str],         # user statements only
     top_k: int = 100,
-) -> list[RankedOccupation]
+) -> RankingResponse
 ```
 
-Output needs `code`, `title`, final `rank`, signal scores/ranks where available, and task evidence when implemented. Validate finite interest scores and allowed keys. Empty/neutral-only inputs return a clearly signaled no-ranking result, agreed with policy.
+The implemented envelope exposes `status`, `reason`, and `occupations: list[RankedOccupation]`; external policy agreement remains pending. Each occupation output needs `code`, `title`, final `rank`, signal scores/ranks where available, and task evidence when implemented. Validate finite interest scores and allowed keys. At M1, inputs without observed nonzero interests return a clearly signaled no-ranking result; text-only ranking remains planned. Policy agreement on this envelope is pending.
 
 **Important:** Development `hidden_slots` are z-scale synthetic inputs according to the current implementation plan; do not clamp or silently treat them as `[-1,1]` tracker scores. Provide a separate `oracle` adapter and label its reports.
 
 **Acceptance / gate**
-- [ ] Data audit saved (counts, missingness, eligibility, split summary).
-- [ ] Contract documented with one mock request/result.
-- [ ] Data validation scripts fail clearly on broken fixtures.
-- [ ] All open decisions recorded; unresolved blocking decisions resolved before M1.
+- [x] Data audit saved (counts, missingness, eligibility, split summary).
+- [x] Contract documented with one mock request/result.
+- [x] Data validation scripts fail clearly on broken fixtures.
+- [x] All open decisions recorded; unresolved blocking decisions resolved before M1.
 
 **Deliverable:** `reports/ranking/m0.md`.
 
@@ -62,11 +64,11 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 4. Build CLI with a fixed mock tracker profile; print top five.
 
 **Tests**
-- [ ] Small fixture matches hand-computed scores.
-- [ ] Negative values and unobserved dimensions behave as expected.
-- [ ] Known zero differs from unknown dimension.
-- [ ] Invalid/nonfinite/out-of-range runtime input is rejected.
-- [ ] Repeated runs are identical and all outputs belong to eligible pool.
+- [x] Small fixture matches hand-computed scores.
+- [x] Negative values and unobserved dimensions behave as expected.
+- [x] Known zero differs from unknown dimension.
+- [x] Invalid/nonfinite/out-of-range runtime input is rejected.
+- [x] Repeated runs are identical and all outputs belong to eligible pool.
 
 **Gate:** runnable CLI + tests pass. No accuracy threshold yet.
 
@@ -80,21 +82,23 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 1. Implement Hit@5, MRR, and graded NDCG@10; use the proposed relevance grades `target=4`, `Primary-Short=3`, `Primary-Long=2`, `Supplemental=1` where valid.
 2. Deduplicate related codes by maximum grade; exclude ineligible codes from both labels and ideal DCG.
 3. Implement per-profile prediction export, aggregate report, and paired comparison script.
-4. Store input mode: `mock_tracker`, `oracle`, or `actual_tracker` (never pool their results).
+4. Store input mode: `mock_tracker`, `oracle`, or `actual_tracker` (never pool their results). The M2 runner implements only the frozen development/oracle condition; other evaluation modes require future adapters.
 5. Run structured-only baseline on development data; do not use target labels as ranking inputs.
 
 **Tests**
-- [ ] Hand-computed target at rank 1, rank 6, and absent cases.
-- [ ] Perfect NDCG=1; irrelevant NDCG=0; empty ideal DCG handled.
-- [ ] Duplicate recommendations cause evaluator error.
-- [ ] Missing/ineligible targets explicitly reported.
-- [ ] Frozen baseline can be reproduced using saved config and data fingerprint.
+- [x] Hand-computed target at rank 1, rank 6, and absent cases.
+- [x] Perfect NDCG=1; irrelevant NDCG=0; empty ideal DCG handled.
+- [x] Duplicate recommendations cause evaluator error.
+- [x] Missing/ineligible targets explicitly reported.
+- [x] Frozen baseline can be reproduced using saved config and data fingerprint.
 
 **Gate:** metrics are trustworthy. Fix evaluator before comparing models.
 
 **Deliverable:** `reports/ranking/m2/` with run manifest, predictions, metrics.
 
 ## M3 — BM25 and two-signal fusion
+
+**Current status:** M0-M4 are implemented and evaluated locally. M3/M4 remain experimental baselines after regressions; M1-only stays the default. The current gate is before M5. See the [canonical status table](README.md#current-implementation-status) and [M4 acceptance report](../reports/ranking/m4/DECISION.md). Upstream/downstream integration sign-off remains pending.
 
 **Purpose:** Test whether lexical occupation information adds value to structured fit.
 
@@ -106,17 +110,19 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 - Compare structured-only, BM25-only, and structured+BM25 using identical development cases.
 
 **Tests**
-- [ ] Exact-term fixture retrieves intended occupation.
-- [ ] Empty/stopword/no-positive query omits BM25 contribution.
-- [ ] Hand-calculated RRF scores and stable tie breaks.
-- [ ] Every returned occupation is unique and eligible.
-- [ ] Failure review includes explicit dislike and familiarity statements.
+- [x] Exact-term fixture retrieves intended occupation.
+- [x] Empty/stopword/no-positive query omits BM25 contribution.
+- [x] Hand-calculated RRF scores and stable tie breaks.
+- [x] Every returned occupation is unique and eligible.
+- [x] Failure review includes explicit dislike and familiarity statements.
 
 **Decision gate:** Is BM25 offering useful complementary signal? Retain as baseline even if it hurts some cases, but document failures and whether to revise query construction later.
 
 **Deliverable:** `reports/ranking/m3/` experiment and decision.
 
 ## M4 — MiniLM + task-level dense retrieval
+
+**Current status:** Implemented and evaluated; see [M4 acceptance/decision](../reports/ranking/m4/DECISION.md). All five acceptance tests are met. Default remains structured-only.
 
 **Purpose:** Measure semantic value beyond exact word matching.
 
@@ -129,11 +135,11 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 - Record index build time, cache size, and preloaded query median/p95 latency.
 
 **Tests**
-- [ ] Paraphrase fixture retrieves meaningful task.
-- [ ] Every result maps to a valid occupation; missing-task occupations don't get a fictitious dense rank.
-- [ ] Cached/reloaded scores match within tolerance.
-- [ ] Empty user text omits dense signal; no task corpus re-embedding during a turn.
-- [ ] Aggregation is correct on a hand-built task fixture.
+- [x] Paraphrase fixture retrieves meaningful task.
+- [x] Every result maps to a valid occupation; missing-task occupations don't get a fictitious dense rank.
+- [x] Cached/reloaded scores match within tolerance.
+- [x] Empty user text omits dense signal; no task corpus re-embedding during a turn.
+- [x] Aggregation is correct on a hand-built task fixture.
 
 **Decision gate:** Does semantic retrieval add sufficient ranking quality relative to complexity/latency? If not, diagnose aggregation before adopting more elaborate ANN search.
 
@@ -151,17 +157,21 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 - Agree on an explicit latency budget with teammates.
 
 **Tests**
-- [ ] Different user states change rank as expected.
-- [ ] Results have valid occupation/task relationships.
-- [ ] No duplicate/ineligible occupations.
-- [ ] Policy handles fewer than 100 results and no-ranking case.
-- [ ] Median/p95 latency measured with preloaded indexes.
+- [x] Different user states change rank as expected.
+- [x] Results have valid occupation/task relationships.
+- [x] No duplicate/ineligible occupations.
+- [x] Policy handles fewer than 100 results and no-ranking case.
+- [x] Median/p95 latency measured with preloaded indexes.
 
 **Decision gate:** **Baseline freeze point.** Save configuration as `baseline_v1`, including the current raw-text query policy. This is the primary control for evidence-aware experiments.
 
 **Deliverable:** `reports/ranking/m5/`, integration trace, frozen baseline manifest.
 
+Implementation evidence: [M5 acceptance mapping](../reports/ranking/m5/DECISION.md). These checks pass with explicitly mocked upstream components and real ranking. Full team acceptance remains pending production tracker/NLI/policy completion, the extractor checkpoint, and teammate agreement on a latency budget. The ranking integration control is frozen as aseline_v1; this does not claim actual-tracker quality.
+
 ## M6 — Experimental: contradiction-aware evidence lifecycle
+
+**Progress:** The query-selection path and correctness coverage are implemented in `recommender/evidence.py`, `recommender/runtime_inputs.py`, and `recommender/ranker.py`. The default configuration remains `raw`. The controlled synthetic M6 comparison is complete (six evaluations on 60 mock-tracker sessions); see [decision and next work](../reports/ranking/m6/DECISION.md). Keep filtering optional: subgroup regressions and M1 fallback gains do not establish representative dialogue benefit. Independently annotated lifecycle data remains pending.
 
 **Purpose:** Remove superseded/rejected statements from BM25 and dense query construction while leaving the structured vector unchanged in the controlled experiment.
 
@@ -174,10 +184,10 @@ Output needs `code`, `title`, final `rank`, signal scores/ranks where available,
 - Avoid editing the structured vector between paired control and treatment runs.
 
 **Tests**
-- [ ] Rejected teaching statement cannot influence text retrieval when superseded.
-- [ ] Active statements remain usable.
-- [ ] Empty active evidence is safe.
-- [ ] Source evidence IDs survive to result diagnostics.
+- [x] Rejected teaching statement cannot influence text retrieval when superseded.
+- [x] Active statements remain usable.
+- [x] Empty active evidence is safe.
+- [x] Source evidence IDs survive to result diagnostics.
 
 **Decision gate:** compare paired target-rank changes, Hit@5, NDCG@10, and stale-evidence sensitivity. **Keep** if useful and no unacceptable regression; **revise** if rule drops meaningful evidence; **revert** if ineffective/unsafe. Log uncertainty and affected-case counts.
 

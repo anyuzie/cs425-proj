@@ -14,6 +14,14 @@ How to integrate your model (you fill ONLY load() and predict(); read() below is
 Do not import torch or transformers at the top of this file; import them inside load() and predict().
 """
 
+# Original teammate hand-off instructions above are preserved verbatim from main.
+# Current adapter: load()/predict() are implemented using Hugging Face AutoModel,
+# so a separate extractor_model.py is not required by this implementation.
+# Supply the complete local checkpoint (config, tokenizer and trained weights),
+# directly in models/extractor/ or at configs/system.json paths.extractor_checkpoint.
+# The adapter expects 45 semantically labelled logits and config.extractor calibration.
+# See reports/ranking/m5/EXTRACTOR_INTEGRATION.md for implementation and validation status.
+
 import json
 import math
 import re
@@ -21,16 +29,8 @@ from pathlib import Path
 
 from .interfaces import Reading, SlotReading
 
-from transformers import (
-AutoTokenizer,
-AutoModelForSequenceClassification,
-)
-from pathlib import Path
-import torch
-
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
 JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
-_NOT_FILLED = "pipeline/extractor.py: fill in load() and predict() (docs/INTEGRATION.md)"
 
 
 def _clamp(x: float) -> float:
@@ -44,6 +44,7 @@ class DebertaExtractor:
         labels = json.loads(Path(labels_path).read_text(encoding="utf-8"))
         self.types = labels["types"]                                                     # R I A S E C
         self.direction_names = {i: n for n, i in labels["direction_index"].items()}      # neutral positive negative
+        self.direction_index_neutral = labels["direction_index"]["neutral"]
         self.reason_names = {i: n for n, i in labels["reason_index"].items()}            # enjoyment familiarity neither
         self.load(Path(checkpoint_dir))
 
@@ -51,39 +52,81 @@ class DebertaExtractor:
     # Load Tokenizer, Model
     ###################################################################
     def load(self, checkpoint_dir: Path) -> None:
+        if not checkpoint_dir.is_dir() or not (checkpoint_dir / "config.json").is_file():
+            raise FileNotFoundError(
+                f"Extractor checkpoint missing at {checkpoint_dir.resolve()}. "
+                "Place the trained config.json, tokenizer files and weights directly in this folder, "
+                "or set paths.extractor_checkpoint in the system config (docs/INTEGRATION.md).")
+        from transformers import AutoTokenizer, AutoModelForSequenceClassification
+        import torch
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
-        self.model = AutoModelForSequenceClassification.from_pretrained(checkpoint_dir).to(self.device).eval()
-        self.cfg = self.model.config.extractor    
+        self.tok = AutoTokenizer.from_pretrained(checkpoint_dir, local_files_only=True)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            checkpoint_dir, local_files_only=True).to(self.device).eval()
+        self.cfg = getattr(self.model.config, "extractor", None)
+        if not isinstance(self.cfg, dict):
+            raise ValueError("Extractor checkpoint config requires extractor calibration settings")
+        if getattr(self.model.config, "num_labels", None) != 45:
+            raise ValueError("Extractor checkpoint must output 45 logits: direction 18, reason 3, strength 24")
+        if type(self.cfg.get("max_len")) is not int or self.cfg["max_len"] < 4:
+            raise ValueError("Extractor max_len must be an integer >= 4")
+        for key in ("T_slot", "T_reason", "T_strength"):
+            value = self.cfg.get(key, 1.0 if key == "T_strength" else None)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
+                raise ValueError(f"Extractor {key} must be a finite positive temperature")
+        self._configure_heads(self.model.config)
+
+    def _configure_heads(self, config):
+        """Translate checkpoint logit labels into the shared labels.json ordering."""
+        labels = getattr(config, "id2label", {})
+        expected = ({f"{t}:{name}" for t in self.types for name in self.direction_names.values()}
+                    | set(self.reason_names.values())
+                    | {f"{t}:strength:{name}" for t in self.types
+                       for name in ("inactive", "dontmind", "mild", "strong")})
+        if len(labels) != 45 or set(labels.values()) != expected:
+            raise ValueError("Extractor id2label must explicitly name all 45 direction/reason/strength logits")
+        indices = {name: int(i) for i, name in labels.items()}
+        if set(indices.values()) != set(range(45)):
+            raise ValueError("Extractor id2label indices must be exactly 0..44")
+        self.direction_indices = [indices[f"{t}:{self.direction_names[i]}"] for t in self.types for i in range(3)]
+        self.reason_indices = [indices[self.reason_names[i]] for i in range(3)]
+        self.strength_indices = [indices[f"{t}:strength:{name}"] for t in self.types
+                                 for name in ("dontmind", "mild", "strong")]
 
     def predict(self, context: str | None, sentence: str) -> dict:
-        """TEAMMATE FILLS. Run the model on ONE sentence and return exactly:
+        """Run the trained model on ONE sentence and return exactly:
 
             {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists of 3, types in R I A S E C order,
                                                                        # class order = data/labels.json direction_index
-             "strength":  [s, ...],                                    # 6 floats 0..1 (sigmoid), same type order
+             "strength":  [s, ...],                                    # 6 mapped strengths 0..1, same type order
              "reason":    [p_enjoyment, p_familiarity, p_neither]}     # 3 probabilities, labels.json reason_index order
 
         Probabilities must already be softmaxed. Return plain Python floats/lists (tensor.tolist()).
         Input: tokenizer(context, sentence) when context is not None, else tokenizer(sentence);
         max_length=128, truncation=True. Wrap the forward pass in torch.no_grad().
         """
+        import torch
+
         final_dict = {}
         args = (context, sentence) if context else (sentence,)
-        enc = self.tok(*args, truncation="only_first" if context else True, max_length=self.cfg["max_len"],
+        enc = self.tok(*args, truncation=True, max_length=self.cfg["max_len"],
                     return_tensors="pt", return_token_type_ids=False).to(self.device)
-        lg = self.model(**enc).logits[0].float().cpu()                                  # 45 scores
+        with torch.inference_mode():
+            lg = self.model(**enc).logits[0].float().cpu()                              # 45 scores
+        if lg.numel() != 45:
+            raise ValueError("Extractor forward pass must return exactly 45 logits")
     
-        sp  = torch.softmax(lg[:18].view(6, 3) / self.cfg["T_slot"], -1).tolist()                # [6, 3]  polarity per type
-        rp  = torch.softmax(lg[18:21] / self.cfg["T_reason"], -1).tolist()                       # [3]     reason
-        # strength: 6 types x 4 classes; drop the "inactive" column, keep dontmind / mild / strong
-        stp = torch.softmax(lg[21:45].view(6, 4)[:, 1:] / self.cfg.get("T_strength", 1.0), -1).tolist()
+        sp = torch.softmax(lg[self.direction_indices].view(6, 3) / self.cfg["T_slot"], -1).tolist()
+        rp = torch.softmax(lg[self.reason_indices] / self.cfg["T_reason"], -1).tolist()
+        # Retain the trained active-class mapping; inactive strength is omitted.
+        stp = torch.softmax(lg[self.strength_indices].view(6, 3) / self.cfg.get("T_strength", 1.0), -1).tolist()
 
         strength_scores = [0, 0, 0, 0, 0, 0] #initialised to 0 first
         strength_mapping = [0.2, 0.55, 1] #maps to: dontmind / mild / strong
         for i in range(len(sp)):
             pol = sp[i]
-            if max(pol) == pol[1]:   # check if the maximum probability is neutral
+            if max(range(len(pol)), key=pol.__getitem__) == self.direction_index_neutral:
                 continue #if polarity highest score is neutral, strength score is 0
             else:
                 strength_probs = stp[i]

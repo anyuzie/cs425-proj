@@ -5,7 +5,6 @@
   "occupations": "data/occupations.csv",
   "profiles": "data/dev_profiles.jsonl",
   "eligibility": "job_zone in [4,5] and complete supplied RIASEC z-scores",
-  "algorithm": "signed dot product over all six oracle dimensions; score descending, code ascending",
   "ranking_depth": "full_pool",
   "seed": 425
 }

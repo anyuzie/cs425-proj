@@ -61,7 +61,10 @@ def _log(system: System, sid: str, s: Session, state: State, text: str | None, o
     turn_log.append(_log_dir(), s.participant_code, {
         "session_id": sid, "turn": out["turn"], "user_text": text, "reply": out["reply"],
         "action": out["action"], "quotes": out["quotes"], "recommendations": out["recommendations"],
-        "done": out["done"], "profile": system.profile(state), "debug": s.debug})
+        "done": out["done"], "profile": system.profile(state), "debug": s.debug,
+        "input_mode": system.input_mode, "components": system.components,
+        "ranking_input": state.ranking_trace[-1] if state.ranking_trace else None,
+        "resolved_ranking": getattr(system.ranker, "resolved_config", None)})
 
 
 @app.get("/api/health", response_model=Health)

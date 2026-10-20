@@ -49,5 +49,23 @@
   "elaboration": 0,
   "unrelated": 0
  },
- "job_zone_filter": "float(job_zone) >= 4 and z-scores present -> 378 recommendable occupations"
+ "job_zone_filter": "float(job_zone) >= 4 and z-scores present -> 378 recommendable occupations",
+ "patterns": [
+  "single_dominant",
+  "two_strong",
+  "three_balanced",
+  "weak_uncertain",
+  "conflicting",
+  "generalist"
+ ],
+ "stress_variations": [
+  "indirect_interest",
+  "ambivalence",
+  "contextual_dislike",
+  "experience_vs_preference",
+  "vague",
+  "multiple_interests",
+  "informal",
+  "temporal_change"
+ ]
 }

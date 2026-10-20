@@ -4,6 +4,7 @@ __pycache__/
 logs/
 models/
 indexes/
+artifacts/ranking/
 docs/plans/
 .impeccable/
 # model / training artefacts, anywhere in the repo
