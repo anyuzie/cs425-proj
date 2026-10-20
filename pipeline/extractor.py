@@ -1,17 +1,16 @@
-"""STEP 1 · Preference extractor (DeBERTa).  STATUS: waiting for your model.
+"""STEP 1 · Preference extractor (DeBERTa).  STATUS: model integrated.
 
-Model: microsoft/deberta-v3-base, fine-tuned on data/extractor.jsonl (manual section 4).
-Switch: already on ("extractor": "deberta" in configs/system.json). The server will not start until you finish.
+Model: microsoft/deberta-v3-base fine-tuned on data/extractor.jsonl (manual section 4), loaded from
+models/extractor/ (gitignored; get the checkpoint from the team Drive and unzip it so config.json sits
+directly in that folder). Config: "extractor": "deberta" in configs/system.json.
 
-How to integrate your model (you fill ONLY load() and predict(); read() below is ours):
-  1. Put your checkpoint in models/extractor/ (gitignored). Share it via Drive, with a hash in the folder name.
-  2. Create pipeline/extractor_model.py with your model class (the 3-head DeBERTa: direction, strength, reason).
-  3. Fill in load() and predict() below, then delete their `raise NotImplementedError` lines.
-  4. pip install -r requirements-models.txt
-  5. .venv/bin/python -m unittest discover -s tests
-  6. Start the server (.venv/bin/uvicorn app.server:app) and open /api/health: "extractor" must read "deberta".
+load() and predict() are the model owner's code. read() and the rest are the pipeline's: it splits the
+message into sentences, calls predict() once per sentence and turns the probabilities into SlotReadings.
+The class order is taken from the model's own id2label (e.g. "R:negative", "R:neutral", "R:positive"),
+so predict() can return probabilities in the model's order; data/labels.json is only the fallback.
 
-Do not import torch or transformers at the top of this file; import them inside load() and predict().
+torch and transformers are imported inside load() and predict(), so the tests run without them.
+Manual check with the real model: .venv/bin/python training/extractor/smoke_test.py
 """
 
 import json
@@ -21,16 +20,11 @@ from pathlib import Path
 
 from .interfaces import Reading, SlotReading
 
-from transformers import (
-AutoTokenizer,
-AutoModelForSequenceClassification,
-)
-from pathlib import Path
-import torch
 
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
 JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
-_NOT_FILLED = "pipeline/extractor.py: fill in load() and predict() (docs/INTEGRATION.md)"
+_NO_CHECKPOINT = ("no trained extractor at {path}: get the checkpoint from the team Drive and unzip it so "
+                  "config.json sits directly in models/extractor/ (docs/INTEGRATION.md)")
 
 
 def _clamp(x: float) -> float:
@@ -46,33 +40,59 @@ class DebertaExtractor:
         self.direction_names = {i: n for n, i in labels["direction_index"].items()}      # neutral positive negative
         self.reason_names = {i: n for n, i in labels["reason_index"].items()}            # enjoyment familiarity neither
         self.load(Path(checkpoint_dir))
+        self._adopt_model_labels()
+
+    def _adopt_model_labels(self) -> None:
+        """Use the class order the model was trained with, from its config.id2label, if it has one.
+
+        Direction labels look like "R:negative"; reason labels are bare names like "enjoyment".
+        predict() returns rows in that order, so read() must index them the same way.
+        """
+        config = getattr(getattr(self, "model", None), "config", None)
+        id2label = getattr(config, "id2label", None) or {}
+        labels = [id2label.get(i, id2label.get(str(i), "")) for i in range(len(id2label))]
+        direction = [lab.split(":", 1)[1] for lab in labels if lab.startswith(f"{self.types[0]}:")
+                     and lab.split(":", 1)[1] in ("negative", "neutral", "positive")]
+        reasons = [lab for lab in labels if lab in ("enjoyment", "familiarity", "neither")]
+        if sorted(direction) == ["negative", "neutral", "positive"]:
+            for t in self.types:   # every type must use the same order, since read() applies one order to all rows
+                if [lab.split(":", 1)[1] for lab in labels if lab.startswith(f"{t}:")
+                        and lab.split(":", 1)[1] in ("negative", "neutral", "positive")] != direction:
+                    raise ValueError(f"model id2label gives type {t} a different class order than {self.types[0]}")
+            self.direction_names = dict(enumerate(direction))
+        if sorted(reasons) == ["enjoyment", "familiarity", "neither"]:
+            self.reason_names = dict(enumerate(reasons))
 
     ###################################################################
     # Load Tokenizer, Model
     ###################################################################
     def load(self, checkpoint_dir: Path) -> None:
+        if not (Path(checkpoint_dir) / "config.json").is_file():
+            raise FileNotFoundError(_NO_CHECKPOINT.format(path=checkpoint_dir))
+        import torch
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
         self.model = AutoModelForSequenceClassification.from_pretrained(checkpoint_dir).to(self.device).eval()
-        self.cfg = self.model.config.extractor    
+        self.cfg = self.model.config.extractor
 
     def predict(self, context: str | None, sentence: str) -> dict:
-        """TEAMMATE FILLS. Run the model on ONE sentence and return exactly:
+        """Run the model on ONE sentence. Returns plain Python lists:
 
-            {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists of 3, types in R I A S E C order,
-                                                                       # class order = data/labels.json direction_index
-             "strength":  [s, ...],                                    # 6 floats 0..1 (sigmoid), same type order
-             "reason":    [p_enjoyment, p_familiarity, p_neither]}     # 3 probabilities, labels.json reason_index order
-
-        Probabilities must already be softmaxed. Return plain Python floats/lists (tensor.tolist()).
-        Input: tokenizer(context, sentence) when context is not None, else tokenizer(sentence);
-        max_length=128, truncation=True. Wrap the forward pass in torch.no_grad().
+            {"direction": 6 lists of 3 probabilities, types in R I A S E C order, classes in the model's
+                          id2label order (this model: negative, neutral, positive),
+             "strength":  6 values: 0 for a neutral type, else 0.2 / 0.55 / 1.0 (dontmind / mild / strong),
+             "reason":    3 probabilities (enjoyment, familiarity, neither)}
         """
+        import torch
+
         final_dict = {}
         args = (context, sentence) if context else (sentence,)
         enc = self.tok(*args, truncation="only_first" if context else True, max_length=self.cfg["max_len"],
                     return_tensors="pt", return_token_type_ids=False).to(self.device)
-        lg = self.model(**enc).logits[0].float().cpu()                                  # 45 scores
+        with torch.no_grad():
+            lg = self.model(**enc).logits[0].float().cpu()                              # 45 scores
     
         sp  = torch.softmax(lg[:18].view(6, 3) / self.cfg["T_slot"], -1).tolist()                # [6, 3]  polarity per type
         rp  = torch.softmax(lg[18:21] / self.cfg["T_reason"], -1).tolist()                       # [3]     reason
@@ -81,9 +101,11 @@ class DebertaExtractor:
 
         strength_scores = [0, 0, 0, 0, 0, 0] #initialised to 0 first
         strength_mapping = [0.2, 0.55, 1] #maps to: dontmind / mild / strong
+        # position of "neutral" in the model's class order (1 for this model: negative, neutral, positive)
+        neutral = next(i for i, name in self.direction_names.items() if name == "neutral")
         for i in range(len(sp)):
             pol = sp[i]
-            if max(pol) == pol[1]:   # check if the maximum probability is neutral
+            if max(pol) == pol[neutral]:   # check if the maximum probability is neutral
                 continue #if polarity highest score is neutral, strength score is 0
             else:
                 strength_probs = stp[i]
@@ -151,64 +173,3 @@ class DebertaExtractor:
                 if t not in best or r.confidence > best[t].confidence:
                     best[t] = r
         return Reading(text, list(best.values()))
-
-
-# ============================================================
-# TEMPORARY MODEL TEST — DELETE AFTER TESTING
-# ============================================================
-if __name__ == "__main__":
-    import json
-
-    checkpoint_dir = Path(__file__).resolve().parent.parent / "models" / "extractor"
-    labels_path = Path(__file__).resolve().parent.parent / "data" / "labels.json"
-
-    print("Loading DeBERTa model...")
-    extractor = DebertaExtractor(checkpoint_dir, labels_path)
-    print(f"Model loaded successfully on {extractor.device}")
-
-    examples = [
-        ("What work do you enjoy?", "I enjoy building and repairing machines."),
-        ("What work do you enjoy?", "I love investigating scientific problems."),
-        ("What work do you enjoy?", "I enjoy helping and teaching people."),
-        ("What work do you enjoy?", "I like organising records and keeping information accurate."),
-        ("What work do you enjoy?", "I enjoy creating artwork and expressing my imagination."),
-        ("What work do you enjoy?", "I like leading teams and persuading people."),
-    ]
-
-    for i, (context, sentence) in enumerate(examples, 1):
-        print("\n" + "=" * 60)
-        print(f"TEST {i}: {sentence}")
-
-        try:
-            result = extractor.predict(context, sentence)
-            extractor._check(result)
-
-            print("\nDirection probabilities:")
-            for slot, probs in zip(extractor.types, result["direction"]):
-                idx = max(range(len(probs)), key=probs.__getitem__)
-                direction = extractor.direction_names[idx]
-                print(f"  {slot}: {direction} | {[round(p, 4) for p in probs]}")
-
-            print("\nStrength:")
-            for slot, score in zip(extractor.types, result["strength"]):
-                print(f"  {slot}: {score:.4f}")
-
-            reason_idx = max(
-                range(len(result["reason"])),
-                key=result["reason"].__getitem__
-            )
-            print("\nReason probabilities:")
-            print({
-                extractor.reason_names[j]: round(p, 4)
-                for j, p in enumerate(result["reason"])
-            })
-            print(f"Predicted reason: {extractor.reason_names[reason_idx]}")
-
-            print("\nOutput shape: VALID")
-
-        except Exception as e:
-            print(f"\nTEST FAILED: {type(e).__name__}: {e}")
-            raise
-
-    print("\nAll test inputs completed successfully.")
-

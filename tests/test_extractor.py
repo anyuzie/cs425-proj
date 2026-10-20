@@ -3,6 +3,7 @@
 import hashlib
 import random
 import unittest
+from types import SimpleNamespace
 
 from contracts import DATA, ExtractorContract
 from pipeline.extractor import DebertaExtractor
@@ -100,9 +101,51 @@ class TestDebertaRead(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing key 'reason'"):
             FakeDeberta({"I enjoy repairing engines at the weekend.": missing}).read("I enjoy repairing engines at the weekend.")
 
-    # def test_unfilled_load_points_to_guide(self):
-    #     with self.assertRaisesRegex(NotImplementedError, "INTEGRATION.md"):
-    #         DebertaExtractor("nowhere", DATA / "labels.json")
+    def test_missing_checkpoint_points_to_guide(self):
+        # Checked before torch is imported, so this runs without torch installed.
+        with self.assertRaisesRegex(FileNotFoundError, "INTEGRATION.md"):
+            DebertaExtractor("nowhere", DATA / "labels.json")
+
+
+def model_labels(order=("negative", "neutral", "positive")):
+    """id2label shaped like the trained checkpoint: 18 direction, 3 reason, 24 strength labels."""
+    labels = [f"{t}:{c}" for t in "RIASEC" for c in order] + ["enjoyment", "familiarity", "neither"]
+    labels += [f"{t}:strength:{k}" for t in "RIASEC" for k in ("inactive", "dontmind", "mild", "strong")]
+    return {i: lab for i, lab in enumerate(labels)}
+
+
+class ModelOrderDeberta(FakeDeberta):
+    """Like the real checkpoint: predict() returns probabilities in the model's id2label order."""
+
+    def __init__(self, table=None, id2label=None):
+        self.id2label = id2label or model_labels()
+        super().__init__(table)
+
+    def load(self, checkpoint_dir):
+        self.model = SimpleNamespace(config=SimpleNamespace(id2label=self.id2label))
+
+
+class TestModelLabelOrder(unittest.TestCase):
+    S = "I enjoy building and repairing machines."
+
+    def test_reads_the_models_class_order(self):
+        neutral = [0.1, 0.8, 0.1]                                  # negative, neutral, positive
+        result = {"direction": [[0.05, 0.10, 0.85]] + [neutral] * 5,   # R positive in the model's order
+                  "strength": [1.0, 0, 0, 0, 0, 0], "reason": [0.9, 0.05, 0.05]}
+        ex = ModelOrderDeberta({self.S: result})
+        self.assertEqual(ex.direction_names, {0: "negative", 1: "neutral", 2: "positive"})
+        slots = ex.read(self.S).slots
+        self.assertEqual([(r.slot, r.sign, r.strength, r.confidence, r.reason) for r in slots],
+                         [("R", 1, 1.0, 0.85, "enjoyment")])   # positive stays positive; neutral types dropped
+
+    def test_falls_back_to_labels_json_without_model_labels(self):
+        self.assertEqual(FakeDeberta().direction_names, {0: "neutral", 1: "positive", 2: "negative"})
+
+    def test_rejects_inconsistent_order_between_types(self):
+        labels = model_labels()
+        labels[3], labels[4] = labels[4], labels[3]                # type I: neutral before negative
+        with self.assertRaisesRegex(ValueError, "different class order"):
+            ModelOrderDeberta(id2label=labels)
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ A student chats in a web page. Each message goes through **seven steps**. They t
 | | `indexes/` | BM25 / FAISS indexes for the ranker | **no** |
 | | `logs/` | Transcripts, one file per participant code | **no** |
 
-Rule of thumb: **training code may import from the app** (for example the model class in `pipeline/extractor_model.py`), but **the app never imports from `training/`.** The only things that cross from training to the app are a checkpoint folder in `models/` and a number in `configs/system.json`.
+Rule of thumb: **training code may import from the app** (for example `pipeline/extractor.py` in `training/extractor/smoke_test.py`), but **the app never imports from `training/`.** The only things that cross from training to the app are a checkpoint folder in `models/` and a number in `configs/system.json`.
 
 ### Files in the app
 
@@ -43,8 +43,7 @@ Rule of thumb: **training code may import from the app** (for example the model 
 | `pipeline/system.py` | — | done | **The conductor**: `System.step()` runs the seven steps for one message |
 | `pipeline/interfaces.py` | — | done | The data passed between steps (`Reading`, `SlotReading`, `State`, `Flag`, `Action`) and what each part must provide |
 | `pipeline/registry.py` | — | done | Maps config names (`"deberta"`, `"nli"`, …) to the code that builds each part |
-| `pipeline/extractor.py` | 1 | **teammate** fills `load()` + `predict()` | Preference extractor. `read()` is done. |
-| `pipeline/extractor_model.py` | 1 | **teammate** creates | Their 3-head DeBERTa model class |
+| `pipeline/extractor.py` | 1 | done (model integrated) | Preference extractor. `load()`/`predict()` are the model owner's code; `read()` is the pipeline's. Manual check: `training/extractor/smoke_test.py`. |
 | `pipeline/tracker.py` | 2 | **teammate** fills `update()` | State tracker with recency decay |
 | `pipeline/rule.py` | 3 | done | Contradiction rule |
 | `pipeline/nli.py` | 4 | **teammate** fills `__init__()` + `score()` | NLI contradiction check |
@@ -230,7 +229,7 @@ What runs when the user presses Send, in order.
 ## 6. From training to the app (the hand-off)
 
 ```
-training/extractor/   train on Colab (imports pipeline/extractor_model.py for the model class)
+training/extractor/   train on Colab; smoke_test.py checks the trained model through pipeline/extractor.py
         │  export the checkpoint folder
         ▼
 extractor-3f9c2a.zip  → team Drive → name posted in the group chat
@@ -360,7 +359,8 @@ CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions, pane
 
 | Function | Who | When | What it does |
 |---|---|---|---|
-| `DebertaExtractor.__init__(checkpoint_dir, labels_path)` | done | startup | Reads the class orders from `labels.json`, then calls `load()` |
+| `DebertaExtractor.__init__(checkpoint_dir, labels_path)` | done | startup | Reads the fallback class orders from `labels.json`, calls `load()`, then `_adopt_model_labels()` |
+| `_adopt_model_labels()` | done | startup | Switches to the class order in the model's `config.id2label` (this model: negative, neutral, positive), so `predict()` can return the model's own order; rejects a label list where types disagree |
 | `load(checkpoint_dir)` | **teammate** | startup | Loads the tokenizer and model |
 | `predict(context, sentence)` | **teammate** | per sentence | Model forward pass → `{"direction", "strength", "reason"}` probabilities |
 | `sentences(text)` | done | per message | Splits on `. ! ?` and newlines, joining pieces of six words or fewer to the sentence before |

@@ -153,7 +153,7 @@ class PipelineTests(unittest.TestCase):
             with self.subTest(kind=kind):
                 try:
                     System.load(DATA, f.name)  # part already filled in: loading is fine
-                except NotImplementedError as e:
+                except (NotImplementedError, FileNotFoundError) as e:   # unfilled part, or no checkpoint here
                     self.assertIn("INTEGRATION.md", str(e))
 
 

@@ -2,7 +2,7 @@
 
 Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-The app has **no stand-ins**. It won't start until the four teammate parts (extractor, tracker, NLI check, policy) are filled in. Each one stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
+The app has **no stand-ins**. It won't start until the remaining teammate parts (tracker, NLI check, policy) are filled in and the extractor checkpoint is in `models/extractor/`. Each one stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
 
 ---
 
@@ -10,7 +10,7 @@ The app has **no stand-ins**. It won't start until the four teammate parts (extr
 
 | Step | Part | File | Status | Config name (already set) |
 |---|---|---|---|---|
-| 1 | Preference extractor | `pipeline/extractor.py` (+ your `pipeline/extractor_model.py`) | **teammate**: fill `load()`, `predict()` | `"extractor": "deberta"` |
+| 1 | Preference extractor | `pipeline/extractor.py` | **done** (model integrated; needs the checkpoint in `models/extractor/`) | `"extractor": "deberta"` |
 | 2 | State tracker | `pipeline/tracker.py` | **teammate**: fill `update()` | `"tracker": "decay"` |
 | 3 | Contradiction rule | `pipeline/rule.py` | done | `"rule": "rule"` |
 | 4 | NLI check | `pipeline/nli.py` | **teammate**: fill `__init__()`, `score()` | `"confirmer": "nli"` |
@@ -34,7 +34,7 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 | **Data package** (O\*NET + team data, read-only) | `data/` | yes, already in the repo; don't edit it |
 | **Checkpoints, indexes, logs** | `models/<part>/`, `indexes/`, `logs/` | **never** |
 
-- Training code may import from the app; for example, it imports your model class from `pipeline/extractor_model.py`. **The app never imports from `training/`.**
+- Training code may import from the app (for example `training/extractor/smoke_test.py` imports `pipeline/extractor.py`). **The app never imports from `training/`.**
 - `.gitignore` blocks model files anywhere in the repo (`*.safetensors`, `*.bin`, `*.pt`, `*.pth`, `*.ckpt`, `*.onnx`, `*.pkl`, `*.zip`, `checkpoints/`, `runs/`, `wandb/`, `outputs/`).
 
 **In your `training/<part>/` folder:**
@@ -53,13 +53,13 @@ You write **two** methods. `read()` is already done: it splits the message into 
 1. **Train** in `training/extractor/`, on `data/extractor.jsonl`:
    - Use the shipped `split` field; don't re-split.
    - Use the class weights in `data/labels.json`.
-   - Put the model class (DeBERTa + direction, strength and reason heads) in `pipeline/extractor_model.py`, and import it from your training code, so training and the app use the same class.
+   - The trained model is a standard `AutoModelForSequenceClassification` with 45 outputs (18 direction, 3 reason, 24 strength) and its labels in `config.id2label`, so no custom model class is needed. If a future version needs one, put it in `pipeline/` and import it from the training code, so both use the same class.
 2. **Export and share:**
    - Save the checkpoint folder (weights, `config.json`, tokenizer files) and zip it with a short hash in the name, e.g. `extractor-3f9c2a.zip`.
    - Upload it to the team Drive folder ([TEAM DRIVE LINK]) and post the name in the group chat.
 3. **Everyone unzips it** so the files sit **directly** in `models/extractor/` (`models/extractor/config.json`, not `models/extractor/extractor-3f9c2a/config.json`).
 4. **Fill `load(checkpoint_dir)`.** It runs once at server start. Load the tokenizer and the model onto `self` (e.g. `self.tok`, `self.model`) and call `.eval()`. Import torch and transformers here, not at the top of the file.
-5. **Fill `predict(context, sentence)`.** It runs once per sentence. Tokenize with `tokenizer(context, sentence)` when `context` isn't `None` (it's the bot question being answered), else `tokenizer(sentence)`, with `max_length=128` and `truncation=True`, inside `torch.no_grad()`. Return plain Python floats and lists, already softmaxed:
+5. **Fill `predict(context, sentence)`.** It runs once per sentence. Tokenize with `tokenizer(context, sentence)` when `context` isn't `None` (it's the bot question being answered), else `tokenizer(sentence)`, with `max_length=128` and `truncation=True`, inside `torch.no_grad()`. Return plain Python floats and lists, already softmaxed. The class order inside each `direction` row can be your model's own: `read()` takes it from the model's `config.id2label` (e.g. `R:negative, R:neutral, R:positive`) and falls back to the `labels.json` order below only if the model has no such labels:
    ```python
    {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists, types in R I A S E C order
     "strength":  [s, ...],                                     # 6 floats 0..1 (sigmoid)
@@ -139,7 +139,7 @@ Write a class with `name`, `eligible_count` and `rank(interests, observed_types,
 - Types are letters `R I A S E C`. Use full names (`Realistic`) only when reading `question_bank.json`.
 - Keep the user's sentences word for word in `source`.
 - Load models once (in `load()` or `__init__`), never inside `read`, `score`, `update` or `decide`.
-- In `pipeline/extractor.py` and `pipeline/nli.py`, import torch and transformers inside the method that needs them, so the tests run without them. At the top of `pipeline/extractor_model.py` or anything in `training/` is fine.
+- In `pipeline/extractor.py` and `pipeline/nli.py`, import torch and transformers inside the method that needs them, so the tests run without them. At the top of anything in `training/` is fine.
 - Need another package? Add it to `requirements-models.txt` with an exact version (`package==1.2.3`) if the app needs it, or to `training/<part>/requirements-training.txt` if only training does.
 - Same input, same output: the rule, the policy and the ranker must be deterministic.
 
