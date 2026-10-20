@@ -27,3 +27,12 @@ outputs/
 /reports/ranking/**/turn_predictions.json
 # Frozen reference used by exact regression tests and legacy baseline checks.
 !/reports/ranking/m2/baseline/predictions.jsonl
+
+# Bulky generated ranking outputs; retain summaries, inputs and provenance.
+/reports/ranking/**/predictions.jsonl
+/reports/ranking/**/turn_predictions.json
+# Frozen reference used by exact regression tests and legacy baseline checks.
+!/reports/ranking/m2/baseline/predictions.jsonl
+
+# contradictor testing
+nli_manual_tests/*

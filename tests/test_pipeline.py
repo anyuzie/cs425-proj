@@ -144,8 +144,9 @@ class PipelineTests(unittest.TestCase):
             System.load(DATA, f.name)
         cfg["components"]["extractor"] = "test-scripted"
         # A part that is not filled in yet must stop startup with a pointer to the guide, not half-run.
-        for kind, name in [("extractor", "deberta"), ("tracker", "decay"), ("confirmer", "nli"),
-                           ("policy", "manual")]:
+        # Only remaining placeholders belong here. Implemented model loaders need
+        # checkpoints; their controlled-output tests must not download models.
+        for kind, name in [("tracker", "decay"), ("policy", "manual")]:
             one = json.loads(json.dumps(cfg))
             one["components"][kind] = name
             with open(f.name, "w") as g:
