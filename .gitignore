@@ -21,3 +21,9 @@ runs/
 wandb/
 .ipynb_checkpoints/
 outputs/
+
+# Bulky generated ranking outputs; retain summaries, inputs and provenance.
+/reports/ranking/**/predictions.jsonl
+/reports/ranking/**/turn_predictions.json
+# Frozen reference used by exact regression tests and legacy baseline checks.
+!/reports/ranking/m2/baseline/predictions.jsonl
