@@ -4,9 +4,10 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-logs/
+# Top-level only: keep recommender/models/ source visible to Git.
+/logs/
 /models/
-indexes/
+/indexes/
 artifacts/ranking/
 docs/plans/
 .impeccable/
@@ -36,10 +37,9 @@ outputs/
 /configs/system.t5-v2.json
 /configs/system.t5.structured.json
 
-# Bulky generated ranking outputs; retain summaries, inputs and provenance.
+# Bulky generated ranking outputs; retain frozen baseline fixtures.
 /reports/ranking/**/predictions.jsonl
 /reports/ranking/**/turn_predictions.json
-# Frozen reference used by exact regression tests and legacy baseline checks.
 !/reports/ranking/m2/baseline/predictions.jsonl
 
 # contradictor testing

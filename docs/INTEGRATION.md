@@ -1,11 +1,8 @@
 # Adding your part
 
-
-**Ranking status update:** M3 BM25/RRF and M4 cached MiniLM/FAISS are implemented in `recommender/` and evaluated offline. The live app factory still selects the structured facade. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md) and [M4 acceptance](../reports/ranking/m4/DECISION.md); full app activation remains M5 integration work.
-
 Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-The app has **no stand-ins**. It won't start until the four teammate parts (extractor, tracker, NLI check, policy) are filled in. Each one stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
+The app has **no stand-ins**. It won't start until the **tracker and policy** are filled in and the trained extractor checkpoint is in `models/extractor/`. Each missing piece stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
 
 ---
 
@@ -13,11 +10,11 @@ The app has **no stand-ins**. It won't start until the four teammate parts (extr
 
 | Step | Part | File | Status | Config name (already set) |
 |---|---|---|---|---|
-| 1 | Preference extractor | `pipeline/extractor.py` (+ your `pipeline/extractor_model.py`) | **teammate**: fill `load()`, `predict()` | `"extractor": "deberta"` |
+| 1 | Preference extractor | `pipeline/extractor.py` | **done**; needs the checkpoint in `models/extractor/` | `"extractor": "deberta"` |
 | 2 | State tracker | `pipeline/tracker.py` | **teammate**: fill `update()` | `"tracker": "decay"` |
 | 3 | Contradiction rule | `pipeline/rule.py` | done | `"rule": "rule"` |
-| 4 | NLI check | `pipeline/nli.py` | **teammate**: fill `__init__()`, `score()` | `"confirmer": "nli"` |
-| 5 | Ranker | `recommender/structured.py` | done (baseline); BM25 + FAISS + RRF is the project lead's work | `"ranker": "structured"` |
+| 4 | NLI check | `pipeline/nli.py` | **done** (threshold tuned, see §7) | `"confirmer": "nli"` |
+| 5 | Ranker | `recommender/` (`RankingPipeline`, set up in `configs/ranking.yaml`) | **done**: structured, BM25, MiniLM/FAISS and RRF (M1–M5) | `"ranker": "configured"` |
 | 6 | Policy | `pipeline/policy.py` | **teammate**: fill `ManualPolicy._decide()` | `"policy": "manual"` |
 | 7 | Template filler | `pipeline/templates.py` | done | `"filler": "question-bank"` |
 | — | Evaluation harness | `eval/harness.py` (new) | to write | `"no_probing": true` for the control arm |
@@ -37,7 +34,7 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 | **Data package** (O\*NET + team data, read-only) | `data/` | yes, already in the repo; don't edit it |
 | **Checkpoints, indexes, logs** | `models/<part>/`, `indexes/`, `logs/` | **never** |
 
-- Training code may import from the app; for example, it imports your model class from `pipeline/extractor_model.py`. **The app never imports from `training/`.**
+- Training code may import from the app (for example `scripts/check_m5_extractor.py` uses `pipeline/`). **The app never imports from `training/`.**
 - `.gitignore` blocks model files anywhere in the repo (`*.safetensors`, `*.bin`, `*.pt`, `*.pth`, `*.ckpt`, `*.onnx`, `*.pkl`, `*.zip`, `checkpoints/`, `runs/`, `wandb/`, `outputs/`).
 
 **In your `training/<part>/` folder:**
@@ -51,27 +48,12 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 
 ### Step 1 · Extractor (`pipeline/extractor.py`)
 
-**M5 adapter update:** `load()` and `predict()` are implemented for the teammate's 45-logit checkpoint. Head outputs are mapped by checkpoint `id2label`, then converted to the shared label ordering; the neutral/positive strength bug is fixed. The local trained weights still need to be installed. Run `python scripts/check_m5_extractor.py --checkpoint <directory>` to validate the real extractor with configured ranking and explicitly mocked remaining upstream components. See [extractor wiring and validation](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md). The original training/export guide below remains reference material; this checkpoint uses discrete strength classes rather than a sigmoid strength head.
+**Done.** `load()` and `predict()` are implemented for the trained 45-output checkpoint (18 direction, 3 reason, 24 strength). The outputs are picked by their `config.id2label` names and converted to the `labels.json` order, so the model's own class order doesn't matter. It's a standard `AutoModelForSequenceClassification`, so no custom model class is needed. What's left is installing the checkpoint:
 
-You write **two** methods. `read()` is already done: it splits the message into sentences, calls your `predict()` on each, and builds the readings.
+1. **Get the checkpoint** from the team Drive folder ([TEAM DRIVE LINK]) and unzip it so the files sit **directly** in `models/extractor/` (`models/extractor/config.json`, not `models/extractor/extractor-3f9c2a/config.json`). It needs `config.json` (with the 45 labels and the `extractor` calibration block), the weights and the tokenizer files.
+2. **Check it:** `python scripts/check_m5_extractor.py --checkpoint models/extractor` runs the real extractor with the configured ranking and the remaining parts faked. Details: [extractor wiring and validation](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
 
-1. **Train** in `training/extractor/`, on `data/extractor.jsonl`:
-   - Use the shipped `split` field; don't re-split.
-   - Use the class weights in `data/labels.json`.
-   - Put the model class (DeBERTa + direction, strength and reason heads) in `pipeline/extractor_model.py`, and import it from your training code, so training and the app use the same class.
-2. **Export and share:**
-   - Save the checkpoint folder (weights, `config.json`, tokenizer files) and zip it with a short hash in the name, e.g. `extractor-3f9c2a.zip`.
-   - Upload it to the team Drive folder ([TEAM DRIVE LINK]) and post the name in the group chat.
-3. **Everyone unzips it** so the files sit **directly** in `models/extractor/` (`models/extractor/config.json`, not `models/extractor/extractor-3f9c2a/config.json`).
-4. **Fill `load(checkpoint_dir)`.** It runs once at server start. Load the tokenizer and the model onto `self` (e.g. `self.tok`, `self.model`) and call `.eval()`. Import torch and transformers here, not at the top of the file.
-5. **Fill `predict(context, sentence)`.** It runs once per sentence. Tokenize with `tokenizer(context, sentence)` when `context` isn't `None` (it's the bot question being answered), else `tokenizer(sentence)`, with `max_length=128` and `truncation=True`, inside `torch.no_grad()`. Return plain Python floats and lists, already softmaxed:
-   ```python
-   {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists, types in R I A S E C order
-    "strength":  [s, ...],                                     # 6 floats 0..1 (sigmoid)
-    "reason":    [p_enjoyment, p_familiarity, p_neither]}      # class orders: data/labels.json
-   ```
-   A wrong shape makes `read()` raise an error naming the key.
-6. **Delete** the two `raise NotImplementedError` lines.
+**Retraining or re-exporting:** train in `training/extractor/` on `data/extractor.jsonl` (use the shipped `split` field and the class weights in `data/labels.json`), keep the 45 labelled outputs and the `extractor` calibration block in `config.json`, zip the checkpoint with a short hash in the name (e.g. `extractor-3f9c2a.zip`), upload it and post the name in the group chat.
 
 ### Step 2 · Tracker (`pipeline/tracker.py`)
 
@@ -86,15 +68,7 @@ Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the
 
 ### Step 4 · NLI check (`pipeline/nli.py`)
 
-1. **Fill `__init__(model_name)`.** Load `cross-encoder/nli-deberta-v3-base` once (e.g. `sentence_transformers.CrossEncoder`) and find which output index is "contradiction". There's no training; the model downloads by name.
-2. **Fill `score(old_src, new_src)`.** Return the softmaxed probability of "contradiction" as a plain float.
-3. **Tune the threshold** in `training/nli/`:
-   - Sweep it on the 75 `split == "dev"` pairs of `data/nli_pairs.jsonl`, using `nli_binary` from `labels.json`.
-   - Report precision and recall once on the 64 `test` pairs.
-   - Put the chosen number in `settings.confirm_threshold` (currently 0.60).
-4. **Delete** the `raise NotImplementedError` lines.
-
-Copy from: `PassthroughConfirmer` in `tests/fakes.py` (it always returns 1.0).
+**Done.** `NliConfirmer` loads `cross-encoder/nli-deberta-v3-base` once and `score(old_src, new_src)` returns the probability of "contradiction". The threshold was tuned on the dev pairs of `data/nli_pairs.jsonl` (`eval/nli.py`); results are in `reports/nli/`. The chosen threshold is **0.9**, but `configs/system.json` still says `confirm_threshold: 0.6` (see §7).
 
 ### Step 6 · Policy (`pipeline/policy.py`)
 
@@ -115,9 +89,9 @@ Copy from: `PassthroughConfirmer` in `tests/fakes.py` (it always returns 1.0).
 
 Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rules.
 
-### Step 5 · Ranker (project lead)
+### Step 5 · Ranker
 
-Write a class with `name`, `eligible_count` and `rank(interests, observed_types, user_sentences, top_k) -> RankingResponse`. Put each card's matched tasks in `evidence`; the cards quote the first two. Register it in `pipeline/registry.py` and set `"ranker"` in the config. Plan: BM25 → MiniLM + FAISS → RRF, per `cs425-ranking-docs/`. BM25 should skip short replies like "the first one".
+**Done.** `"ranker": "configured"` loads `configs/ranking.yaml` once at startup and builds a `RankingPipeline` (structured, BM25, MiniLM/FAISS, RRF). The default preset is structured (M1) only; the three-way RRF preset is tested separately. It reranks every turn from the current tracker values and the user's own messages, before the policy runs. Cards show up to three matched tasks. `settings.input_mode` must be set explicitly: `actual_tracker` for the app, `mock_tracker` for fixtures. More: [ranking architecture](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 decision](../reports/ranking/m5/DECISION.md).
 
 ---
 
@@ -144,7 +118,7 @@ Write a class with `name`, `eligible_count` and `rank(interests, observed_types,
 - Types are letters `R I A S E C`. Use full names (`Realistic`) only when reading `question_bank.json`.
 - Keep the user's sentences word for word in `source`.
 - Load models once (in `load()` or `__init__`), never inside `read`, `score`, `update` or `decide`.
-- In `pipeline/extractor.py` and `pipeline/nli.py`, import torch and transformers inside the method that needs them, so the tests run without them. At the top of `pipeline/extractor_model.py` or anything in `training/` is fine.
+- In `pipeline/extractor.py` and `pipeline/nli.py`, import torch and transformers inside the method that needs them, so the tests run without them. At the top of anything in `training/` is fine.
 - Need another package? Add it to `requirements-models.txt` with an exact version (`package==1.2.3`) if the app needs it, or to `training/<part>/requirements-training.txt` if only training does.
 - Same input, same output: the rule, the policy and the ranker must be deterministic.
 
@@ -166,18 +140,14 @@ Write a class with `name`, `eligible_count` and `rank(interests, observed_types,
 - Where transcripts are stored and when they are deleted (manual section 10).
 - A "why" line specific to each card (right now all five share one sentence).
 - The team Drive folder link (step 1 above).
+- **NLI threshold:** tuning chose 0.9 (`reports/nli/threshold.json`), but `configs/system.json` still has `confirm_threshold: 0.6`. Whoever owns the NLI check should confirm and update it.
 
 ## Install and run
 
 ```
 python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt -r requirements-models.txt
+.venv/bin/pip install -r requirements.txt -r requirements-models.txt -r requirements-ranking.txt
 # data/ comes with the repo (O*NET 31.0 + the team data package); nothing to download
 .venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
 CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions: panel hidden
 ```
-# M5 ranking integration update
-
-The app now selects `ranker: configured` and loads `configs/ranking.yaml` once at startup. M1-only remains default; the optional three-component RRF preset is independently tested. Current tracker values and complete user-only history are reranked each turn before policy invocation. Cards expose up to three provisional task matches; similarity does not establish enjoyment.
-
-Set `settings.input_mode` explicitly (`actual_tracker` for production, `mock_tracker` for fixtures). See the [tracker replay format](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation) and [M5 acceptance report](../reports/ranking/m5/DECISION.md). Production extractor checkpoint, tracker/NLI/policy completion and a team latency budget remain pending. The component guide above describes the interfaces teammates must implement.
