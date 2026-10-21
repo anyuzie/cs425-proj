@@ -4,7 +4,10 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-import torch
+try:
+    import torch
+except ImportError:   # torch is optional: the rest of the suite must run without it
+    torch = None
 
 from eval.nli import evaluate, metrics, select_threshold
 from pipeline.interfaces import HistoryEntry, SlotState, State
@@ -19,6 +22,7 @@ def state_for(old_value=1.0, new_value=-1.0, old_conf=0.8, new_conf=0.9):
     return State(turn=2, slots={"R": SlotState(new_value, new_conf, new.reason, new.source, 2, [old, new])})
 
 
+@unittest.skipIf(torch is None, "needs torch (pip install -r requirements-models.txt)")
 class NliTests(unittest.TestCase):
     def test_load_once_softmax_and_reordered_labels(self):
         model = Mock()
