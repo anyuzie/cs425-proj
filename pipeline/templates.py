@@ -8,9 +8,14 @@ def _pick(options: list[str], index: int) -> str:
 def fill(action, payload: dict, question_bank: dict, type_names: dict[str, str]) -> str:
     """action: Action kind string or Action. payload: index plus slot/quote fields."""
     kind = getattr(action, "kind", action)
+    if kind == 'ABSTAIN' and payload.get('repair'):
+        from .repair import repair_question
+        return repair_question(payload)
     index = payload.get("index", 0)
     if kind == "OPENING":
         return _pick(question_bank["OPENING"], index)
+    if kind == "ABSTAIN" and payload.get("retry") in ("CHALLENGE", "PROBE"):
+        return f"{_pick(question_bank['ABSTAIN'], index)} {fill(payload['retry'], payload, question_bank, type_names)}"
     if kind in ("CLARIFY", "ABSTAIN"):
         question = _pick(question_bank["CLARIFY"][type_names[payload["slot"]]], payload.get("clarify_index", index))
         if kind == "CLARIFY":

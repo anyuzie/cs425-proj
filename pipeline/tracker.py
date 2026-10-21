@@ -1,33 +1,48 @@
-"""STEP 2 · State tracker with recency decay.  STATUS: not built yet.
+"""Confidence-weighted accepted preferences, raw evidence, and targeted resolutions."""
 
-Minimal example: tests/fakes.py SimpleTracker (keeps the latest reading per type).
-Switch on: configs/system.json -> "tracker": "decay"
-No model: plain Python (manual section 5).
-"""
+from math import isfinite
 
-from .interfaces import HistoryEntry, Reading, SlotState, State  # noqa: F401
+from .interfaces import TYPES, Flag, HistoryEntry, Reading, SlotState, State
 
 
 class DecayTracker:
+    # Keep the registry name compatible; the agreed merge has no recency decay.
     name = "decay"
 
-    def __init__(self) -> None:
-        raise NotImplementedError("pipeline/tracker.py is not filled in yet (docs/INTEGRATION.md). "
-                                  "Delete this line once the code below is written.")
-
     def update(self, state: State, reading: Reading) -> None:
-        """Merge this turn's readings into state. Changes `state` in place, returns nothing.
-
-        Must keep doing what SimpleTracker in tests/fakes.py does (copy its code as a start):
-          - state.last_reading_empty = not reading.slots
-          - for each reading: append HistoryEntry(value, confidence, reason, source, state.turn,
-            reason_confidence) to that type's history and set state.slots[letter] = SlotState(...)
-            (keep reading.reason_confidence on both: the PROBE rule needs it > 0.60)
-            (the source sentence MUST be kept: the quote cards and the NLI check use it)
-          - if state.last_action is a PROBE on a type, add that letter to state.resolved
-        """
-        # ================= PUT YOUR CODE HERE =================
-        # New part: weight older evidence down (recency decay) when computing the slot value,
-        # merge weight = confidence. Keep value in -1..1 and confidence in 0..1.
-        # ======================================================
-        raise NotImplementedError
+        for r in reading.slots:
+            if r.slot not in TYPES or r.sign not in (-1, 1) or r.reason not in ("enjoyment", "familiarity", "neither"):
+                raise ValueError("Invalid extractor slot, sign or reason")
+            for value in (r.strength, r.confidence, r.reason_confidence):
+                if isinstance(value, bool) or not isinstance(value, (int, float)) or not isfinite(value) or not 0 <= value <= 1:
+                    raise ValueError("Extractor strength and confidences must be finite numbers in [0, 1]")
+            if not isinstance(r.source, str) or not r.source.strip():
+                raise ValueError("Extractor source must be non-empty")
+        state.last_reading_empty = not reading.slots
+        state.conflict_candidates = []
+        last = state.last_action
+        kind = last.payload.get("retry", "CLARIFY") if last and last.kind == "ABSTAIN" else last.kind if last else None
+        target = last.slot if last and kind in ("CHALLENGE", "PROBE") else None
+        for r in reading.slots:
+            entry = HistoryEntry(r.value, r.confidence, r.reason, r.source, state.turn, r.reason_confidence)
+            old = state.slots.get(r.slot)
+            history = (old.history if old else []) + [entry]
+            state.challenged.discard(r.slot)
+            state.resolved.discard(r.slot)
+            if r.slot == target:
+                state.resolved.add(r.slot)
+                state.flags = [f for f in state.flags if f.slot != r.slot]
+            elif old and old.value * r.value < 0:
+                previous = HistoryEntry(old.value, old.confidence, old.reason, old.source, old.turn, old.reason_confidence)
+                state.conflict_candidates.append(Flag(r.slot, previous, entry))
+                old.history = history
+                continue
+            value, confidence, weight = r.value, r.confidence, r.confidence
+            if old and r.slot != target:
+                old_weight = old.weight if old.weight is not None else old.confidence
+                weight += old_weight
+                if weight:
+                    value = (old.value * old_weight + r.value * r.confidence) / weight
+                    confidence = (old.confidence * old_weight + r.confidence ** 2) / weight
+            state.slots[r.slot] = SlotState(value, confidence, r.reason, r.source,
+                                            state.turn, history, r.reason_confidence, weight)

@@ -1,16 +1,8 @@
-"""STEP 6 · Dialogue policy (full version of manual section 7).  STATUS: not built yet.
+"""Deterministic actions over tracker state and teammate-confirmed conflicts."""
 
-Switch on: configs/system.json -> "policy": "manual"
-No model: plain Python, same input -> same output.
+from statistics import pvariance
 
-You only write ManualPolicy._decide(). PolicyBase.decide() (below) calls it, then adds the question-rotation
-counters and the payload the template filler needs. tests/fakes.py SimplePolicy shows a minimal working
-version of all five rungs.
-"""
-
-from .interfaces import MAX_TURNS, Action, State
-
-PROBE_REASON_CONF = 0.60   # manual section 7: PROBE needs reason confidence above this
+from .interfaces import MAX_TURNS, TYPES, Action, State
 
 
 class PolicyBase:
@@ -38,7 +30,8 @@ class PolicyBase:
         payload["index"] = state.kind_count.get(action.kind, 0)
         if action.slot:
             payload["slot"] = action.slot
-            payload["clarify_index"] = state.clarify_count.get(action.slot, 0)
+            payload["clarify_index"] = (action.payload.get('clarify_index', 0) if action.kind == 'ABSTAIN'
+                                        else state.clarify_count.get(action.slot, 0))
         action.payload = payload
         if action.kind in ("CLARIFY", "ABSTAIN") and action.slot:
             state.clarify_count[action.slot] = state.clarify_count.get(action.slot, 0) + 1
@@ -49,26 +42,39 @@ class PolicyBase:
 class ManualPolicy(PolicyBase):
     name = "manual"
 
-    def __init__(self, max_turns: int = 10, no_probing: bool = False) -> None:
-        raise NotImplementedError("pipeline/policy.py is not filled in yet (docs/INTEGRATION.md). "
-                                  "Delete this line once the code below is written.")
-        super().__init__(max_turns, no_probing)
-
     def _decide(self, state: State) -> Action:
-        """Return one Action. Check top to bottom, first match wins:
-          1 CHALLENGE  state.flags not empty           payload {"old_src", "old_turn", "new_src"}
-          2 PROBE      state.slots[t].reason == "familiarity" and .reason_confidence > PROBE_REASON_CONF, not yet probed   payload {"new_src"}
-          3 ABSTAIN    last action was a question and the reply had no stance; 2 strikes -> settle
-          4 RECOMMEND  ready to recommend (every type filled or settled, profile converged, 5..10 turns)
-          5 CLARIFY    ask the unfilled type with the highest variance
-        Action(kind, slot_letter_or_None, why_text, payload). Update state.challenged / probed /
-        settled / strikes yourself. state.ranking holds this turn's top 100 occupations (RankedOccupation,
-        best first, each with occupation_z) for choosing which slot to ask about.
-        PolicyBase.decide() already returns RECOMMEND at max_turns, so you don't need to.
-        """
-        # ================= PUT YOUR CODE HERE =================
-        # Needed: highest-variance slot (not a fixed order), the PROBE_REASON_CONF check,
-        # re-challenge / force-resolve after an ABSTAIN on a CHALLENGE,
-        # a real convergence check, and skipping rungs 1-2 when self.no_probing is True.
-        # ======================================================
-        raise NotImplementedError
+        last = state.last_action
+        pending = last and last.kind in ("CLARIFY", "CHALLENGE", "PROBE", "ABSTAIN")
+        neutral_retry = pending and state.last_reading_empty
+        probe = next((t for t in TYPES if t in state.slots and state.slots[t].reason == "familiarity"
+                      and t not in state.probed), None)
+        snapshots = state.profile_history[-3:]
+        converged = len(snapshots) == 3 and all(
+            t in a and t in b and abs(a[t] - b[t]) <= .1 + 1e-12
+            for a, b in zip(snapshots, snapshots[1:]) for t in TYPES)
+        if state.turn >= 5 and len(state.slots) == 6 and converged and not neutral_retry and (
+                self.no_probing or (not state.flags and probe is None)):
+            return Action("RECOMMEND", why="all six interests filled and stable over two updates")
+        if neutral_retry:
+            retry = last.payload.get("retry", "CLARIFY") if last.kind == "ABSTAIN" else last.kind
+            payload = {**last.payload, "retry": retry, "previous_question": state.last_reply}
+            if not (self.no_probing and retry in ("CHALLENGE", "PROBE")):
+                return Action("ABSTAIN", last.slot, "no stance; rephrase the same question", payload)
+        if not self.no_probing:
+            if state.flags:
+                flag = state.flags[0]
+                return Action("CHALLENGE", flag.slot, "opposite signs confirmed by NLI",
+                              {"old_src": flag.old.source, "old_turn": flag.old.turn, "new_src": flag.new.source})
+            if probe:
+                state.probed.add(probe)
+                return Action("PROBE", probe, "familiarity-based reason, not yet probed",
+                              {"new_src": state.slots[probe].source})
+        unfilled = [t for t in TYPES if t not in state.slots]
+        if unfilled:
+            pool = state.ranking[:100]
+            slot = max(unfilled, key=lambda t: pvariance([o.occupation_z[t] for o in pool]) if pool else 0)
+            why = "unfilled interest with largest top-100 occupation variance"
+        else:
+            slot = min(TYPES, key=lambda t: state.slots[t].confidence)
+            why = "refine least-confident interest while waiting for convergence or minimum turns"
+        return Action("CLARIFY", slot, why)

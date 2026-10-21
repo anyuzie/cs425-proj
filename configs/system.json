@@ -6,16 +6,22 @@
     "confirmer": "nli",
     "ranker": "configured",
     "policy": "manual",
-    "filler": "question-bank"
+    "filler": "t5-v3"
   },
-  "settings": {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "input_mode": "actual_tracker"},
+  "settings": {
+    "max_turns": 10,
+    "confirm_threshold": 0.6,
+    "no_probing": false,
+    "input_mode": "actual_tracker"
+  },
   "paths": {
     "ranking_config": "configs/ranking.yaml",
     "extractor_checkpoint": "models/extractor",
-    "nli_model": "cross-encoder/nli-deberta-v3-base",
+    "nli_model": "models/nli",
     "embedder": "all-MiniLM-L6-v2",
     "bm25": "indexes/bm25.pkl",
     "faiss": "indexes/faiss.idx",
-    "faiss_owners": "indexes/faiss_owners.json"
+    "faiss_owners": "indexes/faiss_owners.json",
+    "t5_checkpoint": "models/t5-questions-v3b"
   }
 }

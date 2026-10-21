@@ -17,7 +17,7 @@ class SlotReading:
     confidence: float
     reason: str          # enjoyment | familiarity | neither
     source: str          # source sentence
-    reason_confidence: float = 1.0   # probability of `reason`; PROBE needs > 0.60
+    reason_confidence: float = 1.0   # retained for inspection, not action eligibility
 
     @property
     def value(self) -> float:
@@ -51,6 +51,7 @@ class SlotState:
     turn: int
     history: list[HistoryEntry] = field(default_factory=list)
     reason_confidence: float = 1.0
+    weight: float | None = None  # cumulative accepted confidence; None for legacy states
 
 
 @dataclass
@@ -89,6 +90,8 @@ class State:
     ranking: list = field(default_factory=list)       # this turn's top 100 RankedOccupations, set before the policy runs
     ranking_trace: list[dict] = field(default_factory=list)
     done: bool = False
+    profile_history: list[dict[str, float]] = field(default_factory=list)
+    conflict_candidates: list[Flag] | None = None
 
 
 class Extractor(Protocol):

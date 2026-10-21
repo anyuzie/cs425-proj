@@ -39,6 +39,27 @@ def _filler_bank(cfg, d):
     return QuestionBankFiller(qb, names)
 
 
+def _filler_t5(cfg, d):
+    from .t5 import T5Filler
+    qb = json.loads((d / "question_bank.json").read_text(encoding="utf-8"))
+    names = json.loads((d / "labels.json").read_text(encoding="utf-8"))["type_names"]
+    return T5Filler(qb, names, ROOT / cfg["paths"]["t5_checkpoint"])
+
+
+def _filler_t5_v2(cfg, d):
+    from .t5_v2 import T5V2Filler
+    qb = json.loads((d / "question_bank.json").read_text(encoding="utf-8"))
+    names = json.loads((d / "labels.json").read_text(encoding="utf-8"))["type_names"]
+    return T5V2Filler(qb, names, ROOT / cfg["paths"]["t5_checkpoint"])
+
+
+def _filler_t5_v3(cfg, d):
+    from .t5_v3 import T5V3Filler
+    qb = json.loads((d / "question_bank.json").read_text(encoding="utf-8"))
+    names = json.loads((d / "labels.json").read_text(encoding="utf-8"))["type_names"]
+    return T5V3Filler(qb, names, ROOT / cfg["paths"]["t5_checkpoint"])
+
+
 # --- teammate parts: each imports its own file only when chosen in configs/system.json ---
 def _extractor_deberta(cfg, d):
     from .extractor import DebertaExtractor  # pipeline/extractor.py
@@ -52,7 +73,9 @@ def _tracker_decay(cfg, d):
 
 def _confirmer_nli(cfg, d):
     from .nli import NliConfirmer  # pipeline/nli.py
-    return NliConfirmer(cfg["paths"]["nli_model"])
+    model = cfg["paths"]["nli_model"]
+    local = ROOT / model
+    return NliConfirmer(str(local) if local.is_dir() else model)
 
 
 def _policy_manual(cfg, d):
@@ -67,7 +90,7 @@ REGISTRY: dict[str, dict] = {
     "confirmer": {"nli": _confirmer_nli},
     "ranker": {"structured": _ranker_structured, "configured": _ranker_configured},
     "policy": {"manual": _policy_manual},
-    "filler": {"question-bank": _filler_bank},
+    "filler": {"question-bank": _filler_bank, "t5": _filler_t5, "t5-v2": _filler_t5_v2, "t5-v3": _filler_t5_v3},
 }
 
 

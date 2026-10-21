@@ -1,0 +1,26 @@
+{
+  "components": {
+    "extractor": "deberta",
+    "tracker": "decay",
+    "rule": "rule",
+    "confirmer": "nli",
+    "ranker": "configured",
+    "policy": "manual",
+    "filler": "question-bank"
+  },
+  "settings": {
+    "max_turns": 10,
+    "confirm_threshold": 0.6,
+    "no_probing": false,
+    "input_mode": "actual_tracker"
+  },
+  "paths": {
+    "ranking_config": "configs/ranking.yaml",
+    "extractor_checkpoint": "models/extractor",
+    "nli_model": "models/nli",
+    "embedder": "all-MiniLM-L6-v2",
+    "bm25": "indexes/bm25.pkl",
+    "faiss": "indexes/faiss.idx",
+    "faiss_owners": "indexes/faiss_owners.json"
+  }
+}

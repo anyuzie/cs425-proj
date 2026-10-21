@@ -1,8 +1,11 @@
 __pycache__/
 *.py[cod]
 .venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 logs/
-models/
+/models/
 indexes/
 artifacts/ranking/
 docs/plans/
@@ -22,11 +25,16 @@ wandb/
 .ipynb_checkpoints/
 outputs/
 
-# Bulky generated ranking outputs; retain summaries, inputs and provenance.
-/reports/ranking/**/predictions.jsonl
-/reports/ranking/**/turn_predictions.json
-# Frozen reference used by exact regression tests and legacy baseline checks.
-!/reports/ranking/m2/baseline/predictions.jsonl
+# Local experiment reports, including summaries, screenshots and provenance.
+/reports/t5/
+/reports/dialogue/
+/reports/scenarios/
+/reports/test_suite*.txt
+
+# Historical T5 presets retained locally; current defaults/V3 stay versioned.
+/configs/system.t5-v1.json
+/configs/system.t5-v2.json
+/configs/system.t5.structured.json
 
 # Bulky generated ranking outputs; retain summaries, inputs and provenance.
 /reports/ranking/**/predictions.jsonl

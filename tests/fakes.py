@@ -9,11 +9,12 @@ from pathlib import Path
 from pipeline import registry
 from pipeline.interfaces import (MAX_TURNS, TYPES, Action, HistoryEntry, Reading, SlotReading, SlotState,
                                  State)
-from pipeline.policy import PROBE_REASON_CONF, PolicyBase
+from pipeline.policy import PolicyBase
 from recommender.schemas import RankingResponse, TaskEvidence
 from recommender.structured import StructuredRanker
 
 FILL_ORDER = ("C", "E", "A", "R", "S", "I")
+PROBE_REASON_CONF = .60  # preserve the original fake-policy baseline
 
 # known sentence -> (slot, sign, strength, reason, reason_confidence); confidence is always 0.9
 SCRIPT = {

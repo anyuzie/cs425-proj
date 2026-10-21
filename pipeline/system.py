@@ -7,6 +7,7 @@ from time import perf_counter
 
 from . import registry
 from .interfaces import MAX_TURNS, TYPES, Action, State
+from .repair import needs_repair
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG = ROOT / "configs" / "system.json"
@@ -105,22 +106,51 @@ class System:
 
     def _confirmed(self, state: State) -> list:
         flags = []
-        for f in self.rule.candidates(state):
+        rule_state = state
+        if state.conflict_candidates is not None:
+            # Present pending tracker evidence without changing the teammate's rule.
+            slots = {f.slot: replace(state.slots[f.slot], value=f.new.value,
+                        confidence=f.new.confidence, reason=f.new.reason, source=f.new.source,
+                        turn=state.turn, history=[f.old, f.new]) for f in state.conflict_candidates}
+            rule_state = replace(state, slots=slots)
+        for f in self.rule.candidates(rule_state):
             score = self.confirmer.score(f.old.source, f.new.source)
             if score > self.confirm_threshold:
                 flags.append(replace(f, score=score))
         return flags
 
     def step(self, state: State, text: str) -> TurnResult:
+        if state.done:
+            raise ValueError("Conversation has ended; start a new session")
         state.turn += 1
         state.user_texts.append(text)
         last = state.last_action
         asked = last is not None and last.kind in QUESTIONS  # any slot question (ABSTAIN re-asks one)
         reading = self.extractor.read(text, state.last_reply if asked else None, last.slot if asked else None)
+        repair = asked and needs_repair(text)
         self.tracker.update(state, reading)
-        state.flags = self._confirmed(state)
+        retry = last.payload.get("retry", "CLARIFY") if last and last.kind == "ABSTAIN" else last.kind if last else None
+        if last and retry in ("CHALLENGE", "PROBE") and any(r.slot == last.slot for r in reading.slots):
+            state.flags = [f for f in state.flags if f.slot != last.slot]
+        # Confirmed conflicts survive neutral or unrelated answers until resolved.
+        flags = {f.slot: f for f in state.flags}
+        for flag in self._confirmed(state):
+            flags.setdefault(flag.slot, flag)
+        state.flags = list(flags.values())
+        state.profile_history.append({t: s.value for t, s in state.slots.items()})
         state.ranking = self._rank(state, POLICY_TOP_K)  # the policy reads it; the panel and cards reuse it
         action = self.policy.decide(state)
+        if action.kind == 'CLARIFY':
+            from .t5_v2 import FOCUS
+            action.payload['focus'] = FOCUS[action.slot][action.payload['clarify_index'] % 3]
+        if action.kind == 'ABSTAIN' and repair:
+            action.payload['repair'] = True
+            action.payload['repair_count'] = last.payload.get('repair_count', 0) + 1
+        if getattr(self.filler, "uses_context", False) and action.kind != "RECOMMEND":
+            from .t5_v2 import KNOWN
+            known = next((t for t, s in sorted(state.slots.items(), key=lambda item: -item[1].value)
+                          if s.value > 0 and s.reason == "enjoyment" and t != action.slot), None)
+            action.payload.update(last_user=text[:240], known_interest=KNOWN[known] if known else "")
         quotes, recs, done = None, None, False
         if action.kind == "RECOMMEND":
             recs = self.recommendations(state)
@@ -132,10 +162,11 @@ class System:
                 action = Action("ABSTAIN", None, action.why + "; no usable ranking signal")
         else:
             reply = self.filler.fill(action, action.payload)
-        if action.kind == "CHALLENGE":
+        quote_kind = action.payload.get("retry") if action.kind == "ABSTAIN" else action.kind
+        if quote_kind == "CHALLENGE":
             quotes = {"earlier": action.payload["old_src"], "earlier_turn": action.payload["old_turn"],
                       "now": action.payload["new_src"]}
-        elif action.kind == "PROBE":
+        elif quote_kind == "PROBE":
             quotes = {"now": action.payload["new_src"]}
         state.last_action, state.last_reply = action, reply
         state.done = done or state.turn >= self.max_turns

@@ -110,7 +110,7 @@ class TrackerContract:
         tr.update(st, self.reading(("R", -1, 1.0)))
         self.assertEqual(len(st.slots["R"].history), 2)
         self.assertEqual(st.slots["R"].history[0].source, "src R")
-        self.assertEqual(st.slots["R"].turn, 2)
+        self.assertEqual(st.slots["R"].history[-1].turn, 2)
 
     def test_probe_answer_marks_slot_resolved(self):
         tr, st = self.make(), State(turn=2)
