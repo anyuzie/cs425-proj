@@ -4,6 +4,16 @@ Read this document before changing ranking architecture. It is the authoritative
 
 ## Current implementation status
 
+Central workflow automatic promotion (26 October 2026): workflow ranking now
+uses mutable `configs/ranking/active.json`, initialized to weighted dot product.
+`candidate.json` and `promotion.json` select the next experiment and policy.
+Workflow evaluation re-evaluates incumbent and challenger under matching conditions
+and promotes higher Hit@5 only when none of the other five metrics regress.
+Reports, previous bytes and the comparison are preserved; publication is atomic
+and serialized. Workflow chat uses the winner. Direct evaluator calls remain
+report-only, and frozen variants plus the separate application YAML are unchanged.
+See [promotion usage and recovery](RANKING_MODULES.md#run-the-recommended-configuration).
+
 Application integration audit: real cosine and cosine+BM25 now have HTTP-level
 acceptance with explicitly mocked upstream components, covering recommendation
 order, component reuse and participant-mode ranking logs. Live System rejects
@@ -15,7 +25,7 @@ is available. Defaults and frozen variants are unchanged. See the
   `recommender/data/`, `recommender/preparation/`, and `recommender/experiments/`.
   Original imports/CLI entry points remain compatible. Central parameter snapshots
   and additional named variants live under `configs/ranking/`; the new
-  `workflow.json` selects standalone cosine for evaluation and terminal use.
+  `workflow.json` selects the active incumbent for evaluation and terminal use.
   Existing production/default baseline selection is preserved. Terminal I/O lives
   in `app/terminal.py`, delegating to the shared `System.from_config` composition
   root. No ranking fitting is introduced: preparation builds pretrained resources.

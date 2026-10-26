@@ -1,6 +1,7 @@
 {
-  "ranking": "configs/ranking/m1_cosine.json",
+  "ranking": "configs/ranking/active.json",
   "evaluation": "configs/m2.json",
   "preparation": "configs/ranking/preparation.json",
-  "system": "configs/system.cosine.json"
+  "system": "configs/system.json",
+  "promotion": "configs/ranking/promotion.json"
 }

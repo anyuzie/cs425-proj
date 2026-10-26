@@ -8,6 +8,16 @@ This README is the **source of truth for objectives, scope, implementation statu
 
 ## Current implementation status
 
+Central workflow automatic promotion (26 October 2026): `active.json` starts with
+weighted dot product and records the current best central-workflow selection.
+Each `python -m recommender.workflow evaluate` evaluates `candidate.json` against
+the active incumbent on matching inputs, promoting only higher Hit@5 without any
+regression in the other five metrics. Both reports, comparison and previous
+selection are saved; publication is atomic and locked. Workflow chat uses the
+winner. Frozen algorithm variants and the separate application's ranking YAML
+are preserved. Direct evaluation commands remain report-only. See the
+[workflow and recovery guide](../docs/RANKING_MODULES.md#run-the-recommended-configuration).
+
 Application integration audit: real cosine and cosine+BM25 now have HTTP-level
 acceptance with explicitly mocked upstream components, covering recommendation
 order, component reuse and participant-mode ranking logs. Live System rejects
@@ -17,8 +27,8 @@ is available. Defaults and frozen variants are unchanged. See the
 
 The ranking implementation is organized into `recommender/models/`, `data/`,
 `preparation/`, and `experiments/`, with compatible legacy imports. Central
-`configs/ranking/workflow.json` selects the best recorded standalone cosine
-configuration for evaluation and terminal use; legacy production defaults remain
+`configs/ranking/workflow.json` selects the current active configuration
+for evaluation and terminal use; legacy production defaults remain
 unchanged. Algorithm parameters and additional named variants are centralized in
 `configs/ranking/`. Terminal presentation lives in `app/terminal.py` and calls the
 shared conversation `System`. Ranking has resource preparation, not model fitting.
