@@ -7,6 +7,7 @@ from time import perf_counter
 
 from . import registry
 from .interfaces import MAX_TURNS, TYPES, Action, State
+from .answers import read_answer
 from .repair import needs_repair
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -126,7 +127,8 @@ class System:
         state.user_texts.append(text)
         last = state.last_action
         asked = last is not None and last.kind in QUESTIONS  # any slot question (ABSTAIN re-asks one)
-        reading = self.extractor.read(text, state.last_reply if asked else None, last.slot if asked else None)
+        # The answer speaks for itself first; short CHALLENGE/PROBE answers are resolved by rule (pipeline/answers.py).
+        reading = read_answer(self.extractor, state, last if asked else None, text)
         repair = asked and needs_repair(text)
         # The control arm listens to everything: with no_probing, opposite readings are merged, not held.
         state.merge_conflicts = bool(getattr(self.policy, "no_probing", False))

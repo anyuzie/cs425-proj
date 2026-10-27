@@ -83,6 +83,8 @@ Each teammate's code only **receives data and returns data**. It never touches t
 
 ### Step 1 · Extractor: `pipeline/extractor.py`
 
+**How answers to bot questions are read** (`pipeline/answers.py`): the extractor was trained with the bot's question attached only to short CLARIFY replies, so attaching it to anything else makes the question's words leak into the reading. So the answer **speaks for itself first**: it is read alone, and the question is attached only if that finds nothing ("the first one", "either is fine"). Short answers to a CHALLENGE ("the first one" / "the second one") keep the earlier or newer statement, and short answers to a PROBE ("I enjoy it" / "just what I know") keep the stance as enjoyment or set it to 0, by rule.
+
 | Function | Who writes it | Called by | When | Does |
 |---|---|---|---|---|
 | `load(checkpoint_dir)` | implemented | `__init__` | **once**, at server start | Loads local tokenizer/model, validates 45 labelled logits and calibration; checkpoint files required |
@@ -205,7 +207,7 @@ What runs when the user presses Send, in order.
 | 4 | `app/server.py` | `chat()` | Finds the session (404 if unknown). A repeated message id returns the stored reply. Finished → 409. Copies the state. |
 | | **The seven steps** | | |
 | 5 | `pipeline/system.py` | `System.step()` | Turn + 1, stores the text, picks the context (the bot's last question) |
-| 6 | `pipeline/extractor.py` | `read()` → `predict()` per sentence | Message → readings; checkpoint label order translated into shared labels |
+| 6 | `pipeline/answers.py` → `pipeline/extractor.py` | `read_answer()` → `read()` → `predict()` per sentence | Short CHALLENGE/PROBE answers by rule; otherwise the answer alone first, the question only if needed. Message → readings |
 | 7 | `pipeline/tracker.py` | teammate's `update()` | Merges the readings into `state.slots` |
 | 8 | `pipeline/rule.py` | `candidates()` | Opposite signs, both confidence > 0.4? |
 | 9 | `pipeline/system.py` | `_confirmed()` | Only for candidates: asks the NLI check, keeps the conflict if the score > 0.60 |
@@ -384,6 +386,13 @@ Production launch requires the installed extractor checkpoint and completed trac
 |---|---|---|
 | `build(config, data_dir)` | startup | For each of the seven kinds, looks up the name in `config["components"]` and calls its factory. An unknown name → error listing the valid names. |
 | `_extractor_deberta`, `_tracker_decay`, `_confirmer_nli`, `_policy_manual`, `_rule`, `_ranker_configured`, `_ranker_structured`, `_filler_bank` | startup | Factories import selected components and pass configured paths/settings. All component names are validated before construction. |
+
+### `pipeline/answers.py`: reading answers to questions
+
+| Function | When | What it does |
+|---|---|---|
+| `read_answer(extractor, state, last, text)` | per message | After a question: short-answer rules first, then the answer alone, then with the question only if the answer alone has no stance |
+| `short_answer(kind, text, state, slot)` | per message | ≤ 8 words: CHALLENGE "first/earlier" → earlier statement, "second/latest" → newer; PROBE "enjoy" → keep as enjoyment, "just what I know" / "don't enjoy" → 0. Ambiguous answers return `None` and are read normally |
 
 ### `pipeline/extractor.py`: step 1
 

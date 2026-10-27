@@ -40,7 +40,8 @@ class RepairTests(unittest.TestCase):
         system.step(state,text)
         self.assertIs(system.tracker.update.call_args.args[1],item)
         self.assertEqual(state.slots['S'].value,.55)
-        system.extractor.read.assert_called_once_with(text,'Would you enjoy teaching?','S')
+        # the answer alone already had a stance, so the bot's question is not attached (pipeline/answers.py)
+        system.extractor.read.assert_called_once_with(text,None,None)
 
 
 if __name__=='__main__':unittest.main()
