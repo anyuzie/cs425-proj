@@ -146,6 +146,41 @@ Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rul
 
 ## Install and run
 
+### Without the trained models (mock mode)
+
+For trying the whole app on any laptop before the models are shared. **Everything is real except the three
+model parts:** a keyword reader stands in for the extractor, every rule-flagged contradiction counts as
+confirmed, and the fixed question bank replaces T5. No torch, no checkpoints, nothing to download.
+
+```
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m devtools.run_mock serve            # browser: http://localhost:8000 (researcher panel on)
+.venv/bin/python -m devtools.run_mock chat             # same, in the terminal
+.venv/bin/python -m devtools.run_mock eval --limit 20  # full vs no_probing on 20 dev profiles
+```
+
+On Windows use `.venv\Scripts\python.exe` instead of `.venv/bin/python`.
+
+Things to try: *"My dad runs a sales company so that's what I know."* → PROBE → *"just what I know"*;
+*"I love working with machines and tools."* then *"I hate repairing machines, it is boring."* → CHALLENGE →
+*"the second one"*; answer the either-or questions with *"definitely"*, *"no way"* or *"either is fine"*.
+
+**Mock results are flow checks, not results.** The keyword reader is crude, so the `eval` numbers mean
+nothing. Mock runs are labelled `mock_tracker`, and the app refuses to label them `actual_tracker`.
+
+### With the real models
+
+The models are not in GitHub (`/models/` is gitignored: each is several hundred MB). Every machine needs:
+
+| Folder | What | Get it from |
+|---|---|---|
+| `models/extractor/` | Trained DeBERTa extractor | Koon (Drive zip; `config.json` directly in the folder) |
+| `models/nli/` | `cross-encoder/nli-deberta-v3-base` | Download from Hugging Face |
+| `models/t5-questions-v3b/` | Trained T5 question wording | Chua. Only needed for T5 wording: the evaluation uses the question bank. |
+
+About 3–4 GB in total with the Python packages.
+
 ```
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt -r requirements-models.txt -r requirements-ranking.txt
@@ -153,3 +188,13 @@ python3 -m venv .venv
 .venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
 CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions: panel hidden
 ```
+
+Then, with the server running for the scenarios:
+
+```
+.venv/bin/python -m eval.scenario_tests                                    # 19 real-model scenarios
+.venv/bin/python -m eval.dialogue --config configs/system.question-bank.json --limit 120   # headline experiment
+.venv/bin/python training/extractor/context_leak_check.py                  # does the question leak into readings?
+```
+
+For the decay comparison, run the headline experiment twice: with `"decay": 1.0` and with `"decay": 0.9` in the config.

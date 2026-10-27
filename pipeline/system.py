@@ -43,8 +43,8 @@ class System:
         if input_mode not in {"actual_tracker", "mock_tracker", "unverified_tracker"}:
             raise ValueError("invalid tracker input mode")
         if input_mode == "actual_tracker" and any(
-                getattr(c, "name", "").startswith("test-") for c in (extractor, tracker)):
-            raise ValueError("test components cannot be labelled actual_tracker")
+                getattr(c, "name", "").startswith(("test-", "mock-")) for c in (extractor, tracker, confirmer)):
+            raise ValueError("test or mock components cannot be labelled actual_tracker")
         self.input_mode = input_mode
 
     @classmethod

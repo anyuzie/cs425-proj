@@ -1,0 +1,18 @@
+{
+  "components": {
+    "extractor": "mock-keyword",
+    "tracker": "decay",
+    "rule": "rule",
+    "confirmer": "mock-nli",
+    "ranker": "structured",
+    "policy": "manual",
+    "filler": "question-bank"
+  },
+  "settings": {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "decay": 1.0, "probe_reason_conf": 0.6, "input_mode": "mock_tracker"},
+  "paths": {
+    "ranking_config": "configs/ranking.yaml",
+    "extractor_checkpoint": "models/extractor",
+    "nli_model": "models/nli",
+    "t5_checkpoint": "models/t5-questions-v3b"
+  }
+}
