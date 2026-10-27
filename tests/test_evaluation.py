@@ -89,7 +89,7 @@ class BaselineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             a, b = Path(directory) / "a", Path(directory) / "b"
             first = run(Path("configs/m2.json"), a, history=Path(directory) / "history.csv")
-            self.assertEqual(first["profile_count"], 60)
+            self.assertEqual(first["profile_count"], 120)   # dev set grown to 120 profiles
             self.assertEqual(first, run(Path("configs/m2.json"), b, history=Path(directory) / "history.csv"))
             for name in ("metrics.json", "inputs.json", "per_profile.json", "config.json"):
                 self.assertEqual((a / name).read_bytes(), (b / name).read_bytes())
@@ -99,7 +99,7 @@ class BaselineTests(unittest.TestCase):
                         for line in (path / "predictions.jsonl").read_text().splitlines()]
             self.assertEqual(predictions(a), predictions(b))
             summary, diffs = paired_comparison(a, b, samples=100)
-            self.assertEqual(len(diffs), 60)
+            self.assertEqual(len(diffs), 120)
             self.assertEqual(summary["metrics"]["mrr"]["ci95"], [0, 0])
             # Exercise a real paired difference while preserving comparison inputs.
             metrics = json.loads((b / "per_profile.json").read_text())

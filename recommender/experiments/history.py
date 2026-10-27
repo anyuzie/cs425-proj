@@ -92,20 +92,40 @@ def append_history(report: Path, *, history: Path = DEFAULT_HISTORY,
         return True
 
 
+# Datasets the frozen M2 baseline used that have since been replaced in place. The originals were moved,
+# byte for byte, to these paths, so the baseline stays verifiable against its recorded hashes.
+LEGACY_DATA_MOVES = {"data/dev_profiles.jsonl": "data/archive/dev_profiles_60.jsonl"}
+
+
+def _same_text(data: bytes, expected: str) -> bool:
+    """Exact content match, allowing only LF vs CRLF line endings.
+
+    The frozen baseline was hashed on Windows (CRLF) while Git checks it out with LF elsewhere,
+    and the reverse can happen for data files. Any other byte difference still fails.
+    """
+    lf = data.replace(b"\r\n", b"\n")
+    return expected in {hashlib.sha256(v).hexdigest() for v in (data, lf, lf.replace(b"\n", b"\r\n"))}
+
+
 def register_legacy_baseline(report: Path, *, history: Path = DEFAULT_HISTORY) -> bool:
     """Recompute added cutoffs from original predictions, verifying saved inputs."""
     report = Path(report)
     manifest = json.loads((report / "manifest.json").read_text(encoding="utf-8"))
     if manifest["run_id"] != "m2_structured_oracle_dev_v1" or manifest["input_mode"] != "oracle" or manifest["split"] != "development":
         raise ValueError("legacy import supports only the saved M2 baseline")
+    verified = {}   # recorded dataset name -> the file whose bytes matched (original path or its archived copy)
     for name, expected in manifest["dataset_sha256"].items():
-        data = Path(name).read_bytes()
-        # Git on Windows may check out historical LF text as CRLF. Accept only
-        # an exact original hash after newline normalization, never content drift.
-        if expected not in {hashlib.sha256(data).hexdigest(), hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()}:
+        def matches(path):
+            return _same_text(Path(path).read_bytes(), expected)
+        moved = LEGACY_DATA_MOVES.get(name)
+        if matches(name):
+            verified[name] = Path(name)
+        elif moved and Path(moved).is_file() and matches(moved):
+            verified[name] = Path(moved)
+        else:
             raise ValueError(f"dataset fingerprint mismatch: {name}")
     for filename, key in (("config.json", "config_sha256"), ("inputs.json", "inputs_sha256")):
-        if hashlib.sha256((report / filename).read_bytes()).hexdigest() != manifest[key]:
+        if not _same_text((report / filename).read_bytes(), manifest[key]):
             raise ValueError(f"artifact fingerprint mismatch: {filename}")
     predictions = {}
     for line in (report / "predictions.jsonl").read_text(encoding="utf-8").splitlines():
@@ -113,7 +133,7 @@ def register_legacy_baseline(report: Path, *, history: Path = DEFAULT_HISTORY) -
         if row["run_id"] != manifest["run_id"]:
             raise ValueError("prediction run ID mismatch")
         predictions.setdefault(row["profile_id"], []).append(row)
-    profiles = read_profiles(Path("data/dev_profiles.jsonl"))
+    profiles = read_profiles(verified.get("data/dev_profiles.jsonl", Path("data/dev_profiles.jsonl")))
     if set(predictions) != {p["id"] for p in profiles}:
         raise ValueError("prediction profile set mismatch")
     pool, rows = set(manifest["pool"]), []
