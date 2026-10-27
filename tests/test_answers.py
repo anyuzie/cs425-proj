@@ -188,6 +188,32 @@ class SecondReviewRegressions(unittest.TestCase):
         self.assertEqual(ex.calls, [None])
 
 
+class FinalReviewRegressions(unittest.TestCase):
+    def test_mild_simulated_answer_keeps_the_asked_type(self):
+        class DeskIsC:  # alone, "desk"/"report" reads as C; with the question it answers R
+            name = "desk"
+            def read(self, text, context=None, expected_slot=None):
+                slots = [SlotReading("C", 1, .55, .9, "enjoyment", text)]
+                if context:
+                    slots.append(SlotReading(expected_slot, -1, .55, .9, "enjoyment", text))
+                return Reading(text, slots)
+        r = read_answer(DeskIsC(), State(last_reply="Hands-on with equipment, or information at a desk?"),
+                        Action("CLARIFY", "R"), "I'd lean towards the desk one, slightly.")
+        self.assertIn(("R", -1), [(s.slot, s.sign) for s in r.slots])
+
+    def test_hedged_choice_still_pairs(self):
+        ex = LeakyExtractor()
+        r = read_answer(ex, State(last_reply="Hands-on or desk?"), Action("CLARIFY", "R"),
+                        "Hmm not sure, maybe the hands-on one")
+        self.assertEqual([s.slot for s in r.slots], ["R"])
+
+    def test_into_it(self):
+        state = State()
+        state.slots["C"] = SlotState(.6, .9, "familiarity", "x", 1, [], .9, .9)
+        (r,) = short_answer("PROBE", "Not really into it", state, "C").slots
+        self.assertEqual(r.sign, -1)
+
+
 class ReviewRegressions(unittest.TestCase):
     """Cases from the independent review that the first version got wrong."""
 

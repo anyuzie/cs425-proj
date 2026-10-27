@@ -295,7 +295,7 @@ The NLI check needs no hand-off: the model downloads by name. Its tuned threshol
 - `decay`: how much one turn of age shrinks older evidence. `1.0` = off (all turns count equally), `0.9` = on. Test both.
 - `probe_reason_conf`: PROBE only fires when the reason head is more sure than this that the reason is familiarity.
 
-**Both arms treat evidence the same way.** An opposite statement is held for a CHALLENGE only when the rule and the NLI check confirm a contradiction. If they don't (low confidence, or NLI says it is an elaboration), it is merged like any other evidence, which is exactly what the control arm does with every opposite statement. So full vs `no_probing` differs only in asking.
+**Both arms treat evidence the same way.** An opposite statement is held for a CHALLENGE only when the rule and the NLI check confirm a contradiction. If they don't (low confidence, or NLI says it is an elaboration), it is merged like any other evidence, which is exactly what the control arm does with every opposite statement. So full vs `no_probing` differs in asking, with one exception: a contradiction the full arm holds but never resolves (still open at turn 10, or unanswered after a retry) keeps the newer statement at half confidence (manual section 7), while the control arm averages the two statements.
 
 **Known limits of the simulated evaluation** (`eval/dialogue.py`):
 - The simulated student answers a CHALLENGE or PROBE retry with the same resolution sentence, so those retries cannot succeed in simulation.

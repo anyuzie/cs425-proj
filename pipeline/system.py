@@ -145,7 +145,8 @@ class System:
         merge = getattr(self.tracker, "merge_unconfirmed", None)
         for candidate in state.conflict_candidates or []:
             if candidate.slot in flags:   # already held: keep the earlier statement, quote the latest opposite one
-                flags[candidate.slot] = replace(flags[candidate.slot], new=candidate.new)
+                if candidate.new.confidence > 0.4:   # a weak reading must not replace a confirmed quote
+                    flags[candidate.slot] = replace(flags[candidate.slot], new=candidate.new)
             elif merge:
                 merge(state, candidate)
         state.flags = list(flags.values())
