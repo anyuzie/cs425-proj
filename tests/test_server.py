@@ -115,6 +115,25 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(lines[1]["participant_code"] if "participant_code" in lines[1] else "P-014", "P-014")
         self.assertEqual(lines[1]["turn"], 1)
 
+    def test_log_lines_carry_the_turn_trace_and_the_viewer_reads_them(self):
+        import contextlib, io
+        from pathlib import Path
+        from devtools.view_logs import sessions, show
+        s = self.new(participant_code="TRACE-1")
+        self.say(s["session_id"], "I love working with machines and tools.")
+        path = Path(self.logs) / "TRACE-1.jsonl"
+        opening, turn = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines()]
+        self.assertIsNone(opening["trace"])
+        trace = turn["trace"]
+        for key in ("answer_path", "readings", "policy", "reply_source", "top5", "timings_ms"):
+            self.assertIn(key, trace)
+        self.assertEqual(trace["policy"]["action"], turn["action"])
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            show(sessions(path)[0])
+        for expected in ("USER: I love working with machines and tools.", "read:", "extractor:", "policy:", "BOT ("):
+            self.assertIn(expected, out.getvalue())
+
     def test_same_message_id_steps_once(self):
         s = self.new()
         body = {"session_id": s["session_id"], "text": "I love working with machines and tools.", "message_id": "m-1"}

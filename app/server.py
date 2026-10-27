@@ -64,7 +64,8 @@ def _log(system: System, sid: str, s: Session, state: State, text: str | None, o
         "done": out["done"], "profile": system.profile(state), "debug": s.debug,
         "input_mode": system.input_mode, "components": system.components,
         "ranking_input": state.ranking_trace[-1] if state.ranking_trace else None,
-        "resolved_ranking": getattr(system.ranker, "resolved_config", None)})
+        "resolved_ranking": getattr(system.ranker, "resolved_config", None),
+        "trace": state.turn_trace if text is not None else None})
 
 
 @app.get("/api/health", response_model=Health)

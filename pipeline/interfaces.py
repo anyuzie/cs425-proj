@@ -96,6 +96,7 @@ class State:
     revisited: set[str] = field(default_factory=set)            # settled types asked once more at the end
     unresolved_conflicts: list[str] = field(default_factory=list)  # challenges given up on (newer statement kept)
     profile_changed: bool = False      # set by the policy when it changed a slot this turn; System re-ranks
+    turn_trace: dict = field(default_factory=dict)  # how this turn was handled, for the transcript log
 
 
 class Extractor(Protocol):

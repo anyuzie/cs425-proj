@@ -104,20 +104,36 @@ def short_answer(kind: str | None, text: str, state, slot: str | None) -> Readin
     return None
 
 
-def read_answer(extractor, state, last, text: str) -> Reading:
-    """Read the answer to the last bot question without letting the question's words leak in."""
+def read_answer(extractor, state, last, text: str, trace: dict | None = None) -> Reading:
+    """Read the answer to the last bot question without letting the question's words leak in.
+    If `trace` is given, it records which path was taken (for the transcript log)."""
+    trace = {} if trace is None else trace
     kind = asked_kind(last)
+    trace.update(question_kind=kind, asked_slot=getattr(last, "slot", None), question_attached=False)
     alone = extractor.read(text, None, None)
     if kind not in ("CLARIFY", "CHALLENGE", "PROBE") or not last.slot:
+        trace["answer_path"] = "not an answer to a question: read alone"
         return alone
     if any(r.slot == last.slot for r in alone.slots):
-        return alone                              # the answer speaks for itself
+        trace["answer_path"] = "read alone: the answer names the asked type itself"
+        return alone
     if kind in ("CHALLENGE", "PROBE"):
         rule = short_answer(kind, text, state, last.slot)
+        trace["answer_path"] = (f"{kind.lower()} rule" if rule else
+                                f"read alone: {kind.lower()} questions are never attached, no rule matched")
         return Reading(text, alone.slots + rule.slots) if rule else alone
     if not alone.slots and needs_repair(text) and not _CHOICE.search(text):
-        return alone                              # "I can't decide": no stance, never borrow the question's topic
+        trace["answer_path"] = "unsure reply: question not attached"
+        return alone
     if alone.slots and not (_ANSWERISH.search(text) and len(text.split()) <= PAIR_MAX_WORDS):
-        return alone                              # a statement about something else, not a short reply to the either-or
+        trace["answer_path"] = "read alone: a statement about another type, not a reply to the either-or"
+        return alone
     paired = extractor.read(text, state.last_reply, last.slot)
+    trace.update(question_attached=True, answer_path="read with the question (asked type only)",
+                 paired_raw=_readings(paired))
     return Reading(text, alone.slots + [r for r in paired.slots if r.slot == last.slot])
+
+
+def _readings(reading: Reading) -> list[dict]:
+    return [{"slot": r.slot, "sign": r.sign, "strength": round(r.strength, 3), "confidence": round(r.confidence, 3),
+             "reason": r.reason, "reason_confidence": round(r.reason_confidence, 3)} for r in reading.slots]

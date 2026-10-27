@@ -197,4 +197,12 @@ Then, with the server running for the scenarios:
 .venv/bin/python training/extractor/context_leak_check.py                  # does the question leak into readings?
 ```
 
+**Reading the transcripts.** Every turn is logged to `logs/<participant code>.jsonl`, including how the answer was read (alone, with the question, or by a rule), what the extractor found, contradiction checks with their NLI scores, the policy's reason, whether T5 or the question bank wrote the reply, the top 5 and the time per step:
+
+```
+.venv/bin/python -m devtools.view_logs                        # list logs and sessions
+.venv/bin/python -m devtools.view_logs logs/P-014.jsonl --last  # latest session, turn by turn
+.venv/bin/python -m devtools.view_logs logs/P-014.jsonl --brief # one line per turn
+```
+
 For the decay comparison, run the headline experiment twice: with `"decay": 1.0` and with `"decay": 0.9` in the config.
