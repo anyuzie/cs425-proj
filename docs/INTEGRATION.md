@@ -11,7 +11,7 @@ The app has **no stand-ins**. It won't start until the **tracker and policy** ar
 | Step | Part | File | Status | Config name (already set) |
 |---|---|---|---|---|
 | 1 | Preference extractor | `pipeline/extractor.py` | **done**; needs the checkpoint in `models/extractor/` | `"extractor": "deberta"` |
-| 2 | State tracker | `pipeline/tracker.py` | **teammate**: fill `update()` | `"tracker": "decay"` |
+| 2 | State tracker | `pipeline/tracker.py` | **done**: confidence-weighted merge; recency decay is `settings.decay` (1.0 = off, 0.9 = on) | `"tracker": "decay"` |
 | 3 | Contradiction rule | `pipeline/rule.py` | done | `"rule": "rule"` |
 | 4 | NLI check | `pipeline/nli.py` | **done** (threshold tuned, see §7) | `"confirmer": "nli"` |
 | 5 | Ranker | `recommender/` (`RankingPipeline`, set up in `configs/ranking.yaml`) | **done**: structured, BM25, MiniLM/FAISS and RRF (M1–M5) | `"ranker": "configured"` |
@@ -74,8 +74,8 @@ Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the
 
 1. **Write `ManualPolicy._decide(state)`** and return `Action(kind, slot, why, payload)`. Check these top to bottom; the first match wins:
    1. **CHALLENGE**: `state.flags` isn't empty. Payload `{old_src, old_turn, new_src}`.
-   2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > PROBE_REASON_CONF` (0.60), and it hasn't been probed yet. Payload `{new_src}`.
-   3. **ABSTAIN**: the last action was a question and the reply had no stance. Two strikes settle the type.
+   2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > settings.probe_reason_conf` (default 0.60), and it hasn't been probed yet. Payload `{new_src}`.
+   3. **ABSTAIN**: the last action was a question and the reply had no stance. Ask **once** more with a concrete example; if still unsure, move on: the type is marked "no clear preference" (it counts as covered and is asked once more later if turns are left), and a stuck CHALLENGE keeps the newer statement at half confidence.
    4. **RECOMMEND**: every type filled or settled, the profile has converged, and the conversation is 5 to 10 turns in.
    5. **CLARIFY**: ask the unfilled type with the highest variance. Use `state.ranking`, this turn's top 100 occupations, best first, each with `occupation_z`.
 2. **Update the bookkeeping yourself:** `state.challenged`, `probed`, `settled` and `strikes`.

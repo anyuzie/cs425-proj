@@ -67,7 +67,8 @@ def compare(system, profiles, bank):
     results = {}
     for arm, no_probing in (("full", False), ("no_probing", True)):
         candidate = copy(system)
-        candidate.policy = ManualPolicy(system.max_turns, no_probing=no_probing)
+        candidate.policy = ManualPolicy(system.max_turns, no_probing=no_probing,
+                                        probe_reason_conf=getattr(system.policy, "probe_reason_conf", 0.60))
         sessions = [simulate(candidate, profile, bank) for profile in profiles]
         results[arm] = dict(summary=aggregate([s["metrics"] for s in sessions]), sessions=sessions)
     delta = {key: results["full"]["summary"][key] - results["no_probing"]["summary"][key]

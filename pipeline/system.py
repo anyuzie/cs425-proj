@@ -128,6 +128,8 @@ class System:
         asked = last is not None and last.kind in QUESTIONS  # any slot question (ABSTAIN re-asks one)
         reading = self.extractor.read(text, state.last_reply if asked else None, last.slot if asked else None)
         repair = asked and needs_repair(text)
+        # The control arm listens to everything: with no_probing, opposite readings are merged, not held.
+        state.merge_conflicts = bool(getattr(self.policy, "no_probing", False))
         self.tracker.update(state, reading)
         retry = last.payload.get("retry", "CLARIFY") if last and last.kind == "ABSTAIN" else last.kind if last else None
         if last and retry in ("CHALLENGE", "PROBE") and any(r.slot == last.slot for r in reading.slots):

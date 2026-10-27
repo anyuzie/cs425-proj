@@ -17,7 +17,7 @@ class SlotReading:
     confidence: float
     reason: str          # enjoyment | familiarity | neither
     source: str          # source sentence
-    reason_confidence: float = 1.0   # retained for inspection, not action eligibility
+    reason_confidence: float = 1.0   # probability of `reason`; PROBE needs it above settings.probe_reason_conf
 
     @property
     def value(self) -> float:
@@ -92,6 +92,9 @@ class State:
     done: bool = False
     profile_history: list[dict[str, float]] = field(default_factory=list)
     conflict_candidates: list[Flag] | None = None
+    merge_conflicts: bool = False      # control arm: merge opposite readings instead of holding them for a CHALLENGE
+    revisited: set[str] = field(default_factory=set)            # settled types asked once more at the end
+    unresolved_conflicts: list[str] = field(default_factory=list)  # challenges given up on (newer statement kept)
 
 
 class Extractor(Protocol):

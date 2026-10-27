@@ -14,9 +14,9 @@ from pipeline.tracker import DecayTracker
 from pipeline.t5 import T5Filler
 
 
-def reading(text="a statement", reason="enjoyment", **slots):
+def reading(text="a statement", reason="enjoyment", reason_conf=0.0, **slots):
     return Reading(text, [SlotReading(t, 1 if value >= 0 else -1, abs(value), confidence,
-                                     reason, text, 0) for t, (value, confidence) in slots.items()])
+                                     reason, text, reason_conf) for t, (value, confidence) in slots.items()])
 
 
 class TestProductionTracker(TrackerContract, unittest.TestCase):
@@ -71,8 +71,13 @@ class DialogueIntegrationTests(unittest.TestCase):
         self.assertEqual(self.state.slots['S'].value, -.8)
         self.assertEqual(self.step(reading('I enjoy teaching after all', S=(.8, .9))).action, 'CHALLENGE')
 
-    def test_familiarity_no_confidence_gate_and_targeted_answer(self):
-        result = self.step(reading('I studied sales', reason='familiarity', E=(.7, 0)))
+    def test_familiarity_probe_needs_reason_confidence_and_targeted_answer(self):
+        # manual section 7: only probe when the reason head is fairly sure it is familiarity (> 0.60)
+        result = self.step(reading('I studied sales', reason='familiarity', reason_conf=.6, E=(.7, 0)))
+        self.assertNotEqual(result.action, 'PROBE')
+        self.state = State()
+        self.system.start(self.state)
+        result = self.step(reading('I studied sales', reason='familiarity', reason_conf=.9, E=(.7, 0)))
         self.assertEqual(result.action, 'PROBE')
         result = self.step(reading('not sure'))
         self.assertIn('I studied sales', result.reply)
@@ -91,13 +96,17 @@ class DialogueIntegrationTests(unittest.TestCase):
                 result=self.step(reading('I dislike teaching', S=(-1,confidence)))
                 self.assertEqual(result.action,expected)
 
-    def test_no_signal_never_settles_and_stops_at_ten(self):
+    def test_no_signal_retries_once_per_type_and_stops_at_ten(self):
+        actions = []
         for _ in range(10):
             result = self.step(reading('hmm'))
+            actions.append((result.action, self.state.last_action.slot))
         self.assertTrue(result.done)
-        self.assertFalse(self.state.slots)
-        self.assertFalse(self.state.settled)
-        self.assertIsNone(result.recommendations)
+        self.assertFalse(self.state.slots)                  # nothing invented
+        self.assertTrue(self.state.settled)                 # unsure types marked as no clear preference
+        self.assertIsNone(result.recommendations)           # still no recommendations without a signal
+        for (a, slot), (b, nxt) in zip(actions, actions[1:]):
+            self.assertFalse(a == b == 'ABSTAIN' and slot == nxt, actions)   # never the same retry twice
         with self.assertRaises(ValueError):
             self.step(reading('more'))
 

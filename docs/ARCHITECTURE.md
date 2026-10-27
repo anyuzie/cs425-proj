@@ -47,7 +47,7 @@ Rule of thumb: **training code may import shared application code, but the app n
 | `pipeline/interfaces.py` | — | done | The data passed between steps (`Reading`, `SlotReading`, `State`, `Flag`, `Action`) and what each part must provide |
 | `pipeline/registry.py` | — | done | Maps config names (`"deberta"`, `"nli"`, …) to the code that builds each part |
 | `pipeline/extractor.py` | 1 | adapter implemented; checkpoint pending locally | Loads the trained 45-logit DeBERTa checkpoint, maps semantic head labels and produces `Reading` |
-| `pipeline/tracker.py` | 2 | **teammate** fills `update()` | State tracker with recency decay |
+| `pipeline/tracker.py` | 2 | done | State tracker: confidence-weighted merge, optional recency decay (`settings.decay`); in the control arm it merges opposite statements instead of holding them |
 | `pipeline/rule.py` | 3 | done | Contradiction rule |
 | `pipeline/nli.py` | 4 | **teammate** fills `__init__()` + `score()` | NLI contradiction check |
 | `recommender/ranker.py` | 5 | done | Configured M1/BM25/MiniLM pipeline with optional occupation-level RRF; M1-only default |
@@ -161,8 +161,8 @@ score(...) → 0.20       → dropped
 
 The five rules, checked top to bottom (first match wins):
 1. **CHALLENGE** when there's a confirmed contradiction.
-2. **PROBE** when a reason is familiarity **and** its `reason_confidence` > 0.60.
-3. **ABSTAIN** when the reply had no stance. Two strikes settle that type.
+2. **PROBE** when a reason is familiarity **and** its `reason_confidence` > `settings.probe_reason_conf` (default 0.60).
+3. **ABSTAIN** when the reply had no stance: ask once more with a concrete example, then move on. The type becomes "no clear preference" (counts as covered; asked once more later if turns are left). A stuck CHALLENGE keeps the newer statement at half confidence and is logged in `state.unresolved_conflicts`.
 4. **RECOMMEND** when the profile is ready, or at turn 10.
 5. **CLARIFY** the unfilled type with the highest variance.
 
@@ -284,9 +284,14 @@ The NLI check needs no hand-off: the model downloads by name. Its tuned threshol
 ```json
 "components": {"extractor": "deberta", "tracker": "decay", "rule": "rule", "confirmer": "nli",
                "ranker": "configured", "policy": "manual", "filler": "question-bank"},
-"settings":   {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "input_mode": "actual_tracker"},
+"settings":   {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "decay": 1.0,
+               "probe_reason_conf": 0.6, "input_mode": "actual_tracker"},
 "paths":      {"ranking_config": "configs/ranking.yaml", "extractor_checkpoint": "models/extractor"}
 ```
+
+- `no_probing`: the control arm. No CHALLENGE or PROBE, and the tracker merges opposite statements instead of holding them, so it "listens to everything".
+- `decay`: how much one turn of age shrinks older evidence. `1.0` = off (all turns count equally), `0.9` = on. Test both.
+- `probe_reason_conf`: PROBE only fires when the reason head is more sure than this that the reason is familiarity.
 
 - The snippet shows component names and relevant settings/path entries; the complete file also contains NLI and legacy artifact paths. `configured` loads ranking selections from YAML; `structured` remains available for compatibility.
 - The file for a part that isn't filled in yet stops startup with `fill in … (docs/INTEGRATION.md)`.
