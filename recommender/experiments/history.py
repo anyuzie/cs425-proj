@@ -118,7 +118,7 @@ def register_legacy_baseline(report: Path, *, history: Path = DEFAULT_HISTORY) -
         def matches(path):
             return _same_text(Path(path).read_bytes(), expected)
         moved = LEGACY_DATA_MOVES.get(name)
-        if matches(name):
+        if Path(name).is_file() and matches(name):
             verified[name] = Path(name)
         elif moved and Path(moved).is_file() and matches(moved):
             verified[name] = Path(moved)

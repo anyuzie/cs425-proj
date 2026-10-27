@@ -98,10 +98,16 @@ class ShortProbeAnswers(unittest.TestCase):
                 self.assertEqual((r.sign, r.strength, r.reason), (1, .55, "enjoyment"))
 
     def test_familiarity_only_means_no_real_interest(self):
-        for text in ("just what I know", "mainly experience", "I'm just used to it", "I don't enjoy it"):
+        for text in ("just what I know", "mainly experience", "I'm just used to it"):
             with self.subTest(text=text):
                 (r,) = self.answer(text).slots
                 self.assertEqual((r.value, r.reason), (0, "familiarity"))
+
+    def test_not_enjoying_it_is_a_mild_dislike(self):
+        for text in ("I don't enjoy it", "I don't really like it", "never liked it"):
+            with self.subTest(text=text):
+                (r,) = self.answer(text).slots
+                self.assertEqual((r.sign, r.strength), (-1, .55))
 
     def test_mixed_or_unclear_answers_are_read_normally(self):
         for text in ("I like it but it's mostly habit", "hmm", "maybe"):
@@ -135,6 +141,60 @@ class EndToEnd(unittest.TestCase):
         result = self.step(reading("just what I know"))
         self.assertNotEqual(result.action, "ABSTAIN")                         # it was an answer, not "unsure"
         self.assertEqual(self.state.slots["E"].value, 0)                     # no real interest
+
+
+class ReviewRegressions(unittest.TestCase):
+    """Cases from the independent review that the first version got wrong."""
+
+    def test_challenge_rule_ignores_now_before_and_negation(self):
+        for text in ("I now enjoy hands-on work", "Not the first one", "The earlier one was a mistake",
+                     "I still love it now", "I liked it before"):
+            with self.subTest(text=text):
+                self.assertIsNone(short_answer("CHALLENGE", text, challenge_state(), "R"))
+        (r,) = short_answer("CHALLENGE", "No, the second one", challenge_state(), "R").slots
+        self.assertEqual(r.sign, -1)
+
+    def test_challenge_reply_with_its_own_stance_speaks_for_itself(self):
+        class Says:  # alone, the reply states R+ itself
+            name = "says"
+            def read(self, text, context=None, expected_slot=None):
+                return Reading(text, [SlotReading("R", 1, .9, .9, "enjoyment", text)])
+        r = read_answer(Says(), challenge_state(), Action("CHALLENGE", "R"), "I now enjoy hands-on work")
+        self.assertEqual([(s.slot, s.sign) for s in r.slots], [("R", 1)])
+
+    def test_probe_rule_reads_local_negation_and_skips_dislikes(self):
+        state = State()
+        state.slots["C"] = SlotState(.6, .9, "familiarity", "x", 1, [], .9, .9)
+        (r,) = short_answer("PROBE", "I do enjoy it, not just habit", state, "C").slots
+        self.assertEqual((r.sign, r.reason), (1, "enjoyment"))
+        state.slots["C"] = SlotState(-.6, .9, "familiarity", "x", 1, [], .9, .9)
+        self.assertIsNone(short_answer("PROBE", "Actually I'd enjoy it", state, "C"))
+
+    def test_clarify_answer_keeps_the_asked_type_alongside_another_stance(self):
+        class Mixed:
+            name = "mixed"
+            def read(self, text, context=None, expected_slot=None):
+                slots = [SlotReading("E", -1, .8, .9, "enjoyment", text)]
+                if context:
+                    slots.append(SlotReading(expected_slot, 1, .55, .9, "enjoyment", text))
+                return Reading(text, slots)
+        r = read_answer(Mixed(), State(last_reply="Would you rather help people or work alone?"),
+                        Action("CLARIFY", "S"), "Yes, but I hate selling")
+        self.assertEqual(sorted((s.slot, s.sign) for s in r.slots), [("E", -1), ("S", 1)])
+
+    def test_clarify_statement_about_something_else_does_not_borrow_the_question(self):
+        ex = LeakyExtractor()
+        r = read_answer(ex, State(last_reply="Would you rather fix machines or write reports?"),
+                        Action("CLARIFY", "R"), "I enjoy analysing scientific research data.")
+        self.assertEqual([s.slot for s in r.slots], ["I"])
+        self.assertEqual(ex.calls, [None])
+
+    def test_challenge_and_probe_never_attach_the_question(self):
+        for kind in ("CHALLENGE", "PROBE"):
+            with self.subTest(kind=kind):
+                ex = LeakyExtractor()
+                read_answer(ex, challenge_state(), Action(kind, "R"), "hmm")
+                self.assertEqual(ex.calls, [None])   # scenario 10: "hmm" after the challenge read as R+
 
 
 if __name__ == "__main__":

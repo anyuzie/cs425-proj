@@ -2,7 +2,10 @@
 
 from statistics import pvariance
 
+PROBE_REASON_CONF = 0.60   # default for settings.probe_reason_conf (manual section 7)
+
 from .interfaces import MAX_TURNS, TYPES, Action, SlotState, State
+from .repair import needs_repair
 
 
 class PolicyBase:
@@ -43,7 +46,8 @@ class ManualPolicy(PolicyBase):
     name = "manual"
     RETRIES = 1   # unsure answers: rephrase once (with a concrete example), then move on
 
-    def __init__(self, max_turns: int = MAX_TURNS, no_probing: bool = False, probe_reason_conf: float = 0.60) -> None:
+    def __init__(self, max_turns: int = MAX_TURNS, no_probing: bool = False,
+                 probe_reason_conf: float = PROBE_REASON_CONF) -> None:
         super().__init__(max_turns, no_probing)
         if isinstance(probe_reason_conf, bool) or not isinstance(probe_reason_conf, (int, float)) \
                 or not 0 <= probe_reason_conf <= 1:
@@ -58,11 +62,12 @@ class ManualPolicy(PolicyBase):
             if flag:   # manual section 7: keep the newer statement at half confidence, log it as unresolved
                 new = flag.new
                 old = state.slots.get(slot)
-                history = (old.history if old else []) + [new]
-                state.slots[slot] = SlotState(new.value, new.confidence / 2, new.reason, new.source, state.turn,
+                history = old.history if old else [new]   # the tracker already recorded the newer reading
+                state.slots[slot] = SlotState(new.value, new.confidence / 2, new.reason, new.source, new.turn,
                                               history, new.reason_confidence, new.confidence / 2)
                 state.unresolved_conflicts.append(slot)
-            state.resolved.add(slot)
+                state.profile_changed = True   # System re-ranks; no RECOMMEND on a turn the profile changed
+            state.resolved.add(slot)   # closed (not answered): the rule must not raise it again
             return f"challenge on {slot} unresolved after a retry; kept the newer statement at half confidence"
         if retry == "PROBE":
             return f"probe on {slot} unanswered after a retry; kept the reading as it was"
@@ -83,8 +88,13 @@ class ManualPolicy(PolicyBase):
             revisit = retry == "CLARIFY" and slot in state.revisited
             if state.strikes[slot] <= self.RETRIES and not revisit and not (
                     self.no_probing and retry in ("CHALLENGE", "PROBE")):
-                payload = {**last.payload, "retry": retry, "previous_question": state.last_reply, "repair": True}
-                return Action("ABSTAIN", slot, "no stance; ask again once with a concrete example", payload)
+                payload = {**last.payload, "retry": retry, "previous_question": state.last_reply}
+                asked_meaning = bool(state.user_texts) and needs_repair(state.user_texts[-1])
+                if retry == "CLARIFY" and not asked_meaning:
+                    # an unreadable answer: next phrasing (manual section 7). "What do you mean?" / "not sure"
+                    # keeps the same question and gets the concrete-example wording instead.
+                    payload["clarify_index"] = last.payload.get("clarify_index", 0) + 1
+                return Action("ABSTAIN", slot, "no stance; ask once more with the next phrasing", payload)
             state.strikes.pop(slot, None)
             note = self._give_up(state, retry, slot) if slot else ""
             just_settled = slot   # come back later, not straight away
@@ -97,7 +107,7 @@ class ManualPolicy(PolicyBase):
         converged = len(snapshots) == 3 and all(
             t in a and t in b and abs(a[t] - b[t]) <= .1 + 1e-12
             for a, b in zip(snapshots, snapshots[1:]) for t in state.slots)
-        if state.turn >= 5 and len(covered) == 6 and state.slots and converged and (
+        if state.turn >= 5 and len(covered) == 6 and state.slots and converged and not state.profile_changed and (
                 self.no_probing or (not state.flags and probe is None)):
             return Action("RECOMMEND", why=_join(note, "all six interests covered and stable over two updates"))
         if not self.no_probing:
@@ -116,13 +126,16 @@ class ManualPolicy(PolicyBase):
             pool = state.ranking[:100]
             slot = max(unfilled, key=lambda t: pvariance([o.occupation_z[t] for o in pool]) if pool else 0)
             why = "unfilled interest with largest top-100 occupation variance"
-        elif later and state.turn < self.max_turns - 1:
+        elif later and state.turn < self.max_turns:
             slot = later[0]   # turns to spare: ask an unsure type once more, with its next phrasing
             state.revisited.add(slot)
             why = f"turns to spare: ask {slot} once more (it was unsure earlier)"
-        else:
+        elif state.slots:
             slot = min(state.slots, key=lambda t: state.slots[t].confidence)
             why = "refine least-confident interest while waiting for convergence or minimum turns"
+        else:
+            slot = min(TYPES, key=lambda t: state.clarify_count.get(t, 0))
+            why = "nothing stated yet: ask the least-asked interest again"
         return Action("CLARIFY", slot, _join(note, why))
 
 

@@ -156,6 +156,70 @@ class DecaySetting(RulesBase):
         self.assertEqual(self.system.tracker.decay, .9)
 
 
+class ReviewRegressionsPolicy(RulesBase):
+    def stuck_challenge(self):
+        everything = reading(**{t: (.9, .9) for t in "RIASEC"})
+        for _ in range(3):
+            self.step(everything)
+        self.assertEqual(self.step(reading("I hate machines", R=(-.9, .9))).action, "CHALLENGE")
+        self.assertEqual(self.step(reading("hmm")).action, "ABSTAIN")
+        return self.step(reading("hmm"))
+
+    def test_give_up_reranks_and_does_not_recommend_on_a_stale_profile(self):
+        result = self.stuck_challenge()
+        self.assertNotEqual(result.action, "RECOMMEND")                      # the profile just changed
+        self.assertEqual(self.state.profile_history[-1]["R"], self.state.slots["R"].value)
+        fresh = self.system._rank(self.state, 100)
+        self.assertEqual([o.code for o in self.state.ranking], [o.code for o in fresh])
+
+    def test_give_up_does_not_duplicate_history_and_keeps_the_statement_turn(self):
+        self.stuck_challenge()
+        history = self.state.slots["R"].history
+        self.assertEqual([round(h.value, 2) for h in history].count(-.9), 1)
+        self.assertEqual(self.state.slots["R"].turn, 4)                      # when "I hate machines" was said
+
+    def test_everything_unsure_with_a_long_limit_does_not_crash(self):
+        self.system.policy, self.system.max_turns = ManualPolicy(20), 20
+        for _ in range(20):
+            result = self.step(reading("hmm"))
+        self.assertTrue(result.done)
+        self.assertFalse(self.state.slots)
+
+    def test_plain_retry_lets_t5_word_it(self):
+        self.step(reading("I enjoy research", I=(1, .9)))
+        self.step(reading("asdfgh"))
+        self.assertEqual(self.state.last_action.kind, "ABSTAIN")
+        self.assertNotIn("repair", self.state.last_action.payload)          # only "what do you mean" gets the example
+
+
+class FullArmMergesUnconfirmedOpposites(RulesBase):
+    """Review finding 7: the two arms must differ only in asking."""
+
+    def test_rejected_by_nli_is_merged_not_dropped(self):
+        self.step(reading("I like working with people", S=(1, .9)))
+        with patch.object(self.system.confirmer, "score", return_value=.1):   # NLI: an elaboration, not a conflict
+            result = self.step(reading("I need quiet to focus", S=(-1, .9)))
+        self.assertNotEqual(result.action, "CHALLENGE")
+        self.assertAlmostEqual(self.state.slots["S"].value, 0)               # same as the control arm would hold
+
+    def test_low_confidence_opposite_is_merged(self):
+        self.step(reading("I like teaching", S=(1, .9)))
+        self.step(reading("teaching is meh", S=(-1, .3)))                    # rule needs > 0.4 on both
+        self.assertAlmostEqual(self.state.slots["S"].value, (.9 - .3) / 1.2)
+
+
+class DecayCompounds(unittest.TestCase):
+    def test_three_updates(self):
+        tracker, state, d = DecayTracker(.9), State(), .9
+        for turn, value in ((1, 1.0), (3, .2), (6, .6)):
+            state.turn = turn
+            tracker.update(state, reading(I=(value, .9)))
+        w1 = .9 * d ** 2 + .9                         # weight after turn 3
+        v1 = (1.0 * .9 * d ** 2 + .2 * .9) / w1
+        expected = (v1 * w1 * d ** 3 + .6 * .9) / (w1 * d ** 3 + .9)
+        self.assertAlmostEqual(state.slots["I"].value, expected)
+
+
 class EvaluationKeepsSettings(unittest.TestCase):
     def test_compare_builds_both_arms_with_the_configured_probe_threshold(self):
         from eval import dialogue

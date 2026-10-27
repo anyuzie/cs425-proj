@@ -14,7 +14,7 @@ from pipeline.tracker import DecayTracker
 from pipeline.t5 import T5Filler
 
 
-def reading(text="a statement", reason="enjoyment", reason_conf=0.0, **slots):
+def reading(text="a statement", reason="enjoyment", reason_conf=1.0, **slots):
     return Reading(text, [SlotReading(t, 1 if value >= 0 else -1, abs(value), confidence,
                                      reason, text, reason_conf) for t, (value, confidence) in slots.items()])
 

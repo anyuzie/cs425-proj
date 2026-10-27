@@ -77,7 +77,7 @@ Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the
 1. **Write `ManualPolicy._decide(state)`** and return `Action(kind, slot, why, payload)`. Check these top to bottom; the first match wins:
    1. **CHALLENGE**: `state.flags` isn't empty. Payload `{old_src, old_turn, new_src}`.
    2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > settings.probe_reason_conf` (default 0.60), and it hasn't been probed yet. Payload `{new_src}`.
-   3. **ABSTAIN**: the last action was a question and the reply had no stance. Ask **once** more with a concrete example; if still unsure, move on: the type is marked "no clear preference" (it counts as covered and is asked once more later if turns are left), and a stuck CHALLENGE keeps the newer statement at half confidence.
+   3. **ABSTAIN**: the last action was a question and the reply had no stance. Ask **once** more (same question with an example after "what do you mean?"/"not sure", next phrasing after an unreadable answer); if still unsure, move on: the type is marked "no clear preference" (counts as covered; asked once more only while the profile is not ready), and a stuck CHALLENGE keeps the newer statement at half confidence.
    4. **RECOMMEND**: every type filled or settled, the profile has converged, and the conversation is 5 to 10 turns in.
    5. **CLARIFY**: ask the unfilled type with the highest variance. Use `state.ranking`, this turn's top 100 occupations, best first, each with `occupation_z`.
 2. **Update the bookkeeping yourself:** `state.challenged`, `probed`, `settled` and `strikes`.

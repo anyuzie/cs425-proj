@@ -95,6 +95,7 @@ class State:
     merge_conflicts: bool = False      # control arm: merge opposite readings instead of holding them for a CHALLENGE
     revisited: set[str] = field(default_factory=set)            # settled types asked once more at the end
     unresolved_conflicts: list[str] = field(default_factory=list)  # challenges given up on (newer statement kept)
+    profile_changed: bool = False      # set by the policy when it changed a slot this turn; System re-ranks
 
 
 class Extractor(Protocol):

@@ -81,7 +81,8 @@ def _confirmer_nli(cfg, d):
 def _policy_manual(cfg, d):
     from .policy import ManualPolicy  # pipeline/policy.py
     st = _settings(cfg)
-    return ManualPolicy(st.get("max_turns", 10), st.get("no_probing", False), st.get("probe_reason_conf", 0.60))
+    from .policy import PROBE_REASON_CONF
+    return ManualPolicy(st.get("max_turns", 10), st.get("no_probing", False), st.get("probe_reason_conf", PROBE_REASON_CONF))
 
 
 REGISTRY: dict[str, dict] = {

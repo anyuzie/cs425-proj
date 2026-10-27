@@ -141,9 +141,18 @@ class System:
         for flag in self._confirmed(state):
             flags.setdefault(flag.slot, flag)
         state.flags = list(flags.values())
+        # Opposite readings the rule/NLI did not confirm are ordinary evidence: merge them (both arms alike).
+        merge = getattr(self.tracker, "merge_unconfirmed", None)
+        for candidate in state.conflict_candidates or []:
+            if merge and candidate.slot not in flags:
+                merge(state, candidate)
         state.profile_history.append({t: s.value for t, s in state.slots.items()})
         state.ranking = self._rank(state, POLICY_TOP_K)  # the policy reads it; the panel and cards reuse it
+        state.profile_changed = False
         action = self.policy.decide(state)
+        if state.profile_changed:   # the policy settled a stuck challenge: keep history, panel and cards consistent
+            state.profile_history[-1] = {t: s.value for t, s in state.slots.items()}
+            state.ranking = self._rank(state, POLICY_TOP_K)
         if action.kind == 'CLARIFY':
             from .t5_v2 import FOCUS
             action.payload['focus'] = FOCUS[action.slot][action.payload['clarify_index'] % 3]

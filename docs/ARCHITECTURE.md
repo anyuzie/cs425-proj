@@ -164,7 +164,7 @@ score(...) → 0.20       → dropped
 The five rules, checked top to bottom (first match wins):
 1. **CHALLENGE** when there's a confirmed contradiction.
 2. **PROBE** when a reason is familiarity **and** its `reason_confidence` > `settings.probe_reason_conf` (default 0.60).
-3. **ABSTAIN** when the reply had no stance: ask once more with a concrete example, then move on. The type becomes "no clear preference" (counts as covered; asked once more later if turns are left). A stuck CHALLENGE keeps the newer statement at half confidence and is logged in `state.unresolved_conflicts`.
+3. **ABSTAIN** when the reply had no stance: ask **once** more, then move on. "What do you mean?" / "not sure" keeps the same question with a concrete example; an unreadable answer gets the next phrasing. A second unsure answer marks the type "no clear preference" (counts as covered); it is asked once more later **only if the profile is not ready to recommend yet**. A stuck CHALLENGE keeps the newer statement at half confidence, is logged in `state.unresolved_conflicts`, and the bot re-ranks and does not recommend on that turn.
 4. **RECOMMEND** when the profile is ready, or at turn 10.
 5. **CLARIFY** the unfilled type with the highest variance.
 
@@ -294,6 +294,12 @@ The NLI check needs no hand-off: the model downloads by name. Its tuned threshol
 - `no_probing`: the control arm. No CHALLENGE or PROBE, and the tracker merges opposite statements instead of holding them, so it "listens to everything".
 - `decay`: how much one turn of age shrinks older evidence. `1.0` = off (all turns count equally), `0.9` = on. Test both.
 - `probe_reason_conf`: PROBE only fires when the reason head is more sure than this that the reason is familiarity.
+
+**Both arms treat evidence the same way.** An opposite statement is held for a CHALLENGE only when the rule and the NLI check confirm a contradiction. If they don't (low confidence, or NLI says it is an elaboration), it is merged like any other evidence, which is exactly what the control arm does with every opposite statement. So full vs `no_probing` differs only in asking.
+
+**Known limits of the simulated evaluation** (`eval/dialogue.py`):
+- The simulated student answers a CHALLENGE or PROBE retry with the same resolution sentence, so those retries cannot succeed in simulation.
+- The short-answer rules in `pipeline/answers.py` rarely fire there: the simulated resolutions and reveals are full sentences. How the rules behave with real people is only tested by the unit tests and the pilot.
 
 - The snippet shows component names and relevant settings/path entries; the complete file also contains NLI and legacy artifact paths. `configured` loads ranking selections from YAML; `structured` remains available for compatibility.
 - The file for a part that isn't filled in yet stops startup with `fill in … (docs/INTEGRATION.md)`.
