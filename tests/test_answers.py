@@ -110,7 +110,7 @@ class ShortProbeAnswers(unittest.TestCase):
                 self.assertEqual((r.sign, r.strength), (-1, .55))
 
     def test_mixed_or_unclear_answers_are_read_normally(self):
-        for text in ("I like it but it's mostly habit", "hmm", "maybe"):
+        for text in ("hmm", "maybe"):
             with self.subTest(text=text):
                 self.assertIsNone(self.answer(text))
 
@@ -141,6 +141,51 @@ class EndToEnd(unittest.TestCase):
         result = self.step(reading("just what I know"))
         self.assertNotEqual(result.action, "ABSTAIN")                         # it was an answer, not "unsure"
         self.assertEqual(self.state.slots["E"].value, 0)                     # no real interest
+
+
+class SecondReviewRegressions(unittest.TestCase):
+    def probe(self, text):
+        state = State()
+        state.slots["C"] = SlotState(.6, .9, "familiarity", "x", 1, [], .9, .9)
+        r = short_answer("PROBE", text, state, "C")
+        return None if r is None else (r.slots[0].sign, r.slots[0].strength, r.slots[0].reason)
+
+    def test_probe_negation_anywhere_in_the_clause_means_not_enjoying(self):
+        for text in ("I wouldn't say I love it", "I can't say I enjoy it", "Not something I enjoy", "I dislike it"):
+            with self.subTest(text=text):
+                self.assertEqual(self.probe(text), (-1, .55, "enjoyment"))
+        self.assertEqual(self.probe("I hate it"), (-1, 1.0, "enjoyment"))
+
+    def test_probe_last_clause_wins(self):
+        self.assertEqual(self.probe("I don't love it but I like it"), (1, .6, "enjoyment"))
+        self.assertEqual(self.probe("I like it but it's mostly habit"), (1, 0.0, "familiarity"))
+
+    def test_probe_past_or_hypothetical_is_not_judged(self):
+        for text in ("I used to like it", "I'd like to try something else", "Nobody asked if I like it"):
+            with self.subTest(text=text):
+                self.assertIsNone(self.probe(text))
+        self.assertEqual(self.probe("I'm just used to it"), (1, 0.0, "familiarity"))
+
+    def test_more_challenge_phrasings(self):
+        for text, sign in (("The latter.", -1), ("The former", 1), ("Earlier", 1), ("the earlier statement", 1),
+                           ("the newer statement", -1), ("the newest", -1)):
+            with self.subTest(text=text):
+                (r,) = short_answer("CHALLENGE", text, challenge_state(), "R").slots
+                self.assertEqual(r.sign, sign)
+        self.assertIsNone(short_answer("CHALLENGE", "What I said last time", challenge_state(), "R"))
+
+    def test_long_clarify_reply_never_borrows_the_question(self):
+        ex = LeakyExtractor()
+        text = "No, I'd rather spend my whole day doing research with my friends at the lab"
+        r = read_answer(ex, State(last_reply="Do you like working with tools?"), Action("CLARIFY", "R"), text)
+        self.assertEqual([s.slot for s in r.slots], ["I"])          # no leaked R
+
+    def test_unsure_clarify_reply_never_borrows_the_question(self):
+        ex = LeakyExtractor()
+        r = read_answer(ex, State(last_reply="Do you like working with tools?"), Action("CLARIFY", "R"),
+                        "I really cannot decide between those two options right now")
+        self.assertEqual(r.slots, [])
+        self.assertEqual(ex.calls, [None])
 
 
 class ReviewRegressions(unittest.TestCase):

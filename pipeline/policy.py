@@ -2,10 +2,10 @@
 
 from statistics import pvariance
 
-PROBE_REASON_CONF = 0.60   # default for settings.probe_reason_conf (manual section 7)
-
 from .interfaces import MAX_TURNS, TYPES, Action, SlotState, State
 from .repair import needs_repair
+
+PROBE_REASON_CONF = 0.60   # default for settings.probe_reason_conf (manual section 7)
 
 
 class PolicyBase:
@@ -20,10 +20,14 @@ class PolicyBase:
     def _decide(self, state: State) -> Action:
         raise NotImplementedError
 
+    def _finish(self, state: State) -> None:
+        """Called once before the forced RECOMMEND at max_turns."""
+
     def decide(self, state: State) -> Action:
         # Guaranteed here, not left to _decide: the conversation always ends with recommendations,
         # and the control arm can never probe (otherwise the full vs no_probing comparison is invalid).
         if state.turn >= self.max_turns:
+            self._finish(state)   # e.g. settle contradictions still held, so both arms recommend from what was said
             action = Action("RECOMMEND", None, f"turn {state.turn} reached max {self.max_turns}")
         else:
             action = self._decide(state)
@@ -53,6 +57,12 @@ class ManualPolicy(PolicyBase):
                 or not 0 <= probe_reason_conf <= 1:
             raise ValueError("probe_reason_conf must be a number in [0, 1]")
         self.probe_reason_conf = float(probe_reason_conf)   # manual section 7: PROBE needs reason confidence above this
+
+    def _finish(self, state: State) -> None:
+        # A contradiction confirmed on the last turn was never asked about: settle it as a stuck one
+        # (newer statement at half confidence), the way the control arm merges what it heard.
+        for flag in list(state.flags):
+            self._give_up(state, "CHALLENGE", flag.slot)
 
     def _give_up(self, state: State, retry: str, slot: str) -> str:
         """After one failed retry: settle the question and move on. Returns a note for the action log."""
@@ -94,7 +104,9 @@ class ManualPolicy(PolicyBase):
                     # an unreadable answer: next phrasing (manual section 7). "What do you mean?" / "not sure"
                     # keeps the same question and gets the concrete-example wording instead.
                     payload["clarify_index"] = last.payload.get("clarify_index", 0) + 1
-                return Action("ABSTAIN", slot, "no stance; ask once more with the next phrasing", payload)
+                why = ("asked what it means: same question with an example" if asked_meaning
+                       else "no stance; ask once more with the next phrasing")
+                return Action("ABSTAIN", slot, why, payload)
             state.strikes.pop(slot, None)
             note = self._give_up(state, retry, slot) if slot else ""
             just_settled = slot   # come back later, not straight away

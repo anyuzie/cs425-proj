@@ -172,6 +172,32 @@ class ReviewRegressionsPolicy(RulesBase):
         fresh = self.system._rank(self.state, 100)
         self.assertEqual([o.code for o in self.state.ranking], [o.code for o in fresh])
 
+    def test_give_up_keeps_one_ranking_trace_row_per_turn(self):
+        self.stuck_challenge()
+        turns = [row["turn"] for row in self.state.ranking_trace]
+        self.assertEqual(turns, sorted(set(turns)))
+
+    def test_contradiction_held_at_the_last_turn_is_settled_before_recommending(self):
+        self.system.policy, self.system.max_turns = ManualPolicy(2), 2
+        self.step(reading("I like teaching", S=(1, .9)))
+        result = self.step(reading("I dislike teaching", S=(-1, .8)))   # confirmed on the last turn
+        self.assertEqual(result.action, "RECOMMEND")
+        self.assertEqual(self.state.slots["S"].value, -1)                # the newer statement counts
+        self.assertEqual(self.state.unresolved_conflicts, ["S"])
+        self.assertEqual([o.code for o in self.state.ranking], [o.code for o in self.system._rank(self.state, 100)])
+
+    def test_repeated_opposite_while_held_updates_the_quote(self):
+        self.step(reading("I like teaching and fixing cars", S=(1, .9), R=(1, .9)))
+        result = self.step(reading("I dislike teaching and fixing cars", S=(-1, .8), R=(-1, .8)))
+        self.assertEqual(result.action, "CHALLENGE")
+        asked = self.state.last_action.slot
+        other = ({"S", "R"} - {asked}).pop()
+        self.assertIn(other, {f.slot for f in self.state.flags})            # held, not asked yet
+        self.step(reading("I really can't stand it", **{other: (-1, .9)}))  # not an answer to the asked one
+        flag = next(f for f in self.state.flags if f.slot == other)
+        self.assertEqual(flag.new.source, "I really can't stand it")        # quotes the latest statement
+        self.assertEqual(self.state.slots[other].value, 1)                  # still held, not merged
+
     def test_give_up_does_not_duplicate_history_and_keeps_the_statement_turn(self):
         self.stuck_challenge()
         history = self.state.slots["R"].history

@@ -13,31 +13,54 @@ the question to anything else lets its topic leak into the reading. So:
 import re
 
 from .interfaces import Reading, SlotReading
+from .repair import needs_repair
 
 MILD = 0.55  # labels.json strength for a mild stance
+PAIR_MAX_WORDS = 6   # the extractor saw the question only with replies this short
 SHORT = 8   # words. Rules only judge short replies; the training replies with a question were <= 6 words.
 
 # Phrase forms only: bare "now", "before", "later" appear in replies that state a stance of their own
 # ("I now enjoy hands-on work"), so they must not pick a statement.
-_FIRST = re.compile(r"\b(?:the\s+)?(?:first|earlier|former|previous|old(?:er)?)(?:\s+one)\b|\bthe\s+first\b|"
-                    r"\bwhat\s+i\s+said\s+(?:first|before|earlier)\b|^\s*(?:first|the\s+first)\W*$", re.I)
-_SECOND = re.compile(r"\b(?:the\s+)?(?:second|latter|latest|later|new(?:er)?|last)(?:\s+one)\b|\bthe\s+(?:second|latest)\b|"
-                     r"\bwhat\s+i\s+(?:just\s+)?said\s+(?:now|last|just\s+now)\b|\bwhat\s+i\s+just\s+said\b|"
-                     r"^\s*(?:second|the\s+second|latest)\W*$", re.I)
+_FIRST = re.compile(r"\b(?:the\s+)?(?:first|earlier|former|previous|old(?:er|est)?)\s+(?:one|statement)\b|"
+                    r"\bthe\s+(?:first|former|earlier)\b|"
+                    r"\bwhat\s+i\s+said\s+(?:first|before|earlier)\b|^\s*(?:first|earlier|former)\W*$", re.I)
+_SECOND = re.compile(r"\b(?:the\s+)?(?:second|latter|latest|later|new(?:er|est)?)\s+(?:one|statement)\b|"
+                     r"\bthe\s+(?:second|latter|latest|newest)\b|\bwhat\s+i\s+(?:just\s+)?said\s+just\s+now\b|"
+                     r"\bwhat\s+i\s+just\s+said\b|^\s*(?:second|latest|latter)\W*$", re.I)
 # A negation or "that was wrong" makes a first/second reply ambiguous ("not the first one"). A leading
 # "no" does not: "No, the second one" still picks the second.
 _REJECT = re.compile(r"\b(?:not|never|neither)\b|n't\b|\b(?:mistake|wrong|take\s+back|ignore|scratch)\b", re.I)
 _ENJOY = re.compile(r"\b(?:enjoy(?:ed|s)?|lik(?:e|ed|es)|lov(?:e|ed|es)|interested|interesting|passionate|fun)\b", re.I)
-# Negation only right before the enjoy word: "I don't (really) enjoy it", not "I do enjoy it, not just habit".
-_NOT_ENJOY = re.compile(r"(?:\b(?:not|never)|n't)\s+(?:really\s+|actually\s+|that\s+)?"
-                        r"(?:enjoy(?:ed|s)?|lik(?:e|ed|es)|lov(?:e|ed|es)|interested|into)\b", re.I)
 _FAMILIAR = re.compile(r"\b(?:what\s+i\s+know|just\s+know|experience|used\s+to\s+it|familiar|grew\s+up|exposure|"
                        r"only\s+because|just\s+because|mainly\s+because|habit)\b", re.I)
+_CLAUSE = re.compile(r"[,.;!?]|\b(?:but|though|although|however|yet)\b", re.I)
+_NEG_ANY = re.compile(r"\b(?:not|never|nobody)\b|n't\b", re.I)
+_HATE = re.compile(r"\b(?:hate[sd]?|can'?t\s+stand|loathe)\b", re.I)
+_DISLIKE = re.compile(r"\b(?:dislike[sd]?|avoid|not\s+for\s+me)\b", re.I)
+_HEDGE = re.compile(r"\bused\s+to\s+(?:like|enjoy|love)|\b(?:would|'d)\s+(?:like|love)\s+to\b|\bif\s+i\b", re.I)
 _NOT_JUST = re.compile(r"\bnot\s+(?:just|only|merely)\b[^,.;!?]*", re.I)   # "not just habit" denies familiarity
 # Replies to an either-or question; only these may borrow the question when they also mention another type.
 _ANSWERISH = re.compile(r"\b(?:yes|yeah|yep|sure|no|nope|nah|definitely|either|both|neither|first|second|"
                         r"former|latter|rather|prefer|probably|lean|ok|okay|fine|don'?t\s+mind)\b|"
                         r"\b(?:the|that|this)\s+(?:[\w-]+\s+){0,2}one\b", re.I)
+
+
+def _probe_verdict(text: str) -> str | None:
+    """enjoy / dislike / hate / familiar from a short PROBE reply, judged on its last clause that says how
+    the person feels ("I don't love it but I like it" -> enjoy). None when it can't tell."""
+    clauses = [c for c in _CLAUSE.split(_NOT_JUST.sub(" ", text)) if c and c.strip()]
+    for clause in reversed(clauses):
+        if _HEDGE.search(clause):
+            return None                           # past or hypothetical: "I used to like it", "I'd like to try"
+        if _HATE.search(clause):
+            return "dislike" if _NEG_ANY.search(clause) else "hate"   # "I don't hate it" -> mild at most
+        if _DISLIKE.search(clause):
+            return "dislike"
+        if _ENJOY.search(clause):
+            return "dislike" if _NEG_ANY.search(clause) else "enjoy"  # "I wouldn't say I love it"
+        if _FAMILIAR.search(clause):
+            return "familiar"
+    return None
 
 
 def asked_kind(last) -> str | None:
@@ -63,20 +86,15 @@ def short_answer(kind: str | None, text: str, state, slot: str | None) -> Readin
         current = state.slots.get(slot)
         if not current or current.value <= 0:   # probes question a liking; a familiar dislike is left alone
             return None
-        plain = _NOT_JUST.sub(" ", text)
-        not_enjoy = bool(_NOT_ENJOY.search(text))
-        enjoy = bool(_ENJOY.search(text)) and not not_enjoy
-        familiar = not_enjoy or bool(_FAMILIAR.search(plain))
-        if enjoy == familiar:                     # neither, or both ("I like it but mostly it's habit")
+        verdict = _probe_verdict(text)
+        if verdict is None:
             return None
-        # "I enjoy it": keep the stance, now as enjoyment. "I don't like it": a mild dislike.
+        # "I enjoy it": keep the stance, now as enjoyment. "I don't like it": a dislike (strong for "hate").
         # "just what I know": no real interest either way (value 0).
-        if enjoy:
-            sign, strength, reason = 1, min(1.0, current.value), "enjoyment"
-        elif not_enjoy:
-            sign, strength, reason = -1, MILD, "enjoyment"
-        else:
-            sign, strength, reason = 1, 0.0, "familiarity"
+        sign, strength, reason = {"enjoy": (1, min(1.0, current.value), "enjoyment"),
+                                  "dislike": (-1, MILD, "enjoyment"),
+                                  "hate": (-1, 1.0, "enjoyment"),
+                                  "familiar": (1, 0.0, "familiarity")}[verdict]
         return Reading(text, [SlotReading(slot, sign, strength, current.confidence, reason, text.strip(), 1.0)])
     return None
 
@@ -92,7 +110,9 @@ def read_answer(extractor, state, last, text: str) -> Reading:
     if kind in ("CHALLENGE", "PROBE"):
         rule = short_answer(kind, text, state, last.slot)
         return Reading(text, alone.slots + rule.slots) if rule else alone
-    if alone.slots and not _ANSWERISH.search(text):
-        return alone                              # a statement about something else, not an answer to the either-or
+    if not alone.slots and needs_repair(text):
+        return alone                              # "I can't decide": no stance, never borrow the question's topic
+    if alone.slots and not (_ANSWERISH.search(text) and len(text.split()) <= PAIR_MAX_WORDS):
+        return alone                              # a statement about something else, not a short reply to the either-or
     paired = extractor.read(text, state.last_reply, last.slot)
     return Reading(text, alone.slots + [r for r in paired.slots if r.slot == last.slot])
