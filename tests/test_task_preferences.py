@@ -1,11 +1,17 @@
+import importlib.util
 import unittest
-import numpy as np
 
-from recommender.components import ComponentInput
-from recommender.task_preferences import TaskPreferenceExtractor
-from recommender.stance_config import PARAMETERS, POSITIVE_PARAMETERS
-from recommender.stance_ranker import StanceTaskRanker
-from recommender.dense_ranker import Task
+# Same rule as tests/test_dense.py: these need the optional ranking packages.
+if not all(importlib.util.find_spec(name) for name in ("numpy", "faiss")):
+    raise unittest.SkipTest("install requirements-ranking.txt for task-preference fixtures")
+
+import numpy as np  # noqa: E402
+
+from recommender.components import ComponentInput  # noqa: E402
+from recommender.task_preferences import TaskPreferenceExtractor  # noqa: E402
+from recommender.stance_config import PARAMETERS, POSITIVE_PARAMETERS  # noqa: E402
+from recommender.stance_ranker import StanceTaskRanker  # noqa: E402
+from recommender.dense_ranker import Task  # noqa: E402
 
 
 class StanceTests(unittest.TestCase):

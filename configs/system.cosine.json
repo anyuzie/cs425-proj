@@ -11,7 +11,7 @@
   "settings": {
     "max_turns": 10,
     "confirm_threshold": 0.6,
-    "no_probing": false,
+    "no_probing": false, "decay": 1.0, "probe_reason_conf": 0.6,
     "input_mode": "actual_tracker"
   },
   "paths": {

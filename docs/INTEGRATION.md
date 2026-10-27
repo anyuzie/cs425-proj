@@ -11,7 +11,7 @@ The app has **no stand-ins**. It won't start until the **tracker and policy** ar
 | Step | Part | File | Status | Config name (already set) |
 |---|---|---|---|---|
 | 1 | Preference extractor | `pipeline/extractor.py` | **done**; needs the checkpoint in `models/extractor/` | `"extractor": "deberta"` |
-| 2 | State tracker | `pipeline/tracker.py` | **teammate**: fill `update()` | `"tracker": "decay"` |
+| 2 | State tracker | `pipeline/tracker.py` | **done**: confidence-weighted merge; recency decay is `settings.decay` (1.0 = off, 0.9 = on) | `"tracker": "decay"` |
 | 3 | Contradiction rule | `pipeline/rule.py` | done | `"rule": "rule"` |
 | 4 | NLI check | `pipeline/nli.py` | **done** (threshold tuned, see §7) | `"confirmer": "nli"` |
 | 5 | Ranker | `recommender/` (`RankingPipeline`, set up in `configs/ranking.yaml`) | **done**: structured, BM25, MiniLM/FAISS and RRF (M1–M5) | `"ranker": "configured"` |
@@ -48,6 +48,8 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 
 ### Step 1 · Extractor (`pipeline/extractor.py`)
 
+**How answers to bot questions are read** (`pipeline/answers.py`): the extractor was trained with the bot's question attached only to short CLARIFY replies, so attaching it to anything else makes the question's words leak into the reading. So the answer **speaks for itself first**: it is read alone, and the question is attached only if that finds nothing ("the first one", "either is fine"). Short answers to a CHALLENGE ("the first one" / "the second one") keep the earlier or newer statement, and short answers to a PROBE ("I enjoy it" / "just what I know") keep the stance as enjoyment or set it to 0, by rule.
+
 **Done.** `load()` and `predict()` are implemented for the trained 45-output checkpoint (18 direction, 3 reason, 24 strength). The outputs are picked by their `config.id2label` names and converted to the `labels.json` order, so the model's own class order doesn't matter. It's a standard `AutoModelForSequenceClassification`, so no custom model class is needed. What's left is installing the checkpoint:
 
 1. **Get the checkpoint** from the team Drive folder ([TEAM DRIVE LINK]) and unzip it so the files sit **directly** in `models/extractor/` (`models/extractor/config.json`, not `models/extractor/extractor-3f9c2a/config.json`). It needs `config.json` (with the 45 labels and the `extractor` calibration block), the weights and the tokenizer files.
@@ -74,8 +76,8 @@ Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the
 
 1. **Write `ManualPolicy._decide(state)`** and return `Action(kind, slot, why, payload)`. Check these top to bottom; the first match wins:
    1. **CHALLENGE**: `state.flags` isn't empty. Payload `{old_src, old_turn, new_src}`.
-   2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > PROBE_REASON_CONF` (0.60), and it hasn't been probed yet. Payload `{new_src}`.
-   3. **ABSTAIN**: the last action was a question and the reply had no stance. Two strikes settle the type.
+   2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > settings.probe_reason_conf` (default 0.60), and it hasn't been probed yet. Payload `{new_src}`.
+   3. **ABSTAIN**: the last action was a question and the reply had no stance. Ask **once** more (same question with an example after "what do you mean?"/"not sure", next phrasing after an unreadable answer); if still unsure, move on: the type is marked "no clear preference" (counts as covered; asked once more only while the profile is not ready), and a stuck CHALLENGE keeps the newer statement at half confidence.
    4. **RECOMMEND**: every type filled or settled, the profile has converged, and the conversation is 5 to 10 turns in.
    5. **CLARIFY**: ask the unfilled type with the highest variance. Use `state.ranking`, this turn's top 100 occupations, best first, each with `occupation_z`.
 2. **Update the bookkeeping yourself:** `state.challenged`, `probed`, `settled` and `strikes`.
@@ -144,6 +146,41 @@ Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rul
 
 ## Install and run
 
+### Without the trained models (mock mode)
+
+For trying the whole app on any laptop before the models are shared. **Everything is real except the three
+model parts:** a keyword reader stands in for the extractor, every rule-flagged contradiction counts as
+confirmed, and the fixed question bank replaces T5. No torch, no checkpoints, nothing to download.
+
+```
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m devtools.run_mock serve            # browser: http://localhost:8000 (researcher panel on)
+.venv/bin/python -m devtools.run_mock chat             # same, in the terminal
+.venv/bin/python -m devtools.run_mock eval --limit 20  # full vs no_probing on 20 dev profiles
+```
+
+On Windows use `.venv\Scripts\python.exe` instead of `.venv/bin/python`.
+
+Things to try: *"My dad runs a sales company so that's what I know."* → PROBE → *"just what I know"*;
+*"I love working with machines and tools."* then *"I hate repairing machines, it is boring."* → CHALLENGE →
+*"the second one"*; answer the either-or questions with *"definitely"*, *"no way"* or *"either is fine"*.
+
+**Mock results are flow checks, not results.** The keyword reader is crude, so the `eval` numbers mean
+nothing. Mock runs are labelled `mock_tracker`, and the app refuses to label them `actual_tracker`.
+
+### With the real models
+
+The models are not in GitHub (`/models/` is gitignored: each is several hundred MB). Every machine needs:
+
+| Folder | What | Get it from |
+|---|---|---|
+| `models/extractor/` | Trained DeBERTa extractor | Koon (Drive zip; `config.json` directly in the folder) |
+| `models/nli/` | `cross-encoder/nli-deberta-v3-base` | Download from Hugging Face |
+| `models/t5-questions-v3b/` | Trained T5 question wording | Chua. Only needed for T5 wording: the evaluation uses the question bank. |
+
+About 3–4 GB in total with the Python packages.
+
 ```
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt -r requirements-models.txt -r requirements-ranking.txt
@@ -151,3 +188,21 @@ python3 -m venv .venv
 .venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
 CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions: panel hidden
 ```
+
+Then, with the server running for the scenarios:
+
+```
+.venv/bin/python -m eval.scenario_tests                                    # 19 real-model scenarios
+.venv/bin/python -m eval.dialogue --config configs/system.question-bank.json --limit 120   # headline experiment
+.venv/bin/python training/extractor/context_leak_check.py                  # does the question leak into readings?
+```
+
+**Reading the transcripts.** Every turn is logged to `logs/<participant code>.jsonl`, including how the answer was read (alone, with the question, or by a rule), what the extractor found, contradiction checks with their NLI scores, the policy's reason, whether T5 or the question bank wrote the reply, the top 5 and the time per step:
+
+```
+.venv/bin/python -m devtools.view_logs                        # list logs and sessions
+.venv/bin/python -m devtools.view_logs logs/P-014.jsonl --last  # latest session, turn by turn
+.venv/bin/python -m devtools.view_logs logs/P-014.jsonl --brief # one line per turn
+```
+
+For the decay comparison, run the headline experiment twice: with `"decay": 1.0` and with `"decay": 0.9` in the config.

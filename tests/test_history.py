@@ -46,7 +46,8 @@ class HistoryTests(unittest.TestCase):
         original = Path.read_bytes
         def changed(path):
             data = original(path)
-            return data + b" " if path == Path("data/dev_profiles.jsonl") else data
+            # drift the file the frozen baseline is verified against (its original 60 profiles, now archived)
+            return data + b" " if path in (Path("data/dev_profiles.jsonl"), Path("data/archive/dev_profiles_60.jsonl")) else data
         with tempfile.TemporaryDirectory() as directory, patch.object(Path, "read_bytes", changed):
             history = Path(directory) / "history.csv"
             with self.assertRaisesRegex(ValueError, "dataset fingerprint mismatch"):

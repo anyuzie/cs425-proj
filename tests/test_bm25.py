@@ -92,10 +92,10 @@ class BM25Tests(unittest.TestCase):
             result = run(Path("configs/m2.json"), root / "run", history=root / "history.csv",
                          ranking_config=Path("configs/ranking/m3_hybrid.json"))
             manifest = json.loads((root / "run/manifest.json").read_text())
-            self.assertEqual(result["profile_count"], 60)
+            self.assertEqual(result["profile_count"], 120)   # dev set grown to 120 profiles
             self.assertEqual(manifest["components"]["m3"], "bm25@baseline_v1")
             self.assertEqual(manifest["components"]["fusion"], "rrf_k60")
-            self.assertEqual(manifest["fused_profile_count"], 60)
+            self.assertEqual(manifest["fused_profile_count"], 120)
             self.assertEqual(manifest["component_metadata"]["m3"]["documents"], 378)
             with (root / "history.csv").open(newline="") as handle:
                 history = list(csv.DictReader(handle))

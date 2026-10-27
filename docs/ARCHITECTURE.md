@@ -47,7 +47,7 @@ Rule of thumb: **training code may import shared application code, but the app n
 | `pipeline/interfaces.py` | — | done | The data passed between steps (`Reading`, `SlotReading`, `State`, `Flag`, `Action`) and what each part must provide |
 | `pipeline/registry.py` | — | done | Maps config names (`"deberta"`, `"nli"`, …) to the code that builds each part |
 | `pipeline/extractor.py` | 1 | adapter implemented; checkpoint pending locally | Loads the trained 45-logit DeBERTa checkpoint, maps semantic head labels and produces `Reading` |
-| `pipeline/tracker.py` | 2 | **teammate** fills `update()` | State tracker with recency decay |
+| `pipeline/tracker.py` | 2 | done | State tracker: confidence-weighted merge, optional recency decay (`settings.decay`); in the control arm it merges opposite statements instead of holding them |
 | `pipeline/rule.py` | 3 | done | Contradiction rule |
 | `pipeline/nli.py` | 4 | **teammate** fills `__init__()` + `score()` | NLI contradiction check |
 | `recommender/ranker.py` | 5 | done | Configured M1/BM25/MiniLM pipeline with optional occupation-level RRF; M1-only default |
@@ -82,6 +82,8 @@ Ranking     recommender/ranker.py → enabled M1 / BM25 / MiniLM → optional RR
 Each teammate's code only **receives data and returns data**. It never touches the server, the page, or another teammate's file. `System.step` hands each result to the next part in a fixed order, so the parts fit together as long as each method returns what its docstring says.
 
 ### Step 1 · Extractor: `pipeline/extractor.py`
+
+**How answers to bot questions are read** (`pipeline/answers.py`): the extractor was trained with the bot's question attached only to short CLARIFY replies, so attaching it to anything else makes the question's words leak into the reading. So the answer **speaks for itself first**: it is read alone, and the question is attached only if that finds nothing ("the first one", "either is fine"). Short answers to a CHALLENGE ("the first one" / "the second one") keep the earlier or newer statement, and short answers to a PROBE ("I enjoy it" / "just what I know") keep the stance as enjoyment or set it to 0, by rule.
 
 | Function | Who writes it | Called by | When | Does |
 |---|---|---|---|---|
@@ -161,8 +163,8 @@ score(...) → 0.20       → dropped
 
 The five rules, checked top to bottom (first match wins):
 1. **CHALLENGE** when there's a confirmed contradiction.
-2. **PROBE** when a reason is familiarity **and** its `reason_confidence` > 0.60.
-3. **ABSTAIN** when the reply had no stance. Two strikes settle that type.
+2. **PROBE** when a reason is familiarity **and** its `reason_confidence` > `settings.probe_reason_conf` (default 0.60).
+3. **ABSTAIN** when the reply had no stance: ask **once** more, then move on. "What do you mean?" / "not sure" keeps the same question with a concrete example; an unreadable answer gets the next phrasing. A second unsure answer marks the type "no clear preference" (counts as covered); it is asked once more later **only if the profile is not ready to recommend yet**. A stuck CHALLENGE keeps the newer statement at half confidence, is logged in `state.unresolved_conflicts`, and the bot re-ranks and does not recommend on that turn.
 4. **RECOMMEND** when the profile is ready, or at turn 10.
 5. **CLARIFY** the unfilled type with the highest variance.
 
@@ -205,7 +207,7 @@ What runs when the user presses Send, in order.
 | 4 | `app/server.py` | `chat()` | Finds the session (404 if unknown). A repeated message id returns the stored reply. Finished → 409. Copies the state. |
 | | **The seven steps** | | |
 | 5 | `pipeline/system.py` | `System.step()` | Turn + 1, stores the text, picks the context (the bot's last question) |
-| 6 | `pipeline/extractor.py` | `read()` → `predict()` per sentence | Message → readings; checkpoint label order translated into shared labels |
+| 6 | `pipeline/answers.py` → `pipeline/extractor.py` | `read_answer()` → `read()` → `predict()` per sentence | Short CHALLENGE/PROBE answers by rule; otherwise the answer alone first, the question only if needed. Message → readings |
 | 7 | `pipeline/tracker.py` | teammate's `update()` | Merges the readings into `state.slots` |
 | 8 | `pipeline/rule.py` | `candidates()` | Opposite signs, both confidence > 0.4? |
 | 9 | `pipeline/system.py` | `_confirmed()` | Only for candidates: asks the NLI check, keeps the conflict if the score > 0.60 |
@@ -284,9 +286,20 @@ The NLI check needs no hand-off: the model downloads by name. Its tuned threshol
 ```json
 "components": {"extractor": "deberta", "tracker": "decay", "rule": "rule", "confirmer": "nli",
                "ranker": "configured", "policy": "manual", "filler": "question-bank"},
-"settings":   {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "input_mode": "actual_tracker"},
+"settings":   {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "decay": 1.0,
+               "probe_reason_conf": 0.6, "input_mode": "actual_tracker"},
 "paths":      {"ranking_config": "configs/ranking.yaml", "extractor_checkpoint": "models/extractor"}
 ```
+
+- `no_probing`: the control arm. No CHALLENGE or PROBE, and the tracker merges opposite statements instead of holding them, so it "listens to everything".
+- `decay`: how much one turn of age shrinks older evidence. `1.0` = off (all turns count equally), `0.9` = on. Test both.
+- `probe_reason_conf`: PROBE only fires when the reason head is more sure than this that the reason is familiarity.
+
+**Both arms treat evidence the same way.** An opposite statement is held for a CHALLENGE only when the rule and the NLI check confirm a contradiction. If they don't (low confidence, or NLI says it is an elaboration), it is merged like any other evidence, which is exactly what the control arm does with every opposite statement. So full vs `no_probing` differs in asking, with one exception: a contradiction the full arm holds but never resolves (still open at turn 10, or unanswered after a retry) keeps the newer statement at half confidence (manual section 7), while the control arm averages the two statements.
+
+**Known limits of the simulated evaluation** (`eval/dialogue.py`):
+- The simulated student answers a CHALLENGE or PROBE retry with the same resolution sentence, so those retries cannot succeed in simulation.
+- The short-answer rules in `pipeline/answers.py` rarely fire there: the simulated resolutions and reveals are full sentences. How the rules behave with real people is only tested by the unit tests and the pilot.
 
 - The snippet shows component names and relevant settings/path entries; the complete file also contains NLI and legacy artifact paths. `configured` loads ranking selections from YAML; `structured` remains available for compatibility.
 - The file for a part that isn't filled in yet stops startup with `fill in … (docs/INTEGRATION.md)`.
@@ -379,6 +392,13 @@ Production launch requires the installed extractor checkpoint and completed trac
 |---|---|---|
 | `build(config, data_dir)` | startup | For each of the seven kinds, looks up the name in `config["components"]` and calls its factory. An unknown name → error listing the valid names. |
 | `_extractor_deberta`, `_tracker_decay`, `_confirmer_nli`, `_policy_manual`, `_rule`, `_ranker_configured`, `_ranker_structured`, `_filler_bank` | startup | Factories import selected components and pass configured paths/settings. All component names are validated before construction. |
+
+### `pipeline/answers.py`: reading answers to questions
+
+| Function | When | What it does |
+|---|---|---|
+| `read_answer(extractor, state, last, text)` | per message | After a question: short-answer rules first, then the answer alone, then with the question only if the answer alone has no stance |
+| `short_answer(kind, text, state, slot)` | per message | ≤ 8 words: CHALLENGE "first/earlier" → earlier statement, "second/latest" → newer; PROBE "enjoy" → keep as enjoyment, "just what I know" / "don't enjoy" → 0. Ambiguous answers return `None` and are read normally |
 
 ### `pipeline/extractor.py`: step 1
 

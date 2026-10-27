@@ -7,6 +7,7 @@ from time import perf_counter
 
 from . import registry
 from .interfaces import MAX_TURNS, TYPES, Action, State
+from .answers import _readings, read_answer
 from .repair import needs_repair
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,8 +43,8 @@ class System:
         if input_mode not in {"actual_tracker", "mock_tracker", "unverified_tracker"}:
             raise ValueError("invalid tracker input mode")
         if input_mode == "actual_tracker" and any(
-                getattr(c, "name", "").startswith("test-") for c in (extractor, tracker)):
-            raise ValueError("test components cannot be labelled actual_tracker")
+                getattr(c, "name", "").startswith(("test-", "mock-")) for c in (extractor, tracker, confirmer)):
+            raise ValueError("test or mock components cannot be labelled actual_tracker")
         self.input_mode = input_mode
 
     @classmethod
@@ -104,6 +105,17 @@ class System:
                  "tasks": [e.text for e in o.evidence[:3]],
                  "task_evidence": [asdict(e) for e in o.evidence[:3]]} for o in state.ranking[:5]]
 
+    def _reply_source(self, action, reply: str) -> str:
+        """'question-bank', or 't5' when the generated wording was used instead of the bank's fallback."""
+        from .templates import QuestionBankFiller
+        if not isinstance(self.filler, QuestionBankFiller) or type(self.filler) is QuestionBankFiller:
+            return "question-bank"
+        try:
+            bank = QuestionBankFiller.fill(self.filler, action, action.payload)
+        except Exception:   # noqa: BLE001 - only a label for the log
+            return "unknown"
+        return "question-bank" if bank == reply else "t5"
+
     def _confirmed(self, state: State) -> list:
         flags = []
         rule_state = state
@@ -113,8 +125,11 @@ class System:
                         confidence=f.new.confidence, reason=f.new.reason, source=f.new.source,
                         turn=state.turn, history=[f.old, f.new]) for f in state.conflict_candidates}
             rule_state = replace(state, slots=slots)
+        checks = state.turn_trace.setdefault("contradiction_checks", [])
         for f in self.rule.candidates(rule_state):
             score = self.confirmer.score(f.old.source, f.new.source)
+            checks.append({"slot": f.slot, "earlier": f.old.source, "now": f.new.source, "nli_score": round(score, 3),
+                           "kept": score > self.confirm_threshold})
             if score > self.confirm_threshold:
                 flags.append(replace(f, score=score))
         return flags
@@ -126,8 +141,15 @@ class System:
         state.user_texts.append(text)
         last = state.last_action
         asked = last is not None and last.kind in QUESTIONS  # any slot question (ABSTAIN re-asks one)
-        reading = self.extractor.read(text, state.last_reply if asked else None, last.slot if asked else None)
+        # The answer speaks for itself first; short CHALLENGE/PROBE answers are resolved by rule (pipeline/answers.py).
+        trace, timings, clock = {}, {}, perf_counter()
+        state.turn_trace = trace
+        reading = read_answer(self.extractor, state, last if asked else None, text, trace)
+        timings["extractor_ms"] = _ms(clock)
+        trace["readings"] = _readings(reading)
         repair = asked and needs_repair(text)
+        # The control arm listens to everything: with no_probing, opposite readings are merged, not held.
+        state.merge_conflicts = bool(getattr(self.policy, "no_probing", False))
         self.tracker.update(state, reading)
         retry = last.payload.get("retry", "CLARIFY") if last and last.kind == "ABSTAIN" else last.kind if last else None
         if last and retry in ("CHALLENGE", "PROBE") and any(r.slot == last.slot for r in reading.slots):
@@ -137,9 +159,29 @@ class System:
         for flag in self._confirmed(state):
             flags.setdefault(flag.slot, flag)
         state.flags = list(flags.values())
+        # Opposite readings the rule/NLI did not confirm are ordinary evidence: merge them (both arms alike).
+        merge = getattr(self.tracker, "merge_unconfirmed", None)
+        for candidate in state.conflict_candidates or []:
+            if candidate.slot in flags:   # already held: keep the earlier statement, quote the latest opposite one
+                if candidate.new.confidence > 0.4:   # a weak reading must not replace a confirmed quote
+                    flags[candidate.slot] = replace(flags[candidate.slot], new=candidate.new)
+            elif merge:
+                merge(state, candidate)
+        state.flags = list(flags.values())
+        trace["held_contradictions"] = sorted(flags)
+        timings["tracker_and_nli_ms"] = _ms(clock) - timings["extractor_ms"]
         state.profile_history.append({t: s.value for t, s in state.slots.items()})
+        rank_clock = perf_counter()
         state.ranking = self._rank(state, POLICY_TOP_K)  # the policy reads it; the panel and cards reuse it
+        timings["ranking_ms"] = _ms(rank_clock)
+        state.profile_changed = False
         action = self.policy.decide(state)
+        trace["policy"] = {"action": action.kind, "slot": action.slot, "why": action.why}
+        if state.profile_changed:   # the policy settled a stuck challenge: keep history, panel and cards consistent
+            state.profile_history[-1] = {t: s.value for t, s in state.slots.items()}
+            if state.ranking_trace and state.ranking_trace[-1].get("turn") == state.turn:
+                state.ranking_trace.pop()   # replace this turn's trace row instead of adding a second one
+            state.ranking = self._rank(state, POLICY_TOP_K)
         if action.kind == 'CLARIFY':
             from .t5_v2 import FOCUS
             action.payload['focus'] = FOCUS[action.slot][action.payload['clarify_index'] % 3]
@@ -151,6 +193,7 @@ class System:
             known = next((t for t, s in sorted(state.slots.items(), key=lambda item: -item[1].value)
                           if s.value > 0 and s.reason == "enjoyment" and t != action.slot), None)
             action.payload.update(last_user=text[:240], known_interest=KNOWN[known] if known else "")
+        wording_clock = perf_counter()
         quotes, recs, done = None, None, False
         if action.kind == "RECOMMEND":
             recs = self.recommendations(state)
@@ -168,6 +211,11 @@ class System:
                       "now": action.payload["new_src"]}
         elif quote_kind == "PROBE":
             quotes = {"now": action.payload["new_src"]}
+        timings["wording_ms"] = _ms(wording_clock)   # T5 or question bank (and the cards at RECOMMEND)
+        trace["top5"] = [{"code": o.code, "title": o.title} for o in state.ranking[:5]]
+        trace["reply_source"] = self._reply_source(action, reply)
+        timings["total_ms"] = _ms(clock)
+        trace["timings_ms"] = timings
         state.last_action, state.last_reply = action, reply
         state.done = done or state.turn >= self.max_turns
         state.actions.append({"turn": state.turn, "action": action.kind, "why": action.why})
@@ -195,3 +243,7 @@ class System:
             "upstream": {"extractor": self.extractor.name, "tracker": self.tracker.name, "revision": revision},
             "turns": [{k: row[k] for k in ("text", "interests", "observed_types")}
                       for row in state.ranking_trace]}
+
+
+def _ms(start: float) -> float:
+    return round((perf_counter() - start) * 1000, 1)

@@ -8,11 +8,13 @@ from pipeline.repair import needs_repair, repair_question
 
 class RepairTests(unittest.TestCase):
     def test_retry_keeps_facet_and_choice(self):
-        state=State(turn=2,last_reading_empty=True,
-                    last_action=Action('CLARIFY','S',payload={'clarify_index':1}),
-                    clarify_count={'S':2})
-        action=ManualPolicy().decide(state)
-        self.assertEqual(action.payload['clarify_index'],1)
+        def retry(reply):
+            state=State(turn=2,last_reading_empty=True,user_texts=[reply],
+                        last_action=Action('CLARIFY','S',payload={'clarify_index':1}),
+                        clarify_count={'S':2})
+            return ManualPolicy().decide(state).payload['clarify_index']
+        self.assertEqual(retry('What do you mean?'),1)   # asking what it means keeps the same facet
+        self.assertEqual(retry('asdfgh'),2)              # an unreadable answer gets the next phrasing
         self.assertIn('repairing a broken machine',repair_question(
             {'slot':'R','focus':'repairing a broken machine'}))
         self.assertIn('Which statement',repair_question(
@@ -40,7 +42,8 @@ class RepairTests(unittest.TestCase):
         system.step(state,text)
         self.assertIs(system.tracker.update.call_args.args[1],item)
         self.assertEqual(state.slots['S'].value,.55)
-        system.extractor.read.assert_called_once_with(text,'Would you enjoy teaching?','S')
+        # the answer alone already had a stance, so the bot's question is not attached (pipeline/answers.py)
+        system.extractor.read.assert_called_once_with(text,None,None)
 
 
 if __name__=='__main__':unittest.main()

@@ -68,7 +68,7 @@ def _extractor_deberta(cfg, d):
 
 def _tracker_decay(cfg, d):
     from .tracker import DecayTracker  # pipeline/tracker.py
-    return DecayTracker()
+    return DecayTracker(_settings(cfg).get("decay", 1.0))
 
 
 def _confirmer_nli(cfg, d):
@@ -80,7 +80,9 @@ def _confirmer_nli(cfg, d):
 
 def _policy_manual(cfg, d):
     from .policy import ManualPolicy  # pipeline/policy.py
-    return ManualPolicy(_settings(cfg).get("max_turns", 10), _settings(cfg).get("no_probing", False))
+    st = _settings(cfg)
+    from .policy import PROBE_REASON_CONF
+    return ManualPolicy(st.get("max_turns", 10), st.get("no_probing", False), st.get("probe_reason_conf", PROBE_REASON_CONF))
 
 
 REGISTRY: dict[str, dict] = {
