@@ -296,7 +296,10 @@
     h.id = 'resultsH';
     h.tabIndex = -1;
     head.appendChild(h);
-    head.appendChild(el('p', 'lead', 'Under each one are the O*NET task statements that matched your messages most closely. They are the reason it is on this list.'));
+    var hasTasks = recs.some(function (r) { return r.tasks && r.tasks.length; });
+    head.appendChild(el('p', 'lead', hasTasks
+      ? 'Under each one are the O*NET task statements that matched your messages most closely. They are the reason it is on this list.'
+      : 'Each one is ranked by how well its O*NET interest profile fits the interests you described.'));
     wrap.appendChild(head);
 
     wrap.appendChild(el('p', 'reminder', 'A reminder: this is a research prototype, not career advice.'));
@@ -326,7 +329,7 @@
 
     var byg = el('section', 'before-you-go');
     byg.appendChild(el('h2', null, 'Before you go'));
-    byg.appendChild(el('p', null, 'These five come from a six-number interest profile and keyword matching. They can’t know your grades, your circumstances or what you’d be good at. For real decisions, talk to SMU Dato’ Kho Hui Meng Career Centre.'));
+    byg.appendChild(el('p', null, (hasTasks ? 'These five come from a six-number interest profile and keyword matching. ' : 'These five come from a six-number interest profile. ') + 'They can’t know your grades, your circumstances or what you’d be good at. For real decisions, talk to SMU Dato’ Kho Hui Meng Career Centre.'));
     var links = el('div', 'links');
     // TODO: replace placeholder hrefs with the real rating form URL and SMU careers service URL.
     var a1 = el('a', 'primary', 'Rate these five (2 min)');

@@ -93,7 +93,7 @@ Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rul
 
 ### Step 5 · Ranker
 
-**Done.** `"ranker": "configured"` loads `configs/ranking.yaml` once at startup and builds a `RankingPipeline` (structured, BM25, MiniLM/FAISS, RRF). The default preset is structured (M1) only; the three-way RRF preset is tested separately. It reranks every turn from the current tracker values and the user's own messages, before the policy runs. Cards show up to three matched tasks. `settings.input_mode` must be set explicitly: `actual_tracker` for the app, `mock_tracker` for fixtures. More: [ranking architecture](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 decision](../reports/ranking/m5/DECISION.md).
+**Done.** `"ranker": "configured"` loads `configs/ranking.yaml` once at startup and builds a `RankingPipeline` (structured, BM25, MiniLM/FAISS, RRF). The default preset is structured (M1) only; the three-way RRF preset is tested separately. It reranks every turn from the current tracker values and the user's own messages, before the policy runs. Cards show up to three matched tasks when a text component (BM25 or dense) is on; with the structured-only default they show none, and the card copy says the ranking comes from the interest profile. `settings.input_mode` must be set explicitly: `actual_tracker` for the app, `mock_tracker` for fixtures. More: [ranking architecture](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 decision](../reports/ranking/m5/DECISION.md).
 
 ---
 
