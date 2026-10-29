@@ -98,7 +98,8 @@ class ShortProbeAnswers(unittest.TestCase):
                 self.assertEqual((r.sign, r.strength, r.reason), (1, .55, "enjoyment"))
 
     def test_familiarity_only_means_no_real_interest(self):
-        for text in ("just what I know", "mainly experience", "I'm just used to it"):
+        for text in ("just what I know", "mainly experience", "I'm just used to it", "It is something I already know",
+                     "I know it well", "I have a background in it", "I'm comfortable with it"):
             with self.subTest(text=text):
                 (r,) = self.answer(text).slots
                 self.assertEqual((r.value, r.reason), (0, "familiarity"))
@@ -165,6 +166,10 @@ class SecondReviewRegressions(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertIsNone(self.probe(text))
         self.assertEqual(self.probe("I'm just used to it"), (1, 0.0, "familiarity"))
+
+    def test_knowing_plus_feeling_is_judged_on_the_feeling(self):
+        self.assertEqual(self.probe("I know it well and I enjoy it")[2], "enjoyment")
+        self.assertEqual(self.probe("I enjoy it, but I already know it"), (1, 0.0, "familiarity"))
 
     def test_more_challenge_phrasings(self):
         for text, sign in (("The latter.", -1), ("The former", 1), ("Earlier", 1), ("the earlier statement", 1),

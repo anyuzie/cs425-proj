@@ -34,7 +34,8 @@ _SECOND = re.compile(r"\b(?:the\s+)?(?:second|latter|latest|later|new(?:er|est)?
 # "no" does not: "No, the second one" still picks the second.
 _REJECT = re.compile(r"\b(?:not|never|neither)\b|n't\b|\b(?:mistake|wrong|take\s+back|ignore|scratch)\b", re.I)
 _ENJOY = re.compile(r"\b(?:enjoy(?:ed|s)?|lik(?:e|ed|es)|lov(?:e|ed|es)|interested|interesting|passionate|fun|into\s+it)\b", re.I)
-_FAMILIAR = re.compile(r"\b(?:what\s+i\s+know|just\s+know|experience|used\s+to\s+it|familiar|grew\s+up|exposure|"
+_FAMILIAR = re.compile(r"\b(?:what\s+i\s+know|just\s+know|already\s+know|something\s+i\s+know|know\s+it\s+well|"
+                       r"experience|used\s+to\s+it|familiar|grew\s+up|exposure|background|comfortable\s+with|"
                        r"only\s+because|just\s+because|mainly\s+because|habit)\b", re.I)
 _CLAUSE = re.compile(r"[,.;!?]|\b(?:but|though|although|however|yet)\b", re.I)
 _NEG_ANY = re.compile(r"\b(?:not|never|nobody)\b|n't\b", re.I)
