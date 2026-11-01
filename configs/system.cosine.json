@@ -17,7 +17,7 @@
   "paths": {
     "ranking_config": "configs/ranking/m1_cosine.json",
     "extractor_checkpoint": "models/extractor",
-    "nli_model": "cross-encoder/nli-deberta-v3-base",
+    "nli_model": "models/nli-probing-v1/checkpoint",
     "embedder": "all-MiniLM-L6-v2",
     "bm25": "indexes/bm25.pkl",
     "faiss": "indexes/faiss.idx",

@@ -4,8 +4,9 @@ Integration verified on 21 October 2026. Real extractor, real NLI, production
 tracker/policy, configured ranking and optional fine-tuned T5 are now connected.
 No mocks are used by either production system configuration.
 
-The current application keeps extraction, contradiction rules/NLI, and ranking
-behavior from `main` commit `7e065d6`. Only tracker/action policy, T5 wording, and
+The current application keeps extraction, contradiction candidate rules, and ranking
+behavior from `main` commit `7e065d6`. NLI now uses the probing-v1 checkpoint; see
+[NLI deployment](NLI_DEPLOYMENT.md) for setup, policy, and provenance. Only tracker/action policy, T5 wording, and
 real-model loading/integration are extended. Extractor context and evidence
 selection are unchanged; its readings pass directly to the tracker. V3b remains
 the default question model with template fallback. Historical local evaluation
@@ -56,8 +57,10 @@ the researcher panel. Remove that variable to return to researcher mode:
   `NLP_extractor_model.zip`, specifically its `riasec-extractor/` directory.
   Includes safe tensor weights, configuration and tokenizer. Bundled datasets,
   notebooks and redundant pickle-based `.pt` weights were not installed.
-- `models/nli/`: pretrained `cross-encoder/nli-deberta-v3-base`, revision
-  `6c749ce3425cd33b46d187e45b92bbf96ee12ec7`.
+- `models/nli-probing-v1/checkpoint/`: selected fine-tuned NLI checkpoint and tokenizer.
+  Obtain the shared folder and run `python scripts/check_nli_checkpoint.py`; see
+  [NLI deployment](NLI_DEPLOYMENT.md). Downloading the stock Hugging Face model
+  does not reproduce these fine-tuned weights.
 - `models/t5-questions/`: the previously trained local T5 checkpoint, copied from
   the parent project's `artifacts/t5-questions/`.
 
