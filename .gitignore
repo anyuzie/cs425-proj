@@ -44,3 +44,10 @@ outputs/
 
 # contradictor testing
 nli_manual_tests/*
+
+# Local NLI experiment outputs and personal test inputs (weights remain under /models/).
+/reports/nli/*.csv
+/reports/nli/v1_summary.json
+/reports/nli/probing_v1/
+/reports/nli/archive_v1_literal/
+/data/xinyan_test.jsonl

@@ -70,7 +70,7 @@ Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the
 
 ### Step 4 · NLI check (`pipeline/nli.py`)
 
-**Done.** `NliConfirmer` loads `cross-encoder/nli-deberta-v3-base` once and `score(old_src, new_src)` returns the probability of "contradiction". The threshold was tuned on the dev pairs of `data/nli_pairs.jsonl` (`eval/nli.py`); results are in `reports/nli/`. The chosen threshold is **0.9**, but `configs/system.json` still says `confirm_threshold: 0.6` (see §7).
+**Done.** Real system presets now load `models/nli-probing-v1/checkpoint` once; `score(old_src, new_src)` returns P(contradiction). The runtime threshold remains **0.6**. This checkpoint uses the project probing-conflict policy, which differs from standard logical NLI. See [deployment and checkpoint verification](NLI_DEPLOYMENT.md). Older stock-model threshold results do not select this checkpoint.
 
 ### Step 6 · Policy (`pipeline/policy.py`)
 
@@ -176,7 +176,7 @@ The models are not in GitHub (`/models/` is gitignored: each is several hundred 
 | Folder | What | Get it from |
 |---|---|---|
 | `models/extractor/` | Trained DeBERTa extractor | Koon (Drive zip; `config.json` directly in the folder) |
-| `models/nli/` | `cross-encoder/nli-deberta-v3-base` | Download from Hugging Face |
+| `models/nli-probing-v1/checkpoint/` | Fine-tuned probing-v1 NLI | Copy shared checkpoint; verify with `scripts/check_nli_checkpoint.py` |
 | `models/t5-questions-v3b/` | Trained T5 question wording | Chua. Only needed for T5 wording: the evaluation uses the question bank. |
 
 About 3–4 GB in total with the Python packages.

@@ -17,7 +17,7 @@
   "paths": {
     "ranking_config": "configs/ranking.yaml",
     "extractor_checkpoint": "models/extractor",
-    "nli_model": "models/nli",
+    "nli_model": "models/nli-probing-v1/checkpoint",
     "embedder": "all-MiniLM-L6-v2",
     "bm25": "indexes/bm25.pkl",
     "faiss": "indexes/faiss.idx",

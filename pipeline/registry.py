@@ -75,6 +75,12 @@ def _confirmer_nli(cfg, d):
     from .nli import NliConfirmer  # pipeline/nli.py
     model = cfg["paths"]["nli_model"]
     local = ROOT / model
+    if (Path(model).is_absolute() or model.replace("\\", "/").startswith("models/")) and not local.is_dir():
+        raise FileNotFoundError(
+            f"NLI checkpoint missing: {local}. Model weights are not included in Git. "
+            "Copy the shared checkpoint folder here, then run "
+            "python scripts/check_nli_checkpoint.py. See docs/NLI_DEPLOYMENT.md."
+        )
     return NliConfirmer(str(local) if local.is_dir() else model)
 
 
