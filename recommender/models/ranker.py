@@ -24,12 +24,20 @@ class RankingPipeline:
         if isinstance(config, (str, Path)):
             config, _ = load_configuration(Path(config))
         config = deepcopy(BASELINE_CONFIG if config is None else config)
-        if not isinstance(config, dict) or not {"components", "fusion"} <= set(config) or set(config) - {"components", "fusion", "evidence_filter"}:
+        if not isinstance(config, dict) or not {"components", "fusion"} <= set(config) or set(config) - {"components", "fusion", "evidence_filter", "reranking"}:
             raise ValueError("ranking config requires components and fusion; optional evidence_filter")
         self.evidence_filter = config.get("evidence_filter", "raw")
         if self.evidence_filter not in ("raw", "active_only"):
             raise ValueError("evidence_filter must be raw or active_only")
         selections = config["components"]
+        self._reranker = None
+        self._rerankers = []
+        self._semantic_pipeline = None
+        if "reranking" in config:
+            from ..semantic import SemanticMatchingPipeline
+            SemanticMatchingPipeline.validate(config["reranking"])
+            if selections != BASELINE_CONFIG["components"] or config["fusion"] is not None:
+                raise ValueError("description reranking requires weighted dot product only and fusion=null")
         if not isinstance(selections, dict) or set(selections) != set(SIGNAL_NAMES):
             raise ValueError("components must contain exactly m1, m3, m4; use null to disable")
         if self.evidence_filter == "active_only" and selections["m3"] is None and selections["m4"] is None:
@@ -41,6 +49,10 @@ class RankingPipeline:
         self._config = config
         occupations = load_eligible_occupations(occupations_path)
         self._occupations = {o.code: o for o in occupations}
+        if "reranking" in config:
+            self._semantic_pipeline = SemanticMatchingPipeline(occupations_path, set(self._occupations), config["reranking"])
+            self._rerankers = self._semantic_pipeline.stages
+            self._reranker = self._rerankers[0]  # Preserve the single-stage compatibility handle.
         self._components = {key: registry.build(resolved, deepcopy(occupations)) for key, resolved in self._resolved.items()}
 
     @property
@@ -59,7 +71,8 @@ class RankingPipeline:
     def resolved_config(self):
         return {"components": {key: asdict(self._resolved[key]) if key in self._resolved else None
                                 for key in SIGNAL_NAMES}, "fusion": deepcopy(self._config["fusion"]),
-                **({"evidence_filter": self.evidence_filter} if "evidence_filter" in self._config else {})}
+                **({"evidence_filter": self.evidence_filter} if "evidence_filter" in self._config else {}),
+                **({"reranking": deepcopy(self._config["reranking"])} if self._reranker else {})}
 
     @property
     def component_identifiers(self):
@@ -72,7 +85,8 @@ class RankingPipeline:
 
     @property
     def component_metadata(self):
-        return {key: deepcopy(getattr(component, "metadata", {})) for key, component in self._components.items()}
+        return {**{key: deepcopy(getattr(component, "metadata", {})) for key, component in self._components.items()},
+                **({"reranking": self._semantic_pipeline.metadata} if self._semantic_pipeline else {})}
 
     def rank(self, interests: dict[str, float], observed_types: set[str],
              user_sentences: list[str], top_k: int = 100) -> RankingResponse:
@@ -118,11 +132,16 @@ class RankingPipeline:
             for item in ranking.evidence:
                 evidence.setdefault(item.occupation_code, []).append(item)
         results = []
-        for rank, item in enumerate(selected.occupations[:top_k], 1):
+        depth = max(top_k, 100) if self._reranker else top_k
+        for rank, item in enumerate(selected.occupations[:depth], 1):
             occupation = self._occupations[item.code]
             signals = {SIGNAL_NAMES[key]: SignalScore(values[item.code].score, values[item.code].rank)
                        for key, values in scores.items() if item.code in values}
             results.append(RankedOccupation(occupation.code, occupation.title, rank, dict(occupation.z_scores),
                                             rrf_score=item.score if fused else None, signals=signals,
                                             evidence=deepcopy(evidence.get(item.code, []))))
-        return RankingResponse("ranked", occupations=results)
+        response = RankingResponse("ranked", occupations=results)
+        if self._reranker:
+            response = self._semantic_pipeline.rerank(response, inputs.user_sentences)
+        response.occupations = response.occupations[:top_k]
+        return response

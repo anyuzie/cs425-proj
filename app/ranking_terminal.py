@@ -1,9 +1,11 @@
-"""Interactive, independent-turn extraction and configured top-10 ranking.
+"""Independent-turn ranking with user-clause task/context diagnostics.
 
-Run: .venv/Scripts/python.exe scripts/rank_utterance.py
+Run from the project root: .venv/Scripts/python.exe -m app.ranking_terminal
 """
 
 import argparse
+import hashlib
+from importlib.metadata import version
 import json
 import os
 from pathlib import Path
@@ -15,6 +17,12 @@ sys.path.insert(0, str(ROOT))
 from pipeline.extractor import Extractor
 from recommender.models.ranker import RankingPipeline
 from recommender.schemas import TYPES
+from recommender.utterance import UtteranceProcessingPipeline
+from recommender.utterance.task_context import TaskContextClassifier
+from recommender.utterance.stanza_pipeline import StanzaUtteranceProcessingPipeline
+from app.utterance_collection import UtteranceCollection
+from recommender.utterance.context_occupations import ContextOccupationMatcher
+from recommender.utterance.context_matching import ContextMatchingPipeline, route_clause_pipelines, below_clause_score_floor
 
 
 def rank_utterance(text, extractor, ranker):
@@ -28,7 +36,7 @@ def rank_utterance(text, extractor, ranker):
     # This independent snapshot contains only the current user's utterance.
     evidence = [{"id": "e1", "turn": 1, "text": text, "status": "active"}]
     response = ranker.rank_with_evidence(
-        interests, observed, [text], evidence, top_k=10)
+        interests, observed, [text], evidence, top_k=50)
     return reading, interests, observed, response
 
 
@@ -41,8 +49,9 @@ def show_result(reading, interests, observed, response):
     if response.status == "no_signal":
         print(f"No ranking: {response.reason}\n")
         return
-    print(f"\nTop {len(response.occupations)} occupations:")
-    for item in response.occupations:
+    displayed = response.occupations[:10]
+    print(f"\nTop {len(displayed)} occupations:")
+    for item in displayed:
         scores = []
         if item.rrf_score is not None:
             scores.append(f"RRF={item.rrf_score:.6f}")
@@ -50,15 +59,65 @@ def show_result(reading, interests, observed, response):
                       for name, signal in item.signals.items())
         print(f"{item.rank:2}. {item.code} | {item.title}")
         print("    " + " | ".join(scores))
+
     print()
+
+
+def show_clause_scores(processed, classifier, context_pipeline=None, context_occupations=None):
+    """Score exact source clause text; display only, without changing ranking."""
+    texts = [clause.text for clause in processed.clauses]
+    predictions = classifier.predict(texts) if texts else []
+    if len(predictions) != len(texts):
+        raise ValueError("Task/context classifier returned a different number of scores than clauses")
+    print("clauses: " + json.dumps(texts, ensure_ascii=False))
+    for index, (clause, prediction) in enumerate(zip(processed.clauses, predictions), 1):
+        print(f"  {index}. {clause.text}")
+        print(f"     task_score={prediction['task_score']:.6f}"
+              f" | context_score={prediction['context_score']:.6f}")
+        print("     route_task=" + str(prediction['route_task']).lower()
+              + " | route_context=" + str(prediction['route_context']).lower())
+
+        if below_clause_score_floor(prediction):
+            print("     skipped: both classifier scores are below 0.3")
+        routed = route_clause_pipelines(clause.text, prediction, context_pipeline=context_pipeline)
+        if "context" in routed:
+            context = routed["context"]
+            stance = context["preference"]
+            sign = "+1" if stance["sign"] == 1 else "-1" if stance["sign"] == -1 else "unknown"
+            print(f"     context preference: {stance['polarity']} ({sign}; {stance['rule']})")
+            print("     context target: " + stance["target"])
+            print("     context_vector (57 semantic similarities): " + json.dumps([round(v, 6) for v in context["context_vector"]]))
+            print("     closest contexts: " + json.dumps(context["top_contexts"], ensure_ascii=False))
+            if context_occupations is not None:
+                matches = context_occupations.match(context)
+                interpretation = ("potential preference conflicts" if stance["sign"] == -1 else
+                                  "preference unresolved; associations only" if stance["sign"] is None else
+                                  "context associations; not preference compatibility")
+                print(f"     Context-associated occupations ({interpretation}):")
+                if not matches:
+                    print("       No usable context ratings for the selected attributes.")
+                for rank, match in enumerate(matches, 1):
+                    print(f"       {rank}. {match['code']} | {match['title']} | association={match['association_score']:.6f} | coverage={match['coverage']:.1%}")
+                    for evidence in match["evidence"]:
+                        print(f"          {evidence['context']}: rating={evidence['rating']:.3f}, similarity={evidence['similarity']:.3f}")
+    print()
+    return predictions
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--clause-splitter", choices=("stanza", "spacy"), default="stanza",
+                        help="User-clause splitter; Stanza conservative baseline by default")
     parser.add_argument("--system-config", type=Path, default=ROOT / "configs/system.json")
     parser.add_argument("--ranking-config", type=Path, help="Override the system's ranking configuration")
     parser.add_argument("--checkpoint", type=Path, help="Override the extractor checkpoint directory")
     parser.add_argument("--occupations", type=Path, default=ROOT / "data/occupations.csv")
+    parser.add_argument("--task-context-classifier", type=Path, default=ROOT / "models/task_context_bert",
+                        help="Trained independent task/context sigmoid classifier for user clauses")
+    parser.add_argument("--context-dimensions", type=Path,
+                        default=ROOT / "data/work_context/onet_31_0/compact/context_dimensions.csv")
+    parser.add_argument("--collection-dir", type=Path, default=ROOT / "data/collected/utterances",
+                        help="Directory for append-only utterance snapshots")
     args = parser.parse_args()
     # Existing ranking variants resolve model/cache paths relative to the repo.
     os.chdir(ROOT)
@@ -72,22 +131,76 @@ def main():
         ranker = RankingPipeline(args.occupations, config=ranking_config)
         print(f"Loading extractor: {checkpoint}", flush=True)
         extractor = Extractor(checkpoint, ROOT / "data/labels.json")
+        print(f"Loading user-clause splitter: {args.clause_splitter}", flush=True)
+        utterance_processor = (StanzaUtteranceProcessingPipeline() if args.clause_splitter == "stanza"
+                               else UtteranceProcessingPipeline())
+        print(f"Loading user-clause classifier: {args.task_context_classifier}", flush=True)
+        task_context_classifier = TaskContextClassifier(args.task_context_classifier)
+        context_pipeline = ContextMatchingPipeline(args.context_dimensions)
+        context_occupations = ContextOccupationMatcher(
+            args.context_dimensions.parent / "occupation_context_vectors.csv",
+            args.context_dimensions.parent / "occupation_context_mask.csv", args.occupations,
+            context_pipeline.metadata["dimension_ids"])
     except (OSError, ValueError, KeyError, ImportError, RuntimeError) as error:
         print(f"Startup failed: {error}", file=sys.stderr)
         return 1
+    try:
+        collection = UtteranceCollection(args.collection_dir, {
+            "ranking_config": ranker.resolved_config,
+            "extractor_checkpoint": str(checkpoint.resolve()),
+            "context_pipeline": context_pipeline.metadata,
+            "context_occupation_matching": context_occupations.metadata,
+            "clause_score_floor": 0.3,
+            "task_context_classifier_checkpoint": str(args.task_context_classifier.resolve()),
+            "task_context_thresholds": {"task": task_context_classifier.task_threshold,
+                                        "context": task_context_classifier.context_threshold},
+            "parser_model": utterance_processor.model,
+            "parser_version": version("stanza") if args.clause_splitter == "stanza" else utterance_processor.nlp.meta.get("version"),
+            "clause_splitter": args.clause_splitter,
+            "spacy_version": version("spacy"),
+            "source_sha256": {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+                for name in ("recommender/utterance/pipeline.py", "recommender/utterance/classification.py",
+                             "app/ranking_terminal.py", "app/utterance_collection.py",
+                             "recommender/utterance/task_context.py", "recommender/utterance/stanza_pipeline.py", "recommender/utterance/context_matching.py", "recommender/utterance/context_occupations.py")},
+        })
+    except (OSError, ValueError, TypeError) as error:
+        print(f"Unable to start data collection: {error}", file=sys.stderr)
+        return 1
+    print(f"Collecting utterance snapshots: {collection.path}")
     enabled = [f"{k}={v}" for k, v in ranker.component_identifiers.items() if v]
     print("\nEnabled: " + ", ".join(enabled))
     print(f"Eligible occupations: {ranker.eligible_count}")
     print("Each entry is independent. Scores are raw component scores, not probabilities.")
+    print("Clause scores are independent BERT sigmoids; routing uses checkpoint thresholds.")
+    print("Experimental clause classification is display-only and does not affect ranking.")
     print("Enter an utterance, or x to exit.")
     while True:
         try:
-            text = input("You> ").strip()
+            raw_text = input("You> ")
+            text = raw_text.strip()
             if text == "x":
                 break
             if not text:
                 continue
-            show_result(*rank_utterance(text, extractor, ranker))
+            try:
+                entry_id = collection.submitted(raw_text, text)
+            except OSError as error:
+                print(f"Unable to save utterance; stopping collection: {error}", file=sys.stderr)
+                return 1
+            processed = None
+            try:
+                processed = utterance_processor.split(text)
+                result = rank_utterance(text, extractor, ranker)
+                collection.completed(entry_id, processed, *result)
+            except (Exception, KeyboardInterrupt) as error:
+                try:
+                    collection.failed(entry_id, error, processed)
+                except OSError as save_error:
+                    print(f"Unable to save processing failure: {save_error}", file=sys.stderr)
+                    return 1
+                raise
+            show_result(*result)
+            show_clause_scores(processed, task_context_classifier, context_pipeline, context_occupations)
         except (EOFError, KeyboardInterrupt):
             break
         except (OSError, ValueError, RuntimeError) as error:

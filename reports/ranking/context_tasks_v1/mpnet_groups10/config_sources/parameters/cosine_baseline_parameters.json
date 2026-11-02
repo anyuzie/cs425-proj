@@ -1,0 +1,16 @@
+{
+  "dimension_order": [
+    "R",
+    "I",
+    "A",
+    "S",
+    "E",
+    "C"
+  ],
+  "observed_only": true,
+  "occupation_scale": "supplied_z_scores",
+  "normalization": "l2_both_vectors_on_observed_dimensions",
+  "zero_user_norm": "unusable",
+  "zero_occupation_norm": "omit",
+  "tie_break": "code_ascending"
+}

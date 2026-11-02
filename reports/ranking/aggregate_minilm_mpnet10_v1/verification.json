@@ -1,0 +1,8 @@
+{
+  "profiles": 120,
+  "aggregate_formulas_and_groups_verified": true,
+  "protected_files_unchanged": true,
+  "targeted_tests_passed": 36,
+  "consolidated_experiments": 8,
+  "csv": "reports\\ranking\\semantic_experiments_consolidated.csv"
+}

@@ -153,3 +153,13 @@ Use `TBD`, not fabricated performance figures.
 - [ ] Affected-case analysis and regressions included.
 - [ ] Held-out split evaluated after freeze, without retuning.
 - [ ] Model/data revisions, commands, and run artifacts are reproducible.
+
+
+## Permanent semantic evaluation metrics (31 October 2026)
+
+Evaluator m2-v3 includes Hit@1/5/10, MRR, NDCG@5/10 and macro Recall@5/10/20.
+Recall counts all distinct eligible positive-grade labels, including the target
+and related occupations; empty relevance sets receive zero. New comparisons,
+histories and promotion guards include all nine metrics. Old runs keep their
+original evaluator version; unknown historical recall remains blank.
+See [integration and consolidated CSV](../docs/SEMANTIC_INTEGRATION.md).

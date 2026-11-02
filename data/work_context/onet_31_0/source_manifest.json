@@ -1,0 +1,52 @@
+{
+  "release": "31.0",
+  "retrieved_at": "2026-11-01T08:07:53.581549+00:00",
+  "database_url": "https://www.onetcenter.org/database.html",
+  "license_url": "https://www.onetcenter.org/license_db.html",
+  "source_files": {
+    "content_model_reference.csv": {
+      "bytes": 235856,
+      "sha256": "370033744006dbd5df048431d42a402f6741a00a229b6d0f4e4f4249b6399c04",
+      "url": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/content_model_reference.csv"
+    },
+    "occupation_data.csv": {
+      "bytes": 268030,
+      "sha256": "a09eae1d6609686e44e05b7290993a1c8b523d8ca224bc0eedc194c855c3ee02",
+      "url": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/occupation_data.csv"
+    },
+    "scales_reference.csv": {
+      "bytes": 1006,
+      "sha256": "bcba23858ce21ecaacbde303a8993e35d46724b4afb8c9ec2b10e04f42adcfc9",
+      "url": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/scales_reference.csv"
+    },
+    "work_context.csv": {
+      "bytes": 52928020,
+      "sha256": "599f6bff23cbc3e7d8915e25c0167324b1e00c4117bcbcd9a0c754fe47cb4fd7",
+      "url": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/work_context.csv"
+    },
+    "work_context_categories.csv": {
+      "bytes": 30453,
+      "sha256": "1a6ca4b051a94aad61b931c06bc62d16a5527cd4009a94b9effa3d470399ca4a",
+      "url": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/work_context_categories.csv"
+    }
+  },
+  "derived_files": {
+    "context_units.csv": {
+      "bytes": 9112,
+      "sha256": "48c13a73e966dbb99a61977f50ae0c29981ca687b7eebea6c18d817c8e747d0e"
+    },
+    "coverage_report.json": {
+      "bytes": 11678,
+      "sha256": "c1ed97696995ebc1b8738773384348ee1b8bdd01417c0fe53609771524ed6453"
+    },
+    "occupation_coverage.csv": {
+      "bytes": 72137,
+      "sha256": "e36a0569045abab0d0cbaf10c0b68fd7a49c927540e1ea34beba145f25467ed7"
+    },
+    "occupation_work_context.jsonl": {
+      "bytes": 136124080,
+      "sha256": "81e6d5e37fda88d33f9a40b3d0e43a6f474f81f0db3ef2c1d533bf25e458ee8c"
+    }
+  },
+  "changes_to_existing_dataset_or_ranking": false
+}

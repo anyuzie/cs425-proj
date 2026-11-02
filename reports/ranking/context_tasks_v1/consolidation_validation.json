@@ -1,0 +1,5 @@
+{
+  "historical_refresh_retains_treatments": true,
+  "experiment_count": 14,
+  "preserved_treatment_rows": 6
+}

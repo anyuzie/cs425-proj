@@ -1,0 +1,91 @@
+{
+  "control_run_id": "m2_structured_oracle_dev_v1_1cfaddc7e63c45beb974026e5e79ed06",
+  "treatment_run_id": "m2_structured_oracle_dev_v1_98c719ebe9bc475faf2ce8b00356b6fd",
+  "profiles": 120,
+  "bootstrap_samples": 2000,
+  "seed": 425,
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "mean_difference": -0.008333333333333333,
+      "ci95": [
+        -0.025,
+        0.0
+      ],
+      "improved": 0,
+      "regressed": 1
+    },
+    "hit_at_5": {
+      "mean_difference": 0.041666666666666664,
+      "ci95": [
+        -0.016666666666666666,
+        0.1
+      ],
+      "improved": 9,
+      "regressed": 4
+    },
+    "hit_at_10": {
+      "mean_difference": 0.058333333333333334,
+      "ci95": [
+        -0.016666666666666666,
+        0.13333333333333333
+      ],
+      "improved": 14,
+      "regressed": 7
+    },
+    "mrr": {
+      "mean_difference": 0.00615338368308814,
+      "ci95": [
+        -0.0165339668805844,
+        0.025331372026592032
+      ],
+      "improved": 64,
+      "regressed": 41
+    },
+    "ndcg_at_5": {
+      "mean_difference": 0.005956361079740178,
+      "ci95": [
+        -0.014491659870161534,
+        0.026961629957225456
+      ],
+      "improved": 49,
+      "regressed": 39
+    },
+    "ndcg_at_10": {
+      "mean_difference": 0.01117670635840922,
+      "ci95": [
+        -0.011129133581419561,
+        0.03428290072413247
+      ],
+      "improved": 61,
+      "regressed": 45
+    },
+    "recall_at_5": {
+      "mean_difference": 0.000515754312193941,
+      "ci95": [
+        -0.009093217369146162,
+        0.010387865595876433
+      ],
+      "improved": 31,
+      "regressed": 30
+    },
+    "recall_at_10": {
+      "mean_difference": 0.010731879346430431,
+      "ci95": [
+        -0.007747101933440943,
+        0.02906294216762483
+      ],
+      "improved": 43,
+      "regressed": 38
+    },
+    "recall_at_20": {
+      "mean_difference": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "regressed": 0
+    }
+  }
+}

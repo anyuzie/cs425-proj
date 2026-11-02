@@ -1,0 +1,51 @@
+{
+  "seed": 42,
+  "labels": [
+    "task",
+    "context"
+  ],
+  "input_fields": [
+    "text"
+  ],
+  "source_labelling": "Task source -> [1,0]; context names/descriptions -> [0,1]",
+  "train": {
+    "examples": 14065,
+    "sources": {
+      "context_dimensions.csv": 92,
+      "tasks.csv": 13973
+    }
+  },
+  "validation": {
+    "examples": 3435,
+    "sources": {
+      "context_dimensions.csv": 22,
+      "tasks.csv": 3413
+    }
+  },
+  "context_families": {
+    "train": 46,
+    "validation": 11
+  },
+  "task_occupation_groups": {
+    "train": 738,
+    "validation": 185
+  },
+  "excluded": {
+    "conflicting_labels": 0,
+    "duplicates": 307,
+    "cross_split_duplicate_rows": 1145
+  },
+  "source_sha256": {
+    "C:\\Users\\aanny\\Documents\\GitHub\\year5\\cs425\\project\\data\\tasks.csv": "7e3871f13ffc7091b049938792378792c824f317e3ddc6ccfea1b82a688b3b9c",
+    "C:\\Users\\aanny\\Documents\\GitHub\\year5\\cs425\\project\\data\\work_context\\onet_31_0\\compact\\context_dimensions.csv": "5074fb981bccd1038556a696f47b43549e52f57f67160b9fe230e0dcd139ec01"
+  },
+  "dataset_sha256": {
+    "train.jsonl": "5a3ee9a8040cf6465be358550e1d498039726eb01f3dd2040109ffd96e57992b",
+    "validation.jsonl": "f16359bd2ac6b2fc2d65dd8348c405a391271fd5bdfafa7f8cc17947bc740ab9"
+  },
+  "limits": [
+    "Source labels are provisional, not manually reviewed clause labels",
+    "No training targets with simultaneous positives or simultaneous negatives",
+    "No conversational generalisation claim"
+  ]
+}

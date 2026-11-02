@@ -53,3 +53,11 @@ nli_manual_tests/*
 /reports/nli/probing_v1/
 /reports/nli/archive_v1_literal/
 /data/xinyan_test.jsonl
+# Local utterance collection; curate reviewed training exports separately.
+/data/collected/
+
+# Human annotation work and generated training exports.
+/data/annotations/
+/data/training/utterances/
+data/work_context/onet_31_0/raw/work_context.csv
+data/work_context/onet_31_0/prepared/occupation_work_context.jsonl

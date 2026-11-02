@@ -1,0 +1,19 @@
+{
+  "configurations": 8,
+  "permanent_metrics": 10,
+  "frozen_core_reports_unchanged": true,
+  "csv": "reports\\ranking\\semantic_experiments_consolidated.csv",
+  "recall50": {
+    "reports\\ranking\\description_blocks_v1\\control": 0.5898438022818827,
+    "reports\\ranking\\description_blocks_v1\\top100": 0.4590936581764755,
+    "reports\\ranking\\description_blocks_v1\\blocks5": 0.5898438022818827,
+    "reports\\ranking\\description_blocks_v1\\blocks10": 0.5898438022818827,
+    "reports\\ranking\\mpnet_blocks10_v1\\mpnet": 0.5898438022818827,
+    "reports\\ranking\\mpnet20_minilm10_v1": 0.5841798713054518,
+    "reports\\ranking\\minilm20_mpnet10_v1": 0.5904849447293332,
+    "reports\\ranking\\aggregate_minilm_mpnet10_v1": 0.5898438022818827,
+    "reports\\ranking\\mpnet_blocks10_v1\\minilm": 0.5898438022818827,
+    "reports\\ranking\\mpnet20_minilm10_integrated_v1": 0.5841798713054518
+  },
+  "method": "recomputed from saved full predictions and fingerprint-matching labels; no model rerun"
+}

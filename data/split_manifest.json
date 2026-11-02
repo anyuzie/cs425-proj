@@ -1,0 +1,37 @@
+{
+  "seed": 42,
+  "split_unit": "occupation; exact-text duplicate occupation groups kept together",
+  "train": {
+    "clauses": 123,
+    "occupations": 24,
+    "label_combinations": {
+      "[1, 1]": 31,
+      "[0, 1]": 70,
+      "[1, 0]": 22
+    }
+  },
+  "validation": {
+    "clauses": 32,
+    "occupations": 6,
+    "label_combinations": {
+      "[0, 1]": 18,
+      "[1, 1]": 8,
+      "[1, 0]": 6
+    }
+  },
+  "review_csv_sha256": "0b456b6b526dac96ea523ac07c6e40f7964d30714ed01eb9ea4f46aa978ce8a6",
+  "no_neither_examples": true,
+  "model_predictions_in_supervised_splits": false,
+  "held_out_test_set": false,
+  "corpus": {
+    "sources": 19854,
+    "clauses": 20812,
+    "occupations": 1016,
+    "parser": "core_web_sm",
+    "parser_version": "3.8.0",
+    "source_hashes": {
+      "occupations.csv": "d00d968d5fe5076ec76eca55cd5fa2734816ea93e8af6d84bdff2170c1af9503",
+      "tasks.csv": "7e3871f13ffc7091b049938792378792c824f317e3ddc6ccfea1b82a688b3b9c"
+    }
+  }
+}

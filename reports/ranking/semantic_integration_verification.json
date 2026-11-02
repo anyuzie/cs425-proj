@@ -1,0 +1,10 @@
+{
+  "target": "C:\\Users\\aanny\\Documents\\GitHub\\year5\\cs425\\project",
+  "targeted_tests_passed": 32,
+  "prediction_records_exactly_reproduced": 45360,
+  "profiles_with_verified_stage_order": 120,
+  "csv_experiments": 6,
+  "metrics_per_experiment": 9,
+  "protected_files_unchanged": true,
+  "integrated_run": "C:\\Users\\aanny\\Documents\\GitHub\\year5\\cs425\\project\\reports\\ranking\\mpnet20_minilm10_integrated_v1"
+}

@@ -4,11 +4,64 @@ Read this document before changing ranking architecture. It is the authoritative
 
 ## Current implementation status
 
+Context/task text reranking experiment (2 November 2026): six separate frozen treatments add all raw task text to description/context prose, using runtime chunk encoding and unchanged weighted-dot-product first-stage groups. All ten metrics are evaluated on the same 120 development/oracle profiles and 378 occupations; six rows are appended to the preserved eight historical rows. No rated Work Context features or classifier scores are inputs. See [experiment report](../reports/ranking/context_tasks_v1/README.md) for actual metrics, chunk aggregation, grouping and limitations. Active defaults and frozen controls remain unchanged.
+
+Context acceptance revision (2 November 2026): experimental context matching now abstains on unresolved references/preferences, uses explicit setting evidence, and allows no attribute match. Other wording uses a provisional uncalibrated cosine cutoff of .5 instead of forced top-three matches. Informal negation is recognized. Terminal layout, classifier, ranking and fusion are unchanged; see docs/CLAUSE_CONTEXT_PIPELINE.md for limits.
+
+Per-clause context occupation associations (2 November 2026): context-routed clauses display a separate top ten across all local occupations using similarity-weighted available ratings for the three closest context attributes. Coverage and supporting evidence are shown; negative preferences label associated occupations as potential conflicts. These are context associations, not calibrated preference compatibility; RIASEC ranking and task routing remain unchanged. Details: docs/CLAUSE_CONTEXT_PIPELINE.md.
+
+Context clause diagnostics (2 November 2026): terminal occupation-clause details and historical occupation-classifier loading removed. Context-routed user clauses now independently produce a lexical preference sign (unknown for unresolved cases) and 57 ordered MPNet attribute similarities. This is display-only semantic projection, not occupation ratings or ranking integration. Task routing remains independent; its matcher is deferred. See docs/CLAUSE_CONTEXT_PIPELINE.md for semantics and limits.
+
+Stanza terminal baseline (2 November 2026): user clauses now default to offline Stanza dependency parsing with conservative explicit-subject coordination rules (`stanza_conservative_v1`). Embedded complements and shared-subject negation stay together; spaCy remains selectable with `--clause-splitter spacy`. Occupation annotation parsing, shared System, classifier weights and ranking calculations are unchanged. Example-based regressions do not establish general conversational accuracy.
+
+Terminal clause scoring (2 November 2026): `app.ranking_terminal` now displays independent BERT Task/Context sigmoid scores and routes for each exact spaCy clause. Model loads once; this is display-only and does not change extraction, splitting, ranking, fusion or reviewed annotations. Known paraphrase performance remains Task F1 .564103, Context F1 .457831, exact match 35%. The pre-extension ranking snapshot below remains the control.
+
+Pre-extension snapshot (2 November 2026): [ranking and classifier baseline](PRE_EXTENSION_BASELINE.md) records all ten ranking metrics for all eight existing variants. Dot-product-only Hit@5 = .166667; equal-weight MiniLM/MPNet groups-of-10 Hit@5 = .216667 (MRR .133342 versus .141508 for dot product). Active workflow remains dot-product-only. Current source-labelled task/context BERT has source-validation F1 1.000 for both outputs, but the 80-case assistant-authored paraphrase diagnostic gives Task F1 .564103, Context F1 .457831 and exact match 35% (28/80). These are separate evaluations; conversational reliability and ranking benefit are not established. No new classifier/matching integration or scoring change is included in this snapshot.
+
+
+Historical occupation clause classifier pilot (1 November 2026; different checkpoint and label definitions from the current task/context BERT): BERT is trained on 123 human-reviewed clauses from 24 occupations and validated on 32 clauses from six disjoint occupations. Ten-epoch pilot selected by validation macro F1: Activity .625, Job nature .893, exact match .500. No Neither training examples or independent test set. Trained checkpoint installed; real terminal smoke confirms ten displayed occupations and 50 underlying candidates. Occupation prose uses conservative sentence boundaries; user-utterance splitting and ranking scores are unchanged. See docs/OCCUPATION_CLASSIFIER_TRAINING.md for datasets, corpus prediction outputs and limitations.
+
+Utterance preprocessing: optional independent spaCy clause splitting is available through
+`settings.utterance_processing`. Results are recorded in the turn trace; original text,
+RIASEC scoring and reranking are preserved. Pattern classification is deferred.
+See [utterance processing](UTTERANCE_PROCESSING.md).
+
+Recall@50 extension (31 October 2026): evaluator m2-v4 now reports ten permanent
+metrics, including macro Recall@5/10/20/50. All eight configurations have verified
+Recall@50 extensions derived from saved predictions and fingerprint-matching labels.
+Original historical metrics/manifests are preserved. CSV, notebook, history and
+new paired comparisons include Recall@50. See [metric extension](RECALL50.md).
+
+
+Semantic aggregation (31 October 2026): a separate frozen equal-weight variant
+scores the same dot-product top 100 with MiniLM and MPNet, averages raw cosine
+scores and sorts once within baseline groups of 10. Both sequential orders and
+all previous variants remain available. RIASEC extraction/scoring is unchanged.
+All 36 targeted tests pass; the consolidated comparison now has eight experiments.
+See the [aggregation report](../reports/ranking/aggregate_minilm_mpnet10_v1/README.md).
+
+
+Reverse-sequence follow-up (31 October 2026): frozen `minilm20_mpnet10_v1`
+adds MiniLM groups of 20 followed by MPNet groups of 10 formed from MiniLM output.
+Both stage orders are supported in the separate semantic pipeline. The consolidated
+CSV includes seven experiments; all 33 targeted tests pass. See the
+[reverse-sequence report](../reports/ranking/minilm20_mpnet10_v1/README.md). Existing RIASEC processing and defaults are preserved.
+
+
+Semantic integration (31 October 2026): weighted-dot-product RIASEC matching
+remains unchanged and separate from `recommender/semantic/SemanticMatchingPipeline`.
+The semantic pipeline supports description-only MiniLM and MPNet independently,
+or sequential MPNet groups of 20 followed by MiniLM groups of 10 formed from
+MPNet's output. Existing extractor/tracker logic and active defaults are preserved.
+Evaluator `m2-v3` permanently includes Recall@5/10/20 alongside the six existing
+metrics. See [integration guide](SEMANTIC_INTEGRATION.md) and the consolidated experiment CSV.
+
+
 Central workflow automatic promotion (26 October 2026): workflow ranking now
 uses mutable `configs/ranking/active.json`, initialized to weighted dot product.
 `candidate.json` and `promotion.json` select the next experiment and policy.
 Workflow evaluation re-evaluates incumbent and challenger under matching conditions
-and promotes higher Hit@5 only when none of the other five metrics regress.
+and promotes higher Hit@5 only when none of the other nine permanent metrics regress.
 Reports, previous bytes and the comparison are preserved; publication is atomic
 and serialized. Workflow chat uses the winner. Direct evaluator calls remain
 report-only, and frozen variants plus the separate application YAML are unchanged.
@@ -82,7 +135,7 @@ See [M5 acceptance and freeze](../reports/ranking/m5/DECISION.md) and the [sessi
 | `recommender/compare.py` | Compatible-run checks and paired metric differences/bootstrap intervals |
 | `recommender/history.py` | Shared append-only CSV registration and original baseline import |
 
-The dependency direction is contracts → algorithms/registry → pipeline → evaluator. Scoring components never call another scoring component, fusion, or the evaluator. The metric layer consumes occupation codes and evaluator-side labels, regardless of which component produced the codes.
+The dependency direction is contracts â†’ algorithms/registry â†’ pipeline â†’ evaluator. Scoring components never call another scoring component, fusion, or the evaluator. The metric layer consumes occupation codes and evaluator-side labels, regardless of which component produced the codes.
 
 Upstream owns extraction, confidence merging, contradiction resolution, the cumulative RIASEC profile, and user-only chronological history. Recompute rankings from each snapshot; do not accumulate occupation scores across turns or apply confidence merging again. Downstream policy/UI consume `RankingResponse`; System now wires configurable ranking to tracker snapshots and policy output; stance-aware supporting evidence remains future work.
 
@@ -209,7 +262,7 @@ The CSV is not a global leaderboard. `compare.py` checks compatible input mode, 
 9. Better standalone performance does not imply better fused performance.
 10. Document accepted changes and the evidence supporting them, including regressions and limitations.
 
-Do not change Job Zone 4–5 eligibility or supplied z-scores during an algorithm experiment. Runtime `[-1,1]` tracker inputs and oracle z-scale inputs remain distinct. Never tune on held-out profiles or feed target/relevance labels into components. Passing correctness tests does not prove recommendation quality or probing effectiveness.
+Do not change Job Zone 4â€“5 eligibility or supplied z-scores during an algorithm experiment. Runtime `[-1,1]` tracker inputs and oracle z-scale inputs remain distinct. Never tune on held-out profiles or feed target/relevance labels into components. Passing correctness tests does not prove recommendation quality or probing effectiveness.
 
 ## Future implementation workflow
 

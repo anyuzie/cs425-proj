@@ -1,0 +1,450 @@
+{
+  "release": "31.0",
+  "source_rating_rows": 305389,
+  "unique_context_elements": 57,
+  "scale_ids": [
+    "CT",
+    "CTP",
+    "CX",
+    "CXP"
+  ],
+  "local_occupations": 1016,
+  "exact_code_matches": 1016,
+  "title_mismatches": [],
+  "occupations_with_context": 911,
+  "occupations_without_context": [
+    {
+      "code": "11-1031.00",
+      "title": "Legislators"
+    },
+    {
+      "code": "11-9039.00",
+      "title": "Education Administrators, All Other"
+    },
+    {
+      "code": "11-9179.00",
+      "title": "Personal Service Managers, All Other"
+    },
+    {
+      "code": "11-9199.00",
+      "title": "Managers, All Other"
+    },
+    {
+      "code": "13-1199.00",
+      "title": "Business Operations Specialists, All Other"
+    },
+    {
+      "code": "13-2051.00",
+      "title": "Financial and Investment Analysts"
+    },
+    {
+      "code": "13-2054.00",
+      "title": "Financial Risk Specialists"
+    },
+    {
+      "code": "13-2099.00",
+      "title": "Financial Specialists, All Other"
+    },
+    {
+      "code": "15-1299.00",
+      "title": "Computer Occupations, All Other"
+    },
+    {
+      "code": "15-2099.00",
+      "title": "Mathematical Science Occupations, All Other"
+    },
+    {
+      "code": "17-2199.00",
+      "title": "Engineers, All Other"
+    },
+    {
+      "code": "17-3019.00",
+      "title": "Drafters, All Other"
+    },
+    {
+      "code": "17-3029.00",
+      "title": "Engineering Technologists and Technicians, Except Drafters, All Other"
+    },
+    {
+      "code": "19-1029.00",
+      "title": "Biological Scientists, All Other"
+    },
+    {
+      "code": "19-1099.00",
+      "title": "Life Scientists, All Other"
+    },
+    {
+      "code": "19-2099.00",
+      "title": "Physical Scientists, All Other"
+    },
+    {
+      "code": "19-3039.00",
+      "title": "Psychologists, All Other"
+    },
+    {
+      "code": "19-3099.00",
+      "title": "Social Scientists and Related Workers, All Other"
+    },
+    {
+      "code": "19-4044.00",
+      "title": "Hydrologic Technicians"
+    },
+    {
+      "code": "19-4099.00",
+      "title": "Life, Physical, and Social Science Technicians, All Other"
+    },
+    {
+      "code": "21-1019.00",
+      "title": "Counselors, All Other"
+    },
+    {
+      "code": "21-1029.00",
+      "title": "Social Workers, All Other"
+    },
+    {
+      "code": "21-1099.00",
+      "title": "Community and Social Service Specialists, All Other"
+    },
+    {
+      "code": "21-2099.00",
+      "title": "Religious Workers, All Other"
+    },
+    {
+      "code": "23-2099.00",
+      "title": "Legal Support Workers, All Other"
+    },
+    {
+      "code": "25-1069.00",
+      "title": "Social Sciences Teachers, Postsecondary, All Other"
+    },
+    {
+      "code": "25-1199.00",
+      "title": "Postsecondary Teachers, All Other"
+    },
+    {
+      "code": "25-2059.00",
+      "title": "Special Education Teachers, All Other"
+    },
+    {
+      "code": "25-3099.00",
+      "title": "Teachers and Instructors, All Other"
+    },
+    {
+      "code": "25-9049.00",
+      "title": "Teaching Assistants, All Other"
+    },
+    {
+      "code": "25-9099.00",
+      "title": "Educational Instruction and Library Workers, All Other"
+    },
+    {
+      "code": "27-1019.00",
+      "title": "Artists and Related Workers, All Other"
+    },
+    {
+      "code": "27-1029.00",
+      "title": "Designers, All Other"
+    },
+    {
+      "code": "27-2099.00",
+      "title": "Entertainers and Performers, Sports and Related Workers, All Other"
+    },
+    {
+      "code": "27-3099.00",
+      "title": "Media and Communication Workers, All Other"
+    },
+    {
+      "code": "27-4015.00",
+      "title": "Lighting Technicians"
+    },
+    {
+      "code": "27-4099.00",
+      "title": "Media and Communication Equipment Workers, All Other"
+    },
+    {
+      "code": "29-1029.00",
+      "title": "Dentists, All Other Specialists"
+    },
+    {
+      "code": "29-1129.00",
+      "title": "Therapists, All Other"
+    },
+    {
+      "code": "29-1212.00",
+      "title": "Cardiologists"
+    },
+    {
+      "code": "29-1229.00",
+      "title": "Physicians, All Other"
+    },
+    {
+      "code": "29-1242.00",
+      "title": "Orthopedic Surgeons, Except Pediatric"
+    },
+    {
+      "code": "29-1243.00",
+      "title": "Pediatric Surgeons"
+    },
+    {
+      "code": "29-1249.00",
+      "title": "Surgeons, All Other"
+    },
+    {
+      "code": "29-1299.00",
+      "title": "Healthcare Diagnosing or Treating Practitioners, All Other"
+    },
+    {
+      "code": "29-2042.00",
+      "title": "Emergency Medical Technicians"
+    },
+    {
+      "code": "29-2099.00",
+      "title": "Health Technologists and Technicians, All Other"
+    },
+    {
+      "code": "29-9021.00",
+      "title": "Health Information Technologists and Medical Registrars"
+    },
+    {
+      "code": "29-9099.00",
+      "title": "Healthcare Practitioners and Technical Workers, All Other"
+    },
+    {
+      "code": "31-9099.00",
+      "title": "Healthcare Support Workers, All Other"
+    },
+    {
+      "code": "33-1099.00",
+      "title": "First-Line Supervisors of Protective Service Workers, All Other"
+    },
+    {
+      "code": "33-9099.00",
+      "title": "Protective Service Workers, All Other"
+    },
+    {
+      "code": "35-2019.00",
+      "title": "Cooks, All Other"
+    },
+    {
+      "code": "35-9099.00",
+      "title": "Food Preparation and Serving Related Workers, All Other"
+    },
+    {
+      "code": "37-2019.00",
+      "title": "Building Cleaning Workers, All Other"
+    },
+    {
+      "code": "37-3019.00",
+      "title": "Grounds Maintenance Workers, All Other"
+    },
+    {
+      "code": "39-3019.00",
+      "title": "Gambling Service Workers, All Other"
+    },
+    {
+      "code": "39-3099.00",
+      "title": "Entertainment Attendants and Related Workers, All Other"
+    },
+    {
+      "code": "39-4012.00",
+      "title": "Crematory Operators"
+    },
+    {
+      "code": "39-9099.00",
+      "title": "Personal Care and Service Workers, All Other"
+    },
+    {
+      "code": "41-9099.00",
+      "title": "Sales and Related Workers, All Other"
+    },
+    {
+      "code": "43-2099.00",
+      "title": "Communications Equipment Operators, All Other"
+    },
+    {
+      "code": "43-3099.00",
+      "title": "Financial Clerks, All Other"
+    },
+    {
+      "code": "43-4199.00",
+      "title": "Information and Record Clerks, All Other"
+    },
+    {
+      "code": "43-9199.00",
+      "title": "Office and Administrative Support Workers, All Other"
+    },
+    {
+      "code": "45-2099.00",
+      "title": "Agricultural Workers, All Other"
+    },
+    {
+      "code": "45-4029.00",
+      "title": "Logging Workers, All Other"
+    },
+    {
+      "code": "47-3019.00",
+      "title": "Helpers, Construction Trades, All Other"
+    },
+    {
+      "code": "47-4099.00",
+      "title": "Construction and Related Workers, All Other"
+    },
+    {
+      "code": "47-5049.00",
+      "title": "Underground Mining Machine Operators, All Other"
+    },
+    {
+      "code": "47-5099.00",
+      "title": "Extraction Workers, All Other"
+    },
+    {
+      "code": "49-9069.00",
+      "title": "Precision Instrument and Equipment Repairers, All Other"
+    },
+    {
+      "code": "49-9099.00",
+      "title": "Installation, Maintenance, and Repair Workers, All Other"
+    },
+    {
+      "code": "51-2099.00",
+      "title": "Assemblers and Fabricators, All Other"
+    },
+    {
+      "code": "51-3099.00",
+      "title": "Food Processing Workers, All Other"
+    },
+    {
+      "code": "51-4199.00",
+      "title": "Metal Workers and Plastic Workers, All Other"
+    },
+    {
+      "code": "51-6099.00",
+      "title": "Textile, Apparel, and Furnishings Workers, All Other"
+    },
+    {
+      "code": "51-7099.00",
+      "title": "Woodworkers, All Other"
+    },
+    {
+      "code": "51-8099.00",
+      "title": "Plant and System Operators, All Other"
+    },
+    {
+      "code": "51-9199.00",
+      "title": "Production Workers, All Other"
+    },
+    {
+      "code": "53-1049.00",
+      "title": "First-Line Supervisors of Transportation Workers, All Other"
+    },
+    {
+      "code": "53-3054.00",
+      "title": "Taxi Drivers"
+    },
+    {
+      "code": "53-3099.00",
+      "title": "Motor Vehicle Operators, All Other"
+    },
+    {
+      "code": "53-4099.00",
+      "title": "Rail Transportation Workers, All Other"
+    },
+    {
+      "code": "53-6099.00",
+      "title": "Transportation Workers, All Other"
+    },
+    {
+      "code": "53-7199.00",
+      "title": "Material Moving Workers, All Other"
+    },
+    {
+      "code": "55-1011.00",
+      "title": "Air Crew Officers"
+    },
+    {
+      "code": "55-1012.00",
+      "title": "Aircraft Launch and Recovery Officers"
+    },
+    {
+      "code": "55-1013.00",
+      "title": "Armored Assault Vehicle Officers"
+    },
+    {
+      "code": "55-1014.00",
+      "title": "Artillery and Missile Officers"
+    },
+    {
+      "code": "55-1015.00",
+      "title": "Command and Control Center Officers"
+    },
+    {
+      "code": "55-1016.00",
+      "title": "Infantry Officers"
+    },
+    {
+      "code": "55-1017.00",
+      "title": "Special Forces Officers"
+    },
+    {
+      "code": "55-1019.00",
+      "title": "Military Officer Special and Tactical Operations Leaders, All Other"
+    },
+    {
+      "code": "55-2011.00",
+      "title": "First-Line Supervisors of Air Crew Members"
+    },
+    {
+      "code": "55-2012.00",
+      "title": "First-Line Supervisors of Weapons Specialists/Crew Members"
+    },
+    {
+      "code": "55-2013.00",
+      "title": "First-Line Supervisors of All Other Tactical Operations Specialists"
+    },
+    {
+      "code": "55-3011.00",
+      "title": "Air Crew Members"
+    },
+    {
+      "code": "55-3012.00",
+      "title": "Aircraft Launch and Recovery Specialists"
+    },
+    {
+      "code": "55-3013.00",
+      "title": "Armored Assault Vehicle Crew Members"
+    },
+    {
+      "code": "55-3014.00",
+      "title": "Artillery and Missile Crew Members"
+    },
+    {
+      "code": "55-3015.00",
+      "title": "Command and Control Center Specialists"
+    },
+    {
+      "code": "55-3016.00",
+      "title": "Infantry"
+    },
+    {
+      "code": "55-3018.00",
+      "title": "Special Forces"
+    },
+    {
+      "code": "55-3019.00",
+      "title": "Military Enlisted Tactical Operations and Air/Weapons Specialists and Crew Members, All Other"
+    }
+  ],
+  "ranking_eligible_occupations": 378,
+  "ranking_eligible_with_context": 372,
+  "external_codes_not_in_local_dataset": [],
+  "suppressed_rating_rows_preserved": 11491,
+  "not_relevant_rating_rows_preserved": 0,
+  "original_occupations_sha256": "d00d968d5fe5076ec76eca55cd5fa2734816ea93e8af6d84bdff2170c1af9503",
+  "source_urls": {
+    "work_context.csv": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/work_context.csv",
+    "work_context_categories.csv": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/work_context_categories.csv",
+    "scales_reference.csv": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/scales_reference.csv",
+    "content_model_reference.csv": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/content_model_reference.csv",
+    "occupation_data.csv": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/occupation_data.csv"
+  }
+}

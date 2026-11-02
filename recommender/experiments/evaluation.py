@@ -3,7 +3,9 @@
 import math
 
 LEGACY_METRICS = ("hit_at_5", "mrr", "ndcg_at_10")
-METRICS = ("hit_at_1", "hit_at_5", "hit_at_10", "mrr", "ndcg_at_5", "ndcg_at_10")
+PRE_RECALL_METRICS = ("hit_at_1", "hit_at_5", "hit_at_10", "mrr", "ndcg_at_5", "ndcg_at_10")
+RECALL_METRICS = ("recall_at_5", "recall_at_10", "recall_at_20", "recall_at_50")
+METRICS = PRE_RECALL_METRICS + RECALL_METRICS
 GRADES = {"primary_short": 3, "primary_long": 2, "supplemental": 1}
 
 
@@ -49,6 +51,8 @@ def evaluate_ranking(codes: list[str], target: str | None, related: dict,
         **{f"hit_at_{k}": hit_at(target_rank, k) for k in (1, 5, 10)},
         "mrr": 1 / target_rank if target_rank else 0.0,
         **{f"ndcg_at_{k}": ndcg_at(codes, labels, k) for k in (5, 10)},
+        **{f"recall_at_{k}": len(set(codes[:k]) & labels.keys()) / len(labels) if labels else 0.
+           for k in (5, 10, 20, 50)},
         "target_rank": target_rank,
         "target_status": "missing" if not target else "eligible" if target in pool else "ineligible",
         "zero_idcg": ideal == 0,

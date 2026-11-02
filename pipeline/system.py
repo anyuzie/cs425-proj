@@ -31,7 +31,7 @@ class System:
     """Orchestrates the components; per-turn rules live in the components themselves."""
 
     def __init__(self, extractor, tracker, rule, confirmer, ranker, policy, filler, type_names,
-                 max_turns=MAX_TURNS, confirm_threshold=0.6, input_mode="unverified_tracker"):
+                 max_turns=MAX_TURNS, confirm_threshold=0.6, input_mode="unverified_tracker", utterance_processor=None):
         self.extractor, self.tracker, self.rule, self.confirmer = extractor, tracker, rule, confirmer
         self.ranker, self.policy, self.filler, self.type_names = ranker, policy, filler, type_names
         self.max_turns, self.confirm_threshold = max_turns, confirm_threshold
@@ -43,6 +43,7 @@ class System:
         if input_mode == "actual_tracker" and any(
                 getattr(c, "name", "").startswith(("test-", "mock-")) for c in (extractor, tracker, confirmer)):
             raise ValueError("test or mock components cannot be labelled actual_tracker")
+        self.utterance_processor = utterance_processor
         self.input_mode = input_mode
 
     @classmethod
@@ -57,9 +58,13 @@ class System:
         c = registry.build(config, d)
         names = json.loads((d / "labels.json").read_text(encoding="utf-8"))["type_names"]
         st = config.get("settings", {})
+        processor = None
+        if st.get("utterance_processing", False):
+            from recommender.utterance import UtteranceProcessingPipeline
+            processor = UtteranceProcessingPipeline()
         return cls(c["extractor"], c["tracker"], c["rule"], c["confirmer"], c["ranker"], c["policy"], c["filler"],
                    names, st.get("max_turns", MAX_TURNS), st.get("confirm_threshold", 0.6),
-                   st.get("input_mode", "unverified_tracker"))
+                   st.get("input_mode", "unverified_tracker"), processor)
 
     @property
     def eligible(self) -> int:
@@ -142,6 +147,8 @@ class System:
         # The answer speaks for itself first; short CHALLENGE/PROBE answers are resolved by rule (pipeline/answers.py).
         trace, timings, clock = {}, {}, perf_counter()
         state.turn_trace = trace
+        if self.utterance_processor is not None:
+            trace["utterance_processing"] = asdict(self.utterance_processor.split(text))
         reading = read_answer(self.extractor, state, last if asked else None, text, trace)
         if asked and last.payload.get('task'):
             from .task_questions import task_stance

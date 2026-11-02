@@ -1,0 +1,5 @@
+{
+  "operation": "recompute all ten metrics from frozen predictions using m2-v4",
+  "predictions_sha256": "521e45b7f4287247ba951cb33ce4031582ae07d5dea09537fc940b016ab6a712",
+  "source_report": "reports/ranking/mpnet20_minilm10_v1"
+}

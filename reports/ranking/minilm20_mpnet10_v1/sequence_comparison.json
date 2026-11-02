@@ -1,0 +1,91 @@
+{
+  "control_run_id": "m2_structured_oracle_dev_v1_312411d6d2f34e8eabf19c35d23597e7",
+  "treatment_run_id": "m2_structured_oracle_dev_v1_1cfaddc7e63c45beb974026e5e79ed06",
+  "profiles": 120,
+  "bootstrap_samples": 2000,
+  "seed": 425,
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "mean_difference": 0.025,
+      "ci95": [
+        0.0,
+        0.058333333333333334
+      ],
+      "improved": 3,
+      "regressed": 0
+    },
+    "hit_at_5": {
+      "mean_difference": 0.05,
+      "ci95": [
+        0.0,
+        0.10833333333333334
+      ],
+      "improved": 9,
+      "regressed": 3
+    },
+    "hit_at_10": {
+      "mean_difference": 0.075,
+      "ci95": [
+        0.016666666666666666,
+        0.13333333333333333
+      ],
+      "improved": 12,
+      "regressed": 3
+    },
+    "mrr": {
+      "mean_difference": 0.025418107118658415,
+      "ci95": [
+        0.004932068526555386,
+        0.049964302831799666
+      ],
+      "improved": 57,
+      "regressed": 42
+    },
+    "ndcg_at_5": {
+      "mean_difference": 0.01630054867098745,
+      "ci95": [
+        -0.004235726047400601,
+        0.03652762092841303
+      ],
+      "improved": 47,
+      "regressed": 35
+    },
+    "ndcg_at_10": {
+      "mean_difference": 0.01516321463943643,
+      "ci95": [
+        -0.0005578419414101015,
+        0.032181325482818095
+      ],
+      "improved": 54,
+      "regressed": 52
+    },
+    "recall_at_5": {
+      "mean_difference": 0.0016248503245407267,
+      "ci95": [
+        -0.006253315720227485,
+        0.009208796700089268
+      ],
+      "improved": 20,
+      "regressed": 16
+    },
+    "recall_at_10": {
+      "mean_difference": -0.0009488306885752694,
+      "ci95": [
+        -0.01718112558379586,
+        0.013745258045761143
+      ],
+      "improved": 36,
+      "regressed": 38
+    },
+    "recall_at_20": {
+      "mean_difference": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "regressed": 0
+    }
+  }
+}
