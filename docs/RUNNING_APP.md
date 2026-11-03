@@ -134,9 +134,10 @@ candidates use the generic question bank. CHALLENGE/PROBE retain their priority.
 `State.asked_tasks` avoids repeated tasks. `State.task_history` and the transcript's
 `task_answer`/`task_question` trace entries retain the question, task/source,
 reply and actual extractor readings. Explicit task yes/no replies are recorded
-separately from global RIASEC scores. If the extractor cannot infer an unknown
-global interest, the policy acknowledges the task answer and asks a broader
-question instead of forcing a score or repeating an already answered task.
+separately from global RIASEC scores. A clear task answer resumes ordinary action
+selection without forcing a global score or triggering a dedicated broader-interest
+follow-up. Missing extractor readings remain an upstream interpretation issue;
+ordinary policy selection may still revisit an unfilled interest.
 
 T5 receives the selected activity and original task. Unsupported activity changes
 fall back to a grounded template. Recommendation wording does not promise task

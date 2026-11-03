@@ -57,8 +57,6 @@ class T5V2Filler(T5Filler):
     def fill(self, action, payload):
         kind = getattr(action,'kind',action)
         fallback = QuestionBankFiller.fill(self,action,payload)
-        if payload.get('broader_task_check'):
-            return fallback
         if kind == 'ABSTAIN' and payload.get('repair'):
             return fallback
         if kind in ('OPENING','RECOMMEND'):
