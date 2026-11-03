@@ -1,4 +1,4 @@
-"""Reply text comes only from data/question_bank.json; nothing is generated."""
+"""Deterministic question wording, including grounded task fallbacks."""
 
 
 def _pick(options: list[str], index: int) -> str:
@@ -8,6 +8,12 @@ def _pick(options: list[str], index: int) -> str:
 def fill(action, payload: dict, question_bank: dict, type_names: dict[str, str]) -> str:
     """action: Action kind string or Action. payload: index plus slot/quote fields."""
     kind = getattr(action, "kind", action)
+    effective = payload.get('retry', 'CLARIFY') if kind == 'ABSTAIN' else kind
+    if payload.get('task') and effective in ('CLARIFY', 'PROBE'):
+        from .task_questions import task_question
+        question = task_question(effective, payload)
+        return ('Let me ask about that same activity another way. ' + question
+                if kind == 'ABSTAIN' and not payload.get('repair') else question)
     if kind == 'ABSTAIN' and payload.get('repair'):
         from .repair import repair_question
         return repair_question(payload)
@@ -19,14 +25,18 @@ def fill(action, payload: dict, question_bank: dict, type_names: dict[str, str])
     if kind in ("CLARIFY", "ABSTAIN"):
         question = _pick(question_bank["CLARIFY"][type_names[payload["slot"]]], payload.get("clarify_index", index))
         if kind == "CLARIFY":
-            return question
+            return ('Thanks. More broadly, ' + question if payload.get('broader_task_check') else question)
         return f"{_pick(question_bank['ABSTAIN'], index)} {question}"
     if kind == "CHALLENGE":
         return _pick(question_bank["CHALLENGE"], index).format(old_src=payload["old_src"], new_src=payload["new_src"])
     if kind == "PROBE":
         return _pick(question_bank["PROBE"], index).format(new_src=payload["new_src"])
     if kind == "RECOMMEND":
-        return _pick(question_bank["RECOMMEND"], index)
+        reply = ("Here are five occupations to explore based on the preferences you described:"
+                 if payload.get('has_task_evidence') is False else _pick(question_bank["RECOMMEND"], index))
+        if payload.get('uncertain_slots'):
+            reply += ' Some answers remained uncertain, so treat these as starting points to explore.'
+        return reply
     raise ValueError(f"unknown action {kind}")
 
 

@@ -34,6 +34,8 @@ class T5Filler(QuestionBankFiller):
     def fill(self, action, payload):
         fallback = super().fill(action, payload)
         kind = getattr(action, "kind", action)
+        if payload.get('broader_task_check'):
+            return fallback
         if kind == 'ABSTAIN' and payload.get('repair'):
             return fallback
         if kind in ("OPENING", "RECOMMEND"):
@@ -61,7 +63,7 @@ class T5Filler(QuestionBankFiller):
         except (RuntimeError, ValueError, OSError):
             logging.getLogger(__name__).exception("T5 failed; using question-bank template")
             return fallback
-        if not self.valid(question, kind, previous):
+        if not self.valid(question, kind, previous, payload.get('task', {}).get('activity', '')):
             return fallback
         prefix = _pick(self.qb["ABSTAIN"], payload.get("index", 0)) + " " if retry else ""
         if kind == "PROBE":
@@ -71,11 +73,13 @@ class T5Filler(QuestionBankFiller):
         return prefix + question
 
     @staticmethod
-    def valid(text, kind, previous=""):
+    def valid(text, kind, previous="", activity=""):
         if not isinstance(text, str) or not 5 <= len(text.split()) <= 60:
             return False
         if not text.endswith("?") or text.count("?") != 1 or any(c in text for c in '\n\r"{}<>'):
             return False
         if previous and " ".join(text.lower().split()) in " ".join(previous.lower().split()):
+            return False
+        if activity and ' '.join(activity.lower().split()) not in ' '.join(text.lower().split()):
             return False
         return kind != "CHALLENGE" or any(w in text.lower() for w in ("which", "closer", "prefer"))

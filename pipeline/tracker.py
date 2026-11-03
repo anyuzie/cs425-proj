@@ -56,6 +56,8 @@ class DecayTracker:
                 confidence = (old.confidence * old_weight + entry.confidence ** 2) / weight
         state.slots[slot] = SlotState(value, confidence, entry.reason, entry.source,
                                       entry.turn, history, entry.reason_confidence, weight)
+        state.settled.discard(slot)
+        state.unresolved_conflicts = [t for t in state.unresolved_conflicts if t != slot]
 
     def merge_unconfirmed(self, state: State, flag: Flag) -> None:
         """An opposite reading that the rule or NLI did not confirm as a contradiction is ordinary evidence:
