@@ -153,9 +153,9 @@ class TaskQuestionsTests(unittest.TestCase):
             self.assertEqual(state.task_history[-1]['preference'],sign)
             self.assertNotIn('S',state.slots)
             self.assertEqual(result.action,'CLARIFY')
-            self.assertTrue(state.last_action.payload['broader_task_check'])
-            self.assertIn('More broadly',result.reply)
-            self.assertNotIn('task',state.last_action.payload)
+            self.assertNotIn('broader_task_check',state.last_action.payload)
+            self.assertNotIn('More broadly',result.reply)
+            self.assertIn('unfilled interest with largest top-100 occupation variance',state.last_action.why)
 
     def test_partial_profile_at_turn_cap_is_marked_uncertain(self):
         state=State(turn=10,slots={'S':SlotState(.55,.9,'enjoyment','I like teaching.',1)})

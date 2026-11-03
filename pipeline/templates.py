@@ -25,7 +25,7 @@ def fill(action, payload: dict, question_bank: dict, type_names: dict[str, str])
     if kind in ("CLARIFY", "ABSTAIN"):
         question = _pick(question_bank["CLARIFY"][type_names[payload["slot"]]], payload.get("clarify_index", index))
         if kind == "CLARIFY":
-            return ('Thanks. More broadly, ' + question if payload.get('broader_task_check') else question)
+            return question
         return f"{_pick(question_bank['ABSTAIN'], index)} {question}"
     if kind == "CHALLENGE":
         return _pick(question_bank["CHALLENGE"], index).format(old_src=payload["old_src"], new_src=payload["new_src"])

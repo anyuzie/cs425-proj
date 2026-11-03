@@ -95,7 +95,6 @@ class ManualPolicy(PolicyBase):
         task_only = bool(pending and last.payload.get('task') and latest_task
                          and latest_task['turn'] == state.turn and latest_task.get('preference') is not None
                          and not any(r['slot'] == last.slot for r in latest_task['readings']))
-        needs_broader = task_only and last.slot not in state.slots
         neutral_retry = bool(pending and state.last_reading_empty and not task_only)
         note, just_settled = "", None
         if pending and last.slot and not neutral_retry:
@@ -128,7 +127,7 @@ class ManualPolicy(PolicyBase):
         converged = len(snapshots) == 3 and all(
             t in a and t in b and abs(a[t] - b[t]) <= .1 + 1e-12
             for a, b in zip(snapshots, snapshots[1:]) for t in state.slots)
-        if state.turn >= 5 and len(covered) == 6 and state.slots and converged and not state.profile_changed and not needs_broader and (
+        if state.turn >= 5 and len(covered) == 6 and state.slots and converged and not state.profile_changed and (
                 self.no_probing or (not state.flags and probe is None)):
             return Action("RECOMMEND", why=_join(note, "all six interests covered and stable over two updates"))
         if not self.no_probing:
@@ -145,9 +144,6 @@ class ManualPolicy(PolicyBase):
                     payload['task'] = dict(previous['task'])
                 return Action("PROBE", probe, _join(note, "familiarity-based reason, not yet probed"),
                               payload)
-        if needs_broader:
-            return Action('CLARIFY', last.slot, 'task preference recorded; clarify the broader interest separately',
-                          {'broader_task_check': True})
         unfilled = [t for t in TYPES if t not in covered]
         later = [t for t in TYPES if t in state.settled and t not in state.slots and t not in state.revisited
                  and t != just_settled]
