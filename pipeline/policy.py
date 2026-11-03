@@ -4,6 +4,7 @@ from statistics import pvariance
 
 from .interfaces import MAX_TURNS, TYPES, Action, SlotState, State
 from .repair import needs_repair
+from .task_questions import select_task
 
 PROBE_REASON_CONF = 0.60   # default for settings.probe_reason_conf (manual section 7)
 
@@ -34,6 +35,8 @@ class PolicyBase:
             if self.no_probing and action.kind in ("CHALLENGE", "PROBE"):
                 raise ValueError(f"policy returned {action.kind} while no_probing is on; skip rungs 1-2 in _decide")
         payload = dict(action.payload)
+        if action.kind == 'RECOMMEND':
+            payload['uncertain_slots'] = sorted((set(TYPES) - set(state.slots)) | state.settled | set(state.unresolved_conflicts))
         payload["index"] = state.kind_count.get(action.kind, 0)
         if action.slot:
             payload["slot"] = action.slot
@@ -51,12 +54,13 @@ class ManualPolicy(PolicyBase):
     RETRIES = 1   # unsure answers: rephrase once (with a concrete example), then move on
 
     def __init__(self, max_turns: int = MAX_TURNS, no_probing: bool = False,
-                 probe_reason_conf: float = PROBE_REASON_CONF) -> None:
+                 probe_reason_conf: float = PROBE_REASON_CONF, task_questions=()) -> None:
         super().__init__(max_turns, no_probing)
         if isinstance(probe_reason_conf, bool) or not isinstance(probe_reason_conf, (int, float)) \
                 or not 0 <= probe_reason_conf <= 1:
             raise ValueError("probe_reason_conf must be a number in [0, 1]")
         self.probe_reason_conf = float(probe_reason_conf)   # manual section 7: PROBE needs reason confidence above this
+        self.task_questions = task_questions
 
     def _finish(self, state: State) -> None:
         # A contradiction confirmed on the last turn was never asked about: settle it as a stuck one
@@ -87,7 +91,12 @@ class ManualPolicy(PolicyBase):
     def _decide(self, state: State) -> Action:
         last = state.last_action
         pending = last and last.kind in ("CLARIFY", "CHALLENGE", "PROBE", "ABSTAIN")
-        neutral_retry = bool(pending and state.last_reading_empty)
+        latest_task = state.task_history[-1] if state.task_history else None
+        task_only = bool(pending and last.payload.get('task') and latest_task
+                         and latest_task['turn'] == state.turn and latest_task.get('preference') is not None
+                         and not any(r['slot'] == last.slot for r in latest_task['readings']))
+        needs_broader = task_only and last.slot not in state.slots
+        neutral_retry = bool(pending and state.last_reading_empty and not task_only)
         note, just_settled = "", None
         if pending and last.slot and not neutral_retry:
             state.strikes.pop(last.slot, None)   # a usable answer resets the retry count
@@ -100,7 +109,7 @@ class ManualPolicy(PolicyBase):
                     self.no_probing and retry in ("CHALLENGE", "PROBE")):
                 payload = {**last.payload, "retry": retry, "previous_question": state.last_reply}
                 asked_meaning = bool(state.user_texts) and needs_repair(state.user_texts[-1])
-                if retry == "CLARIFY" and not asked_meaning:
+                if retry == "CLARIFY" and not asked_meaning and not last.payload.get('task'):
                     # an unreadable answer: next phrasing (manual section 7). "What do you mean?" / "not sure"
                     # keeps the same question and gets the concrete-example wording instead.
                     payload["clarify_index"] = last.payload.get("clarify_index", 0) + 1
@@ -119,7 +128,7 @@ class ManualPolicy(PolicyBase):
         converged = len(snapshots) == 3 and all(
             t in a and t in b and abs(a[t] - b[t]) <= .1 + 1e-12
             for a, b in zip(snapshots, snapshots[1:]) for t in state.slots)
-        if state.turn >= 5 and len(covered) == 6 and state.slots and converged and not state.profile_changed and (
+        if state.turn >= 5 and len(covered) == 6 and state.slots and converged and not state.profile_changed and not needs_broader and (
                 self.no_probing or (not state.flags and probe is None)):
             return Action("RECOMMEND", why=_join(note, "all six interests covered and stable over two updates"))
         if not self.no_probing:
@@ -129,8 +138,16 @@ class ManualPolicy(PolicyBase):
                               {"old_src": flag.old.source, "old_turn": flag.old.turn, "new_src": flag.new.source})
             if probe:
                 state.probed.add(probe)
+                payload = {"new_src": state.slots[probe].source}
+                previous = next((row for row in reversed(state.task_history)
+                                 if row['slot'] == probe and state.slots[probe].source in row['reply']), None)
+                if previous:
+                    payload['task'] = dict(previous['task'])
                 return Action("PROBE", probe, _join(note, "familiarity-based reason, not yet probed"),
-                              {"new_src": state.slots[probe].source})
+                              payload)
+        if needs_broader:
+            return Action('CLARIFY', last.slot, 'task preference recorded; clarify the broader interest separately',
+                          {'broader_task_check': True})
         unfilled = [t for t in TYPES if t not in covered]
         later = [t for t in TYPES if t in state.settled and t not in state.slots and t not in state.revisited
                  and t != just_settled]
@@ -148,7 +165,11 @@ class ManualPolicy(PolicyBase):
         else:
             slot = min(TYPES, key=lambda t: state.clarify_count.get(t, 0))
             why = "nothing stated yet: ask the least-asked interest again"
-        return Action("CLARIFY", slot, _join(note, why))
+        task = select_task(self.task_questions, state, slot)
+        payload = {'task': task} if task else {}
+        if task:
+            why += f'; O*NET task {task["task_id"]} from {task["occupation_title"]}'
+        return Action("CLARIFY", slot, _join(note, why), payload)
 
 
 def _join(note: str, why: str) -> str:

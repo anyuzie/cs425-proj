@@ -88,7 +88,9 @@ def _policy_manual(cfg, d):
     from .policy import ManualPolicy  # pipeline/policy.py
     st = _settings(cfg)
     from .policy import PROBE_REASON_CONF
-    return ManualPolicy(st.get("max_turns", 10), st.get("no_probing", False), st.get("probe_reason_conf", PROBE_REASON_CONF))
+    from .task_questions import load_tasks
+    tasks = load_tasks(d / 'tasks.csv', ROOT / 'configs/question_tasks.json')
+    return ManualPolicy(st.get("max_turns", 10), st.get("no_probing", False), st.get("probe_reason_conf", PROBE_REASON_CONF), tasks)
 
 
 REGISTRY: dict[str, dict] = {

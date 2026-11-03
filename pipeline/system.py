@@ -145,6 +145,15 @@ class System:
         trace, timings, clock = {}, {}, perf_counter()
         state.turn_trace = trace
         reading = read_answer(self.extractor, state, last if asked else None, text, trace)
+        if asked and last.payload.get('task'):
+            from .task_questions import task_stance
+            task_kind = last.payload.get('retry', 'CLARIFY') if last.kind == 'ABSTAIN' else last.kind
+            entry = {'turn': state.turn, 'slot': last.slot, 'task': dict(last.payload['task']),
+                     'question': state.last_reply, 'reply': text,
+                     'preference': task_stance(text) if task_kind == 'CLARIFY' else None,
+                     'readings': [asdict(r) for r in reading.slots]}
+            state.task_history.append(entry)
+            trace['task_answer'] = entry
         timings["extractor_ms"] = _ms(clock)
         trace["readings"] = _readings(reading)
         repair = asked and needs_repair(text)
@@ -176,15 +185,23 @@ class System:
         timings["ranking_ms"] = _ms(rank_clock)
         state.profile_changed = False
         action = self.policy.decide(state)
-        trace["policy"] = {"action": action.kind, "slot": action.slot, "why": action.why}
         if state.profile_changed:   # the policy settled a stuck challenge: keep history, panel and cards consistent
             state.profile_history[-1] = {t: s.value for t, s in state.slots.items()}
             if state.ranking_trace and state.ranking_trace[-1].get("turn") == state.turn:
                 state.ranking_trace.pop()   # replace this turn's trace row instead of adding a second one
             state.ranking = self._rank(state, POLICY_TOP_K)
+        task = action.payload.get('task')
+        if task and task['occupation_code'] not in {o.code for o in state.ranking[:POLICY_TOP_K]}:
+            state.asked_tasks.discard((task['occupation_code'], task['task_id']))
+            action.payload.pop('task')
+            action.why += '; selected task outside refreshed top 100; generic fallback'
+        trace["policy"] = {"action": action.kind, "slot": action.slot, "why": action.why}
+        if action.payload.get('task'):
+            trace['task_question'] = dict(action.payload['task'])
         if action.kind == 'CLARIFY':
             from .t5_v2 import FOCUS
-            action.payload['focus'] = FOCUS[action.slot][action.payload['clarify_index'] % 3]
+            action.payload['focus'] = (action.payload['task']['activity'] if action.payload.get('task')
+                                       else FOCUS[action.slot][action.payload['clarify_index'] % 3])
         if action.kind == 'ABSTAIN' and repair:
             action.payload['repair'] = True
             action.payload['repair_count'] = last.payload.get('repair_count', 0) + 1
@@ -196,6 +213,7 @@ class System:
         wording_clock = perf_counter()
         quotes, recs, done = None, None, False
         if action.kind == "RECOMMEND":
+            action.payload['has_task_evidence'] = bool(state.ranking) and all(o.evidence for o in state.ranking[:5])
             recs = self.recommendations(state)
             done = True
             if recs:

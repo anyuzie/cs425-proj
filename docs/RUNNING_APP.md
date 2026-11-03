@@ -107,17 +107,42 @@ T5 question falls back to the bank. OPENING and RECOMMEND remain deterministic.
 - The unchanged teammate contradiction rule requires opposite signs with both
   confidences > 0.4. NLI confirmation requires P(contradiction) > 0.6, as on main.
   Keep the accepted profile while a confirmed claim is disputed.
-- PROBE requires familiarity and not previously probed; no reason-confidence gate.
-- All-neutral answers retry the same underlying question, including CHALLENGE or
-  PROBE. No automatic "settled" type after two neutral replies.
+- PROBE requires familiarity, reason confidence above `settings.probe_reason_conf`
+  (default 0.6), and not previously probed, as configured on main.
+- Neutral answers get one retry, then the policy moves on. Unanswered CLARIFY
+  interests are settled as unknown; stuck challenges keep the newer reading at
+  half confidence and are logged as unresolved. Task retries keep the same task.
 - A targeted non-neutral answer to CHALLENGE/PROBE replaces that type and clears
   its conflict. New conflicts can be detected later. CHALLENGE still asks the user
   to choose; mixed/contextual resolution remains deferred.
 - CLARIFY uses the largest variance among unfilled interests over the top 100
   occupations. If all are filled, refine the least-confident one.
-- Normal stopping: at least 5 turns, all six interests filled, each value changes
-  by at most 0.10 on both of the last two updates, no unresolved conflict or pending
+- Normal stopping: at least 5 turns, all six interests covered by readings or
+  settled unknowns, each observed value changes
+  by at most 0.10 on both of the last two updates, no held contradiction or pending
   probe/retry. Hard stop at 10 turns. The `no_probing` control skips interventions.
+
+### Task-based questions (tracker/action/T5)
+
+From the third user turn, CLARIFY can use a real O*NET task from the current top
+100 occupations. `configs/question_tasks.json` contains 23 developer-curated
+task/topic associations and plain-language activities; these are not official
+O*NET task-level RIASEC labels and need team review. Source text and IDs are
+validated against the existing, unmodified `data/tasks.csv`. Unmapped or exhausted
+candidates use the generic question bank. CHALLENGE/PROBE retain their priority.
+
+`State.asked_tasks` avoids repeated tasks. `State.task_history` and the transcript's
+`task_answer`/`task_question` trace entries retain the question, task/source,
+reply and actual extractor readings. Explicit task yes/no replies are recorded
+separately from global RIASEC scores. If the extractor cannot infer an unknown
+global interest, the policy acknowledges the task answer and asks a broader
+question instead of forcing a score or repeating an already answered task.
+
+T5 receives the selected activity and original task. Unsupported activity changes
+fall back to a grounded template. Recommendation wording does not promise task
+citations when none exist, and discloses missing or unresolved preferences.
+Task preferences are not passed into the ranker's scoring; extraction, NLI,
+ranking mathematics, existing model weights and the turn cap are unchanged.
 
 Both application defaults use `configs/ranking.yaml`, exactly as on main:
 structured-only weighted-dot-product scoring. Existing BM25/MiniLM/RRF and cosine

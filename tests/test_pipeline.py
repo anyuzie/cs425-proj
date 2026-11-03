@@ -43,8 +43,8 @@ class PipelineTests(unittest.TestCase):
             result = self.system.step(state, "Definitely the first one")
             self.assertLessEqual(result.turn, 10)
         self.assertEqual(result.action, "RECOMMEND")
-        qb = json.loads((DATA / "question_bank.json").read_text(encoding="utf-8"))
-        self.assertIn(result.reply, qb["RECOMMEND"])
+        self.assertIn('occupations', result.reply)
+        self.assertNotIn('tasks that matched', result.reply)  # this fixture has no task evidence
         self.assertEqual(len(result.recommendations), 5)
         self.assertEqual([r["rank"] for r in result.recommendations], [1, 2, 3, 4, 5])
         for rec in result.recommendations:

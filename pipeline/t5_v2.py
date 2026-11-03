@@ -28,8 +28,8 @@ class T5V2Filler(T5Filler):
     uses_context = True
 
     @staticmethod
-    def valid(text, kind, previous=''):
-        if not T5Filler.valid(text,kind,previous):
+    def valid(text, kind, previous='', activity=''):
+        if not T5Filler.valid(text,kind,previous,activity):
             return False
         return not any(marker in text.lower() for marker in (
             'last_user','known_interest','career question','reference:','action:','style:','context:','focus:')) and not re.match(r'^(direct|scenario|workday)\b', text, re.I)
@@ -43,7 +43,13 @@ class T5V2Filler(T5Filler):
         reference = QuestionBankFiller.fill(self,'CLARIFY',payload) if effective == 'CLARIFY' else (
             'Is this something you would enjoy, or mainly something you have experience with?' if effective == 'PROBE' else
             'Which statement better describes the work you would actually want to do?')
-        return dict(action=effective,type=self.type_names[slot],focus=FOCUS[slot][variant] if effective == 'CLARIFY' else SUBJECT[slot],reference=reference,
+        focus = FOCUS[slot][variant] if effective == 'CLARIFY' else SUBJECT[slot]
+        if payload.get('task') and effective in ('CLARIFY', 'PROBE'):
+            focus = payload['task']['activity']
+            context = context + [payload['task']['text']]
+            if effective == 'PROBE':
+                reference = f'Is {focus} something you enjoy, or mainly something you already know?'
+        return dict(action=effective,type=self.type_names[slot],focus=focus,reference=reference,
                     context=context,retry=retry,previous_question=payload.get('previous_question','') if retry else '',
                     style=STYLES[payload.get('index',0)%3],last_user=payload.get('last_user',''),
                     known_interest=payload.get('known_interest','') if effective == 'CLARIFY' else '')
@@ -51,6 +57,8 @@ class T5V2Filler(T5Filler):
     def fill(self, action, payload):
         kind = getattr(action,'kind',action)
         fallback = QuestionBankFiller.fill(self,action,payload)
+        if payload.get('broader_task_check'):
+            return fallback
         if kind == 'ABSTAIN' and payload.get('repair'):
             return fallback
         if kind in ('OPENING','RECOMMEND'):
@@ -63,7 +71,7 @@ class T5V2Filler(T5Filler):
         except (RuntimeError,ValueError,OSError):
             logging.getLogger(__name__).exception('T5 v2 failed; using template')
             return fallback
-        if not self.valid(question,fields['action'],fields['previous_question']):
+        if not self.valid(question,fields['action'],fields['previous_question'],payload.get('task', {}).get('activity', '')):
             return fallback
         if fields['action'] == 'PROBE' and not re.search(r'experience|familiar|already know|from scratch|new to you', question, re.I):
             return fallback
