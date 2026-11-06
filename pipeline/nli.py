@@ -1,10 +1,3 @@
-"""Manual section 5, step 4: pretrained NLI on candidate source sentences.
-
-Label evidence: https://huggingface.co/cross-encoder/nli-deberta-v3-base/blob/main/config.json
-Published order: contradiction, entailment, neutral. Inspect the loaded config;
-never assume anonymous LABEL_n mappings have that order.
-"""
-
 import math
 
 MODEL_NAME = "cross-encoder/nli-deberta-v3-base"

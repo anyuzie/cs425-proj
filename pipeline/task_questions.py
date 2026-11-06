@@ -1,4 +1,3 @@
-"""Read-only O*NET task lookup for dialogue policy; never changes occupation scores."""
 import csv
 import json
 import re

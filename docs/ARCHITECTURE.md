@@ -404,7 +404,7 @@ Production launch requires the installed extractor checkpoint and completed trac
 
 | Function | Who | When | What it does |
 |---|---|---|---|
-| `DebertaExtractor.__init__(checkpoint_dir, labels_path)` | done | startup | Reads the class orders from `labels.json`, then calls `load()` |
+| `Extractor.__init__(checkpoint_dir, labels_path)` | done | startup | Reads the class orders from `labels.json`, then calls `load()` |
 | `load(checkpoint_dir)` | implemented | startup | Loads local tokenizer/model, validates head count/calibration and configures semantic logit indices |
 | `_configure_heads(config)` | implemented | startup | Maps checkpoint `id2label` into shared direction/reason/strength ordering; rejects incompatible heads |
 | `predict(context, sentence)` | implemented | per sentence | Inference-only forward pass → shared-order direction/reason probabilities and discrete strengths |

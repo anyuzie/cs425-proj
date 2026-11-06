@@ -1,4 +1,3 @@
-"""Wording for explicit repair requests; never filters extractor readings."""
 import re
 
 PREFERENCE = re.compile(r"\b(?:enjoy|like|love|hate|dislike|prefer|rather|satisfying|interested|appeal)\b", re.I)

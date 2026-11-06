@@ -1,6 +1,3 @@
-"""Component name -> factory(config, data_dir). Components are imported lazily, inside their factory,
-so the app starts without torch until a model part is built. Never import torch/transformers at the top of this file."""
-
 import json
 from pathlib import Path
 
@@ -62,8 +59,8 @@ def _filler_t5_v3(cfg, d):
 
 # --- teammate parts: each imports its own file only when chosen in configs/system.json ---
 def _extractor_deberta(cfg, d):
-    from .extractor import DebertaExtractor  # pipeline/extractor.py
-    return DebertaExtractor(ROOT / cfg["paths"]["extractor_checkpoint"], d / "labels.json")
+    from .extractor import Extractor  # pipeline/extractor.py
+    return Extractor(ROOT / cfg["paths"]["extractor_checkpoint"], d / "labels.json")
 
 
 def _tracker_decay(cfg, d):

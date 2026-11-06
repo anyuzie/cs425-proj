@@ -1,10 +1,3 @@
-"""Mock model parts for running the whole app WITHOUT the trained models (no torch, no checkpoints).
-
-Only the three model-backed parts are mocked; the tracker, rule, policy, ranker, question bank, server and
-page are the real code. Importing this module registers the mocks in pipeline.registry; the app itself
-never imports it. Results from mock runs are flow checks only, never evaluation results: the config is
-labelled mock_tracker, and System refuses to label mock components actual_tracker.
-"""
 import json
 import re
 from pathlib import Path

@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from pipeline.extractor import DebertaExtractor  # noqa: E402
+from pipeline.extractor import Extractor  # noqa: E402
 
 bank = json.loads((ROOT / "data/question_bank.json").read_text(encoding="utf-8"))
 challenge = bank["CHALLENGE"][0].format(old_src="I love repairing machines and working with tools.",
@@ -36,7 +36,7 @@ def show(reading):
                      for r in reading.slots) or "no stance"
 
 
-extractor = DebertaExtractor(ROOT / "models/extractor", ROOT / "data/labels.json")
+extractor = Extractor(ROOT / "models/extractor", ROOT / "data/labels.json")
 for name, question, reply in CASES:
     alone, paired = extractor.read(reply), extractor.read(reply, context=question)
     leaked = sorted({r.slot for r in paired.slots} - {r.slot for r in alone.slots})

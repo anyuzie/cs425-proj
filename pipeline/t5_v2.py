@@ -1,4 +1,3 @@
-"""Context-aware wording experiment; policy, exact quotes and v1 remain unchanged."""
 import json
 import logging
 import re

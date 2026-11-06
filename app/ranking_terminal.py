@@ -12,7 +12,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from pipeline.extractor import DebertaExtractor
+from pipeline.extractor import Extractor
 from recommender.models.ranker import RankingPipeline
 from recommender.schemas import TYPES
 
@@ -71,7 +71,7 @@ def main():
         print(f"Loading ranking configuration: {ranking_config}", flush=True)
         ranker = RankingPipeline(args.occupations, config=ranking_config)
         print(f"Loading extractor: {checkpoint}", flush=True)
-        extractor = DebertaExtractor(checkpoint, ROOT / "data/labels.json")
+        extractor = Extractor(checkpoint, ROOT / "data/labels.json")
     except (OSError, ValueError, KeyError, ImportError, RuntimeError) as error:
         print(f"Startup failed: {error}", file=sys.stderr)
         return 1

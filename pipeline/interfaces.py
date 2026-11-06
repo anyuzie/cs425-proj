@@ -1,5 +1,3 @@
-"""Interfaces and shared dataclasses. State is keyed by RIASEC letters."""
-
 from dataclasses import dataclass, field
 from typing import Protocol
 

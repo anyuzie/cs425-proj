@@ -1,4 +1,3 @@
-"""Start the career matcher using the project's default configuration."""
 from pathlib import Path
 import os
 
