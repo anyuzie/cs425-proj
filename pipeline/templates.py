@@ -1,6 +1,3 @@
-"""Deterministic question wording, including grounded task fallbacks."""
-
-
 def _pick(options: list[str], index: int) -> str:
     return options[index % len(options)]
 

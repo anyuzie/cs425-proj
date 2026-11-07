@@ -7,7 +7,7 @@ import tempfile
 from types import SimpleNamespace
 import unittest
 
-from pipeline.extractor import DebertaExtractor
+from pipeline.extractor import Extractor
 
 
 class CheckpointTests(unittest.TestCase):
@@ -20,10 +20,10 @@ class CheckpointTests(unittest.TestCase):
     def test_missing_checkpoint_explains_config_path(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaisesRegex(FileNotFoundError, "paths.extractor_checkpoint"):
-                DebertaExtractor(Path(directory), Path("data/labels.json"))
+                Extractor(Path(directory), Path("data/labels.json"))
 
     def test_unlabelled_checkpoint_heads_are_rejected(self):
-        class Fixture(DebertaExtractor):
+        class Fixture(Extractor):
             def load(self, checkpoint_dir):
                 pass
         extractor = Fixture(Path("unused"), Path("data/labels.json"))
@@ -52,7 +52,7 @@ class CheckpointTests(unittest.TestCase):
                 strength = torch.tensor([[0., 0., 0., 9.]] * 6)
                 return SimpleNamespace(logits=torch.cat((direction.flatten(), torch.tensor([9., 0., 0.]), strength.flatten())).unsqueeze(0))
 
-        class Fixture(DebertaExtractor):
+        class Fixture(Extractor):
             def load(self, checkpoint_dir):
                 self.device, self.tok, self.model = "cpu", tokenizer, Model()
                 self.cfg = {"max_len": 128, "T_slot": 1., "T_reason": 1.}

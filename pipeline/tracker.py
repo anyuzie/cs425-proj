@@ -1,5 +1,3 @@
-"""Confidence-weighted accepted preferences, raw evidence, and targeted resolutions."""
-
 from math import isfinite
 
 from .interfaces import TYPES, Flag, HistoryEntry, Reading, SlotState, State

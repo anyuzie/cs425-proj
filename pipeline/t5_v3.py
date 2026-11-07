@@ -1,4 +1,3 @@
-"""Focused question generation; background is retained in state, outside wording."""
 from .t5_v2 import T5V2Filler, STYLES
 
 

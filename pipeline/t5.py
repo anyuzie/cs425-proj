@@ -1,5 +1,3 @@
-"""Optional T5 wording with exact Python-owned quotations and bank fallback."""
-
 import json
 import logging
 from pathlib import Path

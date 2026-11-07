@@ -1,15 +1,3 @@
-"""Reading the user's answer to a bot question, without letting the question's words leak in.
-
-The extractor was trained with the bot's question attached only to short CLARIFY replies (<= 6 words,
-always labelled with the asked type), never to full sentences, CHALLENGE or PROBE questions. Attaching
-the question to anything else lets its topic leak into the reading. So:
-
-1. The answer speaks for itself first: read it alone. If that already has a stance on the asked type, use it.
-2. CHALLENGE / PROBE (never trained with the question attached): the question is never attached. Short
-   answers ("the first one", "I enjoy it", "just what I know") are resolved by rule from what the bot holds.
-3. CLARIFY (trained with the question): attach the question when the answer alone says nothing, or when it
-   is a reply to the either-or ("yes, but I hate selling"); keep only the asked type from that reading.
-"""
 import re
 
 from .interfaces import Reading, SlotReading

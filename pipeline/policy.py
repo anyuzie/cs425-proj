@@ -1,5 +1,3 @@
-"""Deterministic actions over tracker state and teammate-confirmed conflicts."""
-
 from statistics import pvariance
 
 from .interfaces import MAX_TURNS, TYPES, Action, SlotState, State
