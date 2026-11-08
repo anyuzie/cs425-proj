@@ -97,8 +97,8 @@ class CandidateTests(unittest.TestCase):
 
     def test_confirmation_boundary_preserves_evidence_and_confidence(self):
         state = state_for()
-        system = System(None, None, ContradictionRule(), Mock(), None, None, None, {})
-        for score, count in ((0.599999, 0), (0.6, 0), (0.600001, 1)):
+        system = System(None, None, ContradictionRule(), Mock(), None, None, None, {}, confirm_threshold=0.90)
+        for score, count in ((0.899999, 0), (0.90, 0), (0.900001, 1)):
             system.confirmer.score.return_value = score
             flags = system._confirmed(state)
             self.assertEqual(len(flags), count)

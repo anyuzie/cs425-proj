@@ -1,8 +1,9 @@
 # Fine-tuned NLI deployment
 
-The production presets select `models/nli-probing-v1/checkpoint`. Model weights
-are shared separately and are not included in Git. Obtain the team's original
-probing-v1 checkpoint and copy these files into that directory:
+The real app presets select **NLI v2**, the `1.75e-5` fine-tune with a `0.90`
+contradiction cutoff. Copy the team's shared `models/nli-probing-v2/checkpoint/`
+folder to the same path in your checkout. Git tracks the manifest, and the
+team shares these checkpoint files separately:
 
 - `config.json`
 - `model.safetensors`
@@ -13,27 +14,28 @@ From the repository root, verify the files against the committed sizes and
 SHA-256 hashes before starting the application:
 
 ```powershell
-python scripts/check_nli_checkpoint.py
 python scripts/check_nli_checkpoint.py --smoke
 python run.py
 ```
 
-Use the project's Python environment for these commands. The smoke check loads
-the real checkpoint and prints probabilities for one sentence pair; it is not
-an accuracy evaluation. Do not substitute stock weights under this folder name.
-Missing local checkpoints deliberately fail startup rather than silently loading
-another model.
+Use the project's Python environment. The smoke check verifies the file hashes,
+then loads the checkpoint and prints probabilities and the confirmation decision
+for one sentence pair. See [the app test conversations](RUNNING_APP.md#try-these-conversations)
+to try the new configuration end to end.
 
-`configs/nli/probing_v1.json` records checkpoint hashes, training provenance,
-selection and limitations. The selected first epoch was trained from
-`cross-encoder/nli-deberta-v3-base`. Its training policy includes tensions between
-interests and career preferences worth asking about. However, the live candidate
-rule remains unchanged: only opposite-sign readings of the same RIASEC type
-with both confidences above 0.4 reach NLI. A contradiction probability strictly
-above 0.6 confirms a candidate under the default configuration. Cross-domain
-statements alone therefore do not trigger a challenge.
+`configs/nli/probing_v2.json` records hashes and training provenance. The deployed
+checkpoint is epoch 1 from the original train/dev split at `1.75e-5`. The grouped
+five-fold experiment used separately trained checkpoints to select the settings.
+At `0.90` it produced 96.70% pooled accuracy, 96.60% recall, 9 misses and 9 false
+alarms after correcting one food-stall label during scoring. The development
+pool includes generated examples, and the team selected the threshold using
+these validation results.
 
-The upstream model uses synthetic additions and previously inspected legacy
-test predictions. Its manifest does not establish held-out conversational
-accuracy. The extractor, candidate rule, tracker/action priorities and ranking
-algorithms are separate from this checkpoint selection.
+In the app, only opposite-sign readings of the same RIASEC type with both
+confidences above 0.4 reach NLI. A contradiction probability strictly above
+`settings.confirm_threshold` confirms a candidate.
+
+To compare with v1, copy a system preset and set `paths.nli_model` to
+`models/nli-probing-v1/checkpoint` and `settings.confirm_threshold` to `0.60`.
+Select that preset using `CM_CONFIG`. Verify its checkpoint with
+`python scripts/check_nli_checkpoint.py --manifest configs/nli/probing_v1.json`.

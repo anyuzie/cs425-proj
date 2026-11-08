@@ -143,14 +143,14 @@ Confidence merging and recency decay belong to the tracker. Ranking recomputes f
 
 | Function | Who | Called by | When | Does |
 |---|---|---|---|---|
-| `__init__(model_name)` | **teammate** | registry | once, at server start | Loads `cross-encoder/nli-deberta-v3-base` |
+| `__init__(model_name)` | **teammate** | registry | once, at server start | Loads the configured checkpoint |
 | `score(old_src, new_src)` | **teammate** | `System._confirmed` | **only when step 3 found a candidate** | Returns the probability that the two sentences contradict each other |
 
-`System` keeps the conflict only if the score is above `settings.confirm_threshold` (0.60). Tune that threshold on the dev split of `data/nli_pairs.jsonl`.
+`System` keeps the conflict only if the score is above `settings.confirm_threshold` (0.90 in the real app presets). See [NLI deployment](NLI_DEPLOYMENT.md) for the checkpoint and validation results.
 
 ```
 rule: S was +1 "I love teaching kids", now −1 "I hate teaching, it's draining"
-score(...) → 0.91 > 0.60 → kept → the policy will CHALLENGE
+score(...) → 0.91 > 0.90 → kept → the policy will CHALLENGE
 score(...) → 0.20       → dropped
 ```
 
@@ -260,7 +260,7 @@ models/extractor/config.json, weights, tokenizer files     (files directly insid
 pipeline/extractor.py  load()  →  predict() per sentence  →  read()  →  System.step
 ```
 
-The NLI check needs no hand-off: the model downloads by name. Its tuned threshold goes into `settings.confirm_threshold`.
+Copy the shared NLI checkpoint into the location in `paths.nli_model`. See [NLI deployment](NLI_DEPLOYMENT.md) for setup.
 
 ---
 
@@ -286,7 +286,7 @@ The NLI check needs no hand-off: the model downloads by name. Its tuned threshol
 ```json
 "components": {"extractor": "deberta", "tracker": "decay", "rule": "rule", "confirmer": "nli",
                "ranker": "configured", "policy": "manual", "filler": "question-bank"},
-"settings":   {"max_turns": 10, "confirm_threshold": 0.6, "no_probing": false, "decay": 1.0,
+"settings":   {"max_turns": 10, "confirm_threshold": 0.90, "no_probing": false, "decay": 1.0,
                "probe_reason_conf": 0.6, "input_mode": "actual_tracker"},
 "paths":      {"ranking_config": "configs/ranking.yaml", "extractor_checkpoint": "models/extractor"}
 ```

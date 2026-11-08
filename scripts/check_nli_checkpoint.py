@@ -32,7 +32,7 @@ def verify(checkpoint, manifest):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", type=Path, default=ROOT / "configs/nli/probing_v1.json")
+    parser.add_argument("--manifest", type=Path, default=ROOT / "configs/nli/probing_v2.json")
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--smoke", action="store_true", help="Also load the model and run a sentence pair")
     args = parser.parse_args()
@@ -45,7 +45,9 @@ def main():
             from pipeline.nli import NliConfirmer
             model = NliConfirmer(str(checkpoint.resolve()))
             scores = model.probabilities("I like solving engineering problems", "For work, I would rather work in healthcare")
-            print(json.dumps(scores, indent=2))
+            threshold = manifest["threshold"]
+            print(json.dumps({"scores": scores, "threshold": threshold,
+                              "confirmed": scores["contradiction"] > threshold}, indent=2))
     except (ValueError, OSError, ImportError, RuntimeError) as exc:
         parser.exit(1, f"{exc}\nSee docs/NLI_DEPLOYMENT.md for checkpoint setup.\n")
 
