@@ -14,10 +14,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class NliDeploymentTests(unittest.TestCase):
     def test_real_presets_use_versioned_checkpoint(self):
+        manifest = json.loads((ROOT / "configs/nli/probing_v2.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["threshold"], 0.90)
+        self.assertEqual(manifest["training"]["arguments"]["learning_rate"], 1.75e-5)
         for path in (ROOT / "configs").glob("system*.json"):
             cfg = json.loads(path.read_text(encoding="utf-8"))
             if cfg["components"]["confirmer"] == "nli":
-                self.assertEqual(cfg["paths"]["nli_model"], "models/nli-probing-v1/checkpoint", str(path))
+                self.assertEqual(cfg["paths"]["nli_model"], manifest["checkpoint"], str(path))
+                self.assertEqual(cfg["settings"]["confirm_threshold"], manifest["threshold"], str(path))
 
     def test_missing_local_checkpoint_never_becomes_hub_lookup(self):
         with patch("pipeline.nli.NliConfirmer") as load:

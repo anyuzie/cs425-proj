@@ -5,7 +5,7 @@ tracker/policy, configured ranking and optional fine-tuned T5 are now connected.
 No mocks are used by either production system configuration.
 
 The current application keeps extraction, contradiction candidate rules, and ranking
-behavior from `main` commit `7e065d6`. NLI now uses the probing-v1 checkpoint; see
+behavior from `main` commit `7e065d6`. NLI now uses the probing-v2 checkpoint; see
 [NLI deployment](NLI_DEPLOYMENT.md) for setup, policy, and provenance. Only tracker/action policy, T5 wording, and
 real-model loading/integration are extended. Extractor context and evidence
 selection are unchanged; its readings pass directly to the tracker. V3b remains
@@ -57,7 +57,7 @@ the researcher panel. Remove that variable to return to researcher mode:
   `NLP_extractor_model.zip`, specifically its `riasec-extractor/` directory.
   Includes safe tensor weights, configuration and tokenizer. Bundled datasets,
   notebooks and redundant pickle-based `.pt` weights were not installed.
-- `models/nli-probing-v1/checkpoint/`: selected fine-tuned NLI checkpoint and tokenizer.
+- `models/nli-probing-v2/checkpoint/`: selected fine-tuned NLI checkpoint and tokenizer.
   Obtain the shared folder and run `python scripts/check_nli_checkpoint.py`; see
   [NLI deployment](NLI_DEPLOYMENT.md). Downloading the stock Hugging Face model
   does not reproduce these fine-tuned weights.
@@ -105,7 +105,7 @@ T5 question falls back to the bank. OPENING and RECOMMEND remain deterministic.
   name `decay` is retained for compatibility. If all merge weights are zero, retain
   the latest reading.
 - The unchanged teammate contradiction rule requires opposite signs with both
-  confidences > 0.4. NLI confirmation requires P(contradiction) > 0.6, as on main.
+  confidences > 0.4. The real app presets confirm candidates with P(contradiction) > 0.90.
   Keep the accepted profile while a confirmed claim is disputed.
 - PROBE requires familiarity, reason confidence above `settings.probe_reason_conf`
   (default 0.6), and not previously probed, as configured on main.

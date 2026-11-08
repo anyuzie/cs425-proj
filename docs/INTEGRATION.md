@@ -70,7 +70,7 @@ Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the
 
 ### Step 4 · NLI check (`pipeline/nli.py`)
 
-**Done.** Real system presets now load `models/nli-probing-v1/checkpoint` once; `score(old_src, new_src)` returns P(contradiction). The runtime threshold remains **0.6**. This checkpoint uses the project probing-conflict policy, which differs from standard logical NLI. See [deployment and checkpoint verification](NLI_DEPLOYMENT.md). Older stock-model threshold results do not select this checkpoint.
+**Done.** Real system presets load `models/nli-probing-v2/checkpoint` once. The confirmer returns P(contradiction) and the app keeps candidates whose score is strictly above **0.90**. The checkpoint uses the project probing-conflict policy. See [deployment and checkpoint verification](NLI_DEPLOYMENT.md).
 
 ### Step 6 · Policy (`pipeline/policy.py`)
 
@@ -142,7 +142,6 @@ Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rul
 - Where transcripts are stored and when they are deleted (manual section 10).
 - A "why" line specific to each card (right now all five share one sentence).
 - The team Drive folder link (step 1 above).
-- **NLI threshold:** tuning chose 0.9 (`reports/nli/threshold.json`), but `configs/system.json` still has `confirm_threshold: 0.6`. Whoever owns the NLI check should confirm and update it.
 
 ## Install and run
 
@@ -176,7 +175,7 @@ The models are not in GitHub (`/models/` is gitignored: each is several hundred 
 | Folder | What | Get it from |
 |---|---|---|
 | `models/extractor/` | Trained DeBERTa extractor | Koon (Drive zip; `config.json` directly in the folder) |
-| `models/nli-probing-v1/checkpoint/` | Fine-tuned probing-v1 NLI | Copy shared checkpoint; verify with `scripts/check_nli_checkpoint.py` |
+| `models/nli-probing-v2/checkpoint/` | Fine-tuned probing-v2 NLI | Copy shared checkpoint and verify with `scripts/check_nli_checkpoint.py` |
 | `models/t5-questions-v3b/` | Trained T5 question wording | Chua. Only needed for T5 wording: the evaluation uses the question bank. |
 
 About 3–4 GB in total with the Python packages.
