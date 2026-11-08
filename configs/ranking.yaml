@@ -1,11 +1,21 @@
 components:
+  # Live default since 9 November 2026 (reports/ranking/occupation_semantic_default/DECISION.md):
+  # RIASEC cosine (M1) and the fine-tuned occupation dual encoder (M4) rank in parallel and are
+  # combined by equal-weight occupation-level RRF (k=60). With only one usable component (e.g. no
+  # RIASEC dimension observed yet) RRF is bypassed and that component's ranking is used.
+  # M4 requires the local checkpoint/index in artifacts/ranking/occupation_semantic_v1/ (gitignored).
+  # Previous default, cosine only: configs/ranking/m1_cosine.json (configs/system.cosine.json).
+  # Frozen dot-product control: configs/ranking/baseline_v1.json.
   m1:
-    algorithm: weighted_dot_product
+    algorithm: cosine_similarity
     variant: baseline_v1
   m3: null
-  m4: null
+  m4:
+    algorithm: occupation_dual_encoder
+    variant: finetuned_v1
 
-# Specified future fusion baseline; one usable component bypasses fusion.
+# Identical to configs/ranking/occupation_semantic_fusion_v1.json, the configuration evaluated in
+# reports/ranking/occupation_semantic_v1 and its dev_extractor_inputs comparison.
 fusion:
   algorithm: rrf
   k: 60

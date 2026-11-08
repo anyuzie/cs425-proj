@@ -34,5 +34,9 @@ def runtime_requests(profile, input_mode):
             previous = evidence
         elif previous is not None:
             raise ValueError("source_evidence cannot disappear from later snapshots")
-        requests.append(RankingRequest(dict(turn["interests"]), set(observed), list(history), source_evidence=evidence))
+        reasons = turn.get("slot_reasons")
+        weights = turn.get("slot_weights")
+        requests.append(RankingRequest(dict(turn["interests"]), set(observed), list(history), source_evidence=evidence,
+                                       slot_reasons=dict(reasons) if reasons is not None else None,
+                                       slot_weights=dict(weights) if weights is not None else None))
     return requests

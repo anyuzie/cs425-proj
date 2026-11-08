@@ -20,11 +20,20 @@ class ModularRankingTests(unittest.TestCase):
         self.assertIs(legacy, canonical)
         self.assertIs(legacy.RankingPipeline, RankingPipeline)
 
-    def test_workflow_selects_cosine_and_preserves_baseline(self):
+    def test_workflow_selects_active_configuration_and_preserves_baseline(self):
         paths = load_workflow(Path("configs/ranking/workflow.json"))
         candidate = RankingPipeline(config=paths["ranking"])
         baseline = RankingPipeline()
+        self.assertEqual(paths["ranking"].name, "active.json")
+        selected, _ = load_configuration(paths["ranking"])
+        self.assertEqual(candidate.selection_config, selected)
+        # The workflow keeps its own cosine selection; the app YAML default changed separately.
+        live, _ = load_configuration(Path("configs/ranking/m1_cosine.json"))
+        self.assertEqual(selected, live)
         self.assertEqual(candidate.component_identifiers["m1"], "cosine_similarity@baseline_v1")
+        promotion, _ = load_configuration(paths["promotion"])
+        challenger, _ = load_configuration(Path(promotion["candidate"]))
+        self.assertEqual(challenger, live)
         self.assertEqual(baseline.component_identifiers["m1"], "weighted_dot_product@baseline_v1")
         inputs = OracleInput(dict(R=1., I=.5, A=0., S=-.5, E=0., C=.1), [])
         response = candidate.rank_oracle(inputs)

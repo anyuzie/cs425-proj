@@ -8,6 +8,7 @@ import random
 
 from recommender.experiments.evaluation import METRICS, LEGACY_METRICS
 from recommender.experiments.evaluate import save_json
+from recommender.experiments.metric_extensions import read_extension
 
 
 def paired_comparison(control: Path, treatment: Path, *, samples=2000, seed=425):
@@ -25,6 +26,12 @@ def paired_comparison(control: Path, treatment: Path, *, samples=2000, seed=425)
             raise ValueError("incompatible paired runs: auxiliary_dataset_sha256")
     def indexed(directory):
         rows = read(directory, "per_profile.json")
+        extension = read_extension(directory)
+        if extension:
+            extra = {r["profile_id"]: r for r in extension["per_profile"]}
+            if set(extra) != {r["profile_id"] for r in rows}:
+                raise ValueError("metric extension profile IDs differ")
+            rows = [{**r, **extra[r["profile_id"]]} for r in rows]
         result = {r["profile_id"]: r for r in rows}
         if not rows or len(result) != len(rows):
             raise ValueError("empty or duplicate profile metrics")

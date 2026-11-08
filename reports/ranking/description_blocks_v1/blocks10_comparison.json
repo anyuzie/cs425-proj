@@ -1,0 +1,91 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_structured_oracle_dev_v1_12cbff8ae2824ae6ad2382bb31b9493a",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        -0.06666666666666667,
+        0.03333333333333333
+      ],
+      "improved": 4,
+      "mean_difference": -0.016666666666666666,
+      "regressed": 6
+    },
+    "hit_at_10": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "hit_at_5": {
+      "ci95": [
+        -0.03333333333333333,
+        0.125
+      ],
+      "improved": 14,
+      "mean_difference": 0.041666666666666664,
+      "regressed": 9
+    },
+    "mrr": {
+      "ci95": [
+        -0.0509274741911826,
+        0.03397286987164499
+      ],
+      "improved": 56,
+      "mean_difference": -0.00750820544842501,
+      "regressed": 57
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        -0.029157017709934632,
+        0.010534603553034408
+      ],
+      "improved": 47,
+      "mean_difference": -0.009041313994740152,
+      "regressed": 53
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        -0.04195536478997838,
+        0.030686081429474214
+      ],
+      "improved": 43,
+      "mean_difference": -0.0068324123730634225,
+      "regressed": 47
+    },
+    "recall_at_10": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "recall_at_20": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "recall_at_5": {
+      "ci95": [
+        -0.022417953706653396,
+        0.0032079940255249862
+      ],
+      "improved": 31,
+      "mean_difference": -0.009402659353317248,
+      "regressed": 42
+    }
+  },
+  "profiles": 120,
+  "seed": 425,
+  "treatment_run_id": "m2_structured_oracle_dev_v1_4a72e009ae7f439897c25390ff855946"
+}

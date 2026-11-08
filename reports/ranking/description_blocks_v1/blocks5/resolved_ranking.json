@@ -1,0 +1,37 @@
+{
+  "components": {
+    "m1": {
+      "algorithm": "weighted_dot_product",
+      "component": "m1",
+      "parameters": {
+        "dimension_order": [
+          "R",
+          "I",
+          "A",
+          "S",
+          "E",
+          "C"
+        ],
+        "observed_only": true,
+        "occupation_scale": "supplied_z_scores",
+        "tie_break": "code_ascending"
+      },
+      "variant": "baseline_v1"
+    },
+    "m3": null,
+    "m4": null
+  },
+  "fusion": null,
+  "reranking": {
+    "algorithm": "minilm_descriptions",
+    "block_size": 5,
+    "candidate_count": 100,
+    "dimension": 384,
+    "max_seq_length": 256,
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "ordering": "cosine_desc_code_asc",
+    "query": "newline_join_user_history",
+    "variant": "blocks5_v1"
+  }
+}

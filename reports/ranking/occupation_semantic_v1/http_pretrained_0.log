@@ -1,0 +1,14 @@
+INFO:     Started server process [16872]
+INFO:     Waiting for application startup.
+C:\Users\aanny\Documents\GitHub\year5\cs425\project\.venv\Lib\site-packages\torch\jit\_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights:  30%|###       | 61/202 [00:00<00:00, 599.23it/s]Loading weights: 100%|##########| 202/202 [00:00<00:00, 1345.02it/s]
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights:  12%|#1        | 24/202 [00:00<00:00, 208.81it/s]Loading weights:  34%|###4      | 69/202 [00:00<00:00, 335.32it/s]Loading weights: 100%|##########| 202/202 [00:00<00:00, 846.06it/s]
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 3909.76it/s]
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8017 (Press CTRL+C to quit)
+INFO:     127.0.0.1:57773 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57774 - "POST /api/session HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57775 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63068 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63069 - "POST /api/chat HTTP/1.1" 200 OK

@@ -104,6 +104,9 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
     if ranker.evidence_filter == "active_only" and (mode == "oracle" or any(
             r.source_evidence is None for requests in replay.values() for r in requests)):
         raise ValueError("active_only requires source_evidence on every tracker turn")
+    if ranker.profile_policy != "raw" and (mode == "oracle" or any(
+            r.slot_reasons is None for requests in replay.values() for r in requests)):
+        raise ValueError("profile_policy requires slot_reasons on every tracker turn")
     snapshots, metrics, predictions, times = [], [], [], []
     turn_predictions = []
     fused_profiles = 0
@@ -121,11 +124,18 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
                     "observed_types": sorted(request.observed_types), "user_sentences": request.user_sentences}
                 if request.source_evidence is not None:
                     snapshot["source_evidence"] = request.source_evidence
+                if request.slot_reasons is not None:
+                    snapshot["slot_reasons"] = request.slot_reasons
+                if request.slot_weights is not None:
+                    snapshot["slot_weights"] = request.slot_weights
                 snapshots.append(snapshot)
                 start = perf_counter()
                 response = (ranker.rank_with_evidence(request.interests, request.observed_types,
-                    request.user_sentences, request.source_evidence, len(pool)) if request.source_evidence is not None
-                    else ranker.rank(request.interests, request.observed_types, request.user_sentences, len(pool)))
+                    request.user_sentences, request.source_evidence, len(pool), slot_reasons=request.slot_reasons,
+                    slot_weights=request.slot_weights)
+                    if request.source_evidence is not None
+                    else ranker.rank(request.interests, request.observed_types, request.user_sentences, len(pool),
+                                     slot_reasons=request.slot_reasons, slot_weights=request.slot_weights))
                 times.append(perf_counter() - start)
                 turn_predictions.append({**snapshot, "status": response.status, "reason": response.reason,
                     "query_diagnostics": response.query_diagnostics,
@@ -189,17 +199,18 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         "sample_count": len(times), "method": "preloaded full-pool calls; each oracle profile or tracker turn; nearest-rank p95; excludes metrics/export",
     })
     save_json(output / "manifest.json", {
-        "evaluator_version": "m2-v2", "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "evaluator_version": "m2-v4", "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "run_id": run_id, "control_run_id": "m2_structured_oracle_dev_v1",
         "components": {**ranker.component_identifiers, "fusion": ranker.fusion_identifier},
         "component_metadata": ranker.component_metadata,
         "fused_profile_count": fused_profiles,
-        "retrieval_policy": "No ranking cutoff before evaluation; lexical ranks contain positive matches only; unretrieved target MRR=0",
+        "retrieval_policy": "Weighted dot product full pool; description cosine reranks top 100 only; untouched tail retained for MRR" if ranker.selection_config.get("reranking") else "No ranking cutoff before evaluation; lexical ranks contain positive matches only; unretrieved target MRR=0",
         "resolved_ranking": ranker.resolved_config,
         "algorithm_parameters": ranker.resolved_config["components"],
         "dataset_split": evaluation_config["split"],
-        "hypothesis": f"Evaluate selected ranking on {mode} development inputs; evidence_filter={ranker.evidence_filter}; final turn per session for tracker metrics",
+        "hypothesis": f"Evaluate selected ranking on {mode} development inputs; evidence_filter={ranker.evidence_filter}; reranking={ranker.selection_config.get('reranking', {}).get('variant', 'none')}; final turn per session for tracker metrics",
         "evidence_filter": ranker.evidence_filter,
+        "profile_policy": ranker.profile_policy,
         "evidence_policy_version": "m6-v1" if any(r.source_evidence is not None for rs in replay.values() for r in rs) else None,
         "query_policy": "raw chronological user-only utterances; no stance or lifecycle filtering" if ranker.evidence_filter == "raw" else "active statements only; disputed and superseded excluded; structured vector unchanged",
         "evaluation_unit": "profile" if mode == "oracle" else "session final turn",
@@ -214,11 +225,16 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         "dataset_sha256": {evaluation_config[k]: digest(evaluation_config[k]) for k in ("profiles", "occupations")},
         "inputs_sha256": digest(output / "inputs.json"), "pool": sorted(pool),
         "eligibility": evaluation_config["eligibility"], "ranking_depth": "full eligible pool; MRR not truncated at 100",
-        "metric_definitions": "Hit@1/5/10 exact target; full-pool MRR; NDCG@5/10 gains 2^grade-1, target=4/short=3/long=2/supplemental=1, max grade per eligible code, zero IDCG=0; all profiles in denominator",
+        "metric_definitions": "Hit@1/5/10 exact target; full-pool MRR; NDCG@5/10 gains 2^grade-1, target=4/short=3/long=2/supplemental=1, max grade per eligible code, zero IDCG=0; macro Recall@5/10/20/50 over all eligible positive-grade labels, empty relevance=0; all profiles in denominator",
         "python": platform.python_version(), "dependencies": {"PyYAML": version("PyYAML"), **dense_identity.get("packages", {})},
-        "model_revision": dense_identity.get("parameters", {}).get("model_revision"),
+        "model_revision": dense_identity.get("parameters", {}).get("model_revision") or dense_identity.get("revision"),
         "task_index_fingerprint": dense_metadata.get("artifact_sha256", {}).get("index.faiss"),
-        "auxiliary_dataset_sha256": {dense_identity["parameters"]["tasks_path"]: dense_identity["tasks_sha256"]} if dense_identity else {},
+        # Legacy MiniLM M4 records its task corpus; the occupation dual encoder records checkpoint/split data.
+        "auxiliary_dataset_sha256": ({dense_identity["parameters"]["tasks_path"]: dense_identity["tasks_sha256"]}
+                                     if "tasks_path" in dense_identity.get("parameters", {}) else
+                                     {"occupation_semantic_checkpoint": dense_identity["checkpoint_sha256"],
+                                      "occupation_semantic_data": dense_identity["data_sha256"]}
+                                     if "checkpoint_sha256" in dense_identity else {}),
         "seed": evaluation_config["seed"],
         "test_summary": "See milestone reports for executed acceptance results; runtime integration: reports/ranking/m5/DECISION.md",
         "command": f"python -m recommender.evaluate --config {shlex.quote((output / 'evaluation_config.json').as_posix())} --ranking-config {shlex.quote((output / 'ranking_config.json').as_posix())} --output <new-directory>",

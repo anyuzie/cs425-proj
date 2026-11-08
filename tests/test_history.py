@@ -62,8 +62,9 @@ class HistoryTests(unittest.TestCase):
             original = history.read_bytes()
             rows = list(csv.DictReader(io.StringIO(history.read_text(encoding="utf-8"))))
             self.assertEqual(len(rows), 1)
-            self.assertEqual(rows[0]["m1"], "weighted_dot_product@baseline_v1")
-            self.assertEqual([rows[0][k] for k in ("m3", "m4", "fusion")], ["", "", ""])
+            self.assertEqual([rows[0][k] for k in ("m1", "m3", "m4")],  # configs/ranking.yaml default
+                             ["cosine_similarity@baseline_v1", "", "occupation_dual_encoder@finetuned_v1"])
+            self.assertTrue(rows[0]["fusion"].startswith("rrf"))
             self.assertEqual(float(rows[0]["hit_at_1"]), metrics["hit_at_1"])
             self.assertFalse(append_history(report, history=history))
             self.assertEqual(history.read_bytes(), original)

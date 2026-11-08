@@ -5,6 +5,7 @@ from math import isfinite
 from typing import Literal
 
 TYPES = ("R", "I", "A", "S", "E", "C")
+SLOT_REASONS = ("enjoyment", "familiarity", "neither")
 
 
 def validate_vector(values: dict[str, float], *, runtime: bool) -> None:
@@ -24,11 +25,24 @@ class RankingRequest:
     user_sentences: list[str]
     top_k: int = 100
     source_evidence: list[dict] | None = None
+    # Optional tracker reason per observed slot; read only by a non-raw profile_policy.
+    slot_reasons: dict[str, str] | None = None
+    # Optional tracker evidence mass per observed slot; read only by weight-aware components.
+    slot_weights: dict[str, float] | None = None
 
     def __post_init__(self) -> None:
         validate_vector(self.interests, runtime=True)
         if not isinstance(self.observed_types, set) or not self.observed_types <= set(TYPES):
             raise ValueError("observed_types must be a set of allowed RIASEC keys")
+        if self.slot_reasons is not None and (
+                not isinstance(self.slot_reasons, dict) or set(self.slot_reasons) != self.observed_types
+                or any(value not in SLOT_REASONS for value in self.slot_reasons.values())):
+            raise ValueError("slot_reasons must give enjoyment/familiarity/neither for exactly the observed types")
+        if self.slot_weights is not None and (
+                not isinstance(self.slot_weights, dict) or set(self.slot_weights) != self.observed_types
+                or any(isinstance(w, bool) or not isinstance(w, (int, float)) or not isfinite(w) or w < 0
+                       for w in self.slot_weights.values())):
+            raise ValueError("slot_weights must give a finite nonnegative weight for exactly the observed types")
         if not isinstance(self.user_sentences, list) or any(not isinstance(s, str) for s in self.user_sentences):
             raise ValueError("user_sentences must be a list of user-only strings")
         if isinstance(self.top_k, bool) or not isinstance(self.top_k, int) or self.top_k < 1:

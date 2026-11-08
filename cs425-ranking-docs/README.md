@@ -1,4 +1,10 @@
-# CS425 — Occupation Scoring & Ranking
+# CS425 â€” Occupation Scoring & Ranking
+
+Fusion live default (9 November 2026): `configs/ranking.yaml` now runs M1 `cosine_similarity@baseline_v1` and M4 `occupation_dual_encoder@finetuned_v1` in parallel, combined by equal-weight RRF k=60 (identical to `configs/ranking/occupation_semantic_fusion_v1.json`), for the website, terminals and zero-argument evaluator, by explicit owner decision; it is the new baseline. With no observed RIASEC type the semantic ranking is used alone. On 120 development profiles with real extractor inputs fusion is tied with cosine (MRR .096 vs .117, -.021 [-.059, +.014]) and beats semantic-only (+.056 [+.023, +.092]); on held-out task retrieval .201 vs cosine .032. Single-turn evidence only; negation is not handled by M4. Requires the gitignored local checkpoint/index, otherwise fusion degrades to cosine. Cosine alone remains selectable (`configs/system.cosine.json`); the workflow selection and weight-free mock mode stay on cosine. See [decision](../reports/ranking/occupation_semantic_default/DECISION.md).
+
+Occupation semantic retrieval (9 November 2026): opt-in M4 `occupation_dual_encoder@pretrained_v1` / `@finetuned_v1` (`recommender/occupation_semantic.py`, `training/occupation_semantic.py`) embeds chronological user-only text with MiniLM-L6 and scores all 378 eligible occupations against a validated title/description/task/context index; it runs without extracted preferences or RIASEC and is topic/background association, not preference (negation is not handled). Fine-tuned on source-grouped task/context statements (no dev_profile). Frozen test (1,133 task groups, binary ownership proxy): MRR control .032, pretrained .483, fine-tuned .518 (+.035 [+.020, +.049]), fine-tuned+cosine RRF .201; 38-occupation held-out: .364 to .418. RRF with single-sentence RIASEC hurts on this proxy; conversational relevance is unmeasured and XGBoost is deferred. Terminal/HTTP/restart acceptance pass; browser review pending. Presets `configs/system.occupation-semantic-*-v1.json` and `configs/ranking_terminal/occupation_semantic_*_v1.json`; defaults unchanged. See [report](../reports/ranking/occupation_semantic_v1/README.md).
+
+Context/task text reranking experiment (2 November 2026): six separate frozen treatments add all raw task text to description/context prose, using runtime chunk encoding and unchanged weighted-dot-product first-stage groups. All ten metrics are evaluated on the same 120 development/oracle profiles and 378 occupations; six rows are appended to the preserved eight historical rows. No rated Work Context features or classifier scores are inputs. See [experiment report](../reports/ranking/context_tasks_v1/README.md) for actual metrics, chunk aggregation, grouping and limitations. Active defaults and frozen controls remain unchanged.
 
 > **Project objective:** Build and evaluate a conversational occupation-ranking component that uses a user's evolving RIASEC interest profile and relevant conversation evidence to rank O*NET occupations after each turn.
 >
@@ -7,6 +13,77 @@
 This README is the **source of truth for objectives, scope, implementation status, and milestone priorities**. See [DEVELOPMENT.md](DEVELOPMENT.md) for acceptance criteria and implementation steps, [EVALUATION.md](EVALUATION.md) for controls and metrics, and [EXPERIMENT_TEMPLATE.md](EXPERIMENT_TEMPLATE.md) for recording each experiment. The [ranking architecture memory](../docs/RANKING_EXPERIMENT_ARCHITECTURE.md) is the authoritative guide to module boundaries, configuration variants, and future implementation workflows; read it before architectural changes.
 
 ## Current implementation status
+
+Confidence-weighted distance (8 November 2026): new M1 algorithm `weighted_distance@kappa3_v1` (`recommender/models/weighted_distance.py`, preset `configs/ranking/m1_weighted_distance.json`) scores -sum over observed t of w_t (3 u_t - z_t)^2 with the tracker slot weight w_t; it is `unavailable` without weights (oracle inputs). Optional `RankingRequest.slot_weights` / `ComponentInput.weights` carry the weights (here from format-3 replay sessions; System and terminal wiring land with the separate tracker/policy change); dot product and cosine ignore them and stay frozen. Tier 2 (`data/eval/extractor_sessions_dev_v3`, v2 readings replayed with weights; vectors identical): MRR .143 vs cosine .117 and dot .112; on the 51 profiles with three or fewer observed types distance minus cosine is MRR +.056 [+.014, +.105] and minus dot +.065 [+.025, +.114]; on four or more types differences are near zero with CIs spanning it. Defaults unchanged. See [report](../reports/ranking/weighted_distance_v1/README.md). Tier 3 (`python -m eval.dialogue_distance`, 120 simulated dialogues per set; dot/cosine dialogues reproduce dialogue_probing_v1 exactly): the primary hypothesis is rejected. Full arm, distance in loop + final versus cosine in loop + final: MRR .158 vs .234 (-.076 [-.122, -.036]); distance still beats the dot product (+.066 [+.019, +.111]). Every final profile has four or more observed types, so the sparse regime where distance won at Tier 2 does not occur at the final turn; probing helps distance less than cosine (+.018 vs +.035 MRR). The in-loop ranker barely changes the dialogues. Cosine stays the default; see [Tier 3 report](../reports/ranking/dialogue_distance_v1/README.md).
+
+Cosine live default (8 November 2026): `configs/ranking.yaml` now selects `cosine_similarity@baseline_v1` (fusion null; identical to `configs/ranking/m1_cosine.json`) for the live app, terminal and zero-argument evaluator. Evidence: simulated multi-turn dialogues with the real System and NLI give final-turn MRR .234 vs .092 (+.142 [+.087, +.206]); probing helps only with cosine (+.035 [+.010, +.066]). `weighted_dot_product@baseline_v1` stays frozen as the programmatic `BASELINE_CONFIG` and `configs/ranking/baseline_v1.json`; the workflow's `configs/ranking/active.json` and initial `candidate.json` now also select cosine with fusion disabled, aligning workflow chat/evaluation with the web app and ordinary terminals. This is an explicit configuration alignment using the existing cosine variant and saved dialogue evidence, not a new automated promotion result. Later workflow promotions can change the workflow selection independently of the app YAML. See [decision](../reports/ranking/cosine_default/DECISION.md) and [dialogue report](../reports/ranking/dialogue_probing_v1/FINDINGS.md).
+
+Familiarity-aware profile policies (8 November 2026): a ranking-owned Stage A `profile_policy` (`recommender/profile_policy.py`; config key alongside `evidence_filter`) transforms only the tracker vector before unchanged components, using each slot's tracker `reason`. Frozen `familiarity_excluded_v1` (familiarity slots become unobserved) and `familiarity_half_v1` (weight .5) are evaluated on extractor-derived v2 sessions, which add `slot_reasons`. Cosine + exclusion gives MRR .135 vs .117, Hit@5 .217 vs .175, NDCG@10 .149 vs .134 (MRR CI [-.015, +.058]). It hurts the dot product (MRR -.013, CI excludes zero), and halving hurts both. By subgroup, cosine + exclusion moves MRR +.216 and Hit@5 +.368 for the 19 profiles with a misleading familiarity slot, and MRR -.086 for the 22 whose familiarity slots are genuine. Two profiles lose all observed types. Distinguishing the two cases is the job of probing. Defaults unchanged. See the [report](../reports/ranking/familiarity_policy_v1/README.md).
+
+Extractor-derived inputs (8 November 2026): `scripts/build_extractor_sessions.py` runs each development profile's opening text through the configured DeBERTa extractor and DecayTracker (one turn, no policy) and saves `actual_tracker` sessions in `data/eval/extractor_sessions_dev_v1/`. On these inputs cosine versus dot product is Hit@5 .175 vs .117 (+.058, 95% CI [-.025, +.142]), MRR .117 vs .112, NDCG@10 .134 vs .142. The oracle gap of +.517 Hit@5 shrinks to a non-significant difference, so most of cosine's oracle advantage reflects profiles built from target z-rows. Extraction: 3.61 of 6 types observed on average, 91–99% sign agreement on salient types, top-type agreement .658. Oracle cosine (.683) remains the information ceiling that better profiling could reach; oracle dot product reaches only .167. Defaults unchanged. See the [report](../reports/ranking/extractor_inputs_v1/README.md).
+
+Sentence-to-task reranking (8 November 2026): four frozen `clause_tasks_v1` treatments (MiniLM/MPNet, unsigned/explicit-dislike-signed) apply M4's per-sentence max-task cosine, averaged over sentences, inside the dot-product groups of 10. All four regress versus the dot product on MRR and NDCG@10 (Hit@5 .133–.158 vs .167) and versus the matching `context_tasks_v1` chunk-mean variants. The new reranker diagnostics give a mean within-group target position of 5.83–6.06, worse than random ordering (5.5); the chunk-mean text variants reach about 5.4–5.5. Four rows appended to the consolidated CSV. `app.ranking_terminal --reranking clause-minilm|clause-mpnet[-signed]` shows matched tasks per occupation. Defaults unchanged. See [docs/CLAUSE_TASK_RERANKING.md](../docs/CLAUSE_TASK_RERANKING.md) and the [report](../reports/ranking/clause_tasks_v1/README.md).
+
+Context acceptance revision (2 November 2026): experimental context matching now abstains on unresolved references/preferences, uses explicit setting evidence, and allows no attribute match. Other wording uses a provisional uncalibrated cosine cutoff of .5 instead of forced top-three matches. Informal negation is recognized. Terminal layout, classifier, ranking and fusion are unchanged; see docs/CLAUSE_CONTEXT_PIPELINE.md for limits.
+
+Per-clause context occupation associations (2 November 2026): context-routed clauses display a separate top ten across all local occupations using similarity-weighted available ratings for the three closest context attributes. Coverage and supporting evidence are shown; negative preferences label associated occupations as potential conflicts. These are context associations, not calibrated preference compatibility; RIASEC ranking and task routing remain unchanged. Details: docs/CLAUSE_CONTEXT_PIPELINE.md.
+
+Context clause diagnostics (2 November 2026): terminal occupation-clause details and historical occupation-classifier loading removed. Context-routed user clauses now independently produce a lexical preference sign (unknown for unresolved cases) and 57 ordered MPNet attribute similarities. This is display-only semantic projection, not occupation ratings or ranking integration. Task routing remains independent; its matcher is deferred. See docs/CLAUSE_CONTEXT_PIPELINE.md for semantics and limits.
+
+Stanza terminal baseline (2 November 2026): user clauses now default to offline Stanza dependency parsing with conservative explicit-subject coordination rules (`stanza_conservative_v1`). Embedded complements and shared-subject negation stay together; spaCy remains selectable with `--clause-splitter spacy`. Occupation annotation parsing, shared System, classifier weights and ranking calculations are unchanged. Example-based regressions do not establish general conversational accuracy.
+
+Terminal clause scoring (2 November 2026): `app.ranking_terminal` now displays independent BERT Task/Context sigmoid scores and routes for each exact spaCy clause. Model loads once; this is display-only and does not change extraction, splitting, ranking, fusion or reviewed annotations. Known paraphrase performance remains Task F1 .564103, Context F1 .457831, exact match 35%. The pre-extension ranking snapshot below remains the control.
+
+Pre-extension snapshot (2 November 2026): [ranking and classifier baseline](../docs/PRE_EXTENSION_BASELINE.md) records all ten ranking metrics for all eight existing variants. Dot-product-only Hit@5 = .166667; equal-weight MiniLM/MPNet groups-of-10 Hit@5 = .216667 (MRR .133342 versus .141508 for dot product). Active workflow remains dot-product-only. Current source-labelled task/context BERT has source-validation F1 1.000 for both outputs, but the 80-case assistant-authored paraphrase diagnostic gives Task F1 .564103, Context F1 .457831 and exact match 35% (28/80). These are separate evaluations; conversational reliability and ranking benefit are not established. No new classifier/matching integration or scoring change is included in this snapshot.
+
+
+Historical occupation clause classifier pilot (1 November 2026; different checkpoint and label definitions from the current task/context BERT): BERT is trained on 123 human-reviewed clauses from 24 occupations and validated on 32 clauses from six disjoint occupations. Ten-epoch pilot selected by validation macro F1: Activity .625, Job nature .893, exact match .500. No Neither training examples or independent test set. Trained checkpoint installed; real terminal smoke confirms ten displayed occupations and 50 underlying candidates. Occupation prose uses conservative sentence boundaries; user-utterance splitting and ranking scores are unchanged. See docs/OCCUPATION_CLASSIFIER_TRAINING.md for datasets, corpus prediction outputs and limitations.
+
+Utterance preprocessing: optional independent spaCy clause splitting is available through
+`settings.utterance_processing`. Results are recorded in the turn trace; original text,
+RIASEC scoring and reranking are preserved. Pattern classification is deferred.
+See [utterance processing](../docs/UTTERANCE_PROCESSING.md).
+
+Recall@50 extension (31 October 2026): evaluator m2-v4 now reports ten permanent
+metrics, including macro Recall@5/10/20/50. All eight configurations have verified
+Recall@50 extensions derived from saved predictions and fingerprint-matching labels.
+Original historical metrics/manifests are preserved. CSV, notebook, history and
+new paired comparisons include Recall@50. See [metric extension](../docs/RECALL50.md).
+
+
+Semantic aggregation (31 October 2026): a separate frozen equal-weight variant
+scores the same dot-product top 100 with MiniLM and MPNet, averages raw cosine
+scores and sorts once within baseline groups of 10. Both sequential orders and
+all previous variants remain available. RIASEC extraction/scoring is unchanged.
+All 36 targeted tests pass; the consolidated comparison now has eight experiments.
+See the [aggregation report](../reports/ranking/aggregate_minilm_mpnet10_v1/README.md).
+
+
+Reverse-sequence follow-up (31 October 2026): frozen `minilm20_mpnet10_v1`
+adds MiniLM groups of 20 followed by MPNet groups of 10 formed from MiniLM output.
+Both stage orders are supported in the separate semantic pipeline. The consolidated
+CSV includes seven experiments; all 33 targeted tests pass. See the
+[reverse-sequence report](../reports/ranking/minilm20_mpnet10_v1/README.md). Existing RIASEC processing and defaults are preserved.
+
+
+Semantic integration (31 October 2026): weighted-dot-product RIASEC matching
+remains unchanged and separate from `recommender/semantic/SemanticMatchingPipeline`.
+The semantic pipeline supports description-only MiniLM and MPNet independently,
+or sequential MPNet groups of 20 followed by MiniLM groups of 10 formed from
+MPNet's output. Existing extractor/tracker logic and active defaults are preserved.
+Evaluator `m2-v3` permanently includes Recall@5/10/20 alongside the six existing
+metrics. See [integration guide](../docs/SEMANTIC_INTEGRATION.md) and the consolidated experiment CSV.
+
+
+Central workflow automatic promotion (26 October 2026): `active.json` starts with
+weighted dot product and records the current best central-workflow selection.
+Each `python -m recommender.workflow evaluate` evaluates `candidate.json` against
+the active incumbent on matching inputs, promoting only higher Hit@5 without any
+regression in the other nine permanent metrics. Both reports, comparison and previous
+selection are saved; publication is atomic and locked. Workflow chat uses the
+winner. Frozen algorithm variants and the separate application's ranking YAML
+are preserved. Direct evaluation commands remain report-only. See the
+[workflow and recovery guide](../docs/RANKING_MODULES.md#run-the-recommended-configuration).
 
 Application integration audit: real cosine and cosine+BM25 now have HTTP-level
 acceptance with explicitly mocked upstream components, covering recommendation
@@ -17,8 +94,8 @@ is available. Defaults and frozen variants are unchanged. See the
 
 The ranking implementation is organized into `recommender/models/`, `data/`,
 `preparation/`, and `experiments/`, with compatible legacy imports. Central
-`configs/ranking/workflow.json` selects the best recorded standalone cosine
-configuration for evaluation and terminal use; legacy production defaults remain
+`configs/ranking/workflow.json` selects the current active configuration
+for evaluation and terminal use; legacy production defaults remain
 unchanged. Algorithm parameters and additional named variants are centralized in
 `configs/ranking/`. Terminal presentation lives in `app/terminal.py` and calls the
 shared conversation `System`. Ranking has resource preparation, not model fitting.
@@ -28,16 +105,16 @@ This section is the canonical current status; milestone reports preserve their o
 
 | Milestone | Current status | Evidence |
 |---|---|---|
-| M0 — Data + contracts | Implemented and accepted locally; teammate integration sign-off pending | [M0 report](../reports/ranking/m0.md) |
-| M1 — Structured ranking | Dot-product baseline preserved; cosine alternative implemented and evaluated, default unchanged | [M1 report](../reports/ranking/m1.md), [cosine comparison](../reports/ranking/m1_cosine/DECISION.md) |
-| M2 — Evaluation | Implemented and accepted; frozen structured-only oracle development baseline, metrics, exports, and paired comparison | [M2 decision](../reports/ranking/m2/DECISION.md) |
+| M0 â€” Data + contracts | Implemented and accepted locally; teammate integration sign-off pending | [M0 report](../reports/ranking/m0.md) |
+| M1 â€” Structured ranking | Dot-product baseline preserved as the frozen control; cosine is the live default since 8 November 2026 ([decision](../reports/ranking/cosine_default/DECISION.md)) | [M1 report](../reports/ranking/m1.md), [cosine comparison](../reports/ranking/m1_cosine/DECISION.md) |
+| M2 â€” Evaluation | Implemented and accepted; frozen structured-only oracle development baseline, metrics, exports, and paired comparison | [M2 decision](../reports/ranking/m2/DECISION.md) |
 | M3 - Lexical + fusion | Implemented and evaluated; experimental baseline, M1-only default retained | [M3 decision](../reports/ranking/m3/DECISION.md) |
 | M4 - Semantic task retrieval | Implemented and evaluated; cached MiniLM/FAISS and three-signal baseline | [M4 decision](../reports/ranking/m4/DECISION.md) |
 | M5 | Ranking integration implemented and fixture-tested; baseline frozen; real upstream and latency sign-off pending | [M5 acceptance](../reports/ranking/m5/DECISION.md) |
 | M6 | Query filtering and controlled synthetic ablation complete; optional only, representative dialogue validation pending | [M6 decision](../reports/ranking/m6/DECISION.md) |
 | M7-M9 | Not implemented | [Development roadmap](DEVELOPMENT.md) |
 
-**Current gate: M5 ranking integration frozen; production upstream completion and teammate latency agreement remain pending.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. M4 now provides cached semantic task retrieval and provisional task matches. Live configurable ranking is wired through the shared System. Evidence stays provisional; production upstream components and stance-aware support remain pending.
+**Current gate: M5 ranking integration frozen; production upstream completion and teammate latency agreement remain pending.** The M2 acceptance report records 38 passing M0â€“M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. M4 now provides cached semantic task retrieval and provisional task matches. Live configurable ranking is wired through the shared System. Evidence stays provisional; production upstream components and stance-aware support remain pending.
 
 M6 currently filters evaluator-supplied, cumulative evidence snapshots before BM25/MiniLM query construction. The default raw-text ranking behavior is unchanged. A separate 60-session mock-tracker stress set now supplies synthetic lifecycle snapshots: six evaluations show mixed effects, including gains from M1 fallback. Keep filtering optional; representative dialogue validation remains pending. See the [M6 decision and next-work recommendation](../reports/ranking/m6/DECISION.md).
 
@@ -51,7 +128,7 @@ Stance-aware M4 follow-up: independent `minilm_stance@stance_internal_v1` and po
 
 ## Component configuration
 
-The live app now selects `ranker: configured` in `configs/system.json`, loading the same ranking YAML once at startup. The legacy `structured` factory stays available. M1-only remains the default. Full app startup still requires the team's production extractor checkpoint, tracker, NLI and policy implementations.
+The live app now selects `ranker: configured` in `configs/system.json`, loading the same ranking YAML once at startup. The legacy `structured` factory stays available. M1-only (cosine since 8 November 2026) remains the default. Full app startup still requires the team's production extractor checkpoint, tracker, NLI and policy implementations.
 
 The DeBERTa adapter now maps checkpoint head labels to the shared RIASEC interface and correctly retains positive strengths. Run `python scripts/check_m5_extractor.py --checkpoint <directory>` once trained weights are installed. The real-extractor smoke harness explicitly labels its remaining mock tracker/policy components; see [extractor integration status](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
 
@@ -189,13 +266,13 @@ Future rankers can call `recommender.history.append_history(report_path)` after 
 
 | Level | Objective | Definition of success | Ownership |
 |---|---|---|---|
-| **1 — Required engineering** | Implement a deterministic, modular, per-turn occupation ranker using **RIASEC fit, BM25, MiniLM task matching, and RRF (k=60)**. | Correct, runnable, reproducible ranking pipeline with occupation-level output, top 100 for policy, and task evidence for recommendations. | Scoring & Ranking |
-| **2 — Component research** | Test whether **evidence-aware retrieval** improves rankings compared with retrieval over accumulated raw user text. | Controlled comparisons of stale/contradictory evidence handling and familiarity-aware evidence selection, including regressions. | Scoring & Ranking, with upstream evidence metadata |
-| **3 — End-to-end research** | Test whether **contradiction clarification and familiarity probing** improve final recommendations over accepting the initial user profile. | Evaluated dialogue runs with/without interventions, using the real extractor, state tracker, contradiction check, and policy. | Whole team |
+| **1 â€” Required engineering** | Implement a deterministic, modular, per-turn occupation ranker using **RIASEC fit, BM25, MiniLM task matching, and RRF (k=60)**. | Correct, runnable, reproducible ranking pipeline with occupation-level output, top 100 for policy, and task evidence for recommendations. | Scoring & Ranking |
+| **2 â€” Component research** | Test whether **evidence-aware retrieval** improves rankings compared with retrieval over accumulated raw user text. | Controlled comparisons of stale/contradictory evidence handling and familiarity-aware evidence selection, including regressions. | Scoring & Ranking, with upstream evidence metadata |
+| **3 â€” End-to-end research** | Test whether **contradiction clarification and familiarity probing** improve final recommendations over accepting the initial user profile. | Evaluated dialogue runs with/without interventions, using the real extractor, state tracker, contradiction check, and policy. | Whole team |
 
 **Do not confuse these claims.** An improvement using manually corrected evidence (Level 2) does not prove the chatbot can reliably elicit that correction (Level 3). Likewise, improving BM25 or fusion alone does not prove probing helps.
 
-## 2. What the ranking component does — and does not do
+## 2. What the ranking component does â€” and does not do
 
 **Inputs (dynamic):** the tracked RIASEC vector (six signed values in `[-1,+1]`), which dimensions have been observed, and user utterances. Later milestones may also consume sentence-level evidence metadata such as stance, reason, confidence, lifecycle status, and source turn.
 
@@ -240,9 +317,9 @@ Future rankers can call `recommender.history.append_history(report_path)` after 
                     next question or results
 ```
 
-**Required baseline (M1–M5):** RIASEC → BM25 → dense task retrieval → occupation-level aggregation → equal-weight RRF → integration. This baseline must remain runnable and evaluable even after optional extensions are introduced.
+**Required baseline (M1â€“M5):** RIASEC â†’ BM25 â†’ dense task retrieval â†’ occupation-level aggregation â†’ equal-weight RRF â†’ integration. This baseline must remain runnable and evaluable even after optional extensions are introduced.
 
-**Experimental extensions (M6–M8):** Use lifecycle/stance/reason metadata to choose *which* sentences influence text retrieval, optionally separating positive and negative channels. Keep the original rankers and fusion available as controls.
+**Experimental extensions (M6â€“M8):** Use lifecycle/stance/reason metadata to choose *which* sentences influence text retrieval, optionally separating positive and negative channels. Keep the original rankers and fusion available as controls.
 
 ## 4. Non-negotiable research guardrails
 
@@ -260,16 +337,16 @@ Future rankers can call `recommender.history.append_history(report_path)` after 
 
 | Milestone | What must exist | Research purpose / go-no-go question |
 |---|---|---|
-| **M0 — Data + contracts** | Verified datasets, eligibility rule, typed I/O contract | Can upstream and downstream components exchange the needed data without ambiguity? |
-| **M1 — MVP** | Runnable RIASEC-only ranker | Does structured fit produce valid, deterministic occupation rankings? |
-| **M2 — Evaluator** | Verified Hit@5, MRR, NDCG@10 and saved baseline | Can we trust the comparisons before introducing retrieval complexity? |
-| **M3 — BM25** | Lexical ranker + two-signal RRF | Does lexical matching add useful retrieval signal, and in which cases does it hurt? |
-| **M4 — MiniLM + FAISS** | Cached task embeddings/index, task-to-occupation aggregation, three-signal RRF | Is semantic retrieval useful beyond structured/lexical ranking at acceptable cost? |
-| **M5 — Integration** | Per-turn API, top 100 for policy, task evidence and trace | Can the *required proposal baseline* operate in a realistic conversation? |
-| **M6 — Contradiction-aware evidence** | Status-aware selection/filtering, controlled ablation | Do superseded or disputed statements distort retrieval after the profile is corrected? |
-| **M7 — Familiarity-aware evidence** | Reason-aware selection/weighting, controlled ablation | Does reducing unconfirmed familiarity improve retrieval without suppressing genuine interests? |
-| **M8 — Optional signed channels** | Positive/negative text retrieval variant | Does explicitly handling disliked activities add value beyond M6–M7? |
-| **M9 — Freeze + final evaluation** | Frozen configurations, held-out report, end-to-end results if available | Which changes are justified, and what can we actually claim about probing? |
+| **M0 â€” Data + contracts** | Verified datasets, eligibility rule, typed I/O contract | Can upstream and downstream components exchange the needed data without ambiguity? |
+| **M1 â€” MVP** | Runnable RIASEC-only ranker | Does structured fit produce valid, deterministic occupation rankings? |
+| **M2 â€” Evaluator** | Verified Hit@5, MRR, NDCG@10 and saved baseline | Can we trust the comparisons before introducing retrieval complexity? |
+| **M3 â€” BM25** | Lexical ranker + two-signal RRF | Does lexical matching add useful retrieval signal, and in which cases does it hurt? |
+| **M4 â€” MiniLM + FAISS** | Cached task embeddings/index, task-to-occupation aggregation, three-signal RRF | Is semantic retrieval useful beyond structured/lexical ranking at acceptable cost? |
+| **M5 â€” Integration** | Per-turn API, top 100 for policy, task evidence and trace | Can the *required proposal baseline* operate in a realistic conversation? |
+| **M6 â€” Contradiction-aware evidence** | Status-aware selection/filtering, controlled ablation | Do superseded or disputed statements distort retrieval after the profile is corrected? |
+| **M7 â€” Familiarity-aware evidence** | Reason-aware selection/weighting, controlled ablation | Does reducing unconfirmed familiarity improve retrieval without suppressing genuine interests? |
+| **M8 â€” Optional signed channels** | Positive/negative text retrieval variant | Does explicitly handling disliked activities add value beyond M6â€“M7? |
+| **M9 â€” Freeze + final evaluation** | Frozen configurations, held-out report, end-to-end results if available | Which changes are justified, and what can we actually claim about probing? |
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for each milestone's implementation requirements, tests, and exit gate.
 
@@ -283,7 +360,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for each milestone's implementation require
 
 Do not spend time on adaptive fusion, ranking-impact question selection, or elaborate explanations unless core milestones are stable and a specific hypothesis warrants the extra effort.
 
-## 6. Evaluation philosophy — always retain a control
+## 6. Evaluation philosophy â€” always retain a control
 
 Every iteration must preserve a **control** and a **treatment**:
 
@@ -304,7 +381,7 @@ Use [EVALUATION.md](EVALUATION.md) for precise metric definitions, ablation cont
 
 The implementation plan anticipates `data/occupations.csv`, `data/tasks.csv`, `data/dev_profiles.jsonl`, `data/profiles.jsonl`, `data/related_occupations.csv`, and `data/labels.json`. Verify what actually exists; this documentation does not create those datasets.
 
-- The project proposal describes **1,016 occupations with RIASEC scores**; the working implementation plan restricts eligibility to **378 Job Zone 4–5 occupations** with complete RIASEC data. **Confirm and record** the candidate pool before running benchmarks. Preserve supplied z-scores rather than recomputing them on a restricted pool.
+- The project proposal describes **1,016 occupations with RIASEC scores**; the working implementation plan restricts eligibility to **378 Job Zone 4â€“5 occupations** with complete RIASEC data. **Confirm and record** the candidate pool before running benchmarks. Preserve supplied z-scores rather than recomputing them on a restricted pool.
 - The plan anticipates **60 development profiles** and **100 held-out profiles**. Verify that each split exists and that conversation histories, target labels, and evidence states are available for evidence-aware experiments. A final RIASEC vector alone cannot test contradiction/familiarity filtering.
 - Runtime tracker scores in `[-1,+1]` are **not interchangeable** with synthetic oracle `hidden_slots` expressed on a z-scale. Use a separate oracle adapter and report results separately.
 - Unknown dimensions must remain distinguishable from observed neutral values (e.g., `observed_types`).
@@ -343,7 +420,7 @@ These names are suggestions, **not confirmation that the modules already exist**
 
 ## 9. Quick start
 
-M0–M2 are implemented. Contracts and validation live in `recommender/schemas.py`, `recommender/components.py`, `recommender/data_loader.py`, and `recommender/audit.py`; structured scoring in `recommender/m1.py`, with the compatibility facade in `recommender/structured.py`; registry and orchestration in `recommender/registry.py` and `recommender/ranker.py`; evaluation and comparison in `recommender/evaluation.py`, `recommender/evaluate.py`, and `recommender/compare.py`.
+M0â€“M2 are implemented. Contracts and validation live in `recommender/schemas.py`, `recommender/components.py`, `recommender/data_loader.py`, and `recommender/audit.py`; structured scoring in `recommender/m1.py`, with the compatibility facade in `recommender/structured.py`; registry and orchestration in `recommender/registry.py` and `recommender/ranker.py`; evaluation and comparison in `recommender/evaluation.py`, `recommender/evaluate.py`, and `recommender/compare.py`.
 
 From the repository root with Python 3.10+:
 

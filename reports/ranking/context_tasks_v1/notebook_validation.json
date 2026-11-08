@@ -1,0 +1,9 @@
+{
+  "notebook_sha256": "b3f4d9975050f336d3371faa63a961062390512f805a90d125adb4407ed73f34",
+  "executed_code_cells": 3,
+  "execution_method": "actual cells executed sequentially in an in-process IPython shell with rich output capture",
+  "errors": 0,
+  "experiments": 14,
+  "metrics": 10,
+  "rendered_comparison_tables": 3
+}

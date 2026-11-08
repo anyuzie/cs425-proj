@@ -1,0 +1,100 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_structured_oracle_dev_v1_61ba49db295d40c69c15ac54ac4987af",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        -0.075,
+        0.016666666666666666
+      ],
+      "improved": 3,
+      "mean_difference": -0.025,
+      "regressed": 6
+    },
+    "hit_at_10": {
+      "ci95": [
+        -0.175,
+        -0.008333333333333333
+      ],
+      "improved": 8,
+      "mean_difference": -0.09166666666666666,
+      "regressed": 19
+    },
+    "hit_at_5": {
+      "ci95": [
+        -0.10833333333333334,
+        0.06666666666666667
+      ],
+      "improved": 13,
+      "mean_difference": -0.016666666666666666,
+      "regressed": 15
+    },
+    "mrr": {
+      "ci95": [
+        -0.07601481809005282,
+        0.009085471242331057
+      ],
+      "improved": 46,
+      "mean_difference": -0.031343019690859744,
+      "regressed": 64
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        -0.07903926919953044,
+        -0.00818513107868044
+      ],
+      "improved": 50,
+      "mean_difference": -0.04256627890446989,
+      "regressed": 59
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        -0.07671134350071825,
+        0.0077631912326928286
+      ],
+      "improved": 42,
+      "mean_difference": -0.03285338374258394,
+      "regressed": 52
+    },
+    "recall_at_10": {
+      "ci95": [
+        -0.03981718437794289,
+        -0.001188282893004256
+      ],
+      "improved": 39,
+      "mean_difference": -0.020711619678337945,
+      "regressed": 52
+    },
+    "recall_at_20": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "recall_at_5": {
+      "ci95": [
+        -0.029573921090948956,
+        0.0039288807526036635
+      ],
+      "improved": 35,
+      "mean_difference": -0.012100798632338879,
+      "regressed": 43
+    },
+    "recall_at_50": {
+      "ci95": [
+        -0.025623664297232413,
+        -0.00195953269869679
+      ],
+      "improved": 26,
+      "mean_difference": -0.013529684002787722,
+      "regressed": 40
+    }
+  },
+  "profiles": 120,
+  "seed": 425,
+  "treatment_run_id": "m2_structured_oracle_dev_v1_77e6afb2cc4446d7a955a20ab0ff5cfc"
+}

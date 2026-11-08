@@ -32,8 +32,10 @@ class MockMode(unittest.TestCase):
     def test_mock_config_uses_the_real_parts_except_the_models(self):
         self.assertEqual(self.system.components, {
             "extractor": "mock-keyword", "tracker": "decay", "rule": "rule", "confirmer": "mock-nli",
-            "ranker": "structured", "policy": "manual", "filler": "question-bank"})
+            "ranker": "configured", "policy": "manual", "filler": "question-bank"})
         self.assertEqual(self.system.input_mode, "mock_tracker")
+        # Weight-free mock mode pins RIASEC cosine explicitly; the live default needs the semantic encoder.
+        self.assertEqual(self.system.ranker.component_identifiers["m1"], "cosine_similarity@baseline_v1")
 
     def test_probe_and_challenge_flows_run(self):
         self.assertEqual(self.say("My dad runs a sales company so that's what I know.").action, "PROBE")

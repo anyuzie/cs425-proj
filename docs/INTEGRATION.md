@@ -1,5 +1,10 @@
 # Adding your part
 
+
+**Superseded 9 November 2026:** the live default is now RIASEC cosine + fine-tuned semantic retrieval (`occupation_dual_encoder@finetuned_v1`) fused by RRF k=60; cosine remains selectable via `configs/system.cosine.json`. See [decision](../reports/ranking/occupation_semantic_default/DECISION.md).
+
+**Ranking status update:** M3 BM25/RRF and M4 cached MiniLM/FAISS are implemented in `recommender/` and evaluated offline. The live app uses `"ranker": "configured"`; the default M1 scorer is cosine since 8 November 2026 ([decision](../reports/ranking/cosine_default/DECISION.md)). See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md) and [M4 acceptance](../reports/ranking/m4/DECISION.md); full app activation remains M5 integration work.
+
 Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 The app has **no stand-ins**. It won't start until the **tracker and policy** are filled in and the trained extractor checkpoint is in `models/extractor/`. Each missing piece stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
@@ -93,7 +98,7 @@ Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rul
 
 ### Step 5 · Ranker
 
-**Done.** `"ranker": "configured"` loads `configs/ranking.yaml` once at startup and builds a `RankingPipeline` (structured, BM25, MiniLM/FAISS, RRF). The default preset is structured (M1) only; the three-way RRF preset is tested separately. It reranks every turn from the current tracker values and the user's own messages, before the policy runs. Cards show up to three matched tasks when a text component (BM25 or dense) is on; with the structured-only default they show none, and the card copy says the ranking comes from the interest profile. `settings.input_mode` must be set explicitly: `actual_tracker` for the app, `mock_tracker` for fixtures. More: [ranking architecture](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 decision](../reports/ranking/m5/DECISION.md).
+**Done.** `"ranker": "configured"` loads `configs/ranking.yaml` once at startup and builds a `RankingPipeline` (structured, BM25, MiniLM/FAISS, RRF). The default preset is structured (M1) only, scored by observed-dimension cosine since 8 November 2026; the three-way RRF preset is tested separately. It reranks every turn from the current tracker values and the user's own messages, before the policy runs. Cards show up to three matched tasks when a text component (BM25 or dense) is on; with the structured-only default they show none, and the card copy says the ranking comes from the interest profile. `settings.input_mode` must be set explicitly: `actual_tracker` for the app, `mock_tracker` for fixtures. More: [ranking architecture](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 decision](../reports/ranking/m5/DECISION.md).
 
 ---
 
@@ -205,3 +210,8 @@ Then, with the server running for the scenarios:
 ```
 
 For the decay comparison, run the headline experiment twice: with `"decay": 1.0` and with `"decay": 0.9` in the config.
+# M5 ranking integration update
+
+The app now selects `ranker: configured` and loads `configs/ranking.yaml` once at startup. M1-only remains default; the optional three-component RRF preset is independently tested. Current tracker values and complete user-only history are reranked each turn before policy invocation. Cards expose up to three provisional task matches; similarity does not establish enjoyment.
+
+Set `settings.input_mode` explicitly (`actual_tracker` for production, `mock_tracker` for fixtures). See the [tracker replay format](../cs425-ranking-docs/README.md#multi-turn-tracker-evaluation) and [M5 acceptance report](../reports/ranking/m5/DECISION.md). Production extractor checkpoint, tracker/NLI/policy completion and a team latency budget remain pending. The component guide above describes the interfaces teammates must implement.

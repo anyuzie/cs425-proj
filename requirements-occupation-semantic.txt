@@ -1,0 +1,7 @@
+# Environment used for occupation_semantic_v1; install in an isolated venv to preserve older caches.
+numpy==2.5.4
+torch==2.15.0
+transformers==5.22.1
+sentence-transformers==6.2.0
+scikit-learn==1.9.1
+huggingface-hub==1.33.0

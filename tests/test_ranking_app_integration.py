@@ -1,5 +1,6 @@
 """Real ranking through HTTP; only unfinished upstream components use explicit fakes."""
 from dataclasses import asdict
+from copy import deepcopy
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,40 @@ from recommender.models.ranker import RankingPipeline
 
 
 class RankingAppIntegrationTests(unittest.TestCase):
+    def test_default_web_startup_uses_cosine_semantic_fusion(self):
+        # Load the server's default system file unchanged, then substitute only
+        # upstream test components. Keep its real ranker selection and paths.
+        from_config = System.from_config
+        loaded = []
+
+        def with_test_upstream(data_dir, config):
+            loaded.append(deepcopy(config))
+            config = deepcopy(config)
+            config["components"].update(extractor="test-scripted", confirmer="test-passthrough",
+                                        policy="test-simple-policy", filler="question-bank")
+            config["settings"].update(input_mode="mock_tracker", utterance_processing=False)
+            return from_config(data_dir, config)
+
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ):
+            for key in ("CM_CONFIG", "CM_DATA_DIR", "CM_STUDY_MODE"):
+                os.environ.pop(key, None)
+            os.environ["CM_LOG_DIR"] = directory
+            with patch.object(System, "from_config", side_effect=with_test_upstream), TestClient(app) as client:
+                self.assertEqual(loaded[0], json.loads(Path("configs/system.json").read_text()))
+                ranker = app.state.system.ranker
+                self.assertEqual(ranker.component_identifiers,
+                                 {"m1": "cosine_similarity@baseline_v1", "m3": "", "m4": "occupation_dual_encoder@finetuned_v1"})
+                expected_ranker = RankingPipeline(config=Path("configs/ranking/occupation_semantic_fusion_v1.json"))
+                self.assertEqual(ranker.selection_config, expected_ranker.selection_config)
+                self.assertEqual(client.get("/api/health").status_code, 200)
+                session = client.post("/api/session", json={"debug": True}).json()
+                response = client.post("/api/chat", json={"session_id": session["session_id"],
+                    "text": "I love working with machines and tools. I love analysing data."})
+                self.assertEqual(response.status_code, 200, response.text)
+                row = response.json()["trace"]["ranking_trace"][-1]
+                expected = expected_ranker.rank(row["interests"], set(row["observed_types"]), row["user_sentences"])
+                self.assertEqual(row["occupations"], [asdict(o) for o in expected.occupations])
+
     def test_configured_rankings_reach_policy_api_and_logs(self):
         for selection in ("m1_cosine.json", "m1_cosine_bm25.json"):
             with self.subTest(selection=selection), tempfile.TemporaryDirectory() as directory:

@@ -1,6 +1,8 @@
 """Hand-calculated metrics and M2 reproducibility acceptance tests."""
 
 import json
+import csv
+import io
 import math
 from pathlib import Path
 import tempfile
@@ -15,6 +17,16 @@ from recommender.structured import StructuredRanker
 
 class MetricTests(unittest.TestCase):
     pool = set("abcdefghijk")
+
+    def test_recall_counts_distinct_eligible_labels_and_empty_sets(self):
+        pool = {str(i) for i in range(25)}
+        related = {"primary_short": ["5", "5", "outside"], "supplemental": ["10", "20"]}
+        result = evaluate_ranking([str(i) for i in range(25)], "0", related, pool)
+        self.assertEqual(result["recall_at_5"], .25)
+        self.assertEqual(result["recall_at_10"], .5)
+        self.assertEqual(result["recall_at_20"], .75)
+        empty = evaluate_ranking([], None, {}, pool)
+        self.assertTrue(all(empty[f"recall_at_{k}"] == 0 for k in (5, 10, 20)))
 
     def score(self, codes, target="a", related=None):
         return evaluate_ranking(list(codes), target, related or {}, self.pool)
@@ -72,6 +84,27 @@ class MetricTests(unittest.TestCase):
 
 
 class BaselineTests(unittest.TestCase):
+    def test_history_adds_recall_columns_preserving_old_values_and_backup(self):
+        from recommender.experiments.history import RECALL_METRICS, FIELDS
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            history = root / "history.csv"
+            run(Path("configs/m2.json"), root / "first", history=history)
+            rows = list(csv.DictReader(io.StringIO(history.read_text(encoding="utf-8"))))
+            old_fields = [key for key in FIELDS if key not in RECALL_METRICS]
+            with history.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=old_fields, extrasaction="ignore")
+                writer.writeheader()
+                writer.writerows(rows)
+            original = history.read_bytes()
+            run(Path("configs/m2.json"), root / "second", history=history)
+            self.assertEqual(history.with_suffix(".csv.pre_recall.bak").read_bytes(), original)
+            new_rows = list(csv.DictReader(io.StringIO(history.read_text(encoding="utf-8"))))
+            self.assertEqual(len(new_rows), 2)
+            self.assertEqual({k: new_rows[0][k] for k in old_fields}, {k: rows[0][k] for k in old_fields})
+            self.assertTrue(all(new_rows[0][k] == "" for k in RECALL_METRICS))
+            self.assertTrue(all(new_rows[1][k] != "" for k in RECALL_METRICS))
+
     def test_oracle_scale_and_runtime_boundary(self):
         ranker = StructuredRanker()
         vector = dict.fromkeys("RIASEC", 0.0)
@@ -89,7 +122,8 @@ class BaselineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             a, b = Path(directory) / "a", Path(directory) / "b"
             first = run(Path("configs/m2.json"), a, history=Path(directory) / "history.csv")
-            self.assertEqual(first["profile_count"], 120)   # dev set grown to 120 profiles
+            expected_count = len([line for line in Path("data/dev_profiles.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()])
+            self.assertEqual(first["profile_count"], expected_count)
             self.assertEqual(first, run(Path("configs/m2.json"), b, history=Path(directory) / "history.csv"))
             for name in ("metrics.json", "inputs.json", "per_profile.json", "config.json"):
                 self.assertEqual((a / name).read_bytes(), (b / name).read_bytes())
@@ -99,7 +133,7 @@ class BaselineTests(unittest.TestCase):
                         for line in (path / "predictions.jsonl").read_text().splitlines()]
             self.assertEqual(predictions(a), predictions(b))
             summary, diffs = paired_comparison(a, b, samples=100)
-            self.assertEqual(len(diffs), 120)
+            self.assertEqual(len(diffs), expected_count)
             self.assertEqual(summary["metrics"]["mrr"]["ci95"], [0, 0])
             # Exercise a real paired difference while preserving comparison inputs.
             metrics = json.loads((b / "per_profile.json").read_text())

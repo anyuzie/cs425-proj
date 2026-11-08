@@ -1,0 +1,32 @@
+{
+  "components": {
+    "m1": {
+      "algorithm": "weighted_dot_product",
+      "variant": "baseline_v1"
+    },
+    "m3": null,
+    "m4": null
+  },
+  "fusion": null,
+  "reranking": {
+    "algorithm": "minilm_descriptions",
+    "block_size": 10,
+    "candidate_count": 100,
+    "dimension": 384,
+    "max_seq_length": 256,
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "ordering": "cosine_desc_code_asc",
+    "query": "newline_join_user_history",
+    "text_policy": {
+      "chunk_overlap": 0,
+      "chunk_tokens": 224,
+      "document_aggregation": "mean_chunk_cosine",
+      "numeric_occupation_inputs": "none",
+      "precomputed_embeddings": false,
+      "source": "occupation_description_as_context_plus_all_tasks",
+      "tasks_path": "data/tasks.csv"
+    },
+    "variant": "blocks10_v1_context_tasks_v1"
+  }
+}

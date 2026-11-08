@@ -1,0 +1,6 @@
+.venv/
+resources/
+vendor/
+runtime.local.json
+__pycache__/
+reports/session_*.jsonl

@@ -292,12 +292,15 @@
     wrap.setAttribute('aria-labelledby', 'resultsH');
 
     var head = el('div');
-    var h = el('h2', 'results-h', 'Five occupations that fit what you told me');
+    var semanticAssociation = recs.some(function (r) { return r.ranking_basis === 'semantic_association'; });
+    var h = el('h2', 'results-h', semanticAssociation ? 'Five occupations related to what you described' : 'Five occupations that fit what you told me');
     h.id = 'resultsH';
     h.tabIndex = -1;
     head.appendChild(h);
     var hasTasks = recs.some(function (r) { return r.tasks && r.tasks.length; });
-    head.appendChild(el('p', 'lead', hasTasks
+    head.appendChild(el('p', 'lead', semanticAssociation
+      ? 'These experimental results reflect topic and background associations. They do not establish a career preference.'
+      : hasTasks
       ? 'Under each one are the O*NET task statements that matched your messages most closely. They are the reason it is on this list.'
       : 'Each one is ranked by how well its O*NET interest profile fits the interests you described.'));
     wrap.appendChild(head);
@@ -329,7 +332,7 @@
 
     var byg = el('section', 'before-you-go');
     byg.appendChild(el('h2', null, 'Before you go'));
-    byg.appendChild(el('p', null, (hasTasks ? 'These five come from a six-number interest profile and keyword matching. ' : 'These five come from a six-number interest profile. ') + 'They can’t know your grades, your circumstances or what you’d be good at. For real decisions, talk to SMU Dato’ Kho Hui Meng Career Centre.'));
+    byg.appendChild(el('p', null, (semanticAssociation ? 'These five use experimental occupation text retrieval. ' : hasTasks ? 'These five come from a six-number interest profile and keyword matching. ' : 'These five come from a six-number interest profile. ') + 'They can’t know your grades, your circumstances or what you’d be good at. For real decisions, talk to SMU Dato’ Kho Hui Meng Career Centre.'));
     var links = el('div', 'links');
     // TODO: replace placeholder hrefs with the real rating form URL and SMU careers service URL.
     var a1 = el('a', 'primary', 'Rate these five (2 min)');
@@ -426,7 +429,25 @@
     });
     s4.appendChild(dl);
     p.appendChild(s4);
+    var rankingRows = trace.ranking_trace || [];
+    var latestRanking = rankingRows[rankingRows.length - 1];
+    var semantic = latestRanking && (latestRanking.query_diagnostics || {}).occupation_semantic;
+    if (semantic) {
+      var semanticPanel = el('section');
+      semanticPanel.appendChild(el('h2', null, 'Occupation semantic experiment'));
+      semanticPanel.appendChild(el('p', null, 'Topic/background association is independent of accepted preferences.'));
+      semanticPanel.appendChild(el('pre', null, JSON.stringify(semantic, null, 2)));
+      var scores = (latestRanking.occupations || []).slice(0, 5).map(function (o) {
+        return { code: o.code, rank: o.rank, signals: o.signals, rrf_score: o.rrf_score };
+      });
+      var scoreDetails = el('details');
+      scoreDetails.appendChild(el('summary', null, 'Component scores and ranks'));
+      scoreDetails.appendChild(el('pre', null, JSON.stringify(scores, null, 2)));
+      semanticPanel.appendChild(scoreDetails);
+      p.appendChild(semanticPanel);
+    }
   }
+
 
   /* ---------- events ---------- */
   els.form.addEventListener('submit', function (e) {

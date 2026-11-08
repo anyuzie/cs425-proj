@@ -1,0 +1,4 @@
+{
+  "system_config": "configs/system.occupation-semantic-finetuned-v1.json",
+  "clause_diagnostics": false
+}

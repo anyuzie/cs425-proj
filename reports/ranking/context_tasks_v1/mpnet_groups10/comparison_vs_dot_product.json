@@ -1,0 +1,100 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_structured_oracle_dev_v1_61ba49db295d40c69c15ac54ac4987af",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        -0.058333333333333334,
+        0.03333333333333333
+      ],
+      "improved": 4,
+      "mean_difference": -0.008333333333333333,
+      "regressed": 5
+    },
+    "hit_at_10": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "hit_at_5": {
+      "ci95": [
+        -0.041666666666666664,
+        0.125
+      ],
+      "improved": 17,
+      "mean_difference": 0.041666666666666664,
+      "regressed": 12
+    },
+    "mrr": {
+      "ci95": [
+        -0.0453563361984765,
+        0.037581840952942126
+      ],
+      "improved": 50,
+      "mean_difference": -0.002815418679623622,
+      "regressed": 55
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        -0.029138436249217425,
+        0.008853458772313473
+      ],
+      "improved": 50,
+      "mean_difference": -0.009295916131101286,
+      "regressed": 47
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        -0.04312249438547817,
+        0.028574668722770254
+      ],
+      "improved": 47,
+      "mean_difference": -0.006650728712679577,
+      "regressed": 40
+    },
+    "recall_at_10": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "recall_at_20": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "recall_at_5": {
+      "ci95": [
+        -0.019665981271050927,
+        0.006200269637769638
+      ],
+      "improved": 30,
+      "mean_difference": -0.006606411841512461,
+      "regressed": 34
+    },
+    "recall_at_50": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    }
+  },
+  "profiles": 120,
+  "seed": 425,
+  "treatment_run_id": "m2_structured_oracle_dev_v1_ee2228f1b51b4b36b7cb55aaf5343fbc"
+}

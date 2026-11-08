@@ -18,9 +18,21 @@ from recommender.ranker import BASELINE_CONFIG
 
 
 class ConfigurationTests(unittest.TestCase):
-    def test_yaml_default_matches_accepted_baseline(self):
+    def test_yaml_default_is_the_cosine_semantic_fusion_selection(self):
+        # Explicit owner decision (reports/ranking/occupation_semantic_default/DECISION.md).
         config, _ = load_configuration(Path("configs/ranking.yaml"))
-        self.assertEqual(config, BASELINE_CONFIG)
+        fusion, _ = load_configuration(Path("configs/ranking/occupation_semantic_fusion_v1.json"))
+        self.assertEqual(config, fusion)
+
+    def test_cosine_remains_selectable_as_previous_default(self):
+        cosine, _ = load_configuration(Path("configs/ranking/m1_cosine.json"))
+        self.assertEqual(cosine["components"]["m1"], {"algorithm": "cosine_similarity", "variant": "baseline_v1"})
+        system, _ = load_configuration(Path("configs/system.cosine.json"))
+        self.assertEqual(system["paths"]["ranking_config"], "configs/ranking/m1_cosine.json")
+
+    def test_dot_product_control_remains_the_programmatic_baseline(self):
+        baseline, _ = load_configuration(Path("configs/ranking/baseline_v1.json"))
+        self.assertEqual(baseline["components"], BASELINE_CONFIG["components"])
 
     def test_invalid_yaml_duplicate_keys_and_nonmapping(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -100,7 +112,8 @@ class ConfigurationTests(unittest.TestCase):
             with (root / "history.csv").open(newline="") as handle:
                 rows = list(csv.DictReader(handle))
             self.assertEqual(len(rows), 2)
-            self.assertEqual(rows[0]["m1"], "weighted_dot_product@baseline_v1")
+            self.assertEqual([rows[0]["m1"], rows[0]["m4"]],  # configs/ranking.yaml default
+                             ["cosine_similarity@baseline_v1", "occupation_dual_encoder@finetuned_v1"])
             self.assertEqual(rows[0]["config_hash"], manifest["config_sha256"])
 
     def test_zero_argument_cli_and_automatic_reports(self):

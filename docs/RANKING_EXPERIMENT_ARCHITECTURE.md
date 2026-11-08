@@ -4,6 +4,83 @@ Read this document before changing ranking architecture. It is the authoritative
 
 ## Current implementation status
 
+Fusion live default (9 November 2026): `configs/ranking.yaml` now runs M1 `cosine_similarity@baseline_v1` and M4 `occupation_dual_encoder@finetuned_v1` in parallel, combined by equal-weight RRF k=60 (identical to `configs/ranking/occupation_semantic_fusion_v1.json`), for the website, terminals and zero-argument evaluator, by explicit owner decision; it is the new baseline. With no observed RIASEC type the semantic ranking is used alone. On 120 development profiles with real extractor inputs fusion is tied with cosine (MRR .096 vs .117, -.021 [-.059, +.014]) and beats semantic-only (+.056 [+.023, +.092]); on held-out task retrieval .201 vs cosine .032. Single-turn evidence only; negation is not handled by M4. Requires the gitignored local checkpoint/index, otherwise fusion degrades to cosine. Cosine alone remains selectable (`configs/system.cosine.json`); the workflow selection and weight-free mock mode stay on cosine. See [decision](../reports/ranking/occupation_semantic_default/DECISION.md).
+
+Occupation semantic retrieval (9 November 2026): opt-in M4 `occupation_dual_encoder@pretrained_v1` / `@finetuned_v1` (`recommender/occupation_semantic.py`, `training/occupation_semantic.py`) embeds chronological user-only text with MiniLM-L6 and scores all 378 eligible occupations against a validated title/description/task/context index; it runs without extracted preferences or RIASEC and is topic/background association, not preference (negation is not handled). Fine-tuned on source-grouped task/context statements (no dev_profile). Frozen test (1,133 task groups, binary ownership proxy): MRR control .032, pretrained .483, fine-tuned .518 (+.035 [+.020, +.049]), fine-tuned+cosine RRF .201; 38-occupation held-out: .364 to .418. RRF with single-sentence RIASEC hurts on this proxy; conversational relevance is unmeasured and XGBoost is deferred. Terminal/HTTP/restart acceptance pass; browser review pending. Presets `configs/system.occupation-semantic-*-v1.json` and `configs/ranking_terminal/occupation_semantic_*_v1.json`; defaults unchanged. See [report](../reports/ranking/occupation_semantic_v1/README.md).
+
+Confidence-weighted distance (8 November 2026): new M1 algorithm `weighted_distance@kappa3_v1` (`recommender/models/weighted_distance.py`, preset `configs/ranking/m1_weighted_distance.json`) scores -sum over observed t of w_t (3 u_t - z_t)^2 with the tracker slot weight w_t; it is `unavailable` without weights (oracle inputs). Optional `RankingRequest.slot_weights` / `ComponentInput.weights` carry the weights (here from format-3 replay sessions; System and terminal wiring land with the separate tracker/policy change); dot product and cosine ignore them and stay frozen. Tier 2 (`data/eval/extractor_sessions_dev_v3`, v2 readings replayed with weights; vectors identical): MRR .143 vs cosine .117 and dot .112; on the 51 profiles with three or fewer observed types distance minus cosine is MRR +.056 [+.014, +.105] and minus dot +.065 [+.025, +.114]; on four or more types differences are near zero with CIs spanning it. Defaults unchanged. See [report](../reports/ranking/weighted_distance_v1/README.md). Tier 3 (`python -m eval.dialogue_distance`, 120 simulated dialogues per set; dot/cosine dialogues reproduce dialogue_probing_v1 exactly): the primary hypothesis is rejected. Full arm, distance in loop + final versus cosine in loop + final: MRR .158 vs .234 (-.076 [-.122, -.036]); distance still beats the dot product (+.066 [+.019, +.111]). Every final profile has four or more observed types, so the sparse regime where distance won at Tier 2 does not occur at the final turn; probing helps distance less than cosine (+.018 vs +.035 MRR). The in-loop ranker barely changes the dialogues. Cosine stays the default; see [Tier 3 report](../reports/ranking/dialogue_distance_v1/README.md).
+
+Cosine live default (8 November 2026): `configs/ranking.yaml` now selects `cosine_similarity@baseline_v1` (fusion null; identical to `configs/ranking/m1_cosine.json`) for the live app, terminal and zero-argument evaluator. Evidence: simulated multi-turn dialogues with the real System and NLI give final-turn MRR .234 vs .092 (+.142 [+.087, +.206]); probing helps only with cosine (+.035 [+.010, +.066]). `weighted_dot_product@baseline_v1` stays frozen as the programmatic `BASELINE_CONFIG` and `configs/ranking/baseline_v1.json`; the workflow's `configs/ranking/active.json` and initial `candidate.json` now also select cosine with fusion disabled, aligning workflow chat/evaluation with the web app and ordinary terminals. This is an explicit configuration alignment using the existing cosine variant and saved dialogue evidence, not a new automated promotion result. Later workflow promotions can change the workflow selection independently of the app YAML. See [decision](../reports/ranking/cosine_default/DECISION.md) and [dialogue report](../reports/ranking/dialogue_probing_v1/FINDINGS.md).
+
+Familiarity-aware profile policies (8 November 2026): optional ranking config key `profile_policy` (`raw` default; frozen `familiarity_excluded_v1`, `familiarity_half_v1` in `recommender/profile_policy.py`) is applied by `RankingPipeline` to the structured input only, before components; components and text are unchanged, and `raw` output is byte-identical. `RankingRequest.slot_reasons` (optional, validated against observed types) carries the tracker reason; replay sessions may include it per turn; a non-raw policy is rejected for oracle inputs or turns without reasons. Cosine + exclusion: MRR .135 vs .117 (CI spans zero), +.216 MRR on misleading-familiarity profiles, -.086 on genuine ones. See [report](../reports/ranking/familiarity_policy_v1/README.md).
+
+Extractor-derived inputs (8 November 2026): development profile openings are converted to `actual_tracker` sessions by the configured extractor and tracker (`scripts/build_extractor_sessions.py`; one turn, no policy). On these inputs cosine versus dot product is Hit@5 .175 vs .117 (CI spans zero), MRR .117 vs .112, NDCG@10 .134 vs .142, compared with the oracle gap of .683 vs .167. Upstream code stays in `scripts/`; `recommender/` reads only the saved sessions. Defaults unchanged. See [report](../reports/ranking/extractor_inputs_v1/README.md).
+
+Sentence-to-task reranking (8 November 2026): `recommender/semantic/clause_tasks.py` adds four frozen `*_clause_tasks_v1` / `*_clause_tasks_signed_v1` reranking variants via `SemanticMatchingPipeline` (M4 max-task/mean-sentence formula inside dot-product groups of 10). All regress versus the dot product and `context_tasks_v1`; within-group target position is worse than random. Earlier variants are untouched; the terminal can select them with `--reranking`. See [CLAUSE_TASK_RERANKING.md](CLAUSE_TASK_RERANKING.md).
+
+Context/task text reranking experiment (2 November 2026): six separate frozen treatments add all raw task text to description/context prose, using runtime chunk encoding and unchanged weighted-dot-product first-stage groups. All ten metrics are evaluated on the same 120 development/oracle profiles and 378 occupations; six rows are appended to the preserved eight historical rows. No rated Work Context features or classifier scores are inputs. See [experiment report](../reports/ranking/context_tasks_v1/README.md) for actual metrics, chunk aggregation, grouping and limitations. Active defaults and frozen controls remain unchanged.
+
+Context acceptance revision (2 November 2026): experimental context matching now abstains on unresolved references/preferences, uses explicit setting evidence, and allows no attribute match. Other wording uses a provisional uncalibrated cosine cutoff of .5 instead of forced top-three matches. Informal negation is recognized. Terminal layout, classifier, ranking and fusion are unchanged; see docs/CLAUSE_CONTEXT_PIPELINE.md for limits.
+
+Per-clause context occupation associations (2 November 2026): context-routed clauses display a separate top ten across all local occupations using similarity-weighted available ratings for the three closest context attributes. Coverage and supporting evidence are shown; negative preferences label associated occupations as potential conflicts. These are context associations, not calibrated preference compatibility; RIASEC ranking and task routing remain unchanged. Details: docs/CLAUSE_CONTEXT_PIPELINE.md.
+
+Context clause diagnostics (2 November 2026): terminal occupation-clause details and historical occupation-classifier loading removed. Context-routed user clauses now independently produce a lexical preference sign (unknown for unresolved cases) and 57 ordered MPNet attribute similarities. This is display-only semantic projection, not occupation ratings or ranking integration. Task routing remains independent; its matcher is deferred. See docs/CLAUSE_CONTEXT_PIPELINE.md for semantics and limits.
+
+Stanza terminal baseline (2 November 2026): user clauses now default to offline Stanza dependency parsing with conservative explicit-subject coordination rules (`stanza_conservative_v1`). Embedded complements and shared-subject negation stay together; spaCy remains selectable with `--clause-splitter spacy`. Occupation annotation parsing, shared System, classifier weights and ranking calculations are unchanged. Example-based regressions do not establish general conversational accuracy.
+
+Terminal clause scoring (2 November 2026): `app.ranking_terminal` now displays independent BERT Task/Context sigmoid scores and routes for each exact spaCy clause. Model loads once; this is display-only and does not change extraction, splitting, ranking, fusion or reviewed annotations. Known paraphrase performance remains Task F1 .564103, Context F1 .457831, exact match 35%. The pre-extension ranking snapshot below remains the control.
+
+Pre-extension snapshot (2 November 2026): [ranking and classifier baseline](PRE_EXTENSION_BASELINE.md) records all ten ranking metrics for all eight existing variants. Dot-product-only Hit@5 = .166667; equal-weight MiniLM/MPNet groups-of-10 Hit@5 = .216667 (MRR .133342 versus .141508 for dot product). Active workflow remains dot-product-only. Current source-labelled task/context BERT has source-validation F1 1.000 for both outputs, but the 80-case assistant-authored paraphrase diagnostic gives Task F1 .564103, Context F1 .457831 and exact match 35% (28/80). These are separate evaluations; conversational reliability and ranking benefit are not established. No new classifier/matching integration or scoring change is included in this snapshot.
+
+
+Historical occupation clause classifier pilot (1 November 2026; different checkpoint and label definitions from the current task/context BERT): BERT is trained on 123 human-reviewed clauses from 24 occupations and validated on 32 clauses from six disjoint occupations. Ten-epoch pilot selected by validation macro F1: Activity .625, Job nature .893, exact match .500. No Neither training examples or independent test set. Trained checkpoint installed; real terminal smoke confirms ten displayed occupations and 50 underlying candidates. Occupation prose uses conservative sentence boundaries; user-utterance splitting and ranking scores are unchanged. See docs/OCCUPATION_CLASSIFIER_TRAINING.md for datasets, corpus prediction outputs and limitations.
+
+Utterance preprocessing: optional independent spaCy clause splitting is available through
+`settings.utterance_processing`. Results are recorded in the turn trace; original text,
+RIASEC scoring and reranking are preserved. Pattern classification is deferred.
+See [utterance processing](UTTERANCE_PROCESSING.md).
+
+Recall@50 extension (31 October 2026): evaluator m2-v4 now reports ten permanent
+metrics, including macro Recall@5/10/20/50. All eight configurations have verified
+Recall@50 extensions derived from saved predictions and fingerprint-matching labels.
+Original historical metrics/manifests are preserved. CSV, notebook, history and
+new paired comparisons include Recall@50. See [metric extension](RECALL50.md).
+
+
+Semantic aggregation (31 October 2026): a separate frozen equal-weight variant
+scores the same dot-product top 100 with MiniLM and MPNet, averages raw cosine
+scores and sorts once within baseline groups of 10. Both sequential orders and
+all previous variants remain available. RIASEC extraction/scoring is unchanged.
+All 36 targeted tests pass; the consolidated comparison now has eight experiments.
+See the [aggregation report](../reports/ranking/aggregate_minilm_mpnet10_v1/README.md).
+
+
+Reverse-sequence follow-up (31 October 2026): frozen `minilm20_mpnet10_v1`
+adds MiniLM groups of 20 followed by MPNet groups of 10 formed from MiniLM output.
+Both stage orders are supported in the separate semantic pipeline. The consolidated
+CSV includes seven experiments; all 33 targeted tests pass. See the
+[reverse-sequence report](../reports/ranking/minilm20_mpnet10_v1/README.md). Existing RIASEC processing and defaults are preserved.
+
+
+Semantic integration (31 October 2026): weighted-dot-product RIASEC matching
+remains unchanged and separate from `recommender/semantic/SemanticMatchingPipeline`.
+The semantic pipeline supports description-only MiniLM and MPNet independently,
+or sequential MPNet groups of 20 followed by MiniLM groups of 10 formed from
+MPNet's output. Existing extractor/tracker logic and active defaults are preserved.
+Evaluator `m2-v3` permanently includes Recall@5/10/20 alongside the six existing
+metrics. See [integration guide](SEMANTIC_INTEGRATION.md) and the consolidated experiment CSV.
+
+
+Central workflow automatic promotion (26 October 2026): workflow ranking now
+uses mutable `configs/ranking/active.json`, initialized to weighted dot product.
+`candidate.json` and `promotion.json` select the next experiment and policy.
+Workflow evaluation re-evaluates incumbent and challenger under matching conditions
+and promotes higher Hit@5 only when none of the other nine permanent metrics regress.
+Reports, previous bytes and the comparison are preserved; publication is atomic
+and serialized. Workflow chat uses the winner. Direct evaluator calls remain
+report-only, and frozen variants plus the separate application YAML are unchanged.
+See [promotion usage and recovery](RANKING_MODULES.md#run-the-recommended-configuration).
+
 Application integration audit: real cosine and cosine+BM25 now have HTTP-level
 acceptance with explicitly mocked upstream components, covering recommendation
 order, component reuse and participant-mode ranking logs. Live System rejects
@@ -15,14 +92,14 @@ is available. Defaults and frozen variants are unchanged. See the
   `recommender/data/`, `recommender/preparation/`, and `recommender/experiments/`.
   Original imports/CLI entry points remain compatible. Central parameter snapshots
   and additional named variants live under `configs/ranking/`; the new
-  `workflow.json` selects standalone cosine for evaluation and terminal use.
+  `workflow.json` selects the active incumbent for evaluation and terminal use.
   Existing production/default baseline selection is preserved. Terminal I/O lives
   in `app/terminal.py`, delegating to the shared `System.from_config` composition
   root. No ranking fitting is introduced: preparation builds pretrained resources.
   See [module and iteration guide](RANKING_MODULES.md).
 
 - M0: data validation and local contracts implemented; external teammate sign-off remains pending.
-- M1: signed weighted dot product preserved as `weighted_dot_product@baseline_v1`; observed-dimension cosine implemented and evaluated separately as `cosine_similarity@baseline_v1`. Cosine development/oracle Hit@5=.883333 versus .166667 for dot product; the production default stays dot product pending tracker validation. See [cosine decision](../reports/ranking/m1_cosine/DECISION.md).
+- M1: signed weighted dot product preserved as `weighted_dot_product@baseline_v1`; observed-dimension cosine implemented and evaluated separately as `cosine_similarity@baseline_v1`. Cosine development/oracle Hit@5=.883333 versus .166667 for dot product; the dot product stayed the production default pending tracker validation; cosine became the live default on 8 November 2026 after the dialogue evaluation ([decision](../reports/ranking/cosine_default/DECISION.md)). See [cosine decision](../reports/ranking/m1_cosine/DECISION.md).
 - M2: development/oracle evaluation, six metric cutoffs, reproducible exports, paired comparison, and append-only history implemented.
 - Cosine M1 fusion combinations are evaluated and registered: Hit@5=.266667 with BM25, .233333 with MiniLM, .116667 with both, versus .883333 standalone. Equal-weight RRF regresses in every case; defaults remain unchanged. See [cosine fusion report](../reports/ranking/m1_cosine/FUSION_DECISION.md).
 - The modular refactor and automatic configuration workflow preserve the accepted M1 formula, response contract, and M2 metrics. All 61 tests pass, including exact comparison of all 22,680 saved oracle baseline occupation results and a no-argument CLI test.
@@ -60,6 +137,7 @@ See [M5 acceptance and freeze](../reports/ranking/m5/DECISION.md) and the [sessi
 | `recommender/bm25_ranker.py` | Independent BM25 baseline, frozen tokenizer/stopwords, eligible in-memory index and positive-only lexical ranks |
 | `recommender/m1.py` | Independent weighted-dot-product algorithm and its explicit baseline parameters |
 | `recommender/cosine.py` | Independent observed-dimension cosine algorithm, explicit normalization and zero-norm policies |
+| `recommender/models/weighted_distance.py` | Independent confidence-weighted z-space distance; reads `ComponentInput.weights` (tracker slot weights) |
 | `recommender/registry.py` | Algorithm factories, named parameter variants, deterministic resolution, and duplicate-registration rejection |
 | `recommender/configuration.py` | Default file paths and safe JSON/YAML loading with duplicate-key rejection |
 | `recommender/ranker.py` | Request validation, enabled component construction/invocation, candidate validation, standalone/fusion dispatch, and response assembly |
@@ -72,7 +150,7 @@ See [M5 acceptance and freeze](../reports/ranking/m5/DECISION.md) and the [sessi
 | `recommender/compare.py` | Compatible-run checks and paired metric differences/bootstrap intervals |
 | `recommender/history.py` | Shared append-only CSV registration and original baseline import |
 
-The dependency direction is contracts → algorithms/registry → pipeline → evaluator. Scoring components never call another scoring component, fusion, or the evaluator. The metric layer consumes occupation codes and evaluator-side labels, regardless of which component produced the codes.
+The dependency direction is contracts â†’ algorithms/registry â†’ pipeline â†’ evaluator. Scoring components never call another scoring component, fusion, or the evaluator. The metric layer consumes occupation codes and evaluator-side labels, regardless of which component produced the codes.
 
 Upstream owns extraction, confidence merging, contradiction resolution, the cumulative RIASEC profile, and user-only chronological history. Recompute rankings from each snapshot; do not accumulate occupation scores across turns or apply confidence merging again. Downstream policy/UI consume `RankingResponse`; System now wires configurable ranking to tracker snapshots and policy output; stance-aware supporting evidence remains future work.
 
@@ -166,7 +244,7 @@ Use the simple explicit `AlgorithmRegistry`, not dynamic imports or a plugin fra
 
 Factories receive validated eligible occupations and an owned copy of variant parameters. A future text/dense factory should load its own additional artifacts from explicit parameter paths; do not make M1 load task data, text indices, or models. Keep occupation-code joins aligned with the candidate pool and record additional static artifact fingerprints in the run manifest when introducing them. For isolated tests/experiments, pass a separate registry to `RankingPipeline(..., registry=registry)` or `evaluate.run(..., registry=registry)`. Accepted production registrations belong in `default_registry()` so CLI selection works without source edits between already registered variants.
 
-The default registry registers `weighted_dot_product@baseline_v1`, `cosine_similarity@baseline_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`; the default selection remains M1 dot product only. Tests use a temporary alias to exercise switching; that alias is not a production variant or a new algorithm. The M1 parameters fix dimension order `R,I,A,S,E,C`, observed-only scoring, supplied occupation z-scores, and ascending-code tie-breaking. Cosine normalizes both vectors over observed dimensions; zero user norm is unusable and zero occupation norm is omitted. Select `configs/ranking/m1_cosine.json` for cosine. Algorithms reject unsupported parameter settings rather than pretending to support unimplemented formulas.
+The default registry registers `weighted_dot_product@baseline_v1`, `cosine_similarity@baseline_v1`, `weighted_distance@kappa3_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`; the default selection (`configs/ranking.yaml`) is M1 cosine only since 8 November 2026; the dot product remains the programmatic baseline. Tests use a temporary alias to exercise switching; that alias is not a production variant or a new algorithm. The M1 parameters fix dimension order `R,I,A,S,E,C`, observed-only scoring, supplied occupation z-scores, and ascending-code tie-breaking. Cosine normalizes both vectors over observed dimensions; zero user norm is unusable and zero occupation norm is omitted. Select `configs/ranking/m1_cosine.json` for cosine. Algorithms reject unsupported parameter settings rather than pretending to support unimplemented formulas.
 
 ## Algorithm, variant, and run identity
 
@@ -199,7 +277,7 @@ The CSV is not a global leaderboard. `compare.py` checks compatible input mode, 
 9. Better standalone performance does not imply better fused performance.
 10. Document accepted changes and the evidence supporting them, including regressions and limitations.
 
-Do not change Job Zone 4–5 eligibility or supplied z-scores during an algorithm experiment. Runtime `[-1,1]` tracker inputs and oracle z-scale inputs remain distinct. Never tune on held-out profiles or feed target/relevance labels into components. Passing correctness tests does not prove recommendation quality or probing effectiveness.
+Do not change Job Zone 4â€“5 eligibility or supplied z-scores during an algorithm experiment. Runtime `[-1,1]` tracker inputs and oracle z-scale inputs remain distinct. Never tune on held-out profiles or feed target/relevance labels into components. Passing correctness tests does not prove recommendation quality or probing effectiveness.
 
 ## Future implementation workflow
 

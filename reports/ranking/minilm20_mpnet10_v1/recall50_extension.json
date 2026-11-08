@@ -1,0 +1,495 @@
+{
+  "extension_version": "recall50-v1",
+  "definition": "Macro recall over distinct eligible positive-grade labels at rank 50; empty relevance=0",
+  "source_manifest_sha256": "0d0227278f478e2d3c213cb1fd1c15a7861b7743969053e50bfd1c655bb0cae0",
+  "predictions_sha256": "b528bdabd30548b98e57c1d1dea56a8de80267d4cc466e5628de5c85f28f99a0",
+  "dataset_sha256": {
+    "data/dev_profiles.jsonl": "438bbd1dc4774b77bedb8f376bede9545dc1d485ede9f5fe0322e1f8e8684b3f",
+    "data/occupations.csv": "d00d968d5fe5076ec76eca55cd5fa2734816ea93e8af6d84bdff2170c1af9503"
+  },
+  "aggregate": {
+    "recall_at_50": 0.5904849447293332
+  },
+  "per_profile": [
+    {
+      "profile_id": "D001",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D002",
+      "recall_at_50": 0.9
+    },
+    {
+      "profile_id": "D003",
+      "recall_at_50": 0.3125
+    },
+    {
+      "profile_id": "D004",
+      "recall_at_50": 0.46153846153846156
+    },
+    {
+      "profile_id": "D005",
+      "recall_at_50": 0.9333333333333333
+    },
+    {
+      "profile_id": "D006",
+      "recall_at_50": 0.5833333333333334
+    },
+    {
+      "profile_id": "D007",
+      "recall_at_50": 0.8
+    },
+    {
+      "profile_id": "D008",
+      "recall_at_50": 0.3
+    },
+    {
+      "profile_id": "D009",
+      "recall_at_50": 0.7619047619047619
+    },
+    {
+      "profile_id": "D010",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D011",
+      "recall_at_50": 0.9444444444444444
+    },
+    {
+      "profile_id": "D012",
+      "recall_at_50": 0.3333333333333333
+    },
+    {
+      "profile_id": "D013",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D014",
+      "recall_at_50": 0.35714285714285715
+    },
+    {
+      "profile_id": "D015",
+      "recall_at_50": 0.46153846153846156
+    },
+    {
+      "profile_id": "D016",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D017",
+      "recall_at_50": 0.8095238095238095
+    },
+    {
+      "profile_id": "D018",
+      "recall_at_50": 0.8888888888888888
+    },
+    {
+      "profile_id": "D019",
+      "recall_at_50": 0.8235294117647058
+    },
+    {
+      "profile_id": "D020",
+      "recall_at_50": 0.7333333333333333
+    },
+    {
+      "profile_id": "D021",
+      "recall_at_50": 0.5333333333333333
+    },
+    {
+      "profile_id": "D022",
+      "recall_at_50": 0.4
+    },
+    {
+      "profile_id": "D023",
+      "recall_at_50": 0.8421052631578947
+    },
+    {
+      "profile_id": "D024",
+      "recall_at_50": 0.7142857142857143
+    },
+    {
+      "profile_id": "D025",
+      "recall_at_50": 0.8125
+    },
+    {
+      "profile_id": "D026",
+      "recall_at_50": 0.6666666666666666
+    },
+    {
+      "profile_id": "D027",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D028",
+      "recall_at_50": 0.5454545454545454
+    },
+    {
+      "profile_id": "D029",
+      "recall_at_50": 0.8095238095238095
+    },
+    {
+      "profile_id": "D030",
+      "recall_at_50": 0.6666666666666666
+    },
+    {
+      "profile_id": "D031",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D032",
+      "recall_at_50": 0.5333333333333333
+    },
+    {
+      "profile_id": "D033",
+      "recall_at_50": 0.2857142857142857
+    },
+    {
+      "profile_id": "D034",
+      "recall_at_50": 0.15789473684210525
+    },
+    {
+      "profile_id": "D035",
+      "recall_at_50": 0.23529411764705882
+    },
+    {
+      "profile_id": "D036",
+      "recall_at_50": 0.625
+    },
+    {
+      "profile_id": "D037",
+      "recall_at_50": 0.1875
+    },
+    {
+      "profile_id": "D038",
+      "recall_at_50": 0.7777777777777778
+    },
+    {
+      "profile_id": "D039",
+      "recall_at_50": 0.3333333333333333
+    },
+    {
+      "profile_id": "D040",
+      "recall_at_50": 0.8947368421052632
+    },
+    {
+      "profile_id": "D041",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D042",
+      "recall_at_50": 0.6875
+    },
+    {
+      "profile_id": "D043",
+      "recall_at_50": 0.8666666666666667
+    },
+    {
+      "profile_id": "D044",
+      "recall_at_50": 0.29411764705882354
+    },
+    {
+      "profile_id": "D045",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D046",
+      "recall_at_50": 0.4
+    },
+    {
+      "profile_id": "D047",
+      "recall_at_50": 0.7333333333333333
+    },
+    {
+      "profile_id": "D048",
+      "recall_at_50": 0.7333333333333333
+    },
+    {
+      "profile_id": "D049",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D050",
+      "recall_at_50": 0.6190476190476191
+    },
+    {
+      "profile_id": "D051",
+      "recall_at_50": 0.2222222222222222
+    },
+    {
+      "profile_id": "D052",
+      "recall_at_50": 0.7
+    },
+    {
+      "profile_id": "D053",
+      "recall_at_50": 0.5384615384615384
+    },
+    {
+      "profile_id": "D054",
+      "recall_at_50": 0.7
+    },
+    {
+      "profile_id": "D055",
+      "recall_at_50": 0.8095238095238095
+    },
+    {
+      "profile_id": "D056",
+      "recall_at_50": 0.5555555555555556
+    },
+    {
+      "profile_id": "D057",
+      "recall_at_50": 0.8823529411764706
+    },
+    {
+      "profile_id": "D058",
+      "recall_at_50": 0.7857142857142857
+    },
+    {
+      "profile_id": "D059",
+      "recall_at_50": 0.23529411764705882
+    },
+    {
+      "profile_id": "D060",
+      "recall_at_50": 0.6923076923076923
+    },
+    {
+      "profile_id": "D061",
+      "recall_at_50": 0.625
+    },
+    {
+      "profile_id": "D062",
+      "recall_at_50": 0.19047619047619047
+    },
+    {
+      "profile_id": "D063",
+      "recall_at_50": 0.26666666666666666
+    },
+    {
+      "profile_id": "D064",
+      "recall_at_50": 0.29411764705882354
+    },
+    {
+      "profile_id": "D065",
+      "recall_at_50": 0.47058823529411764
+    },
+    {
+      "profile_id": "D066",
+      "recall_at_50": 0.4444444444444444
+    },
+    {
+      "profile_id": "D067",
+      "recall_at_50": 0.6363636363636364
+    },
+    {
+      "profile_id": "D068",
+      "recall_at_50": 0.6842105263157895
+    },
+    {
+      "profile_id": "D069",
+      "recall_at_50": 0.46153846153846156
+    },
+    {
+      "profile_id": "D070",
+      "recall_at_50": 0.6111111111111112
+    },
+    {
+      "profile_id": "D071",
+      "recall_at_50": 0.6470588235294118
+    },
+    {
+      "profile_id": "D072",
+      "recall_at_50": 0.25
+    },
+    {
+      "profile_id": "D073",
+      "recall_at_50": 1.0
+    },
+    {
+      "profile_id": "D074",
+      "recall_at_50": 0.7272727272727273
+    },
+    {
+      "profile_id": "D075",
+      "recall_at_50": 0.4
+    },
+    {
+      "profile_id": "D076",
+      "recall_at_50": 0.42857142857142855
+    },
+    {
+      "profile_id": "D077",
+      "recall_at_50": 0.4
+    },
+    {
+      "profile_id": "D078",
+      "recall_at_50": 0.13333333333333333
+    },
+    {
+      "profile_id": "D079",
+      "recall_at_50": 0.8666666666666667
+    },
+    {
+      "profile_id": "D080",
+      "recall_at_50": 0.6666666666666666
+    },
+    {
+      "profile_id": "D081",
+      "recall_at_50": 0.5384615384615384
+    },
+    {
+      "profile_id": "D082",
+      "recall_at_50": 0.8461538461538461
+    },
+    {
+      "profile_id": "D083",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D084",
+      "recall_at_50": 0.8823529411764706
+    },
+    {
+      "profile_id": "D085",
+      "recall_at_50": 0.7
+    },
+    {
+      "profile_id": "D086",
+      "recall_at_50": 0.4117647058823529
+    },
+    {
+      "profile_id": "D087",
+      "recall_at_50": 0.3684210526315789
+    },
+    {
+      "profile_id": "D088",
+      "recall_at_50": 0.6
+    },
+    {
+      "profile_id": "D089",
+      "recall_at_50": 0.9333333333333333
+    },
+    {
+      "profile_id": "D090",
+      "recall_at_50": 0.29411764705882354
+    },
+    {
+      "profile_id": "D091",
+      "recall_at_50": 0.6470588235294118
+    },
+    {
+      "profile_id": "D092",
+      "recall_at_50": 0.1
+    },
+    {
+      "profile_id": "D093",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D094",
+      "recall_at_50": 0.36363636363636365
+    },
+    {
+      "profile_id": "D095",
+      "recall_at_50": 0.4117647058823529
+    },
+    {
+      "profile_id": "D096",
+      "recall_at_50": 0.8125
+    },
+    {
+      "profile_id": "D097",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D098",
+      "recall_at_50": 0.9090909090909091
+    },
+    {
+      "profile_id": "D099",
+      "recall_at_50": 0.5714285714285714
+    },
+    {
+      "profile_id": "D100",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D101",
+      "recall_at_50": 0.5882352941176471
+    },
+    {
+      "profile_id": "D102",
+      "recall_at_50": 0.3125
+    },
+    {
+      "profile_id": "D103",
+      "recall_at_50": 0.6666666666666666
+    },
+    {
+      "profile_id": "D104",
+      "recall_at_50": 0.7647058823529411
+    },
+    {
+      "profile_id": "D105",
+      "recall_at_50": 0.1875
+    },
+    {
+      "profile_id": "D106",
+      "recall_at_50": 0.8333333333333334
+    },
+    {
+      "profile_id": "D107",
+      "recall_at_50": 0.5
+    },
+    {
+      "profile_id": "D108",
+      "recall_at_50": 0.9411764705882353
+    },
+    {
+      "profile_id": "D109",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D110",
+      "recall_at_50": 0.35
+    },
+    {
+      "profile_id": "D111",
+      "recall_at_50": 0.4444444444444444
+    },
+    {
+      "profile_id": "D112",
+      "recall_at_50": 0.4117647058823529
+    },
+    {
+      "profile_id": "D113",
+      "recall_at_50": 0.8461538461538461
+    },
+    {
+      "profile_id": "D114",
+      "recall_at_50": 0.3333333333333333
+    },
+    {
+      "profile_id": "D115",
+      "recall_at_50": 0.75
+    },
+    {
+      "profile_id": "D116",
+      "recall_at_50": 0.7777777777777778
+    },
+    {
+      "profile_id": "D117",
+      "recall_at_50": 0.9166666666666666
+    },
+    {
+      "profile_id": "D118",
+      "recall_at_50": 0.6153846153846154
+    },
+    {
+      "profile_id": "D119",
+      "recall_at_50": 0.7619047619047619
+    },
+    {
+      "profile_id": "D120",
+      "recall_at_50": 0.631578947368421
+    }
+  ]
+}

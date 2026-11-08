@@ -12,11 +12,14 @@ class ComponentInput:
 
     None means the structured profile is unavailable; an empty observed set is
     a supplied profile with no observed dimensions. No evaluator labels cross here.
+    ``weights`` is the tracker's per-observed-slot evidence mass, or None when the
+    caller has none (oracle inputs, legacy callers); only weight-aware components read it.
     """
 
     interests: Mapping[str, float] | None = None
     observed_types: frozenset[str] = frozenset()
     user_sentences: tuple[str, ...] = ()
+    weights: Mapping[str, float] | None = None
 
 
 @dataclass(frozen=True)

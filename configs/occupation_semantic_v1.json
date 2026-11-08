@@ -1,0 +1,16 @@
+{
+  "seed": 425,
+  "artifacts": "artifacts/ranking/occupation_semantic_v1",
+  "report": "reports/ranking/occupation_semantic_v1",
+  "near_duplicate_cosine": 0.85,
+  "split": {"train": 0.70, "validation": 0.15, "test": 0.15},
+  "heldout_occupations": 38,
+  "batch_size": 8,
+  "max_train_groups": 768,
+  "random_negatives": 4,
+  "epochs": 3,
+  "patience": 1,
+  "learning_rate": 0.00001,
+  "weight_decay": 0.01,
+  "temperature": 0.07
+}

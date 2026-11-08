@@ -1,0 +1,58 @@
+﻿element_id,element_name,description,source_domain
+4.C.1.a.2.c,Public Speaking,How frequently does your job require public speaking (one speaker with an audience)?,Work Context
+4.C.1.a.2.f,Telephone Conversations,How often do you have telephone conversations in this job?,Work Context
+4.C.1.a.2.h,E-Mail,How frequently does your job require you to use E-mail?,Work Context
+4.C.1.a.2.j,Written Letters and Memos,How frequently does your job require written letters and memos?,Work Context
+4.C.1.a.2.l,Face-to-Face Discussions with Individuals and Within Teams,How frequently does your job require face-to-face discussions with individuals and within teams?,Work Context
+4.C.1.a.4,Contact With Others,"How much does this job require the worker to be in contact with others (face-to-face, by telephone, or otherwise) in order to perform it?",Work Context
+4.C.1.b.1.e,Work With or Contribute to a Work Group or Team,How important is it to work with or contribute to a work group or team in this job?,Work Context
+4.C.1.b.1.f,Deal With External Customers or the Public in General,How important is it to deal with external customers (as in retail sales) or the public in general (as in police work) in this job?,Work Context
+4.C.1.b.1.g,Coordinate or Lead Others in Accomplishing Work Activities,How important is it to coordinate or lead others (not as a supervisor or team leader) in accomplishing work activities in this job?,Work Context
+4.C.1.c.1,Health and Safety of Other Workers,How much responsibility is there for the health and safety of others in this job?,Work Context
+4.C.1.c.2,Work Outcomes and Results of Other Workers,How responsible is the worker for work outcomes and results of other workers?,Work Context
+4.C.1.d.1,Conflict Situations,How frequently are there conflict situations the employee has to face in this job?,Work Context
+4.C.1.d.2,"Dealing With Unpleasant, Angry, or Discourteous People","How frequently does the worker have to deal with unpleasant, angry, or discourteous individuals as part of the job requirements?",Work Context
+4.C.1.d.3,Dealing with Violent or Physically Aggressive People,How frequently does this job require the worker to deal with physical aggression of violent individuals?,Work Context
+4.C.2.a.1.a,"Indoors, Environmentally Controlled",How often does this job require working indoors in an environmentally controlled environment (like a warehouse with air conditioning)?,Work Context
+4.C.2.a.1.b,"Indoors, Not Environmentally Controlled",How often does this job require working in an environment that is not environmentally controlled (like a warehouse without air conditioning)?,Work Context
+4.C.2.a.1.c,"Outdoors, Exposed to All Weather Conditions","How often does this job require working outdoors, exposed to all weather conditions?",Work Context
+4.C.2.a.1.d,"Outdoors, Under Cover","How often does this job require working outdoors, under cover (like in an open shed)?",Work Context
+4.C.2.a.1.e,In an Open Vehicle or Operating Equipment,How often does this job require working in an open vehicle or operating equipment (like a tractor)?,Work Context
+4.C.2.a.1.f,In an Enclosed Vehicle or Operate Enclosed Equipment,How often does this job require working in a closed vehicle or operate enclosed equipment (like a car)?,Work Context
+4.C.2.a.3,Physical Proximity,To what extent does this job require the worker to perform job tasks physically close to other people?,Work Context
+4.C.2.b.1.a,"Exposed to Sounds, Noise Levels that are Distracting or Uncomfortable",How often does this job require working exposed to sounds and noise levels that are distracting or uncomfortable?,Work Context
+4.C.2.b.1.b,Exposed to Very Hot or Cold Temperatures,How often does this job require working in very hot (above 90 F degrees) or very cold (below 32 F degrees) temperatures?,Work Context
+4.C.2.b.1.c,Exposed to Extremely Bright or Inadequate Lighting Conditions,How often does this job require working in extremely bright or inadequate lighting conditions?,Work Context
+4.C.2.b.1.d,Exposed to Contaminants,"How often does this job require working exposed to contaminants (such as pollutants, gases, dust or odors)?",Work Context
+4.C.2.b.1.e,"Exposed to Cramped Work Space, Awkward Positions",How often does this job require working in cramped work spaces that requires getting into awkward positions?,Work Context
+4.C.2.b.1.f,Exposed to Whole Body Vibration,How often does this job require exposure to whole body vibration (like operating a jackhammer or earth moving equipment)?,Work Context
+4.C.2.c.1.a,Exposed to Radiation,How often does this job require exposure to radiation?,Work Context
+4.C.2.c.1.b,Exposed to Disease or Infections,How often does this job require exposure to disease/infections?,Work Context
+4.C.2.c.1.c,Exposed to High Places,How often does this job require exposure to high places?,Work Context
+4.C.2.c.1.d,Exposed to Hazardous Conditions,How often does this job require exposure to hazardous conditions?,Work Context
+4.C.2.c.1.e,Exposed to Hazardous Equipment,How often does this job require exposure to hazardous equipment?,Work Context
+4.C.2.c.1.f,"Exposed to Minor Burns, Cuts, Bites, or Stings","How often does this job require exposure to minor burns, cuts, bites, or stings?",Work Context
+4.C.2.d.1.a,Spend Time Sitting,How much does this job require sitting?,Work Context
+4.C.2.d.1.b,Spend Time Standing,How much does this job require standing?,Work Context
+4.C.2.d.1.c,"Spend Time Climbing Ladders, Scaffolds, or Poles","How much does this job require climbing ladders, scaffolds, poles, etc.?",Work Context
+4.C.2.d.1.d,Spend Time Walking or Running,How much does this job require walking or running?,Work Context
+4.C.2.d.1.e,"Spend Time Kneeling, Crouching, Stooping, or Crawling","How much does this job require kneeling, crouching, stooping or crawling?",Work Context
+4.C.2.d.1.f,Spend Time Keeping or Regaining Balance,How much does this job require keeping or regaining your balance?,Work Context
+4.C.2.d.1.g,"Spend Time Using Your Hands to Handle, Control, or Feel Objects, Tools, or Controls","How much does this job require using your hands to handle, control, or feel objects, tools or controls?",Work Context
+4.C.2.d.1.h,Spend Time Bending or Twisting Your Body,How much does this job require bending or twisting your body?,Work Context
+4.C.2.d.1.i,Spend Time Making Repetitive Motions,How much does this job require making repetitive motions?,Work Context
+4.C.2.e.1.d,"Wear Common Protective or Safety Equipment such as Safety Shoes, Glasses, Gloves, Hearing Protection, Hard Hats, or Life Jackets","How often does this job require wearing common protective or safety equipment such as safety shoes, glasses, gloves, hearing protection, hard hats or life-jackets?",Work Context
+4.C.2.e.1.e,"Wear Specialized Protective or Safety Equipment such as Breathing Apparatus, Safety Harness, Full Protection Suits, or Radiation Protection","How often does this job require wearing specialized protective or safety equipment such as breathing apparatus, safety harness, full protection suits, or radiation protection?",Work Context
+4.C.3.a.1,Consequence of Error,How serious would the result usually be if the worker made a mistake that was not easily correctable?,Work Context
+4.C.3.a.2.a,Impact of Decisions on Co-workers or Company Results,What results do your decisions usually have on other people or the image or reputation or financial resources of your employer?,Work Context
+4.C.3.a.2.b,Frequency of Decision Making,"How often is the worker required to make decisions that affect other people, the financial resources, and/or the image and reputation of the organization?",Work Context
+4.C.3.a.4,Freedom to Make Decisions,"How much decision making freedom, without supervision, does the job offer?",Work Context
+4.C.3.b.2,Degree of Automation,How automated is the job?,Work Context
+4.C.3.b.4,Importance of Being Exact or Accurate,How important is being very exact or highly accurate in performing this job?,Work Context
+4.C.3.b.7,Importance of Repeating Same Tasks,"How important are continuous, repetitive, physical activities (like key entry) or mental activities (like checking entries in a ledger) to performing this job?",Work Context
+4.C.3.b.8,"Determine Tasks, Priorities and Goals","How much freedom does the worker have in determining the tasks, priorities, or goals of the job?",Work Context
+4.C.3.c.1,Level of Competition,To what extent does this job require the worker to compete or to be aware of competitive pressures?,Work Context
+4.C.3.d.1,Time Pressure,How often does this job require the worker to meet strict deadlines?,Work Context
+4.C.3.d.3,Pace Determined by Speed of Equipment,How important is it to this job that the pace is determined by the speed of equipment or machinery? (This does not refer to keeping busy at all times on this job.),Work Context
+4.C.3.d.4,Work Schedules,How regular are the work schedules for this job?,Work Context
+4.C.3.d.8,Duration of Typical Work Week,Number of hours typically worked in one week.,Work Context

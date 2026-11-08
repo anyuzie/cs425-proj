@@ -1,0 +1,20 @@
+{
+  "verified": true,
+  "treatment_prediction_counts": {
+    "minilm_groups5": 45360,
+    "minilm_groups10": 45360,
+    "mpnet_groups10": 45360,
+    "mpnet20_then_minilm10": 45360,
+    "minilm20_then_mpnet10": 45360,
+    "minilm_mpnet_equal_weights_groups10": 45360
+  },
+  "total_treatment_predictions": 272160,
+  "profiles": 120,
+  "checks": [
+    "all ten metrics independently recomputed",
+    "all source hashes match executed manifests",
+    "original CSV is byte prefix",
+    "unchanged structured scores and z-scores",
+    "full pool, contiguous ranks, grouping membership, untouched tail"
+  ]
+}

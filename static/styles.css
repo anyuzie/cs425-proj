@@ -271,3 +271,5 @@ textarea:disabled { background: var(--chip-bg); }
   .trace-row { grid-template-columns: 30px minmax(0, 1fr); }
   .trace-row .w { grid-column: 2; }
 }
+/* Researcher-panel JSON diagnostics (occupation semantic experiment). */
+.researcher pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }

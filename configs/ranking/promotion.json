@@ -1,0 +1,4 @@
+{
+  "candidate": "configs/ranking/candidate.json",
+  "policy": "hit5_no_regression"
+}

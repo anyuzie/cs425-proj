@@ -1,0 +1,15 @@
+{
+  "components": {
+    "m1": {
+      "algorithm": "weighted_dot_product",
+      "variant": "baseline_v1"
+    },
+    "m3": null,
+    "m4": null
+  },
+  "fusion": {
+    "algorithm": "rrf",
+    "k": 60
+  },
+  "profile_policy": "familiarity_half_v1"
+}

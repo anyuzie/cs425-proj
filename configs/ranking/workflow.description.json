@@ -1,0 +1,6 @@
+{
+  "ranking": "configs/ranking/description_top100.json",
+  "evaluation": "configs/m2.json",
+  "preparation": "configs/ranking/preparation.json",
+  "system": "configs/system.json"
+}

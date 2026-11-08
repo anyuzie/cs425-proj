@@ -78,11 +78,19 @@ class AlgorithmRegistry:
 
 def default_registry() -> AlgorithmRegistry:
     registry = AlgorithmRegistry()
+    from ..occupation_semantic import OccupationSemantic
+    registry.register_algorithm('m4', 'occupation_dual_encoder', OccupationSemantic)
+    for name in ('pretrained', 'finetuned'):
+        registry.register_variant('m4', 'occupation_dual_encoder', name + '_v1', {
+            'index': 'artifacts/ranking/occupation_semantic_v1/' + name + '_index'})
     registry.register_algorithm("m1", "weighted_dot_product", WeightedDotProduct)
     registry.register_variant("m1", "weighted_dot_product", "baseline_v1", BASELINE_PARAMETERS)
     from .cosine import CosineSimilarity, BASELINE_PARAMETERS as COSINE_PARAMETERS
     registry.register_algorithm("m1", "cosine_similarity", CosineSimilarity)
     registry.register_variant("m1", "cosine_similarity", "baseline_v1", COSINE_PARAMETERS)
+    from .weighted_distance import WeightedDistance, BASELINE_PARAMETERS as DISTANCE_PARAMETERS
+    registry.register_algorithm("m1", "weighted_distance", WeightedDistance)
+    registry.register_variant("m1", "weighted_distance", "kappa3_v1", DISTANCE_PARAMETERS)
     from .bm25_ranker import BM25Ranker, BASELINE_PARAMETERS as BM25_PARAMETERS
     registry.register_algorithm("m3", "bm25", BM25Ranker)
     registry.register_variant("m3", "bm25", "baseline_v1", BM25_PARAMETERS)

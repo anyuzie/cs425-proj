@@ -1,0 +1,18 @@
+{
+  "clauses": 20812,
+  "occupations": 1016,
+  "categories": {
+    "job_nature": 13014,
+    "both": 7488,
+    "activity": 310
+  },
+  "checkpoint_sha256": "97e4fc4334cb36d2c0462a8ecbdd77845f01618d3e7daa6df1f06624dcd321db",
+  "thresholds": [
+    0.5,
+    0.5
+  ],
+  "human_reviewed": false,
+  "training_eligible": false,
+  "source_corpus_sha256": "2c11b49aae67614ec5385b6547d4ed784bc5e73f1bb0604528707406e45b8368",
+  "limitation": "Pilot trained on 123 reviewed clauses; no Neither examples; predictions require review before supervised reuse."
+}

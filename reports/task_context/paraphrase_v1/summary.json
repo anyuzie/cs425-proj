@@ -1,0 +1,396 @@
+{
+  "checkpoint": "C:\\Users\\aanny\\Documents\\GitHub\\year5\\cs425\\project\\models\\task_context_bert",
+  "model_sha256": "9b32c4c6526b609af5f6b8d77b7399d7170c34c1425fc4b9364c866f8f58a5b2",
+  "thresholds": {
+    "task": 0.5,
+    "context": 0.5
+  },
+  "created_at": "2026-11-01T10:35:13.791591+00:00",
+  "training_performed": false,
+  "thresholds_tuned": false,
+  "cases_sha256": "a9b72c3ec204139e7161bfa52a61e0f1d8ded9f4a42507fb258ec413a1b908d7",
+  "label_provenance": "Assistant-authored diagnostic cases and expected content labels, not independently reviewed benchmark",
+  "overall": {
+    "task": {
+      "precision": 0.6470588235294118,
+      "recall": 0.5,
+      "f1": 0.5641025641025641,
+      "tp": 22,
+      "fp": 12,
+      "fn": 22,
+      "tn": 24
+    },
+    "context": {
+      "precision": 0.40425531914893614,
+      "recall": 0.5277777777777778,
+      "f1": 0.4578313253012048,
+      "tp": 19,
+      "fp": 28,
+      "fn": 17,
+      "tn": 16
+    },
+    "examples": 80,
+    "exact_matches": 28,
+    "exact_match": 0.35
+  },
+  "by_group": {
+    "task": {
+      "task": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6666666666666666,
+        "tp": 16,
+        "fp": 0,
+        "fn": 16,
+        "tn": 0
+      },
+      "context": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 16,
+        "fn": 0,
+        "tn": 16
+      },
+      "examples": 32,
+      "exact_matches": 16,
+      "exact_match": 0.5
+    },
+    "context": {
+      "task": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 12,
+        "fn": 0,
+        "tn": 12
+      },
+      "context": {
+        "precision": 1.0,
+        "recall": 0.5416666666666666,
+        "f1": 0.7027027027027027,
+        "tp": 13,
+        "fp": 0,
+        "fn": 11,
+        "tn": 0
+      },
+      "examples": 24,
+      "exact_matches": 12,
+      "exact_match": 0.5
+    },
+    "mixed": {
+      "task": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6666666666666666,
+        "tp": 6,
+        "fp": 0,
+        "fn": 6,
+        "tn": 0
+      },
+      "context": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6666666666666666,
+        "tp": 6,
+        "fp": 0,
+        "fn": 6,
+        "tn": 0
+      },
+      "examples": 12,
+      "exact_matches": 0,
+      "exact_match": 0.0
+    },
+    "irrelevant": {
+      "task": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 12
+      },
+      "context": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 12,
+        "fn": 0,
+        "tn": 0
+      },
+      "examples": 12,
+      "exact_matches": 0,
+      "exact_match": 0.0
+    }
+  },
+  "by_variant": {
+    "source_like": {
+      "task": {
+        "precision": 0.6470588235294118,
+        "recall": 1.0,
+        "f1": 0.7857142857142857,
+        "tp": 11,
+        "fp": 6,
+        "fn": 0,
+        "tn": 0
+      },
+      "context": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 9,
+        "tn": 8
+      },
+      "examples": 17,
+      "exact_matches": 8,
+      "exact_match": 0.47058823529411764
+    },
+    "fragment": {
+      "task": {
+        "precision": 0.6470588235294118,
+        "recall": 1.0,
+        "f1": 0.7857142857142857,
+        "tp": 11,
+        "fp": 6,
+        "fn": 0,
+        "tn": 0
+      },
+      "context": {
+        "precision": 1.0,
+        "recall": 0.1111111111111111,
+        "f1": 0.2,
+        "tp": 1,
+        "fp": 0,
+        "fn": 8,
+        "tn": 8
+      },
+      "examples": 17,
+      "exact_matches": 8,
+      "exact_match": 0.47058823529411764
+    },
+    "first_person_positive": {
+      "task": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 11,
+        "tn": 6
+      },
+      "context": {
+        "precision": 0.5294117647058824,
+        "recall": 1.0,
+        "f1": 0.6923076923076923,
+        "tp": 9,
+        "fp": 8,
+        "fn": 0,
+        "tn": 0
+      },
+      "examples": 17,
+      "exact_matches": 6,
+      "exact_match": 0.35294117647058826
+    },
+    "first_person_negative": {
+      "task": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 11,
+        "tn": 6
+      },
+      "context": {
+        "precision": 0.5294117647058824,
+        "recall": 1.0,
+        "f1": 0.6923076923076923,
+        "tp": 9,
+        "fp": 8,
+        "fn": 0,
+        "tn": 0
+      },
+      "examples": 17,
+      "exact_matches": 6,
+      "exact_match": 0.35294117647058826
+    }
+  },
+  "exact_training_text_matches": 0,
+  "nonexact_training_texts": {
+    "task": {
+      "precision": 0.6470588235294118,
+      "recall": 0.5,
+      "f1": 0.5641025641025641,
+      "tp": 22,
+      "fp": 12,
+      "fn": 22,
+      "tn": 24
+    },
+    "context": {
+      "precision": 0.40425531914893614,
+      "recall": 0.5277777777777778,
+      "f1": 0.4578313253012048,
+      "tp": 19,
+      "fp": 28,
+      "fn": 17,
+      "tn": 16
+    },
+    "examples": 80,
+    "exact_matches": 28,
+    "exact_match": 0.35
+  },
+  "family_stability": [
+    {
+      "family": "task:machinery",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9858281789347529,
+      "context_score_range": 0.9991036984865787
+    },
+    {
+      "family": "task:records",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9890795294195414,
+      "context_score_range": 0.9994561111743678
+    },
+    {
+      "family": "task:teaching",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9921684060245752,
+      "context_score_range": 0.9997423965105554
+    },
+    {
+      "family": "task:care",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9904034798964858,
+      "context_score_range": 0.9995824594734586
+    },
+    {
+      "family": "task:cooking",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.991704298183322,
+      "context_score_range": 0.9997228707870818
+    },
+    {
+      "family": "task:gardening",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9879949279129505,
+      "context_score_range": 0.9993582078313921
+    },
+    {
+      "family": "task:design",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9916546028107405,
+      "context_score_range": 0.9997425525725703
+    },
+    {
+      "family": "task:programming",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9919712045229971,
+      "context_score_range": 0.9997445325061562
+    },
+    {
+      "family": "context:outdoors",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9931967132724822,
+      "context_score_range": 0.9997987358292448
+    },
+    {
+      "family": "context:quiet",
+      "variants": 4,
+      "routing_changed_from_anchor": 3,
+      "task_score_range": 0.9930654391646385,
+      "context_score_range": 0.9997984394649393
+    },
+    {
+      "family": "context:night",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9936412288807333,
+      "context_score_range": 0.999824566533789
+    },
+    {
+      "family": "context:team",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9925595568493009,
+      "context_score_range": 0.9997620139183709
+    },
+    {
+      "family": "context:alone",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9924484416842461,
+      "context_score_range": 0.9997349666518858
+    },
+    {
+      "family": "context:autonomy",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9922811300493777,
+      "context_score_range": 0.9997399165658862
+    },
+    {
+      "family": "mixed:outdoor_repair",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9882917730137706,
+      "context_score_range": 0.999389898366644
+    },
+    {
+      "family": "mixed:noisy_teaching",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9926985031925142,
+      "context_score_range": 0.9997880726732546
+    },
+    {
+      "family": "mixed:greenhouse",
+      "variants": 4,
+      "routing_changed_from_anchor": 2,
+      "task_score_range": 0.9917538897134364,
+      "context_score_range": 0.999694247788284
+    },
+    {
+      "family": "irrelevant:uncertainty",
+      "variants": 4,
+      "routing_changed_from_anchor": 0,
+      "task_score_range": 0.0005247839726507664,
+      "context_score_range": 3.230571746826172e-05
+    },
+    {
+      "family": "irrelevant:credential",
+      "variants": 4,
+      "routing_changed_from_anchor": 0,
+      "task_score_range": 0.0009903472382575274,
+      "context_score_range": 5.5730342864990234e-05
+    },
+    {
+      "family": "irrelevant:greeting",
+      "variants": 4,
+      "routing_changed_from_anchor": 0,
+      "task_score_range": 0.0012671258300542831,
+      "context_score_range": 9.936094284057617e-05
+    }
+  ],
+  "limits": [
+    "Small targeted, assistant-authored stress test",
+    "Semantic families are known topics; not a random real-user sample",
+    "Preference polarity does not change the expected content labels",
+    "Same family variants are correlated; do not interpret as 80 independent examples"
+  ]
+}

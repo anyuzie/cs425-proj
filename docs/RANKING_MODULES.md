@@ -1,15 +1,20 @@
 # Ranking development map
 
-The recommended workflow selects standalone `cosine_similarity@baseline_v1`, the
-best recorded development/oracle configuration. This is a configuration choice,
-not a new quality claim. Legacy production defaults and dot-product controls are
-preserved. Cosine has not been established as better with actual tracker inputs.
+The central workflow starts with `weighted_dot_product@baseline_v1` in the mutable
+`configs/ranking/active.json` selection. Each workflow evaluation compares a
+candidate with this incumbent and automatically promotes only a higher Hit@5
+with no regression in the other five metrics. Frozen presets and the separate
+application `configs/ranking.yaml` default are preserved. Oracle improvements
+do not establish quality with actual tracker inputs.
 
 ## Layout and dependency direction
 
 ```text
 configs/                         All editable experiment/application settings
   ranking/workflow.json          Select model, preparation, evaluation, system
+  ranking/active.json            Current best selection used by workflow chat
+  ranking/candidate.json         Editable next challenger
+  ranking/promotion.json         Challenger path and metric acceptance policy
   ranking/parameters/*.json       Exact accepted algorithm parameter snapshots
   ranking/variants.json           Additional named parameter variants
   ranking/preparation.json        Resource preparation selection and input data
@@ -38,6 +43,7 @@ recommender/
     structured.py                 Legacy dot-product facade
   preparation/build_dense.py     Offline pretrained model/task-index preparation
   experiments/
+    promotion.py                Paired evaluation and atomic selection promotion
     evaluation.py                Metrics only
     evaluate.py                  Experiment runner, snapshots and provenance
     runtime_inputs.py            Tracker replay adapter
@@ -74,9 +80,49 @@ python -m recommender.workflow prepare --download-model
 ```
 
 All three read `configs/ranking/workflow.json`; `--config` selects another workflow.
-Its paths are relative to the repository root. Evaluation additionally accepts
-`--output` and `--history` for isolated reports. Chat receives the workflow's same
+Its paths are relative to the repository root. Chat receives the workflow's active
 ranking selection, overriding the system file's ranking path in memory.
+
+As of 8 November 2026, `active.json` and the initial `candidate.json` both select
+`cosine_similarity@baseline_v1` with fusion disabled, matching `configs/ranking.yaml`
+used by the web app and ordinary terminals. This is an explicit selection change
+using the existing cosine variant and dialogue evidence, not a new promotion run.
+The dot-product control remains in `baseline_v1.json`. Later workflow promotions
+change only `active.json`; they do not automatically change the web app's YAML.
+
+Edit `configs/ranking/candidate.json`, then run `python -m recommender.workflow evaluate`.
+Or test a preserved preset without editing the candidate file:
+
+```powershell
+python -m recommender.workflow evaluate --ranking-config configs/ranking/m1_cosine.json
+```
+
+Each round re-evaluates the active configuration and challenger under the same
+evaluation settings, dataset and current implementation. It does not scan old
+reports for a global winner: `active.json` is the incumbent. Both completed runs
+append to evaluation history. The round contains `control/`, `candidate/`, the
+original selection bytes and `promotion.json` with metrics, paired comparison,
+policy, hashes and publication status. `--output` chooses a fresh round directory;
+`--history` isolates registration. A tie or any metric regression retains the
+incumbent. Only successful, compatible development evaluations can promote.
+The selected configuration changes atomically; an exclusive lock rejects parallel
+rounds and an external edit during evaluation aborts publication. If interrupted
+at publication, compare `selected_sha256` and `previous_sha256` with the active
+file; `prepared` is an intent record and does not claim completed publication.
+The backup `previous_active.json` permits manual rollback.
+
+`promotion.json` selects the `hit5_no_regression` policy. Supported alternatives
+are `hit5` (Hit@5 alone) and `pareto` (any gain, no regression). A 1e-12 tolerance
+ignores floating-point roundoff. `active_only` replay selections are evaluated
+but never published to workflow chat, whose live System requires raw evidence.
+Failures leave the incumbent unchanged unless an external writer changed it.
+Incomplete rounds remain available for diagnosis; remove a leftover active-file
+lock only after confirming no evaluation process is still running.
+
+`python -m recommender.experiments.evaluate` remains a report-only entry point.
+Unit tests and the independent utterance terminal do not trigger promotion.
+The default app/utterance terminal still reads `ranking.yaml`; to inspect the
+central winner use `python -m app.ranking_terminal --ranking-config configs/ranking/active.json`.
 
 Cosine requires no resource preparation. `prepare` explicitly builds the optional
 MiniLM task index selected in `preparation.json`; it is never invoked by chat or
@@ -101,8 +147,9 @@ These are not replaced with mocks automatically.
 
 ## Iterate without changing accepted baselines
 
-1. Select a control/treatment in `configs/ranking/*.json` and point the workflow
-   at it. Keep evaluation conditions in `configs/m2.json` separate from selection.
+1. Edit `candidate.json` or pass a preserved preset through `--ranking-config`.
+   Keep evaluation conditions in `configs/m2.json` separate from selection. Do not
+   edit `active.json` to try a challenger; it records the incumbent.
 2. Accepted files under `parameters/` preserve the existing parameter values;
    do not edit their meaning in place. Add a new variant for changed settings.
 3. For an already supported parameter change, add an entry to `variants.json`
@@ -132,7 +179,7 @@ python -m unittest discover -s tests -v
 ```
 
 `tests/test_modular_ranking.py` checks canonical/legacy identity, dependency
-boundaries, cosine workflow selection, parameter-variant substitution and terminal
+boundaries, active workflow selection, parameter-variant substitution and terminal
 delegation. Existing scoring/evaluation/integration tests remain the regression
 controls. Optional semantic tests require the optional model dependencies.
 
