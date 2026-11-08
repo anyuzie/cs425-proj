@@ -1,0 +1,11 @@
+components:
+  m1:
+    algorithm: weighted_dot_product
+    variant: baseline_v1
+  m3: null
+  m4: null
+
+# Specified future fusion baseline; one usable component bypasses fusion.
+fusion:
+  algorithm: rrf
+  k: 60

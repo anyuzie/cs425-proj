@@ -1,0 +1,77 @@
+{
+  "name": "nli-probing-v1",
+  "checkpoint": "models/nli-probing-v1/checkpoint",
+  "base_model": "cross-encoder/nli-deberta-v3-base",
+  "annotation_policy": "Contradiction includes cross-domain interest versus career-preference tensions worth probing; it is not limited to logical incompatibility.",
+  "threshold": 0.6,
+  "selected_epoch": 1,
+  "training": {
+    "arguments": {
+      "command": "train",
+      "data": "data\\nli_natural_v1.jsonl",
+      "base": "cross-encoder/nli-deberta-v3-base",
+      "output": "models\\nli-probing-v1",
+      "epochs": 3,
+      "batch_size": 8,
+      "learning_rate": 1e-05,
+      "seed": 425,
+      "allow_unreviewed": true
+    },
+    "data_sha256": "e1de70f99ecfba447a979fe030f96a8489f5636f2ea8c8cd695d7c5a3d4fa8c0",
+    "script_sha256": "5d245c94250e700aff1169bd8245f4a317ee6275518fce47503d16cae4897fe6",
+    "versions": {
+      "torch": "2.14.1",
+      "transformers": "5.19.0"
+    },
+    "device": "cpu",
+    "label_order": {
+      "0": "contradiction",
+      "1": "entailment",
+      "2": "neutral"
+    },
+    "base_commit": null,
+    "selection": "lowest dev binary negative log likelihood; earlier epoch wins ties",
+    "objective": "contradiction vs summed entailment/neutral probability",
+    "epochs": [
+      {
+        "epoch": 1,
+        "train": 0.3890155858168017,
+        "dev": 0.5869678953406063
+      },
+      {
+        "epoch": 2,
+        "train": 0.014899177785571814,
+        "dev": 0.8071102577144736
+      },
+      {
+        "epoch": 3,
+        "train": 0.00016893985619846014,
+        "dev": 0.895137337039647
+      }
+    ],
+    "best_epoch": 1
+  },
+  "files": {
+    "config.json": {
+      "bytes": 1143,
+      "sha256": "8b263719da524fde882c2c92013439e0181e045b2ba009cb1072bd102c8ebbfa"
+    },
+    "model.safetensors": {
+      "bytes": 737722356,
+      "sha256": "eb88a46d310b88435a2cdea6068fc8fa1a3f5f5cd0276a815c02344ce2adc38d"
+    },
+    "tokenizer.json": {
+      "bytes": 8340128,
+      "sha256": "3aabdd19a2a28f0b88f25ee7b49b6751f299955212ae02d211e1eaa741237381"
+    },
+    "tokenizer_config.json": {
+      "bytes": 525,
+      "sha256": "c2fb368bae37a63e4fa8b198861a775125be3d468fef3cccb7fa4a4f42968d25"
+    }
+  },
+  "limitations": [
+    "Synthetic patterned additions; legacy test predictions previously inspected.",
+    "Legacy labels preserved and may differ from the new probing-conflict policy.",
+    "Existing same-slot opposite-sign candidate gate is unchanged."
+  ]
+}

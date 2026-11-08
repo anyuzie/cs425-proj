@@ -1,0 +1,143 @@
+{
+  "description": "Policy-authored enquiry associations, not official O*NET task-level RIASEC labels. Activities are plain-language summaries of the referenced tasks. Review associations when extending this starter catalog.",
+  "tasks": [
+    {
+      "slot": "R",
+      "occupation_code": "15-1231.00",
+      "task_id": "18999",
+      "activity": "installing or repairing network cables"
+    },
+    {
+      "slot": "R",
+      "occupation_code": "15-1232.00",
+      "task_id": "1284",
+      "activity": "installing and repairing computer equipment"
+    },
+    {
+      "slot": "R",
+      "occupation_code": "29-2012.00",
+      "task_id": "18535",
+      "activity": "setting up and maintaining laboratory equipment"
+    },
+    {
+      "slot": "I",
+      "occupation_code": "15-2041.00",
+      "task_id": "8956",
+      "activity": "analysing statistical data to find meaningful patterns"
+    },
+    {
+      "slot": "I",
+      "occupation_code": "19-4061.00",
+      "task_id": "12955",
+      "activity": "analysing research data using statistical software"
+    },
+    {
+      "slot": "I",
+      "occupation_code": "15-1252.00",
+      "task_id": "21662",
+      "activity": "analysing user needs and software requirements"
+    },
+    {
+      "slot": "I",
+      "occupation_code": "27-1024.00",
+      "task_id": "23971",
+      "activity": "investigating the needs of a design project's audience"
+    },
+    {
+      "slot": "A",
+      "occupation_code": "27-1024.00",
+      "task_id": "299",
+      "activity": "creating visual designs and page layouts"
+    },
+    {
+      "slot": "A",
+      "occupation_code": "27-1014.00",
+      "task_id": "6882",
+      "activity": "designing graphics and animation"
+    },
+    {
+      "slot": "A",
+      "occupation_code": "27-3043.00",
+      "task_id": "22671",
+      "activity": "writing original stories or other creative prose"
+    },
+    {
+      "slot": "S",
+      "occupation_code": "11-9041.00",
+      "task_id": "1070",
+      "activity": "helping clients understand proposals and findings"
+    },
+    {
+      "slot": "S",
+      "occupation_code": "15-1232.00",
+      "task_id": "1282",
+      "activity": "helping computer users by answering their questions"
+    },
+    {
+      "slot": "S",
+      "occupation_code": "25-2021.00",
+      "task_id": "6540",
+      "activity": "teaching students individually or in groups"
+    },
+    {
+      "slot": "S",
+      "occupation_code": "17-2072.00",
+      "task_id": "20499",
+      "activity": "teaching staff or customers about electronics equipment standards"
+    },
+    {
+      "slot": "S",
+      "occupation_code": "27-1024.00",
+      "task_id": "305",
+      "activity": "helping clients clarify their design needs"
+    },
+    {
+      "slot": "E",
+      "occupation_code": "41-4011.00",
+      "task_id": "11240",
+      "activity": "negotiating prices and sales agreements"
+    },
+    {
+      "slot": "E",
+      "occupation_code": "13-1023.00",
+      "task_id": "1147",
+      "activity": "negotiating contracts with suppliers"
+    },
+    {
+      "slot": "E",
+      "occupation_code": "11-2022.00",
+      "task_id": "14",
+      "activity": "leading a sales team"
+    },
+    {
+      "slot": "C",
+      "occupation_code": "43-9111.00",
+      "task_id": "9792",
+      "activity": "checking data for completeness and accuracy"
+    },
+    {
+      "slot": "C",
+      "occupation_code": "13-2011.00",
+      "task_id": "21514",
+      "activity": "checking financial records for accuracy"
+    },
+    {
+      "slot": "C",
+      "occupation_code": "19-4061.00",
+      "task_id": "12956",
+      "activity": "checking database entries and correcting errors"
+    },
+    {
+      "slot": "C",
+      "occupation_code": "27-1024.00",
+      "task_id": "15228",
+      "activity": "maintaining an organised archive of images and previous designs"
+    },
+    {
+      "slot": "C",
+      "occupation_code": "25-2021.00",
+      "task_id": "6547",
+      "activity": "maintaining accurate and complete student records"
+    }
+  ]
+}

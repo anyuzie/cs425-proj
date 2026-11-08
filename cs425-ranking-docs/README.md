@@ -4,7 +4,186 @@
 >
 > **Research question (whole project):** Can probing contradictions and challenging familiarity-based justifications give a better occupation ranking than accepting the user's stated profile as given?
 
-This README is the **source of truth for objectives, scope, architecture, and milestone priorities**. See [DEVELOPMENT.md](DEVELOPMENT.md) for acceptance criteria and implementation steps, [EVALUATION.md](EVALUATION.md) for controls and metrics, and [EXPERIMENT_TEMPLATE.md](EXPERIMENT_TEMPLATE.md) for recording each experiment.
+This README is the **source of truth for objectives, scope, implementation status, and milestone priorities**. See [DEVELOPMENT.md](DEVELOPMENT.md) for acceptance criteria and implementation steps, [EVALUATION.md](EVALUATION.md) for controls and metrics, and [EXPERIMENT_TEMPLATE.md](EXPERIMENT_TEMPLATE.md) for recording each experiment. The [ranking architecture memory](../docs/RANKING_EXPERIMENT_ARCHITECTURE.md) is the authoritative guide to module boundaries, configuration variants, and future implementation workflows; read it before architectural changes.
+
+## Current implementation status
+
+Application integration audit: real cosine and cosine+BM25 now have HTTP-level
+acceptance with explicitly mocked upstream components, covering recommendation
+order, component reuse and participant-mode ranking logs. Live System rejects
+replay-only `active_only` selection at startup until upstream lifecycle evidence
+is available. Defaults and frozen variants are unchanged. See the
+[integration audit](../docs/RANKING_INTEGRATION_AUDIT.md).
+
+The ranking implementation is organized into `recommender/models/`, `data/`,
+`preparation/`, and `experiments/`, with compatible legacy imports. Central
+`configs/ranking/workflow.json` selects the best recorded standalone cosine
+configuration for evaluation and terminal use; legacy production defaults remain
+unchanged. Algorithm parameters and additional named variants are centralized in
+`configs/ranking/`. Terminal presentation lives in `app/terminal.py` and calls the
+shared conversation `System`. Ranking has resource preparation, not model fitting.
+See the [module map and iteration workflow](../docs/RANKING_MODULES.md).
+
+This section is the canonical current status; milestone reports preserve their own scope and recorded acceptance results. The architecture and milestone requirements below include planned work.
+
+| Milestone | Current status | Evidence |
+|---|---|---|
+| M0 — Data + contracts | Implemented and accepted locally; teammate integration sign-off pending | [M0 report](../reports/ranking/m0.md) |
+| M1 — Structured ranking | Dot-product baseline preserved; cosine alternative implemented and evaluated, default unchanged | [M1 report](../reports/ranking/m1.md), [cosine comparison](../reports/ranking/m1_cosine/DECISION.md) |
+| M2 — Evaluation | Implemented and accepted; frozen structured-only oracle development baseline, metrics, exports, and paired comparison | [M2 decision](../reports/ranking/m2/DECISION.md) |
+| M3 - Lexical + fusion | Implemented and evaluated; experimental baseline, M1-only default retained | [M3 decision](../reports/ranking/m3/DECISION.md) |
+| M4 - Semantic task retrieval | Implemented and evaluated; cached MiniLM/FAISS and three-signal baseline | [M4 decision](../reports/ranking/m4/DECISION.md) |
+| M5 | Ranking integration implemented and fixture-tested; baseline frozen; real upstream and latency sign-off pending | [M5 acceptance](../reports/ranking/m5/DECISION.md) |
+| M6 | Query filtering and controlled synthetic ablation complete; optional only, representative dialogue validation pending | [M6 decision](../reports/ranking/m6/DECISION.md) |
+| M7-M9 | Not implemented | [Development roadmap](DEVELOPMENT.md) |
+
+**Current gate: M5 ranking integration frozen; production upstream completion and teammate latency agreement remain pending.** The M2 acceptance report records 38 passing M0–M2 tests. Its 60-profile oracle development baseline reports Hit@5 = 0.166667, MRR = 0.135636, and NDCG@10 = 0.203471. These are offline synthetic-oracle results, not actual-tracker or end-to-end probing results. BM25 and occupation-level RRF are now implemented at M3. M4 now provides cached semantic task retrieval and provisional task matches. Live configurable ranking is wired through the shared System. Evidence stays provisional; production upstream components and stance-aware support remain pending.
+
+M6 currently filters evaluator-supplied, cumulative evidence snapshots before BM25/MiniLM query construction. The default raw-text ranking behavior is unchanged. A separate 60-session mock-tracker stress set now supplies synthetic lifecycle snapshots: six evaluations show mixed effects, including gains from M1 fallback. Keep filtering optional; representative dialogue validation remains pending. See the [M6 decision and next-work recommendation](../reports/ranking/m6/DECISION.md).
+
+The earlier modular refactor originally registered only `weighted_dot_product@baseline_v1`, preserved the `StructuredRanker` compatibility API, and added a shared component interface, registry, configurable pipeline, and fusion boundary subsequently implemented at M3. The refactor originally passed 54 tests; the default-configuration workflow originally passed 61 tests. At M4, the ranking/evaluation suite passed 85 tests. At the initial M5 freeze, full discovery ran 155 tests: 154 passed, with the same pre-existing missing extractor-checkpoint error. All six M5 integration tests pass; see the M5 acceptance report. See the [refactor acceptance report](../reports/ranking/refactor/DECISION.md).
+
+Cosine M1 has also been evaluated with BM25, MiniLM and both using equal-weight RRF k=60. Development/oracle Hit@5 is .266667, .233333 and .116667 respectively, versus .883333 for cosine alone. All three runs are registered in evaluation history; see the [fusion decision](../reports/ranking/m1_cosine/FUSION_DECISION.md). Defaults remain unchanged.
+
+120-profile follow-up: all six M1+M3, M1+M4 and three-way combinations were rerun for dot-product and cosine M1 on identical development/oracle inputs. Every combination regresses against its matching standalone M1 on all six metrics; standalone cosine Hit@5 is .683333. Both histories contain the six new runs. The stale semantic cache was preserved and rebuilt with the same pinned model and parameters. Defaults remain unchanged. See [120-profile combination report](../reports/ranking/combinations_dev120/README.md).
+
+Stance-aware M4 follow-up: independent `minilm_stance@stance_internal_v1` and positive-only `positive_internal_v1` are implemented with conservative runtime text-only extraction, pinned MiniLM resources, and fixed signed task matching. The frozen M4 and defaults are preserved. All 38 targeted tests pass. Five conditions are evaluated on the restored canonical 120-profile dataset and registered in both histories. Hit@5: frozen M4 .041667, positive-only stance .033333, signed stance .033333, cosine .683333, cosine+stance .308333. Signed stance covers 97/120 profiles; defaults remain unchanged. All 45,360 frozen semantic scores/ranks match the earlier canonical-data run. Polarity quality remains unverified without independent review labels. See [stance experiment status](../reports/ranking/stance_dev120_v3/README.md).
+
+## Component configuration
+
+The live app now selects `ranker: configured` in `configs/system.json`, loading the same ranking YAML once at startup. The legacy `structured` factory stays available. M1-only remains the default. Full app startup still requires the team's production extractor checkpoint, tracker, NLI and policy implementations.
+
+The DeBERTa adapter now maps checkpoint head labels to the shared RIASEC interface and correctly retains positive strengths. Run `python scripts/check_m5_extractor.py --checkpoint <directory>` once trained weights are installed. The real-extractor smoke harness explicitly labels its remaining mock tracker/policy components; see [extractor integration status](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
+
+Extractor follow-up verification: 159 tests run, 158 pass; the sole error still requires the absent production extractor checkpoint. All four new checkpoint-adapter tests pass. Actual trained-model inference remains pending installation of the weights.
+
+M5 freezes the ranking control as [`baseline_v1`](../configs/ranking/baseline_v1.json), alongside an independently tested optional three-way RRF preset. See the [acceptance mapping, latency and limitations](../reports/ranking/m5/DECISION.md).
+
+The evaluator automatically loads [`configs/ranking.yaml`](../configs/ranking.yaml) for M1/M3/M4 algorithms, variants, and fusion, and [`configs/m2.json`](../configs/m2.json) for evaluation settings. Edit these files independently, then run from the repository root:
+
+```powershell
+python -m recommender.evaluate
+```
+
+Reports are created under `reports/ranking/experiments/<UTC timestamp>_<UUID>/`; the command prints the path and metrics. Successful runs append to the central history CSV with selected `algorithm@variant` identifiers. No flags are required. Missing files, malformed configurations, unknown algorithms, and invalid variants fail clearly before evaluation.
+
+YAML support uses pinned PyYAML. One-time setup and activation:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+The development workstation's local `.venv` is already prepared; activate it in a new shell. Explicit `--config`, `--ranking-config`, `--output`, and `--history` overrides remain supported. The old `configs/ranking.json` is retained for compatibility, but is not loaded by default.
+
+Each report saves separate `evaluation_config.json`, `ranking_config.json`, and `resolved_ranking.json` snapshots, byte-for-byte copies of original config sources, and individual SHA-256 hashes in `manifest.json`. The existing `config.json` reproduction bundle and its hash remain available; CSV `config_hash` covers that bundle. To reuse the separate snapshots:
+
+```powershell
+python -m recommender.evaluate --config <report>/evaluation_config.json --ranking-config <report>/ranking_config.json
+```
+
+The registered variants are `weighted_dot_product@baseline_v1`, `bm25@baseline_v1`, and `minilm@mean_tasks_v1`. `null` disables a component; RRF `k=60` is implemented. One usable signal passes through, no usable signal returns `no_signal`, and multiple usable signals use equal-weight occupation-level RRF. M1 scoring and all six M2 metrics are unchanged. Evaluation defaults to development/oracle with the established candidate pool; explicit actual_tracker and mock_tracker snapshot replay is also supported.
+
+In Python, use `RankingPipeline(config=Path("configs/ranking.yaml"))`; existing `StructuredRanker()` callers remain valid. See the [architecture memory](../docs/RANKING_EXPERIMENT_ARCHITECTURE.md) for configuration provenance, variant preservation, and reproduction rules.
+
+### Multi-turn tracker evaluation
+
+The default evaluator remains oracle-only. To evaluate recorded conversations, copy `configs/m2.json`, set `input_mode` to `actual_tracker` and `profiles` to your annotated session JSONL, then pass that evaluation file with `--config`. Keep algorithm selection in the ranking YAML. Use `mock_tracker` for scripted or simulated tracker snapshots; never relabel fixtures as actual tracker runs.
+
+`System.tracker_record(state, profile_id=..., revision=...)` exports chronological user messages and the tracker snapshot actually used each turn, with extractor/tracker identity and caller-supplied code/model revision. Declare the System's input mode explicitly; unverified exports are rejected. Independently add `target` and the usual `related` relevance labels, then write one JSON object per session. Scoring never receives those labels. Runtime values must be in `[-1,1]`; unknown dimensions are distinguished by `observed_types`.
+
+```json
+{"id":"session_1","input_mode":"actual_tracker","upstream":{"extractor":"deberta","tracker":"decay","revision":"<code-and-model-revisions>"},"turns":[{"text":"I enjoy repairing machines.","interests":{"R":0.8,"I":0,"A":0,"S":0,"E":0,"C":0},"observed_types":["R"]},{"text":"Actually, I prefer analysing data.","interests":{"R":-0.2,"I":0.9,"A":0,"S":0,"E":0,"C":0},"observed_types":["R","I"]}],"target":"15-2051.00","related":{"short":[],"long":[],"supplemental":[]}}
+```
+
+This illustrates the format, not a real tracker capture. The evaluator replays all turns, writes `turn_predictions.json`, and computes unchanged M2 metrics on the final turn of each session. Input mode and upstream provenance are fingerprinted in saved inputs; incompatible conditions are rejected by paired comparison. Central history descriptions identify the mode. Match inputs, split, datasets and upstream revisions before comparing configurations.
+
+### M6 contradiction-aware query experiment
+
+For M6 replay, each turn may include a cumulative `source_evidence` list with one stable record per user utterance: `id`, one-based `turn`, immutable original `text`, and lifecycle `status` (`active`, `disputed`, or `superseded`). A later snapshot may resolve disputed evidence, but cannot rewrite an utterance or reactivate superseded evidence. Select `evidence_filter: raw` or `evidence_filter: active_only` at the top level of the ranking configuration. `active_only` excludes both disputed and superseded utterances and requires BM25 or MiniLM to be enabled; the structured vector remains unchanged. For a controlled comparison, run both filters against the same annotated session file, ranking stack, and tracker snapshots. The report records source evidence and selected/excluded IDs in query diagnostics. A reproducible synthetic development stress set and six saved evaluations are included in `reports/ranking/m6/run_v1/`; these test sensitivity and fallback, while independently annotated real dialogue quality remains untested.
+
+To reproduce the frozen **mock-upstream** integration baseline and optional real three-way ranking benchmark:
+
+```powershell
+python scripts/freeze_ranking_baseline.py --output reports/ranking/m5/reproduction
+```
+
+This requires the prepared M4 model/cache and writes fresh reports, traces, source snapshots, latency measurements and history rows. It does not evaluate production upstream behavior.
+
+## M3 baseline and measured decision
+
+M3 adds a frozen BM25 baseline over eligible `bm25_doc` and RRF `sum(1/(60+rank))`. Only positive lexical matches enter fusion; empty/stopword/unmatched queries fall back to other available signals. Queries use all user utterances with no evidence, dislike, or familiarity filtering. Parameters/tokenization are recorded in each resolved configuration.
+
+| Same 60 development/oracle cases | Hit@5 | MRR | NDCG@10 |
+|---|---:|---:|---:|
+| Structured | .166667 | .135636 | .203471 |
+| BM25 | .016667 | .016099 | .020544 |
+| Structured + BM25 RRF | .133333 | .084887 | .116610 |
+
+Keep the experimental baseline, but **retain M1-only as the default**. See the [M3 acceptance mapping, comparisons and limitations](../reports/ranking/m3/DECISION.md) and [failure review](../reports/ranking/m3/failure_review.md). To evaluate hybrid explicitly:
+
+```powershell
+python -m recommender.evaluate --ranking-config configs/ranking/m3_hybrid.json
+```
+
+Sibling presets `m3_structured.json` and `m3_bm25.json` support standalone comparisons. You can also enable `m3: {algorithm: bm25, variant: baseline_v1}` in `configs/ranking.yaml`; M4 stays `null`. This evaluation uses oracle vectors and raw profile texts, not the actual extractor/tracker. The live app's registry still chooses the structured facade.
+
+## M4 semantic baseline
+
+M4 is implemented and evaluated; **structured-only remains the default**. On the same 60 development/oracle cases, Hit@5 is 16.67% for structured, 5.00% for dense, 11.67% for structured+dense, 3.33% for BM25+dense, and 5.00% for three-way RRF. These results do not justify default activation or a probing-effectiveness claim.
+
+The frozen `minilm@mean_tasks_v1` variant uses a pinned MiniLM revision, normalized task embeddings, and exhaustive FAISS IndexFlatIP search. It takes the best task match per occupation per natural-language sentence, then averages across sentences. Task matches are provisional, including when a user expresses a dislike. The cache contains 8,243 eligible tasks across 378 occupations. Tasks are embedded once, not during turns.
+
+```powershell
+# Fresh environment / checkout only:
+python -m pip install -r requirements-ranking.txt
+python -m recommender.build_dense --download-model
+# Local environment/model/cache are already prepared:
+python -m recommender.evaluate --ranking-config configs/ranking/m4_three_way.json
+```
+
+Other presets are `m4_dense.json`, `m4_structured_dense.json`, and `m4_bm25_dense.json`. For the default no-argument workflow, set `m4: {algorithm: minilm, variant: mean_tasks_v1}` in `configs/ranking.yaml`, enabling M1/M3 as desired. Caches and local model files are gitignored; build refuses overwriting an existing cache, and runtime rejects stale/corrupt artifacts.
+
+See the [M4 acceptance mapping and measured decision](../reports/ranking/m4/DECISION.md), [failure review](../reports/ranking/m4/failure_review.md), and [reload reproducibility checks](../reports/ranking/m4/reproducibility_check.json). Model/task/index hashes and dependency versions are retained in detailed manifests; original history rows and baselines remain intact. Next is M5 integration, after a subsequent instruction.
+
+## Persistent evaluation history
+
+[`reports/ranking/evaluation_history.csv`](../reports/ranking/evaluation_history.csv) is an append-only registry: one row per successful evaluation run, with duplicate `run_id` values safely skipped. The first row is the original M2 structured-only oracle development baseline, imported from its saved full-pool predictions. Its original artifacts, timestamp, configuration hash, and git revision are preserved. Added cutoffs were recomputed after verifying dataset/config/input hashes and exact agreement with the original three aggregate metrics; no ranking was rerun for this import.
+
+| CSV columns | Meaning |
+|---|---|
+| `run_id`, `timestamp` | Unique run identity and evaluation time in UTC |
+| `m1`, `m3`, `m4` | Structured, lexical, and semantic `algorithm@variant` identifiers in new runs; unused components are empty fields |
+| `fusion` | Fusion identifier; empty for standalone ranking |
+| `description` | Brief experiment description |
+| `candidate_count`, `profile_count` | Eligible pool size and evaluated profile count |
+| `hit_at_1`, `hit_at_5`, `hit_at_10` | Exact-target hit rates at each cutoff |
+| `mrr` | Full-pool mean reciprocal exact-target rank |
+| `ndcg_at_5`, `ndcg_at_10` | Graded NDCG using unchanged relevance grades and eligibility rules |
+| `config_hash` | SHA-256 of the saved configuration |
+| `dataset_fingerprint` | SHA-256 of the sorted dataset path-to-SHA256 mapping, serialized as compact JSON |
+| `git_commit` | Recorded source revision; manifest source hashes also identify uncommitted code |
+| `report_path` | Detailed run directory containing configuration, inputs, manifest, predictions, and metrics |
+
+Run from the repository root:
+
+```powershell
+python -m recommender.evaluate
+```
+
+Every invocation assigns a unique run ID and snapshots both loaded configurations. After all artifacts are saved, it automatically appends to the central history. `--history <path>` selects another registry, for example in isolated tests. Failed ranking/export runs never reach the append step. A registry error leaves completed artifacts available for registration retry:
+
+```powershell
+python -m recommender.history <report-path>
+python -m recommender.history reports/ranking/m2/baseline --legacy-baseline
+```
+
+The second command verifies and registers the original baseline, or safely skips its existing ID. It requires the original fingerprint-matching local datasets. History writers use an exclusive sibling `.lock` file; a busy registry fails without changing rows. If a process is interrupted, verify no writer is running before removing a stale lock and retrying.
+
+Future rankers can call `recommender.history.append_history(report_path)` after exporting a complete run. Set manifest `components` to stable algorithm/variant IDs, e.g. `{"m1": "weighted_dot_product@baseline_v1", "m3": "bm25@baseline_v1", "m4": "minilm@mean_tasks_v1", "fusion": "rrf_k60"}`. M1/M3/M4/RRF are implemented; configurations select which signals participate. The original M2 row retains its unversioned `weighted_dot_product` identifier unchanged; no CSV schema migration is needed. Keep exact parameters, input mode, split, eligibility, fingerprints, and evaluator version in the detailed manifest/configuration. The evaluator uses the common pipeline, defaults to development/oracle, and supports explicit development tracker-snapshot replay; M1, BM25, and MiniLM task retrieval are its implemented scoring components today.
+
+**Comparison guidance:** the CSV is a registry, not a leaderboard. Compare only matching input modes, datasets, candidate pools, and metric definitions. Use `python -m recommender.compare <control-directory> <treatment-directory> --output <new-directory>` for compatible paired runs. Original M2 artifacts retain evaluator `m2-v1` and three metrics; new runs use `m2-v2` and all six. Legacy-to-legacy comparisons still work. Cross-version comparisons are rejected: reproduce the control and treatment with the same evaluator before comparing them. Prediction scores/order reproduce, while run IDs, timing, timestamps, and source metadata vary.
 
 ## 1. Three levels of objectives
 
@@ -164,11 +343,21 @@ These names are suggestions, **not confirmation that the modules already exist**
 
 ## 9. Quick start
 
-M0 implementation is available in `recommender/schemas.py`, `recommender/data_loader.py`, and `recommender/audit.py`. See the [M0 audit and contract report](../reports/ranking/m0.md) for verified counts, interface examples, pending teammate coordination, and reproduction commands. Run `python -m unittest discover -s tests -v` and `python -m recommender.audit` from the repository root. No ranking algorithm is implemented at M0.
+M0–M2 are implemented. Contracts and validation live in `recommender/schemas.py`, `recommender/components.py`, `recommender/data_loader.py`, and `recommender/audit.py`; structured scoring in `recommender/m1.py`, with the compatibility facade in `recommender/structured.py`; registry and orchestration in `recommender/registry.py` and `recommender/ranker.py`; evaluation and comparison in `recommender/evaluation.py`, `recommender/evaluate.py`, and `recommender/compare.py`.
 
-1. Read the objectives and scope above, then begin **M0** in [DEVELOPMENT.md](DEVELOPMENT.md).
+From the repository root with Python 3.10+:
+
+```powershell
+python -m unittest discover -s tests -v
+python -m recommender.cli
+python -m recommender.evaluate
+```
+
+Automatic output paths are unique; use a fresh directory when overriding `--output`. See the [M2 report](../reports/ranking/m2/DECISION.md) for the machine-specific Python path and comparison command.
+
+1. Read the objectives, current status above, and [DEVELOPMENT.md](DEVELOPMENT.md).
 2. Confirm the O*NET eligibility rule and upstream/downstream contracts with teammates.
-3. Finish **M1 RIASEC MVP** and **M2 evaluation baseline** before BM25 or dense retrieval.
+3. Preserve the accepted **M1 RIASEC MVP** and **M2 evaluation baseline** as controls for subsequent milestones.
 4. For each material change, copy [EXPERIMENT_TEMPLATE.md](EXPERIMENT_TEMPLATE.md) into `reports/ranking/experiments/`, run the control and treatment, and record the decision.
 5. Keep M5 as the required completion checkpoint; evaluate M6/M7 as research extensions; freeze before M9.
 

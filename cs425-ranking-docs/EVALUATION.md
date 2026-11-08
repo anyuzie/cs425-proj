@@ -2,6 +2,8 @@
 
 Return to [README](README.md) · See [Development](DEVELOPMENT.md) · Copy [Experiment template](EXPERIMENT_TEMPLATE.md)
 
+**Current status:** M2 implements the structured-only oracle development baseline (R0), primary metrics, exports, and paired comparisons. Other ladder entries and end-to-end evaluation remain planned. See the [canonical status table](README.md#current-implementation-status) and [M2 decision](../reports/ranking/m2/DECISION.md).
+
 ## The four questions we evaluate separately
 
 | Layer | Question | Data / method |
@@ -15,8 +17,8 @@ Return to [README](README.md) · See [Development](DEVELOPMENT.md) · Copy [Expe
 
 ## Dataset and leakage rules
 
-1. **Development (planned 60):** evaluate experiments, tune only here, inspect failures.
-2. **Held-out (planned 100):** run once configuration is frozen. Log all cases, including missing/out-of-pool targets.
+1. **Development (verified 60):** evaluate experiments, tune only here, inspect failures.
+2. **Held-out (verified 100):** run once configuration is frozen. Log all cases, including missing/out-of-pool targets.
 3. **Conversation subset:** needed for M6–M8. Check whether existing records include text, ordered turns, evidence status, familiarity/reason, and pre/post profile snapshots. If not, create an independently reviewed supplementary set with profile-disjoint development/held-out splits.
 4. **Input modes:** `oracle`, `mock_tracker`, `actual_tracker` are separate result categories. Development `hidden_slots` are z-scale synthetic values, *not* runtime `[-1,1]` interests. Never silently mix or clamp.
 5. Labels (`target_occupation`, relevance grades, target profile) are read by the **evaluator only**, never by the ranker. No synthetic target answer should leak into retrieval query construction.
@@ -32,6 +34,8 @@ Return to [README](README.md) · See [Development](DEVELOPMENT.md) · Copy [Expe
 
 **Diagnostic, not replacements for primary metrics:** per-profile exact target rank change, top-5 set change frequency, stale-evidence sensitivity, recovery after probe/clarification, performance on genuine-familiarity cases, runtime (median/p95), error rate, number of affected examples.
 
+**Additional implemented cutoffs:** exact-target Hit@1 and Hit@10, plus graded NDCG@5 using the same labels, gain function, and pool filtering as NDCG@10. New runs save all six metrics and register them in the [evaluation history](README.md#persistent-evaluation-history). The original three metric definitions remain unchanged.
+
 Report quality *and* uncertainty. For paired runs, compute per-profile metric differences and a bootstrap 95% confidence interval resampling profiles (not turns) to preserve dependence. A paired McNemar test may complement binary Hit@5. Report sample sizes; avoid grand claims with a tiny affected subset.
 
 ## Baseline ladder (fixed evidence; same development inputs)
@@ -46,7 +50,7 @@ Report quality *and* uncertainty. For paired runs, compute per-profile metric di
 | R5 | | ✓ | ✓ | Text-only fusion |
 | **R6** | ✓ | ✓ | ✓ | **Proposal-compliant equal-weight RRF baseline** |
 
-Start with R0 in M2; add models as milestones deliver them. Do not compare runs using different candidate pools or oracle-vs-tracker profiles as though they were controlled ablations.
+R0 was completed at M2; add the remaining models as later milestones deliver them. Do not compare runs using different candidate pools or oracle-vs-tracker profiles as though they were controlled ablations.
 
 ## Evidence-aware experiment ladder
 

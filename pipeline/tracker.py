@@ -1,33 +1,65 @@
-"""STEP 2 · State tracker with recency decay.  STATUS: not built yet.
+from math import isfinite
 
-Minimal example: tests/fakes.py SimpleTracker (keeps the latest reading per type).
-Switch on: configs/system.json -> "tracker": "decay"
-No model: plain Python (manual section 5).
-"""
-
-from .interfaces import HistoryEntry, Reading, SlotState, State  # noqa: F401
+from .interfaces import TYPES, Flag, HistoryEntry, Reading, SlotState, State
 
 
 class DecayTracker:
+    """decay = how much one turn of age shrinks older evidence's weight: 1.0 = off (all turns equal), 0.9 = on."""
     name = "decay"
 
-    def __init__(self) -> None:
-        raise NotImplementedError("pipeline/tracker.py is not filled in yet (docs/INTEGRATION.md). "
-                                  "Delete this line once the code below is written.")
+    def __init__(self, decay: float = 1.0) -> None:
+        if isinstance(decay, bool) or not isinstance(decay, (int, float)) or not 0 < decay <= 1:
+            raise ValueError("decay must be a number in (0, 1]")
+        self.decay = float(decay)
 
     def update(self, state: State, reading: Reading) -> None:
-        """Merge this turn's readings into state. Changes `state` in place, returns nothing.
+        for r in reading.slots:
+            if r.slot not in TYPES or r.sign not in (-1, 1) or r.reason not in ("enjoyment", "familiarity", "neither"):
+                raise ValueError("Invalid extractor slot, sign or reason")
+            for value in (r.strength, r.confidence, r.reason_confidence):
+                if isinstance(value, bool) or not isinstance(value, (int, float)) or not isfinite(value) or not 0 <= value <= 1:
+                    raise ValueError("Extractor strength and confidences must be finite numbers in [0, 1]")
+            if not isinstance(r.source, str) or not r.source.strip():
+                raise ValueError("Extractor source must be non-empty")
+        state.last_reading_empty = not reading.slots
+        state.conflict_candidates = []
+        last = state.last_action
+        kind = last.payload.get("retry", "CLARIFY") if last and last.kind == "ABSTAIN" else last.kind if last else None
+        target = last.slot if last and kind in ("CHALLENGE", "PROBE") else None
+        for r in reading.slots:
+            entry = HistoryEntry(r.value, r.confidence, r.reason, r.source, state.turn, r.reason_confidence)
+            old = state.slots.get(r.slot)
+            history = (old.history if old else []) + [entry]
+            state.challenged.discard(r.slot)
+            state.resolved.discard(r.slot)
+            if r.slot == target:
+                state.resolved.add(r.slot)
+                state.flags = [f for f in state.flags if f.slot != r.slot]
+            elif old and old.value * r.value < 0 and not state.merge_conflicts:   # control arm merges instead
+                previous = HistoryEntry(old.value, old.confidence, old.reason, old.source, old.turn, old.reason_confidence)
+                state.conflict_candidates.append(Flag(r.slot, previous, entry))
+                old.history = history
+                continue
+            self._merge(state, r.slot, entry, history, old if r.slot != target else None)
 
-        Must keep doing what SimpleTracker in tests/fakes.py does (copy its code as a start):
-          - state.last_reading_empty = not reading.slots
-          - for each reading: append HistoryEntry(value, confidence, reason, source, state.turn,
-            reason_confidence) to that type's history and set state.slots[letter] = SlotState(...)
-            (keep reading.reason_confidence on both: the PROBE rule needs it > 0.60)
-            (the source sentence MUST be kept: the quote cards and the NLI check use it)
-          - if state.last_action is a PROBE on a type, add that letter to state.resolved
-        """
-        # ================= PUT YOUR CODE HERE =================
-        # New part: weight older evidence down (recency decay) when computing the slot value,
-        # merge weight = confidence. Keep value in -1..1 and confidence in 0..1.
-        # ======================================================
-        raise NotImplementedError
+    def _merge(self, state: State, slot: str, entry: HistoryEntry, history: list, old: SlotState | None) -> None:
+        """Confidence-weighted merge of one reading into a slot; older evidence shrinks by decay per turn of age."""
+        value, confidence, weight = entry.value, entry.confidence, entry.confidence
+        if old:
+            old_weight = old.weight if old.weight is not None else old.confidence
+            old_weight *= self.decay ** max(0, entry.turn - old.turn)   # older evidence counts for less
+            weight += old_weight
+            if weight:
+                value = (old.value * old_weight + entry.value * entry.confidence) / weight
+                confidence = (old.confidence * old_weight + entry.confidence ** 2) / weight
+        state.slots[slot] = SlotState(value, confidence, entry.reason, entry.source,
+                                      entry.turn, history, entry.reason_confidence, weight)
+        state.settled.discard(slot)
+        state.unresolved_conflicts = [t for t in state.unresolved_conflicts if t != slot]
+
+    def merge_unconfirmed(self, state: State, flag: Flag) -> None:
+        """An opposite reading that the rule or NLI did not confirm as a contradiction is ordinary evidence:
+        merge it, so the full arm does not throw away what the control arm keeps."""
+        old = state.slots.get(flag.slot)
+        if old is not None:
+            self._merge(state, flag.slot, flag.new, old.history, old)

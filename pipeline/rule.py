@@ -1,5 +1,3 @@
-"""STEP 3 · Contradiction rule (arithmetic, no model). Finds same-type readings with opposite signs."""
-
 from .interfaces import Flag, State
 
 

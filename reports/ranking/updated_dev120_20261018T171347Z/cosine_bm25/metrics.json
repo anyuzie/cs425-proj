@@ -1,0 +1,13 @@
+{
+  "hit_at_1": 0.075,
+  "hit_at_10": 0.4083333333333333,
+  "hit_at_5": 0.23333333333333334,
+  "ineligible_targets": 0,
+  "missing_targets": 0,
+  "mrr": 0.1748757847597314,
+  "ndcg_at_10": 0.18998133475443066,
+  "ndcg_at_5": 0.15843043577741384,
+  "profile_count": 120,
+  "unranked_targets": 0,
+  "zero_idcg_cases": 0
+}

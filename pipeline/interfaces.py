@@ -1,5 +1,3 @@
-"""Interfaces and shared dataclasses. State is keyed by RIASEC letters."""
-
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -17,7 +15,7 @@ class SlotReading:
     confidence: float
     reason: str          # enjoyment | familiarity | neither
     source: str          # source sentence
-    reason_confidence: float = 1.0   # probability of `reason`; PROBE needs > 0.60
+    reason_confidence: float = 1.0   # probability of `reason`; PROBE needs it above settings.probe_reason_conf
 
     @property
     def value(self) -> float:
@@ -51,6 +49,7 @@ class SlotState:
     turn: int
     history: list[HistoryEntry] = field(default_factory=list)
     reason_confidence: float = 1.0
+    weight: float | None = None  # cumulative accepted confidence; None for legacy states
 
 
 @dataclass
@@ -87,7 +86,17 @@ class State:
     kind_count: dict[str, int] = field(default_factory=dict)
     actions: list[dict] = field(default_factory=list)
     ranking: list = field(default_factory=list)       # this turn's top 100 RankedOccupations, set before the policy runs
+    ranking_trace: list[dict] = field(default_factory=list)
     done: bool = False
+    profile_history: list[dict[str, float]] = field(default_factory=list)
+    conflict_candidates: list[Flag] | None = None
+    merge_conflicts: bool = False      # control arm: merge opposite readings instead of holding them for a CHALLENGE
+    revisited: set[str] = field(default_factory=set)            # settled types asked once more at the end
+    unresolved_conflicts: list[str] = field(default_factory=list)  # challenges given up on (newer statement kept)
+    profile_changed: bool = False      # set by the policy when it changed a slot this turn; System re-ranks
+    turn_trace: dict = field(default_factory=dict)  # how this turn was handled, for the transcript log
+    asked_tasks: set[tuple[str, str]] = field(default_factory=set)
+    task_history: list[dict] = field(default_factory=list)  # question/source/reply plus actual extractor readings
 
 
 class Extractor(Protocol):

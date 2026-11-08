@@ -1,25 +1,17 @@
-"""STEP 1 · Preference extractor (DeBERTa).  STATUS: waiting for your model.
-
-Model: microsoft/deberta-v3-base, fine-tuned on data/extractor.jsonl (manual section 4).
-Switch: already on ("extractor": "deberta" in configs/system.json). The server will not start until you finish.
-
-How to integrate your model (you fill ONLY load() and predict(); read() below is ours):
-  1. Put your checkpoint in models/extractor/ (gitignored). Share it via Drive, with a hash in the folder name.
-  2. Create pipeline/extractor_model.py with your model class (the 3-head DeBERTa: direction, strength, reason).
-  3. Fill in load() and predict() below, then delete their `raise NotImplementedError` lines.
-  4. pip install -r requirements-models.txt
-  5. .venv/bin/python -m unittest discover -s tests
-  6. Start the server (.venv/bin/uvicorn app.server:app) and open /api/health: "extractor" must read "deberta".
-
-Do not import torch or transformers at the top of this file; import them inside load() and predict().
-"""
+# Original teammate hand-off instructions above are preserved verbatim from main.
+# Current adapter: load()/predict() are implemented using Hugging Face AutoModel,
+# so a separate extractor_model.py is not required by this implementation.
+# Supply the complete local checkpoint (config, tokenizer and trained weights),
+# directly in models/extractor/ or at configs/system.json paths.extractor_checkpoint.
+# The adapter expects 45 semantically labelled logits and config.extractor calibration.
+# See reports/ranking/m5/EXTRACTOR_INTEGRATION.md for implementation and validation status.
 
 import json
 import math
 import re
 from pathlib import Path
 
-# from .interfaces import Reading, SlotReading
+from .interfaces import Reading, SlotReading
 
 from transformers import (
 AutoTokenizer,
@@ -34,7 +26,6 @@ from transformers import AutoModel
 
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
 JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
-_NOT_FILLED = "pipeline/extractor.py: fill in load() and predict() (docs/INTEGRATION.md)"
 
 
 def _clamp(x: float) -> float:
@@ -73,17 +64,19 @@ class CustomConcatWithLayer(nn.Module):
         pooled = torch.cat([(h * mask).sum(1) / denom for h in hs], dim=-1)  # (B, n * H)
 
         return self.classifier(self.dropout(pooled))
-class DebertaExtractor:
+    
+class Extractor:
     name = "deberta"
 
     def __init__(self, checkpoint_dir: Path, labels_path: Path) -> None:
         labels = json.loads(Path(labels_path).read_text(encoding="utf-8"))
         self.types = labels["types"]                                                     # R I A S E C
         self.direction_names = {i: n for n, i in labels["direction_index"].items()}      # neutral positive negative
+        self.direction_index_neutral = labels["direction_index"]["neutral"]
         self.reason_names = {i: n for n, i in labels["reason_index"].items()}            # enjoyment familiarity neither
         self.neutral_idx = labels["direction_index"]["neutral"]
-        saved_cfg = AutoConfig.from_pretrained(checkpoint_dir)       # reads saved config.json
-        self.cfg = saved_cfg.extractor
+        self.config = AutoConfig.from_pretrained(checkpoint_dir)       # reads saved config.json
+        self.cfg = self.config.extractor
         
         self.load(Path(checkpoint_dir))
         
@@ -91,6 +84,12 @@ class DebertaExtractor:
     # Load Tokenizer, Model
     ###################################################################
     def load(self, checkpoint_dir: Path) -> None:
+        if not checkpoint_dir.is_dir() or not (checkpoint_dir / "config.json").is_file():
+            raise FileNotFoundError(
+                f"Extractor checkpoint missing at {checkpoint_dir.resolve()}. "
+                "Place the trained config.json, tokenizer files and weights directly in this folder, "
+                "or set paths.extractor_checkpoint in the system config (docs/INTEGRATION.md).")
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.use_bf16 = self.device.type == "cuda" and torch.cuda.is_bf16_supported()
 
@@ -105,37 +104,68 @@ class DebertaExtractor:
 
         self.model = model.to(self.device).eval() 
 
+        if not isinstance(self.cfg, dict):
+            raise ValueError("Extractor checkpoint config requires extractor calibration settings")
+        if type(self.cfg.get("max_len")) is not int or self.cfg["max_len"] < 4:
+            raise ValueError("Extractor max_len must be an integer >= 4")
+        if getattr(self.config, "num_labels", None) != 45:
+            raise ValueError("Extractor checkpoint must output 45 logits: direction 18, reason 3, strength 24")
+        for key in ("T_slot", "T_reason", "T_strength"):
+            value = self.cfg.get(key, 1.0 if key == "T_strength" else None)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
+                raise ValueError(f"Extractor {key} must be a finite positive temperature")
+        self._configure_heads(self.config)
+
+    def _configure_heads(self, config):
+        """Translate checkpoint logit labels into the shared labels.json ordering."""
+        labels = getattr(config, "id2label", {})
+        expected = ({f"{t}:{name}" for t in self.types for name in self.direction_names.values()}
+                    | set(self.reason_names.values())
+                    | {f"{t}:strength:{name}" for t in self.types
+                       for name in ("inactive", "dontmind", "mild", "strong")})
+        if len(labels) != 45 or set(labels.values()) != expected:
+            raise ValueError("Extractor id2label must explicitly name all 45 direction/reason/strength logits")
+        indices = {name: int(i) for i, name in labels.items()}
+        if set(indices.values()) != set(range(45)):
+            raise ValueError("Extractor id2label indices must be exactly 0..44")
+        self.direction_indices = [indices[f"{t}:{self.direction_names[i]}"] for t in self.types for i in range(3)]
+        self.reason_indices = [indices[self.reason_names[i]] for i in range(3)]
+        self.strength_indices = [indices[f"{t}:strength:{name}"] for t in self.types
+                                 for name in ("dontmind", "mild", "strong")]
+
     def predict(self, context: str | None, sentence: str) -> dict:
-        """TEAMMATE FILLS. Run the model on ONE sentence and return exactly:
+        """Run the trained model on ONE sentence and return exactly:
 
             {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists of 3, types in R I A S E C order,
                                                                        # class order = data/labels.json direction_index
-             "strength":  [s, ...],                                    # 6 floats 0..1 (sigmoid), same type order
+             "strength":  [s, ...],                                    # 6 mapped strengths 0..1, same type order
              "reason":    [p_enjoyment, p_familiarity, p_neither]}     # 3 probabilities, labels.json reason_index order
 
         Probabilities must already be softmaxed. Return plain Python floats/lists (tensor.tolist()).
         Input: tokenizer(context, sentence) when context is not None, else tokenizer(sentence);
         max_length=128, truncation=True. Wrap the forward pass in torch.no_grad().
         """
+        import torch
+
         final_dict = {}
         args = (context, sentence) if context else (sentence,)
-        enc = self.tok(*args, truncation="only_first" if context else True, max_length=self.cfg["max_len"],
+        enc = self.tok(*args, truncation=True, max_length=self.cfg["max_len"],
                     return_tensors="pt", return_token_type_ids=False).to(self.device)
         if self.cfg["custom_name"] != None:
             lg = self.model(**enc, custom_layers_n = self.cfg["custom_layers_pool_conc"])[0].float().cpu()
         else:
             lg = self.model(**enc, custom_layers_n = self.cfg["custom_layers_pool_conc"]).logits[0].float().cpu()                                 # 45 scores
     
-        sp  = torch.softmax(lg[:18].view(6, 3) / self.cfg["T_slot"], -1).tolist()                # [6, 3]  polarity per type
-        rp  = torch.softmax(lg[18:21] / self.cfg["T_reason"], -1).tolist()                       # [3]     reason
-        # strength: 6 types x 4 classes; drop the "inactive" column, keep dontmind / mild / strong
-        stp = torch.softmax(lg[21:45].view(6, 4)[:, 1:] / self.cfg.get("T_strength", 1.0), -1).tolist()
+        sp = torch.softmax(lg[self.direction_indices].view(6, 3) / self.cfg["T_slot"], -1).tolist()
+        rp = torch.softmax(lg[self.reason_indices] / self.cfg["T_reason"], -1).tolist()
+        # Retain the trained active-class mapping; inactive strength is omitted.
+        stp = torch.softmax(lg[self.strength_indices].view(6, 3) / self.cfg.get("T_strength", 1.0), -1).tolist()
 
         strength_scores = [0, 0, 0, 0, 0, 0] #initialised to 0 first
         strength_mapping = [0.2, 0.55, 1] # maps to: dontmind / mild / strong
         for i in range(len(sp)):
             pol = sp[i]
-            if max(pol) == pol[1]:   # check if the maximum probability is neutral
+            if max(range(len(pol)), key=pol.__getitem__) == self.direction_index_neutral:
                 continue #if polarity highest score is neutral, strength score is 0
             else:
                 strength_probs = stp[i]
@@ -184,83 +214,22 @@ class DebertaExtractor:
             if not ok:
                 raise ValueError(f"predict() key {key!r} has the wrong shape or non-numeric values; expected {desc}")
 
-    # def read(self, text: str, context: str | None = None, expected_slot: str | None = None) -> Reading:
-    #     # expected_slot is accepted for interface compatibility and unused: the model already sees the question as context.
-    #     best: dict[str, SlotReading] = {}
-    #     for sentence in self.sentences(text):
-    #         out = self.predict(context, sentence)
-    #         self._check(out)
-    #         reason_p = [float(p) for p in out["reason"]]
-    #         ri = max(range(len(reason_p)), key=reason_p.__getitem__)
-    #         for t, probs, strength in zip(self.types, out["direction"], out["strength"]):
-    #             probs = [float(p) for p in probs]
-    #             ci = max(range(len(probs)), key=probs.__getitem__)
-    #             name = self.direction_names[ci]
-    #             if name == "neutral":
-    #                 continue
-    #             r = SlotReading(t, 1 if name == "positive" else -1, _clamp(strength), _clamp(probs[ci]),
-    #                             self.reason_names[ri], sentence, _clamp(reason_p[ri]))
-    #             if t not in best or r.confidence > best[t].confidence:
-    #                 best[t] = r
-    #     return Reading(text, list(best.values()))
-
-
-# ============================================================
-# TEMPORARY MODEL TEST — DELETE AFTER TESTING
-# ============================================================
-if __name__ == "__main__":
-    import json
-
-    checkpoint_dir = Path(__file__).resolve().parent.parent / "models" / "extractor"
-    labels_path = Path(__file__).resolve().parent.parent / "data" / "labels.json"
-
-    print("Loading DeBERTa model...")
-    extractor = DebertaExtractor(checkpoint_dir, labels_path)
-    print(f"Model loaded successfully on {extractor.device}")
-
-    examples = [
-        ("What work do you enjoy?", "I enjoy building and repairing machines."),
-        ("What work do you enjoy?", "I love investigating scientific problems."),
-        ("What work do you enjoy?", "I enjoy helping and teaching people."),
-        ("What work do you enjoy?", "I like organising records and keeping information accurate."),
-        ("What work do you enjoy?", "I enjoy creating artwork and expressing my imagination."),
-        ("What work do you enjoy?", "I like leading teams and persuading people."),
-    ]
-
-    for i, (context, sentence) in enumerate(examples, 1):
-        print("\n" + "=" * 60)
-        print(f"TEST {i}: {sentence}")
-
-        try:
-            result = extractor.predict(context, sentence)
-            extractor._check(result)
-
-            print("\nDirection probabilities:")
-            for slot, probs in zip(extractor.types, result["direction"]):
-                idx = max(range(len(probs)), key=probs.__getitem__)
-                direction = extractor.direction_names[idx]
-                print(f"  {slot}: {direction} | {[round(p, 4) for p in probs]}")
-
-            print("\nStrength:")
-            for slot, score in zip(extractor.types, result["strength"]):
-                print(f"  {slot}: {score:.4f}")
-
-            reason_idx = max(
-                range(len(result["reason"])),
-                key=result["reason"].__getitem__
-            )
-            print("\nReason probabilities:")
-            print({
-                extractor.reason_names[j]: round(p, 4)
-                for j, p in enumerate(result["reason"])
-            })
-            print(f"Predicted reason: {extractor.reason_names[reason_idx]}")
-
-            print("\nOutput shape: VALID")
-
-        except Exception as e:
-            print(f"\nTEST FAILED: {type(e).__name__}: {e}")
-            raise
-
-    print("\nAll test inputs completed successfully.")
-
+    def read(self, text: str, context: str | None = None, expected_slot: str | None = None) -> Reading:
+        # expected_slot is accepted for interface compatibility and unused: the model already sees the question as context.
+        best: dict[str, SlotReading] = {}
+        for sentence in self.sentences(text):
+            out = self.predict(context, sentence)
+            self._check(out)
+            reason_p = [float(p) for p in out["reason"]]
+            ri = max(range(len(reason_p)), key=reason_p.__getitem__)
+            for t, probs, strength in zip(self.types, out["direction"], out["strength"]):
+                probs = [float(p) for p in probs]
+                ci = max(range(len(probs)), key=probs.__getitem__)
+                name = self.direction_names[ci]
+                if name == "neutral":
+                    continue
+                r = SlotReading(t, 1 if name == "positive" else -1, _clamp(strength), _clamp(probs[ci]),
+                                self.reason_names[ri], sentence, _clamp(reason_p[ri]))
+                if t not in best or r.confidence > best[t].confidence:
+                    best[t] = r
+        return Reading(text, list(best.values()))

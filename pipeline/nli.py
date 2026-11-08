@@ -1,32 +1,42 @@
-"""STEP 4 · NLI contradiction check.  STATUS: not built yet.
+import math
 
-Minimal example: tests/fakes.py PassthroughConfirmer (says "yes, contradiction" to everything).
-Switch on: configs/system.json -> "confirmer": "nli"
-Model:     cross-encoder/nli-deberta-v3-base (no training, used as is)
-
-Only runs when step 3 (the rule) finds two readings of one type with opposite signs.
-The system keeps the conflict when score > 0.60 (settings.confirm_threshold).
-Tune that number on the dev pairs of data/nli_pairs.jsonl; report once on the test pairs.
-"""
+MODEL_NAME = "cross-encoder/nli-deberta-v3-base"
 
 
 class NliConfirmer:
     name = "nli"
 
-    def __init__(self, model_name: str) -> None:
-        raise NotImplementedError("pipeline/nli.py is not filled in yet (docs/INTEGRATION.md). "
-                                  "Delete this line once the code below is written.")
-        # ================= PUT YOUR CODE HERE: load once =================
-        #   from sentence_transformers import CrossEncoder
-        #   self.model = CrossEncoder(model_name)
-        #   self.contradiction_index = <index of the "contradiction" label for this model>
-        # ==================================================================
+    def __init__(self, model_name: str = MODEL_NAME) -> None:
+        import torch
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        labels = {int(k): str(v).lower() for k, v in self.model.config.id2label.items()}
+        if set(labels) != {0, 1, 2} or set(labels.values()) != {
+            "contradiction", "entailment", "neutral"
+        }:
+            raise ValueError(f"Unverified NLI output label mapping: {labels!r}")
+        self.label_order = [labels[i] for i in range(3)]
+        self.contradiction_index = self.label_order.index("contradiction")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model.to(self.device).eval()
 
     def score(self, old_src: str, new_src: str) -> float:
-        """old_src  the earlier sentence, e.g. "I like bouncing ideas off people"
-        new_src  the new sentence,     e.g. "I hate group work"
-        Return the probability (0..1) that they contradict each other, as a plain float."""
-        # ================= PUT YOUR CODE HERE =================
-        # logits = self.model.predict([(old_src, new_src)])  -> softmax -> take the contradiction column
-        # ======================================================
-        raise NotImplementedError
+        """Return P(contradiction), separately from extractor confidence."""
+        return self.probabilities(old_src, new_src)["contradiction"]
+
+    def probabilities(self, old_src: str, new_src: str) -> dict[str, float]:
+        """Return all three named NLI probabilities from a single forward pass."""
+        import torch
+
+        features = self.tokenizer(old_src, new_src, padding=True, truncation=True,
+                                  max_length=512, return_tensors="pt").to(self.device)
+        with torch.inference_mode():
+            logits = self.model(**features).logits
+            if tuple(logits.shape) != (1, 3):
+                raise ValueError(f"Expected one NLI row with three logits, got {logits.shape}")
+            values = torch.softmax(logits.float(), dim=-1)[0].tolist()
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError("NLI returned a non-finite probability")
+        return {label: float(values[i]) for i, label in enumerate(self.label_order)}

@@ -16,9 +16,11 @@ All text in this package was drafted by an LLM and checked by blind LLM readers.
 | labelling/ | – | Team | GUIDE.md, real_sentences_template.csv and import_real.py for collecting and merging real student sentences |
 | question_bank.json | – | Policy + simulator | Opening, 18 CLARIFY questions, CHALLENGE / PROBE / ABSTAIN / RECOMMEND templates, and ANSWERS with 5 levels per question |
 | labels.json | – | All training code | Label indices, class weights (inverse frequency), strength values, input format, NLI binary mapping |
-| profiles.jsonl | 100 | **Final evaluation only** | Fresh v3 test set. Never tune on it. |
-| dev_profiles.jsonl | 60 | Tuning | Same format as the test set (20 original + 40 added 9 Oct from fresh targets) |
-| nli_pairs.jsonl | 139 | Contradiction-check validation | dev 75 (28 contradiction, 33 elaboration incl. 20 hard, 14 unrelated); test 64 (31 contradiction, 27 elaboration incl. 20 hard, 6 unrelated). Field `source` is hand / hard / profiles / dev_profiles. |
+| profiles.jsonl | 100 | **Final evaluation only** | v3 test set (unchanged). Never tune on it. |
+| profiles_v4.jsonl | 120 | **Final evaluation only** | Balanced test set (18 Oct): 20 students per top type, six patterns. Never tune on it. |
+| extractor_stress.jsonl | 400 | Extractor stress test only | 8 phrasing types × 50, same fields as extractor.jsonl plus `variation`; split `stress_test`. Never train on it. |
+| dev_profiles.jsonl | 120 | Tuning | Same format as the test set. D001–D060 as before; D061–D120 added 18 Oct to balance the top types (20 each). |
+| nli_pairs.jsonl | 175 | Contradiction-check validation | dev 88 (41 contradiction, 33 elaboration incl. 20 hard, 14 unrelated); test 87 (54 contradiction, 27 elaboration incl. 20 hard, 6 unrelated). Field `source`: hand / hard / profiles / dev_profiles / profiles_v4 / dev_profiles_v4. |
 | nli_pairs_blind.jsonl | 60 | Human sort check | The hand-made pairs with no labels |
 | eval/simulator.py, eval/metrics.py, eval/lexicon_baseline.py | – | Evaluation harness | Reference simulator and metrics, plus a keyword baseline (test macro-F1 0.48) |
 | scripts/ | – | Rebuilding | Every script that produced the files above |
@@ -114,3 +116,32 @@ Direction (positive / neutral / negative) with a **confidence**, plus a separate
 - eval/simulator.py: ABSTAIN with a slot now returns the CLARIFY answer for that slot and variant. To retry a CHALLENGE, call `answer("CHALLENGE", slot)` again.
 - eval/metrics.py: in `ndcg_at`, codes outside the pool earn nothing, so NDCG stays at or below 1 even if a ranking includes them.
 - Type keys: letters (R…C) in slots, strength, hidden_slots, resolutions and z columns; full names in question_bank.json, contradiction.slot and nli_pairs.slot.
+
+## 18 Oct: balanced profiles, patterns and the extractor stress test
+- **Why the old sets were skewed:** targets were balanced on O*NET's raw scores, but the system matches on z-scores, and the two disagree on the top type for most R and C jobs (Architects: raw top R, z top A). Test v3 had 0 Realistic-led students on z-scores. No degree-level job has Realistic as its top z-score.
+- **New students** are balanced on their own top z-type (`top_type`, = argmax of `hidden_slots`):
+  - dev: +60 (D061–D120), so dev has 20 per type (120);
+  - test: new `profiles_v4.jsonl`, 120 students, 20 per type. `profiles.jsonl` (v3) is unchanged.
+- **Patterns** (`pattern` field, now on every profile; older profiles are labelled by rule): single_dominant, two_strong, three_balanced, weak_uncertain, conflicting, generalist. A new student's `hidden_slots` is the target job's z-row reshaped by its pattern, plus small noise, with the chosen type on top. R-led students use the most Realistic degree jobs (engineers and similar) with Realistic raised.
+- **Targets:** 180 different jobs; none shared between dev and any test set.
+- **New fields:**
+  - `top_type`
+  - `pattern`
+  - `nearest_by_profile`: the 5 pool jobs closest to the student's own scores
+- **New metric:** `fit_hit_at` in eval/metrics.py counts a hit if the target or one of `nearest_by_profile` is in the top 5.
+- **Checks:** blind readers rated all 180 new texts without the numbers. 0 of 1,080 slots fell outside their band, and r = 0.88 with the hidden scores. Resolutions were written blind to the target.
+- **Perfect-reader ceiling** (structured cosine on hidden_slots), hit@5 / related-hit@5:
+
+  | Set | hit@5 | related-hit@5 |
+  |---|---|---|
+  | test v3 | 0.82 | 0.90 |
+  | dev (120) | 0.68 | 0.77 |
+  | test v4 | 0.47 | 0.69 |
+
+  - The v4 ceiling is lower because the patterns move people away from job averages. It is lowest for generalist students (about 0.06) and three_balanced students (about 0.33).
+  - R-led students reach about 0.35, because no degree job leads on R.
+  - Report hit@5 together with related-hit@5 and fit-hit@5, split by pattern and by top type.
+- **extractor_stress.jsonl (400)** is a separate test of hard phrasing. It covers 8 variations × 50: indirect_interest, ambivalence, contextual_dislike, experience_vs_preference, vague, multiple_interests, informal, temporal_change.
+  - The labels were checked by two blind readers plus a majority vote: direction agreement 99.9% (2 like/dislike flips in 4,800), strength 99.6%, reason 99.5%. Only 4 rows changed.
+  - The stand-in TF-IDF model scores macro-F1 0.68 on it (0.67 on the normal test split). Indirect interest is the hardest variation, at 0.51.
+- **nli_pairs.jsonl:** +36 contradictions taken from the new students (13 dev, 23 test), making 175 pairs.

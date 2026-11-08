@@ -2,7 +2,7 @@
 
 Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-The app has **no stand-ins**. It won't start until the four teammate parts (extractor, tracker, NLI check, policy) are filled in. Each one stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
+The app has **no stand-ins**. It won't start until the **tracker and policy** are filled in and the trained extractor checkpoint is in `models/extractor/`. Each missing piece stops startup with a message pointing here. The tests run on small fakes in `tests/fakes.py`, so you can work and test before the others finish.
 
 ---
 
@@ -10,11 +10,11 @@ The app has **no stand-ins**. It won't start until the four teammate parts (extr
 
 | Step | Part | File | Status | Config name (already set) |
 |---|---|---|---|---|
-| 1 | Preference extractor | `pipeline/extractor.py` (+ your `pipeline/extractor_model.py`) | **teammate**: fill `load()`, `predict()` | `"extractor": "deberta"` |
-| 2 | State tracker | `pipeline/tracker.py` | **teammate**: fill `update()` | `"tracker": "decay"` |
+| 1 | Preference extractor | `pipeline/extractor.py` | **done**; needs the checkpoint in `models/extractor/` | `"extractor": "deberta"` |
+| 2 | State tracker | `pipeline/tracker.py` | **done**: confidence-weighted merge; recency decay is `settings.decay` (1.0 = off, 0.9 = on) | `"tracker": "decay"` |
 | 3 | Contradiction rule | `pipeline/rule.py` | done | `"rule": "rule"` |
-| 4 | NLI check | `pipeline/nli.py` | **teammate**: fill `__init__()`, `score()` | `"confirmer": "nli"` |
-| 5 | Ranker | `recommender/structured.py` | done (baseline); BM25 + FAISS + RRF is the project lead's work | `"ranker": "structured"` |
+| 4 | NLI check | `pipeline/nli.py` | **done** (threshold tuned, see §7) | `"confirmer": "nli"` |
+| 5 | Ranker | `recommender/` (`RankingPipeline`, set up in `configs/ranking.yaml`) | **done**: structured, BM25, MiniLM/FAISS and RRF (M1–M5) | `"ranker": "configured"` |
 | 6 | Policy | `pipeline/policy.py` | **teammate**: fill `ManualPolicy._decide()` | `"policy": "manual"` |
 | 7 | Template filler | `pipeline/templates.py` | done | `"filler": "question-bank"` |
 | — | Evaluation harness | `eval/harness.py` (new) | to write | `"no_probing": true` for the control arm |
@@ -34,7 +34,7 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 | **Data package** (O\*NET + team data, read-only) | `data/` | yes, already in the repo; don't edit it |
 | **Checkpoints, indexes, logs** | `models/<part>/`, `indexes/`, `logs/` | **never** |
 
-- Training code may import from the app; for example, it imports your model class from `pipeline/extractor_model.py`. **The app never imports from `training/`.**
+- Training code may import from the app (for example `scripts/check_m5_extractor.py` uses `pipeline/`). **The app never imports from `training/`.**
 - `.gitignore` blocks model files anywhere in the repo (`*.safetensors`, `*.bin`, `*.pt`, `*.pth`, `*.ckpt`, `*.onnx`, `*.pkl`, `*.zip`, `checkpoints/`, `runs/`, `wandb/`, `outputs/`).
 
 **In your `training/<part>/` folder:**
@@ -48,25 +48,14 @@ You never need to edit `configs/system.json`, `pipeline/system.py`, `pipeline/re
 
 ### Step 1 · Extractor (`pipeline/extractor.py`)
 
-You write **two** methods. `read()` is already done: it splits the message into sentences, calls your `predict()` on each, and builds the readings.
+**How answers to bot questions are read** (`pipeline/answers.py`): the extractor was trained with the bot's question attached only to short CLARIFY replies, so attaching it to anything else makes the question's words leak into the reading. So the answer **speaks for itself first**: it is read alone, and the question is attached only if that finds nothing ("the first one", "either is fine"). Short answers to a CHALLENGE ("the first one" / "the second one") keep the earlier or newer statement, and short answers to a PROBE ("I enjoy it" / "just what I know") keep the stance as enjoyment or set it to 0, by rule.
 
-1. **Train** in `training/extractor/`, on `data/extractor.jsonl`:
-   - Use the shipped `split` field; don't re-split.
-   - Use the class weights in `data/labels.json`.
-   - Put the model class (DeBERTa + direction, strength and reason heads) in `pipeline/extractor_model.py`, and import it from your training code, so training and the app use the same class.
-2. **Export and share:**
-   - Save the checkpoint folder (weights, `config.json`, tokenizer files) and zip it with a short hash in the name, e.g. `extractor-3f9c2a.zip`.
-   - Upload it to the team Drive folder ([TEAM DRIVE LINK]) and post the name in the group chat.
-3. **Everyone unzips it** so the files sit **directly** in `models/extractor/` (`models/extractor/config.json`, not `models/extractor/extractor-3f9c2a/config.json`).
-4. **Fill `load(checkpoint_dir)`.** It runs once at server start. Load the tokenizer and the model onto `self` (e.g. `self.tok`, `self.model`) and call `.eval()`. Import torch and transformers here, not at the top of the file.
-5. **Fill `predict(context, sentence)`.** It runs once per sentence. Tokenize with `tokenizer(context, sentence)` when `context` isn't `None` (it's the bot question being answered), else `tokenizer(sentence)`, with `max_length=128` and `truncation=True`, inside `torch.no_grad()`. Return plain Python floats and lists, already softmaxed:
-   ```python
-   {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists, types in R I A S E C order
-    "strength":  [s, ...],                                     # 6 floats 0..1 (sigmoid)
-    "reason":    [p_enjoyment, p_familiarity, p_neither]}      # class orders: data/labels.json
-   ```
-   A wrong shape makes `read()` raise an error naming the key.
-6. **Delete** the two `raise NotImplementedError` lines.
+**Done.** `load()` and `predict()` are implemented for the trained 45-output checkpoint (18 direction, 3 reason, 24 strength). The outputs are picked by their `config.id2label` names and converted to the `labels.json` order, so the model's own class order doesn't matter. It's a standard `AutoModelForSequenceClassification`, so no custom model class is needed. What's left is installing the checkpoint:
+
+1. **Get the checkpoint** from the team Drive folder ([TEAM DRIVE LINK]) and unzip it so the files sit **directly** in `models/extractor/` (`models/extractor/config.json`, not `models/extractor/extractor-3f9c2a/config.json`). It needs `config.json` (with the 45 labels and the `extractor` calibration block), the weights and the tokenizer files.
+2. **Check it:** `python scripts/check_m5_extractor.py --checkpoint models/extractor` runs the real extractor with the configured ranking and the remaining parts faked. Details: [extractor wiring and validation](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
+
+**Retraining or re-exporting:** train in `training/extractor/` on `data/extractor.jsonl` (use the shipped `split` field and the class weights in `data/labels.json`), keep the 45 labelled outputs and the `extractor` calibration block in `config.json`, zip the checkpoint with a short hash in the name (e.g. `extractor-3f9c2a.zip`), upload it and post the name in the group chat.
 
 ### Step 2 · Tracker (`pipeline/tracker.py`)
 
@@ -81,22 +70,14 @@ Copy from: `SimpleTracker` in `tests/fakes.py`, which does everything except the
 
 ### Step 4 · NLI check (`pipeline/nli.py`)
 
-1. **Fill `__init__(model_name)`.** Load `cross-encoder/nli-deberta-v3-base` once (e.g. `sentence_transformers.CrossEncoder`) and find which output index is "contradiction". There's no training; the model downloads by name.
-2. **Fill `score(old_src, new_src)`.** Return the softmaxed probability of "contradiction" as a plain float.
-3. **Tune the threshold** in `training/nli/`:
-   - Sweep it on the 75 `split == "dev"` pairs of `data/nli_pairs.jsonl`, using `nli_binary` from `labels.json`.
-   - Report precision and recall once on the 64 `test` pairs.
-   - Put the chosen number in `settings.confirm_threshold` (currently 0.60).
-4. **Delete** the `raise NotImplementedError` lines.
-
-Copy from: `PassthroughConfirmer` in `tests/fakes.py` (it always returns 1.0).
+**Done.** Real system presets now load `models/nli-probing-v1/checkpoint` once; `score(old_src, new_src)` returns P(contradiction). The runtime threshold remains **0.6**. This checkpoint uses the project probing-conflict policy, which differs from standard logical NLI. See [deployment and checkpoint verification](NLI_DEPLOYMENT.md). Older stock-model threshold results do not select this checkpoint.
 
 ### Step 6 · Policy (`pipeline/policy.py`)
 
 1. **Write `ManualPolicy._decide(state)`** and return `Action(kind, slot, why, payload)`. Check these top to bottom; the first match wins:
    1. **CHALLENGE**: `state.flags` isn't empty. Payload `{old_src, old_turn, new_src}`.
-   2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > PROBE_REASON_CONF` (0.60), and it hasn't been probed yet. Payload `{new_src}`.
-   3. **ABSTAIN**: the last action was a question and the reply had no stance. Two strikes settle the type.
+   2. **PROBE**: a slot's `reason == "familiarity"` **and** `reason_confidence > settings.probe_reason_conf` (default 0.60), and it hasn't been probed yet. Payload `{new_src}`.
+   3. **ABSTAIN**: the last action was a question and the reply had no stance. Ask **once** more (same question with an example after "what do you mean?"/"not sure", next phrasing after an unreadable answer); if still unsure, move on: the type is marked "no clear preference" (counts as covered; asked once more only while the profile is not ready), and a stuck CHALLENGE keeps the newer statement at half confidence.
    4. **RECOMMEND**: every type filled or settled, the profile has converged, and the conversation is 5 to 10 turns in.
    5. **CLARIFY**: ask the unfilled type with the highest variance. Use `state.ranking`, this turn's top 100 occupations, best first, each with `occupation_z`.
 2. **Update the bookkeeping yourself:** `state.challenged`, `probed`, `settled` and `strikes`.
@@ -110,9 +91,9 @@ Copy from: `PassthroughConfirmer` in `tests/fakes.py` (it always returns 1.0).
 
 Copy from: `SimplePolicy` in `tests/fakes.py`, a minimal version of all five rules.
 
-### Step 5 · Ranker (project lead)
+### Step 5 · Ranker
 
-Write a class with `name`, `eligible_count` and `rank(interests, observed_types, user_sentences, top_k) -> RankingResponse`. Put each card's matched tasks in `evidence`; the cards quote the first two. Register it in `pipeline/registry.py` and set `"ranker"` in the config. Plan: BM25 → MiniLM + FAISS → RRF, per `cs425-ranking-docs/`. BM25 should skip short replies like "the first one".
+**Done.** `"ranker": "configured"` loads `configs/ranking.yaml` once at startup and builds a `RankingPipeline` (structured, BM25, MiniLM/FAISS, RRF). The default preset is structured (M1) only; the three-way RRF preset is tested separately. It reranks every turn from the current tracker values and the user's own messages, before the policy runs. Cards show up to three matched tasks when a text component (BM25 or dense) is on; with the structured-only default they show none, and the card copy says the ranking comes from the interest profile. `settings.input_mode` must be set explicitly: `actual_tracker` for the app, `mock_tracker` for fixtures. More: [ranking architecture](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 decision](../reports/ranking/m5/DECISION.md).
 
 ---
 
@@ -139,7 +120,7 @@ Write a class with `name`, `eligible_count` and `rank(interests, observed_types,
 - Types are letters `R I A S E C`. Use full names (`Realistic`) only when reading `question_bank.json`.
 - Keep the user's sentences word for word in `source`.
 - Load models once (in `load()` or `__init__`), never inside `read`, `score`, `update` or `decide`.
-- In `pipeline/extractor.py` and `pipeline/nli.py`, import torch and transformers inside the method that needs them, so the tests run without them. At the top of `pipeline/extractor_model.py` or anything in `training/` is fine.
+- In `pipeline/extractor.py` and `pipeline/nli.py`, import torch and transformers inside the method that needs them, so the tests run without them. At the top of anything in `training/` is fine.
 - Need another package? Add it to `requirements-models.txt` with an exact version (`package==1.2.3`) if the app needs it, or to `training/<part>/requirements-training.txt` if only training does.
 - Same input, same output: the rule, the policy and the ranker must be deterministic.
 
@@ -161,13 +142,67 @@ Write a class with `name`, `eligible_count` and `rank(interests, observed_types,
 - Where transcripts are stored and when they are deleted (manual section 10).
 - A "why" line specific to each card (right now all five share one sentence).
 - The team Drive folder link (step 1 above).
+- **NLI threshold:** tuning chose 0.9 (`reports/nli/threshold.json`), but `configs/system.json` still has `confirm_threshold: 0.6`. Whoever owns the NLI check should confirm and update it.
 
 ## Install and run
 
+### Without the trained models (mock mode)
+
+For trying the whole app on any laptop before the models are shared. **Everything is real except the three
+model parts:** a keyword reader stands in for the extractor, every rule-flagged contradiction counts as
+confirmed, and the fixed question bank replaces T5. No torch, no checkpoints, nothing to download.
+
 ```
 python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt -r requirements-models.txt
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m devtools.run_mock serve            # browser: http://localhost:8000 (researcher panel on)
+.venv/bin/python -m devtools.run_mock chat             # same, in the terminal
+.venv/bin/python -m devtools.run_mock eval --limit 20  # full vs no_probing on 20 dev profiles
+```
+
+On Windows use `.venv\Scripts\python.exe` instead of `.venv/bin/python`.
+
+Things to try: *"My dad runs a sales company so that's what I know."* → PROBE → *"just what I know"*;
+*"I love working with machines and tools."* then *"I hate repairing machines, it is boring."* → CHALLENGE →
+*"the second one"*; answer the either-or questions with *"definitely"*, *"no way"* or *"either is fine"*.
+
+**Mock results are flow checks, not results.** The keyword reader is crude, so the `eval` numbers mean
+nothing. Mock runs are labelled `mock_tracker`, and the app refuses to label them `actual_tracker`.
+
+### With the real models
+
+The models are not in GitHub (`/models/` is gitignored: each is several hundred MB). Every machine needs:
+
+| Folder | What | Get it from |
+|---|---|---|
+| `models/extractor/` | Trained DeBERTa extractor | Koon (Drive zip; `config.json` directly in the folder) |
+| `models/nli-probing-v1/checkpoint/` | Fine-tuned probing-v1 NLI | Copy shared checkpoint; verify with `scripts/check_nli_checkpoint.py` |
+| `models/t5-questions-v3b/` | Trained T5 question wording | Chua. Only needed for T5 wording: the evaluation uses the question bank. |
+
+About 3–4 GB in total with the Python packages.
+
+```
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt -r requirements-models.txt -r requirements-ranking.txt
 # data/ comes with the repo (O*NET 31.0 + the team data package); nothing to download
 .venv/bin/uvicorn app.server:app --reload           # http://localhost:8000, researcher panel on
 CM_STUDY_MODE=1 .venv/bin/uvicorn app.server:app    # participant sessions: panel hidden
 ```
+
+Then, with the server running for the scenarios:
+
+```
+.venv/bin/python -m eval.scenario_tests                                    # 19 real-model scenarios
+.venv/bin/python -m eval.dialogue --config configs/system.question-bank.json --limit 120   # headline experiment
+.venv/bin/python training/extractor/context_leak_check.py                  # does the question leak into readings?
+```
+
+**Reading the transcripts.** Every turn is logged to `logs/<participant code>.jsonl`, including how the answer was read (alone, with the question, or by a rule), what the extractor found, contradiction checks with their NLI scores, the policy's reason, whether T5 or the question bank wrote the reply, the top 5 and the time per step:
+
+```
+.venv/bin/python -m devtools.view_logs                        # list logs and sessions
+.venv/bin/python -m devtools.view_logs logs/P-014.jsonl --last  # latest session, turn by turn
+.venv/bin/python -m devtools.view_logs logs/P-014.jsonl --brief # one line per turn
+```
+
+For the decay comparison, run the headline experiment twice: with `"decay": 1.0` and with `"decay": 0.9` in the config.

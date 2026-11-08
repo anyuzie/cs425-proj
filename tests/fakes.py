@@ -9,11 +9,12 @@ from pathlib import Path
 from pipeline import registry
 from pipeline.interfaces import (MAX_TURNS, TYPES, Action, HistoryEntry, Reading, SlotReading, SlotState,
                                  State)
-from pipeline.policy import PROBE_REASON_CONF, PolicyBase
+from pipeline.policy import PolicyBase
 from recommender.schemas import RankingResponse, TaskEvidence
 from recommender.structured import StructuredRanker
 
 FILL_ORDER = ("C", "E", "A", "R", "S", "I")
+PROBE_REASON_CONF = .60  # preserve the original fake-policy baseline
 
 # known sentence -> (slot, sign, strength, reason, reason_confidence); confidence is always 0.9
 SCRIPT = {
@@ -131,7 +132,7 @@ class StructuredKeywordRanker:
         self._ranker = StructuredRanker(occupations_path)
         self.eligible_count = self._ranker.eligible_count
         self._n = n_evidence
-        eligible = {o.code for o in self._ranker._occupations}
+        eligible = self._ranker.eligible_codes
         self._tasks: dict[str, list[tuple[str, str, set[str]]]] = {}
         with Path(tasks_path).open(encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):

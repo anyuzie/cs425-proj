@@ -1,9 +1,16 @@
 __pycache__/
 *.py[cod]
 .venv/
-logs/
-models/
-indexes/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+# Top-level only: keep recommender/models/ source visible to Git.
+/logs/
+/models/
+/indexes/
+# Local model bundles prepared for teammate handoff.
+/share/
+artifacts/ranking/
 docs/plans/
 .impeccable/
 # model / training artefacts, anywhere in the repo
@@ -20,3 +27,29 @@ runs/
 wandb/
 .ipynb_checkpoints/
 outputs/
+
+# Local experiment reports, including summaries, screenshots and provenance.
+/reports/t5/
+/reports/dialogue/
+/reports/scenarios/
+/reports/test_suite*.txt
+
+# Historical T5 presets retained locally; current defaults/V3 stay versioned.
+/configs/system.t5-v1.json
+/configs/system.t5-v2.json
+/configs/system.t5.structured.json
+
+# Bulky generated ranking outputs; retain frozen baseline fixtures.
+/reports/ranking/**/predictions.jsonl
+/reports/ranking/**/turn_predictions.json
+!/reports/ranking/m2/baseline/predictions.jsonl
+
+# contradictor testing
+nli_manual_tests/*
+
+# Local NLI experiment outputs and personal test inputs (weights remain under /models/).
+/reports/nli/*.csv
+/reports/nli/v1_summary.json
+/reports/nli/probing_v1/
+/reports/nli/archive_v1_literal/
+/data/xinyan_test.jsonl

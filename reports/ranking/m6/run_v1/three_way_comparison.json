@@ -1,0 +1,118 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m6_stress_v1_dcf3a51db585408580114d250143f122",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        -0.08333333333333333,
+        0.03333333333333333
+      ],
+      "improved": 1,
+      "mean_difference": -0.016666666666666666,
+      "regressed": 2
+    },
+    "hit_at_10": {
+      "ci95": [
+        -0.03333333333333333,
+        0.13333333333333333
+      ],
+      "improved": 5,
+      "mean_difference": 0.05,
+      "regressed": 2
+    },
+    "hit_at_5": {
+      "ci95": [
+        -0.06666666666666667,
+        0.08333333333333333
+      ],
+      "improved": 3,
+      "mean_difference": 0.016666666666666666,
+      "regressed": 2
+    },
+    "mrr": {
+      "ci95": [
+        -0.05456005053796154,
+        0.05424822415665851
+      ],
+      "improved": 32,
+      "mean_difference": 0.0005527540485124896,
+      "regressed": 12
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        -0.0060186714644703074,
+        0.0624514184459685
+      ],
+      "improved": 22,
+      "mean_difference": 0.026639721771579125,
+      "regressed": 12
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        -0.021228812993281446,
+        0.049883414499189684
+      ],
+      "improved": 14,
+      "mean_difference": 0.013935566186936782,
+      "regressed": 10
+    }
+  },
+  "profiles": 60,
+  "seed": 425,
+  "strata": {
+    "all_active": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": 0.0,
+        "hit_at_10": 0.0,
+        "hit_at_5": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_10": 0.0,
+        "ndcg_at_5": 0.0
+      },
+      "rank_improved": 0,
+      "rank_regressed": 0
+    },
+    "disputed": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": -0.06666666666666667,
+        "hit_at_10": -0.06666666666666667,
+        "hit_at_5": -0.06666666666666667,
+        "mrr": -0.06129185656231698,
+        "ndcg_at_10": -0.01773883868796254,
+        "ndcg_at_5": -0.034503210535953496
+      },
+      "rank_improved": 10,
+      "rank_regressed": 4
+    },
+    "empty_active": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": 0.0,
+        "hit_at_10": 0.26666666666666666,
+        "hit_at_5": 0.13333333333333333,
+        "mrr": 0.07984741509861752,
+        "ndcg_at_10": 0.140114381071772,
+        "ndcg_at_5": 0.1079852516374759
+      },
+      "rank_improved": 13,
+      "rank_regressed": 2
+    },
+    "superseded": {
+      "count": 15,
+      "metric_differences": {
+        "hit_at_1": 0.0,
+        "hit_at_10": 0.0,
+        "hit_at_5": 0.0,
+        "mrr": -0.016344542342250575,
+        "ndcg_at_10": -0.01581665529749296,
+        "ndcg_at_5": -0.017739776353775268
+      },
+      "rank_improved": 9,
+      "rank_regressed": 6
+    }
+  },
+  "treatment_run_id": "m6_stress_v1_83c6271df43b464ab04f62c3de45735d"
+}
