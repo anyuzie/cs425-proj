@@ -19,7 +19,7 @@ import math
 import re
 from pathlib import Path
 
-from .interfaces import Reading, SlotReading
+# from .interfaces import Reading, SlotReading
 
 from transformers import (
 AutoTokenizer,
@@ -27,6 +27,10 @@ AutoModelForSequenceClassification,
 )
 from pathlib import Path
 import torch
+from safetensors.torch import load_model
+from transformers import AutoConfig
+import torch.nn as nn
+from transformers import AutoModel
 
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
 JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
@@ -35,8 +39,40 @@ _NOT_FILLED = "pipeline/extractor.py: fill in load() and predict() (docs/INTEGRA
 
 def _clamp(x: float) -> float:
     return min(1.0, max(0.0, float(x)))
+class CustomConcatWithLayer(nn.Module):
+    def __init__(self, custom_layers_n, model_name, dropout=0.1):
+        super().__init__()
+        try:  # some models have a pooling layer (roberta), others don't (deberta)
+            self.encoder = AutoModel.from_pretrained(model_name, add_pooling_layer=False)
+        except TypeError:
+            self.encoder = AutoModel.from_pretrained(model_name)
+        hidden_size = self.encoder.config.hidden_size
+        self.config = self.encoder.config
+        
+        self.dropout = nn.Dropout(dropout)
+        # input to the classifier is larger because of concatenation
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden_size * custom_layers_n, 512),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, 45),
+        )
 
+    def forward(self, input_ids, attention_mask, custom_layers_n):
+        outputs = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            output_hidden_states=True,
+        )
 
+        # concatenate the last n_layers for pooling
+        hs = outputs.hidden_states[-custom_layers_n:]
+        mask = attention_mask.unsqueeze(-1).to(hs[0].dtype)       # (B, T, 1)
+        denom = mask.sum(1).clamp(min=1e-9)                       # (B, 1)
+
+        pooled = torch.cat([(h * mask).sum(1) / denom for h in hs], dim=-1)  # (B, n * H)
+
+        return self.classifier(self.dropout(pooled))
 class DebertaExtractor:
     name = "deberta"
 
@@ -45,16 +81,28 @@ class DebertaExtractor:
         self.types = labels["types"]                                                     # R I A S E C
         self.direction_names = {i: n for n, i in labels["direction_index"].items()}      # neutral positive negative
         self.reason_names = {i: n for n, i in labels["reason_index"].items()}            # enjoyment familiarity neither
+        self.neutral_idx = labels["direction_index"]["neutral"]
+        saved_cfg = AutoConfig.from_pretrained(checkpoint_dir)       # reads saved config.json
+        self.cfg = saved_cfg.extractor
         self.load(Path(checkpoint_dir))
-
+        
     ###################################################################
     # Load Tokenizer, Model
     ###################################################################
     def load(self, checkpoint_dir: Path) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.use_bf16 = self.device.type == "cuda" and torch.cuda.is_bf16_supported()
+
         self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
-        self.model = AutoModelForSequenceClassification.from_pretrained(checkpoint_dir).to(self.device).eval()
-        self.cfg = self.model.config.extractor    
+
+        if self.cfg["custom_name"]!= None:                                           # custom head model
+            model_cls = globals()[self.cfg["custom_name"]]
+            model = model_cls(self.cfg["custom_layers_pool_conc"], self.cfg["model_name"])
+            load_model(model, str(checkpoint_dir / "model.safetensors"))
+        else:                                                        # plain HF classifier
+            model = AutoModelForSequenceClassification.from_pretrained(checkpoint_dir)
+
+        self.model = model.to(self.device).eval() 
 
     def predict(self, context: str | None, sentence: str) -> dict:
         """TEAMMATE FILLS. Run the model on ONE sentence and return exactly:
@@ -72,7 +120,10 @@ class DebertaExtractor:
         args = (context, sentence) if context else (sentence,)
         enc = self.tok(*args, truncation="only_first" if context else True, max_length=self.cfg["max_len"],
                     return_tensors="pt", return_token_type_ids=False).to(self.device)
-        lg = self.model(**enc).logits[0].float().cpu()                                  # 45 scores
+        if self.cfg["custom_name"] != None:
+            lg = self.model(**enc, custom_layers_n = self.cfg["custom_layers_pool_conc"])[0].float().cpu()
+        else:
+            lg = self.model(**enc, custom_layers_n = self.cfg["custom_layers_pool_conc"]).logits[0].float().cpu()                                 # 45 scores
     
         sp  = torch.softmax(lg[:18].view(6, 3) / self.cfg["T_slot"], -1).tolist()                # [6, 3]  polarity per type
         rp  = torch.softmax(lg[18:21] / self.cfg["T_reason"], -1).tolist()                       # [3]     reason
@@ -80,7 +131,7 @@ class DebertaExtractor:
         stp = torch.softmax(lg[21:45].view(6, 4)[:, 1:] / self.cfg.get("T_strength", 1.0), -1).tolist()
 
         strength_scores = [0, 0, 0, 0, 0, 0] #initialised to 0 first
-        strength_mapping = [0.2, 0.55, 1] #maps to: dontmind / mild / strong
+        strength_mapping = [0.2, 0.55, 1] # maps to: dontmind / mild / strong
         for i in range(len(sp)):
             pol = sp[i]
             if max(pol) == pol[1]:   # check if the maximum probability is neutral
@@ -132,25 +183,25 @@ class DebertaExtractor:
             if not ok:
                 raise ValueError(f"predict() key {key!r} has the wrong shape or non-numeric values; expected {desc}")
 
-    def read(self, text: str, context: str | None = None, expected_slot: str | None = None) -> Reading:
-        # expected_slot is accepted for interface compatibility and unused: the model already sees the question as context.
-        best: dict[str, SlotReading] = {}
-        for sentence in self.sentences(text):
-            out = self.predict(context, sentence)
-            self._check(out)
-            reason_p = [float(p) for p in out["reason"]]
-            ri = max(range(len(reason_p)), key=reason_p.__getitem__)
-            for t, probs, strength in zip(self.types, out["direction"], out["strength"]):
-                probs = [float(p) for p in probs]
-                ci = max(range(len(probs)), key=probs.__getitem__)
-                name = self.direction_names[ci]
-                if name == "neutral":
-                    continue
-                r = SlotReading(t, 1 if name == "positive" else -1, _clamp(strength), _clamp(probs[ci]),
-                                self.reason_names[ri], sentence, _clamp(reason_p[ri]))
-                if t not in best or r.confidence > best[t].confidence:
-                    best[t] = r
-        return Reading(text, list(best.values()))
+    # def read(self, text: str, context: str | None = None, expected_slot: str | None = None) -> Reading:
+    #     # expected_slot is accepted for interface compatibility and unused: the model already sees the question as context.
+    #     best: dict[str, SlotReading] = {}
+    #     for sentence in self.sentences(text):
+    #         out = self.predict(context, sentence)
+    #         self._check(out)
+    #         reason_p = [float(p) for p in out["reason"]]
+    #         ri = max(range(len(reason_p)), key=reason_p.__getitem__)
+    #         for t, probs, strength in zip(self.types, out["direction"], out["strength"]):
+    #             probs = [float(p) for p in probs]
+    #             ci = max(range(len(probs)), key=probs.__getitem__)
+    #             name = self.direction_names[ci]
+    #             if name == "neutral":
+    #                 continue
+    #             r = SlotReading(t, 1 if name == "positive" else -1, _clamp(strength), _clamp(probs[ci]),
+    #                             self.reason_names[ri], sentence, _clamp(reason_p[ri]))
+    #             if t not in best or r.confidence > best[t].confidence:
+    #                 best[t] = r
+    #     return Reading(text, list(best.values()))
 
 
 # ============================================================
