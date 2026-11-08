@@ -13,14 +13,58 @@ from pathlib import Path
 
 from .interfaces import Reading, SlotReading
 
+from transformers import (
+AutoTokenizer,
+AutoModelForSequenceClassification,
+)
+from pathlib import Path
+import torch
+from safetensors.torch import load_model
+from transformers import AutoConfig
+import torch.nn as nn
+from transformers import AutoModel
+
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
 JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
 
 
 def _clamp(x: float) -> float:
     return min(1.0, max(0.0, float(x)))
+class CustomConcatWithLayer(nn.Module):
+    def __init__(self, custom_layers_n, model_name, dropout=0.1):
+        super().__init__()
+        try:  # some models have a pooling layer (roberta), others don't (deberta)
+            self.encoder = AutoModel.from_pretrained(model_name, add_pooling_layer=False)
+        except TypeError:
+            self.encoder = AutoModel.from_pretrained(model_name)
+        hidden_size = self.encoder.config.hidden_size
+        self.config = self.encoder.config
+        
+        self.dropout = nn.Dropout(dropout)
+        # input to the classifier is larger because of concatenation
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden_size * custom_layers_n, 512),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, 45),
+        )
 
+    def forward(self, input_ids, attention_mask, custom_layers_n):
+        outputs = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            output_hidden_states=True,
+        )
 
+        # concatenate the last n_layers for pooling
+        hs = outputs.hidden_states[-custom_layers_n:]
+        mask = attention_mask.unsqueeze(-1).to(hs[0].dtype)       # (B, T, 1)
+        denom = mask.sum(1).clamp(min=1e-9)                       # (B, 1)
+
+        pooled = torch.cat([(h * mask).sum(1) / denom for h in hs], dim=-1)  # (B, n * H)
+
+        return self.classifier(self.dropout(pooled))
+    
 class Extractor:
     name = "deberta"
 
@@ -30,8 +74,12 @@ class Extractor:
         self.direction_names = {i: n for n, i in labels["direction_index"].items()}      # neutral positive negative
         self.direction_index_neutral = labels["direction_index"]["neutral"]
         self.reason_names = {i: n for n, i in labels["reason_index"].items()}            # enjoyment familiarity neither
+        self.neutral_idx = labels["direction_index"]["neutral"]
+        self.config = AutoConfig.from_pretrained(checkpoint_dir)       # reads saved config.json
+        self.cfg = self.config.extractor
+        
         self.load(Path(checkpoint_dir))
-
+        
     ###################################################################
     # Load Tokenizer, Model
     ###################################################################
@@ -41,25 +89,32 @@ class Extractor:
                 f"Extractor checkpoint missing at {checkpoint_dir.resolve()}. "
                 "Place the trained config.json, tokenizer files and weights directly in this folder, "
                 "or set paths.extractor_checkpoint in the system config (docs/INTEGRATION.md).")
-        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-        import torch
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.tok = AutoTokenizer.from_pretrained(checkpoint_dir, local_files_only=True)
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            checkpoint_dir, local_files_only=True).to(self.device).eval()
-        self.cfg = getattr(self.model.config, "extractor", None)
+        self.use_bf16 = self.device.type == "cuda" and torch.cuda.is_bf16_supported()
+
+        self.tok = AutoTokenizer.from_pretrained(checkpoint_dir)
+
+        if self.cfg["custom_name"]!= None:                                           # custom head model
+            model_cls = globals()[self.cfg["custom_name"]]
+            model = model_cls(self.cfg["custom_layers_pool_conc"], self.cfg["model_name"])
+            load_model(model, str(checkpoint_dir / "model.safetensors"))
+        else:                                                        # plain HF classifier
+            model = AutoModelForSequenceClassification.from_pretrained(checkpoint_dir)
+
+        self.model = model.to(self.device).eval() 
+
         if not isinstance(self.cfg, dict):
             raise ValueError("Extractor checkpoint config requires extractor calibration settings")
-        if getattr(self.model.config, "num_labels", None) != 45:
-            raise ValueError("Extractor checkpoint must output 45 logits: direction 18, reason 3, strength 24")
         if type(self.cfg.get("max_len")) is not int or self.cfg["max_len"] < 4:
             raise ValueError("Extractor max_len must be an integer >= 4")
+        if getattr(self.config, "num_labels", None) != 45:
+            raise ValueError("Extractor checkpoint must output 45 logits: direction 18, reason 3, strength 24")
         for key in ("T_slot", "T_reason", "T_strength"):
             value = self.cfg.get(key, 1.0 if key == "T_strength" else None)
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
                 raise ValueError(f"Extractor {key} must be a finite positive temperature")
-        self._configure_heads(self.model.config)
+        self._configure_heads(self.config)
 
     def _configure_heads(self, config):
         """Translate checkpoint logit labels into the shared labels.json ordering."""
@@ -96,10 +151,10 @@ class Extractor:
         args = (context, sentence) if context else (sentence,)
         enc = self.tok(*args, truncation=True, max_length=self.cfg["max_len"],
                     return_tensors="pt", return_token_type_ids=False).to(self.device)
-        with torch.inference_mode():
-            lg = self.model(**enc).logits[0].float().cpu()                              # 45 scores
-        if lg.numel() != 45:
-            raise ValueError("Extractor forward pass must return exactly 45 logits")
+        if self.cfg["custom_name"] != None:
+            lg = self.model(**enc, custom_layers_n = self.cfg["custom_layers_pool_conc"])[0].float().cpu()
+        else:
+            lg = self.model(**enc, custom_layers_n = self.cfg["custom_layers_pool_conc"]).logits[0].float().cpu()                                 # 45 scores
     
         sp = torch.softmax(lg[self.direction_indices].view(6, 3) / self.cfg["T_slot"], -1).tolist()
         rp = torch.softmax(lg[self.reason_indices] / self.cfg["T_reason"], -1).tolist()
@@ -107,7 +162,7 @@ class Extractor:
         stp = torch.softmax(lg[self.strength_indices].view(6, 3) / self.cfg.get("T_strength", 1.0), -1).tolist()
 
         strength_scores = [0, 0, 0, 0, 0, 0] #initialised to 0 first
-        strength_mapping = [0.2, 0.55, 1] #maps to: dontmind / mild / strong
+        strength_mapping = [0.2, 0.55, 1] # maps to: dontmind / mild / strong
         for i in range(len(sp)):
             pol = sp[i]
             if max(range(len(pol)), key=pol.__getitem__) == self.direction_index_neutral:
