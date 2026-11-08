@@ -5,21 +5,30 @@ from ..models.description_reranker import DescriptionReranker, VARIANTS
 from ..models.sequential_description_config import SEQUENTIAL_VARIANTS
 from ..schemas import SignalScore
 from .aggregation_config import AGGREGATED_PARAMETERS
+from .clause_tasks import CONFIGURATIONS as CLAUSE_CONFIGURATIONS, ClauseTaskReranker, base_variant
 from .context_tasks import CONFIGURATIONS, ContextTaskReranker
 
 
 class SemanticMatchingPipeline:
     @staticmethod
     def validate(parameters):
-        if parameters not in CONFIGURATIONS.values() and parameters != AGGREGATED_PARAMETERS and parameters not in SEQUENTIAL_VARIANTS and parameters not in VARIANTS.values():
+        if (parameters not in CONFIGURATIONS.values() and parameters not in CLAUSE_CONFIGURATIONS.values()
+                and parameters != AGGREGATED_PARAMETERS and parameters not in SEQUENTIAL_VARIANTS
+                and parameters not in VARIANTS.values()):
             raise ValueError("reranking requires a frozen description variant")
 
     def __init__(self, occupations_path, eligible_codes, parameters):
         self.validate(parameters)
         self.parameters = deepcopy(parameters)
         context_tasks = parameters in CONFIGURATIONS.values()
+        self.clause_tasks = parameters in CLAUSE_CONFIGURATIONS.values()
         self.sequential = parameters["algorithm"] == "sequential_descriptions"
         self.aggregated = parameters["algorithm"] == "aggregated_descriptions"
+        if self.clause_tasks:
+            self.stages = [ClauseTaskReranker(occupations_path, eligible_codes,
+                                              parameters=base_variant(parameters),
+                                              policy=parameters["text_policy"])]
+            return
         selections = parameters["stages"] if self.sequential or self.aggregated else [parameters]
         scorer = ContextTaskReranker if context_tasks else DescriptionReranker
         if context_tasks and not (self.sequential or self.aggregated):

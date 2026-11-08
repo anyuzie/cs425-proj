@@ -1,7 +1,7 @@
 # Career Matcher: architecture
 
 
-**Current status:** M1, M3 BM25/RRF, M4 cached MiniLM/FAISS and M5 ranking integration are implemented. The live app selects `ranker: configured`, loading `configs/ranking.yaml` once at startup; **M1-only remains the default**. The legacy `structured` facade remains available. M5's ranking control is frozen with explicitly mocked upstream acceptance. Production activation still requires the extractor checkpoint, completed tracker/NLI/policy implementations and teammate latency agreement. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 acceptance](../reports/ranking/m5/DECISION.md) and [extractor integration status](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
+**Current status:** M1, M3 BM25/RRF, M4 cached MiniLM/FAISS and M5 ranking integration are implemented. The live app selects `ranker: configured`, loading `configs/ranking.yaml` once at startup; **M1-only remains the default, scored by observed-dimension cosine (`cosine_similarity@baseline_v1`) since 8 November 2026** ([decision](../reports/ranking/cosine_default/DECISION.md)). The weighted dot product is kept as the frozen control. The legacy `structured` facade remains available. M5's ranking control is frozen with explicitly mocked upstream acceptance. Production activation still requires the extractor checkpoint, completed tracker/NLI/policy implementations and teammate latency agreement. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 acceptance](../reports/ranking/m5/DECISION.md) and [extractor integration status](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
 
 How the system is built, which file does what, and how one message moves through the code.
 To add your part (what to fill in, where files go, training hand-off, PR checklist), see [INTEGRATION.md](INTEGRATION.md). Section 11 below lists every function in each important file.
@@ -50,8 +50,8 @@ Rule of thumb: **training code may import shared application code, but the app n
 | `pipeline/tracker.py` | 2 | done | State tracker: confidence-weighted merge, optional recency decay (`settings.decay`); in the control arm it merges opposite statements instead of holding them |
 | `pipeline/rule.py` | 3 | done | Contradiction rule |
 | `pipeline/nli.py` | 4 | **teammate** fills `__init__()` + `score()` | NLI contradiction check |
-| `recommender/ranker.py` | 5 | done | Configured M1/BM25/MiniLM pipeline with optional occupation-level RRF; M1-only default |
-| `recommender/structured.py` | 5 | done | Backward-compatible M1-only facade |
+| `recommender/ranker.py` | 5 | done | Configured M1/BM25/MiniLM pipeline with optional occupation-level RRF; M1-only default (cosine since 8 Nov 2026) |
+| `recommender/structured.py` | 5 | done | Backward-compatible M1-only facade (fixed weighted dot product; not used by any live config) |
 | `pipeline/policy.py` | 6 | **teammate** fills `ManualPolicy._decide()` | Dialogue policy. `PolicyBase.decide()` is done. |
 | `pipeline/templates.py` | 7 | done | Template filler |
 | `app/server.py`, `app/schemas.py`, `app/turn_log.py` | — | done | Server, API shapes, transcript log |
@@ -172,7 +172,7 @@ The five rules, checked top to bottom (first match wins):
 
 ### Steps 5 and 7 (done)
 
-- **Step 5:** `RankingPipeline.rank(interests, observed_types, user_sentences, top_k)` returns a `RankingResponse`. `configs/ranking.yaml` independently selects M1, BM25 and MiniLM variants. One usable component bypasses fusion; two or more use configured equal-weight RRF at `k=60`; none returns `no_signal`. M1-only remains default and supplies no task quotes. Enabled MiniLM retrieval attaches provisional task matches; cards expose up to three per occupation without claiming that similarity establishes enjoyment.
+- **Step 5:** `RankingPipeline.rank(interests, observed_types, user_sentences, top_k)` returns a `RankingResponse`. `configs/ranking.yaml` independently selects M1, BM25 and MiniLM variants. One usable component bypasses fusion; two or more use configured equal-weight RRF at `k=60`; none returns `no_signal`. M1-only remains default and supplies no task quotes; its M1 score is the cosine between the interest vector and the occupation z-row over observed types (since 8 November 2026; previously the weighted dot product). Enabled MiniLM retrieval attaches provisional task matches; cards expose up to three per occupation without claiming that similarity establishes enjoyment.
 - **Step 7:** `filler.fill(action, payload)` picks the reply from the question bank and fills in the user's quoted sentences.
 
 ### All together: `System.step` in `pipeline/system.py`
@@ -232,7 +232,7 @@ What runs when the user presses Send, in order.
 | File | Read by | When |
 |---|---|---|
 | `configs/system.json` | `pipeline/system.py` `System.load` | Startup |
-| `configs/ranking.yaml` | `pipeline/registry.py`, through `RankingPipeline` | Startup; legacy `structured` factory retains fixed M1-only selection |
+| `configs/ranking.yaml` | `pipeline/registry.py`, through `RankingPipeline` | Startup; every `configs/system*.json` uses `configured` (cosine via this file, or `system.cosine.json` → `m1_cosine.json`); the legacy `structured` factory retains the fixed dot product for compatibility only |
 | `data/occupations.csv` | `recommender/data_loader.py`, through `RankingPipeline` | Startup |
 | `artifacts/ranking/` | MiniLM component: pinned model and task cache/index | Startup, only when M4 is enabled; no task corpus embedding per turn |
 | `data/question_bank.json`, `data/labels.json` | `pipeline/templates.py`; `labels.json` also by `pipeline/extractor.py` (class orders) | Startup |

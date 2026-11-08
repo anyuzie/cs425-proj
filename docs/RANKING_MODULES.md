@@ -83,6 +83,13 @@ All three read `configs/ranking/workflow.json`; `--config` selects another workf
 Its paths are relative to the repository root. Chat receives the workflow's active
 ranking selection, overriding the system file's ranking path in memory.
 
+As of 8 November 2026, `active.json` and the initial `candidate.json` both select
+`cosine_similarity@baseline_v1` with fusion disabled, matching `configs/ranking.yaml`
+used by the web app and ordinary terminals. This is an explicit selection change
+using the existing cosine variant and dialogue evidence, not a new promotion run.
+The dot-product control remains in `baseline_v1.json`. Later workflow promotions
+change only `active.json`; they do not automatically change the web app's YAML.
+
 Edit `configs/ranking/candidate.json`, then run `python -m recommender.workflow evaluate`.
 Or test a preserved preset without editing the candidate file:
 

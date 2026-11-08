@@ -18,9 +18,15 @@ from recommender.ranker import BASELINE_CONFIG
 
 
 class ConfigurationTests(unittest.TestCase):
-    def test_yaml_default_matches_accepted_baseline(self):
+    def test_yaml_default_is_the_accepted_cosine_selection(self):
+        # Promoted on dialogue evidence (reports/ranking/cosine_default/DECISION.md).
         config, _ = load_configuration(Path("configs/ranking.yaml"))
-        self.assertEqual(config, BASELINE_CONFIG)
+        cosine, _ = load_configuration(Path("configs/ranking/m1_cosine.json"))
+        self.assertEqual(config, cosine)
+
+    def test_dot_product_control_remains_the_programmatic_baseline(self):
+        baseline, _ = load_configuration(Path("configs/ranking/baseline_v1.json"))
+        self.assertEqual(baseline["components"], BASELINE_CONFIG["components"])
 
     def test_invalid_yaml_duplicate_keys_and_nonmapping(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -100,7 +106,7 @@ class ConfigurationTests(unittest.TestCase):
             with (root / "history.csv").open(newline="") as handle:
                 rows = list(csv.DictReader(handle))
             self.assertEqual(len(rows), 2)
-            self.assertEqual(rows[0]["m1"], "weighted_dot_product@baseline_v1")
+            self.assertEqual(rows[0]["m1"], "cosine_similarity@baseline_v1")  # configs/ranking.yaml default
             self.assertEqual(rows[0]["config_hash"], manifest["config_sha256"])
 
     def test_zero_argument_cli_and_automatic_reports(self):

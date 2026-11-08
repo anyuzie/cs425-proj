@@ -1,0 +1,8 @@
+{
+  "components": {
+    "m1": {"algorithm": "weighted_distance", "variant": "kappa3_v1"},
+    "m3": null,
+    "m4": null
+  },
+  "fusion": null
+}

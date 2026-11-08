@@ -1,0 +1,28 @@
+{
+  "definition": "Saved v2 extractor readings replayed through DecayTracker.update on a fresh first-turn State; identical vectors and observed types to the source, plus slot_weights and re-derived slot_reasons.",
+  "git_revision": "505f2ac993c7ac24d4418c38a44e499dcb0bde90",
+  "outputs_sha256": {
+    "sessions.jsonl": "bd2c4f5f38eaa68e7a4b612c1332c1eff5df0aa8cd9c9b9d2721ee7c88e65c7b"
+  },
+  "profile_count": 120,
+  "reason_changes_vs_source": [],
+  "replay": "opening_turn_v1",
+  "session_format": 3,
+  "source": "data/eval/extractor_sessions_dev_v2",
+  "source_manifest_sha256": "33f52bab32d9f280db7bd79e9eeb252c5707c44584857aa467a627e0b1f8ad2e",
+  "source_outputs_sha256": {
+    "readings.jsonl": "0ae899359d1c737ec14fb3833b7fee6d890b55bda6710c39b0e819459957f642",
+    "sessions.jsonl": "ac0ecd9fec2ea89996ab67eda465f43d6fec90933c0cc80d1bb150c6812c5315"
+  },
+  "source_sha256": {
+    "pipeline/interfaces.py": "e26ab28d976c2d2a76ccedadb4ae550d7a69ab13ac61b558f0218367c74a3ae1",
+    "pipeline/tracker.py": "12701ed07529bd8ce0bbcc503e167148ab0208afc187e06492ff5bc71d611962",
+    "scripts/replay_extractor_sessions.py": "d82c653d623cae04d72b58844f879d7669e3f409a4267d29fa2b7afc84105be1"
+  },
+  "tracker": {
+    "decay": 1.0,
+    "name": "decay",
+    "reason_mode": "evidence_v1"
+  },
+  "working_tree_dirty": true
+}

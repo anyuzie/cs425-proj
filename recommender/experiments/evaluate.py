@@ -104,6 +104,9 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
     if ranker.evidence_filter == "active_only" and (mode == "oracle" or any(
             r.source_evidence is None for requests in replay.values() for r in requests)):
         raise ValueError("active_only requires source_evidence on every tracker turn")
+    if ranker.profile_policy != "raw" and (mode == "oracle" or any(
+            r.slot_reasons is None for requests in replay.values() for r in requests)):
+        raise ValueError("profile_policy requires slot_reasons on every tracker turn")
     snapshots, metrics, predictions, times = [], [], [], []
     turn_predictions = []
     fused_profiles = 0
@@ -121,11 +124,18 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
                     "observed_types": sorted(request.observed_types), "user_sentences": request.user_sentences}
                 if request.source_evidence is not None:
                     snapshot["source_evidence"] = request.source_evidence
+                if request.slot_reasons is not None:
+                    snapshot["slot_reasons"] = request.slot_reasons
+                if request.slot_weights is not None:
+                    snapshot["slot_weights"] = request.slot_weights
                 snapshots.append(snapshot)
                 start = perf_counter()
                 response = (ranker.rank_with_evidence(request.interests, request.observed_types,
-                    request.user_sentences, request.source_evidence, len(pool)) if request.source_evidence is not None
-                    else ranker.rank(request.interests, request.observed_types, request.user_sentences, len(pool)))
+                    request.user_sentences, request.source_evidence, len(pool), slot_reasons=request.slot_reasons,
+                    slot_weights=request.slot_weights)
+                    if request.source_evidence is not None
+                    else ranker.rank(request.interests, request.observed_types, request.user_sentences, len(pool),
+                                     slot_reasons=request.slot_reasons, slot_weights=request.slot_weights))
                 times.append(perf_counter() - start)
                 turn_predictions.append({**snapshot, "status": response.status, "reason": response.reason,
                     "query_diagnostics": response.query_diagnostics,
@@ -200,6 +210,7 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         "dataset_split": evaluation_config["split"],
         "hypothesis": f"Evaluate selected ranking on {mode} development inputs; evidence_filter={ranker.evidence_filter}; reranking={ranker.selection_config.get('reranking', {}).get('variant', 'none')}; final turn per session for tracker metrics",
         "evidence_filter": ranker.evidence_filter,
+        "profile_policy": ranker.profile_policy,
         "evidence_policy_version": "m6-v1" if any(r.source_evidence is not None for rs in replay.values() for r in rs) else None,
         "query_policy": "raw chronological user-only utterances; no stance or lifecycle filtering" if ranker.evidence_filter == "raw" else "active statements only; disputed and superseded excluded; structured vector unchanged",
         "evaluation_unit": "profile" if mode == "oracle" else "session final turn",

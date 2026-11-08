@@ -1,11 +1,13 @@
 components:
   m1:
-    algorithm: weighted_dot_product
+    # Live default since 8 November 2026 (reports/ranking/cosine_default/DECISION.md).
+    # The frozen control weighted_dot_product@baseline_v1 stays registered and is
+    # selectable with configs/ranking/baseline_v1.json.
+    algorithm: cosine_similarity
     variant: baseline_v1
   m3: null
   m4: null
 
-# Specified future fusion baseline; one usable component bypasses fusion.
-fusion:
-  algorithm: rrf
-  k: 60
+# Identical to configs/ranking/m1_cosine.json, the configuration evaluated in
+# reports/ranking/dialogue_probing_v1. One usable component needs no fusion.
+fusion: null

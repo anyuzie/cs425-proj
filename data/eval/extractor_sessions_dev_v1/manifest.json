@@ -1,0 +1,38 @@
+{
+  "definition": "Opening profile text only, one turn; DebertaExtractor.read then DecayTracker.update on a fresh State, as System.step does on turn 1. No policy, probing, NLI, confirmation or ranking.",
+  "extractor_checkpoint": "models\\extractor",
+  "extractor_device": "cpu",
+  "extractor_files_sha256": {
+    "added_tokens.json": "a4b6bfe668f2b3cf6f0cd535e98a0663d2d0d4a4a15f13075ad3597d33985a23",
+    "best_model.pt": "a63fc07a417559cbb4829986d32a98b6575027ac26de44e9b7701c397bef7dad",
+    "config.json": "862ce37855e1060a637d5f2b51582f88dd1fd731c2ff3e7ec947d276506d9f70",
+    "model.safetensors": "1204bcb06890b657d7c72b3f8f03c06316e929aad8122940f809132ea09e7226",
+    "special_tokens_map.json": "ed7c099c988dbb414b18a6980d20cb57b91b7cd119f6f6941eb364b0e892e712",
+    "spm.model": "c679fbf93643d19aab7ee10c0b99e460bdbc02fedf34b92b05af343b4af586fd",
+    "tokenizer.json": "56b459685e720792de562341d832d93a9ef598a10a38834ff57d651eb8e3d919",
+    "tokenizer_config.json": "700dba386cc05b6b14e74add7fe9293a6cb3ab16f3aa2eb177c76e288592bf01"
+  },
+  "git_revision": "b3aa40383ef3b8ce694919de6289c56f919a3879",
+  "input_mode_rationale": "Snapshots are produced by the configured production extractor and tracker from text; they are not scripted or derived from hidden_slots. The single-turn replay is not a live multi-turn dialogue.",
+  "labels_sha256": "1f6267c613a3ebc63ed8cdbe78bbdb224e4244c4c6918e6a3124483daffa1fb1",
+  "outputs_sha256": {
+    "readings.jsonl": "0ae899359d1c737ec14fb3833b7fee6d890b55bda6710c39b0e819459957f642",
+    "sessions.jsonl": "ac3ef1b7127c3d52d3c1816d7450563ed2ad9bd518a4d3f56d68097fb2505727"
+  },
+  "profile_count": 120,
+  "profiles": "data\\dev_profiles.jsonl",
+  "profiles_sha256": "438bbd1dc4774b77bedb8f376bede9545dc1d485ede9f5fe0322e1f8e8684b3f",
+  "replay": "opening_turn_v1",
+  "source_sha256": {
+    "pipeline/extractor.py": "ebc790c6c11dbc6f1152809dd66351dca771de51c995f4cb8d2053b2e593bc68",
+    "pipeline/interfaces.py": "7bce81cfba4760cf034938c4de854fe9c6dc3be1050db736ebb44b87aa8942cb",
+    "pipeline/tracker.py": "14b0371485e2673455940b6cb98a1c28c0329985b902da4d9028cacfc8a7e798",
+    "scripts/build_extractor_sessions.py": "c9382909149f863b7b9fec1b41087eebfc18c3d24a6eab20066e7cc1cc362c29"
+  },
+  "system_config_sha256": "50ad4437ce216321689caff801a32c1e72e3121347d6152973c9d8b0c1d287b5",
+  "tracker": {
+    "decay": 1.0,
+    "name": "decay"
+  },
+  "working_tree_dirty": true
+}

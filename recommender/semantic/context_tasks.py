@@ -58,6 +58,8 @@ class ContextTaskReranker(DescriptionReranker):
                 tasks[row["code"]][task_id] = text
         if not all(tasks.values()):
             raise ValueError("Every eligible occupation requires tasks")
+        # Exposed read-only for subclasses that score individual task statements.
+        self.tasks = {code: dict(sorted(values.items())) for code, values in tasks.items()}
         self.descriptions = {code: "Context:\n" + description + "\nTasks:\n" + "\n".join(
             text for _, text in sorted(tasks[code].items())) for code, description in self.descriptions.items()}
         self.chunk_counts = {}

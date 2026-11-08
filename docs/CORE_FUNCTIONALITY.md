@@ -11,7 +11,7 @@ this is a functional check, not a model-quality acceptance result.
 | Choose actions | OPENING, CLARIFY, PROBE, CHALLENGE, ABSTAIN and RECOMMEND are wired. Controlled tests cover neutral retries, persistent/recurrent conflicts and resolutions. |
 | Stop conversations | Minimum five turns and stable complete profile; hard cap ten; tests cover both stopping and no-probing control. |
 | Generate wording | Local fine-tuned T5 loaded in the HTTP app; invalid/repeated wording falls back to templates. Exact quotations inserted by code. |
-| Rank occupations | Original main default: structured weighted-dot-product scoring through configs/ranking.yaml. Existing retrieval/fusion variants are retained, not selected by default. |
+| Rank occupations | Default: observed-dimension cosine scoring through configs/ranking.yaml (since 8 November 2026, [decision](../reports/ranking/cosine_default/DECISION.md); the original weighted dot product is kept as the frozen control). Existing retrieval/fusion variants are retained, not selected by default. |
 | Show results and citations | Live HTTP conversation ended at turn seven with five occupations. All fifteen displayed task citations were checked against their occupation in `data/tasks.csv`. |
 | Browser/session support | Page returned HTTP 200; health shows real components and 378 eligible occupations. API tests cover sessions, validation, duplicate messages, debug/study presentation and logs. |
 | Evaluate dialogue | New `eval.dialogue` uses real System with paired full/no-probing development simulations; six conversations completed. Labels remain outside System inputs. |
