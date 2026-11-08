@@ -17,7 +17,7 @@ from recommender.models.ranker import RankingPipeline
 
 
 class RankingAppIntegrationTests(unittest.TestCase):
-    def test_default_web_startup_uses_cosine(self):
+    def test_default_web_startup_uses_cosine_semantic_fusion(self):
         # Load the server's default system file unchanged, then substitute only
         # upstream test components. Keep its real ranker selection and paths.
         from_config = System.from_config
@@ -39,16 +39,16 @@ class RankingAppIntegrationTests(unittest.TestCase):
                 self.assertEqual(loaded[0], json.loads(Path("configs/system.json").read_text()))
                 ranker = app.state.system.ranker
                 self.assertEqual(ranker.component_identifiers,
-                                 {"m1": "cosine_similarity@baseline_v1", "m3": "", "m4": ""})
-                cosine = RankingPipeline(config=Path("configs/ranking/m1_cosine.json"))
-                self.assertEqual(ranker.selection_config, cosine.selection_config)
+                                 {"m1": "cosine_similarity@baseline_v1", "m3": "", "m4": "occupation_dual_encoder@finetuned_v1"})
+                expected_ranker = RankingPipeline(config=Path("configs/ranking/occupation_semantic_fusion_v1.json"))
+                self.assertEqual(ranker.selection_config, expected_ranker.selection_config)
                 self.assertEqual(client.get("/api/health").status_code, 200)
                 session = client.post("/api/session", json={"debug": True}).json()
                 response = client.post("/api/chat", json={"session_id": session["session_id"],
                     "text": "I love working with machines and tools. I love analysing data."})
                 self.assertEqual(response.status_code, 200, response.text)
                 row = response.json()["trace"]["ranking_trace"][-1]
-                expected = cosine.rank(row["interests"], set(row["observed_types"]), row["user_sentences"])
+                expected = expected_ranker.rank(row["interests"], set(row["observed_types"]), row["user_sentences"])
                 self.assertEqual(row["occupations"], [asdict(o) for o in expected.occupations])
 
     def test_configured_rankings_reach_policy_api_and_logs(self):

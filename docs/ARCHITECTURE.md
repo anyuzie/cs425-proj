@@ -1,6 +1,8 @@
 # Career Matcher: architecture
 
 
+**Superseded 9 November 2026:** the live default is now RIASEC cosine + fine-tuned semantic retrieval (`occupation_dual_encoder@finetuned_v1`) fused by RRF k=60; cosine remains selectable via `configs/system.cosine.json`. See [decision](../reports/ranking/occupation_semantic_default/DECISION.md).
+
 **Current status:** M1, M3 BM25/RRF, M4 cached MiniLM/FAISS and M5 ranking integration are implemented. The live app selects `ranker: configured`, loading `configs/ranking.yaml` once at startup; **M1-only remains the default, scored by observed-dimension cosine (`cosine_similarity@baseline_v1`) since 8 November 2026** ([decision](../reports/ranking/cosine_default/DECISION.md)). The weighted dot product is kept as the frozen control. The legacy `structured` facade remains available. M5's ranking control is frozen with explicitly mocked upstream acceptance. Production activation still requires the extractor checkpoint, completed tracker/NLI/policy implementations and teammate latency agreement. See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md), [M5 acceptance](../reports/ranking/m5/DECISION.md) and [extractor integration status](../reports/ranking/m5/EXTRACTOR_INTEGRATION.md).
 
 How the system is built, which file does what, and how one message moves through the code.

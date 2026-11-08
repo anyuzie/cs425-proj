@@ -16,7 +16,8 @@ SCRIPTS = [
 ]
 
 
-def make_system(ranking_path=Path("configs/ranking.yaml")):
+# Structured RIASEC (M1) integration fixture: pinned to cosine, independent of the app YAML default.
+def make_system(ranking_path=Path("configs/ranking/m1_cosine.json")):
     config = json.loads(Path("tests/test_config.json").read_text())
     config["components"]["ranker"] = "configured"
     config["paths"]["ranking_config"] = str(ranking_path.resolve())

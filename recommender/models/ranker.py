@@ -110,7 +110,7 @@ class RankingPipeline:
         inputs = ComponentInput(interests, frozenset(observed), tuple(request.user_sentences), weights)
         response = self._rank(inputs, request.top_k)
         if profile:
-            response.query_diagnostics = {"profile": profile}
+            response.query_diagnostics = {**response.query_diagnostics, "profile": profile}
         return response
 
     def rank_with_evidence(self, interests, observed_types, user_sentences, source_evidence, top_k=100, *,
@@ -121,7 +121,7 @@ class RankingPipeline:
         interests, observed, weights, profile = self._profile(request)
         # Only text changes here; the vector changes only through profile_policy.
         response = self._rank(ComponentInput(interests, frozenset(observed), tuple(sentences), weights), top_k)
-        response.query_diagnostics = {**diagnostics, **({"profile": profile} if profile else {})}
+        response.query_diagnostics = {**response.query_diagnostics, **diagnostics, **({"profile": profile} if profile else {})}
         return response
 
     def rank_oracle(self, inputs: OracleInput) -> RankingResponse:
@@ -146,8 +146,19 @@ class RankingPipeline:
             rankings[key] = result
         selected, fused = select_ranking(rankings, self._config["fusion"])
         selected.validate_pool(self.eligible_codes)
+        semantic_diagnostics = {}
+        if any(r.algorithm == 'occupation_dual_encoder' for r in self._resolved.values()):
+            semantic_diagnostics = {'occupation_semantic': {
+                'requested': self.selection_config, 'resolved': self.component_identifiers,
+                'components': {key: {'status': r.status, 'reason': r.reason} for key,r in rankings.items()},
+                'model_index': self._components['m4'].metadata,
+                'query': self._components['m4'].query_diagnostics(inputs),
+                'composition': 'rrf_k60' if fused else 'single_usable_component',
+                'observed_types': sorted(inputs.observed_types),
+                'xgboost_invoked': False, 'xgboost_reason': 'no compatible career-relevance labels/schema for semantic features',
+                'fallback_reason': '; '.join(f'{k}: {r.reason}' for k,r in rankings.items() if r.status != 'usable') or None}}
         if selected.status != "usable":
-            return RankingResponse("no_signal", reason=selected.reason)
+            return RankingResponse("no_signal", reason=selected.reason, query_diagnostics=semantic_diagnostics)
         scores = {key: {item.code: item for item in ranking.occupations} for key, ranking in rankings.items()}
         evidence = {}
         for ranking in rankings.values():
@@ -162,7 +173,7 @@ class RankingPipeline:
             results.append(RankedOccupation(occupation.code, occupation.title, rank, dict(occupation.z_scores),
                                             rrf_score=item.score if fused else None, signals=signals,
                                             evidence=deepcopy(evidence.get(item.code, []))))
-        response = RankingResponse("ranked", occupations=results)
+        response = RankingResponse("ranked", occupations=results, query_diagnostics=semantic_diagnostics)
         if self._reranker:
             response = self._semantic_pipeline.rerank(response, inputs.user_sentences)
         response.occupations = response.occupations[:top_k]

@@ -227,9 +227,14 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         "eligibility": evaluation_config["eligibility"], "ranking_depth": "full eligible pool; MRR not truncated at 100",
         "metric_definitions": "Hit@1/5/10 exact target; full-pool MRR; NDCG@5/10 gains 2^grade-1, target=4/short=3/long=2/supplemental=1, max grade per eligible code, zero IDCG=0; macro Recall@5/10/20/50 over all eligible positive-grade labels, empty relevance=0; all profiles in denominator",
         "python": platform.python_version(), "dependencies": {"PyYAML": version("PyYAML"), **dense_identity.get("packages", {})},
-        "model_revision": dense_identity.get("parameters", {}).get("model_revision"),
+        "model_revision": dense_identity.get("parameters", {}).get("model_revision") or dense_identity.get("revision"),
         "task_index_fingerprint": dense_metadata.get("artifact_sha256", {}).get("index.faiss"),
-        "auxiliary_dataset_sha256": {dense_identity["parameters"]["tasks_path"]: dense_identity["tasks_sha256"]} if dense_identity else {},
+        # Legacy MiniLM M4 records its task corpus; the occupation dual encoder records checkpoint/split data.
+        "auxiliary_dataset_sha256": ({dense_identity["parameters"]["tasks_path"]: dense_identity["tasks_sha256"]}
+                                     if "tasks_path" in dense_identity.get("parameters", {}) else
+                                     {"occupation_semantic_checkpoint": dense_identity["checkpoint_sha256"],
+                                      "occupation_semantic_data": dense_identity["data_sha256"]}
+                                     if "checkpoint_sha256" in dense_identity else {}),
         "seed": evaluation_config["seed"],
         "test_summary": "See milestone reports for executed acceptance results; runtime integration: reports/ranking/m5/DECISION.md",
         "command": f"python -m recommender.evaluate --config {shlex.quote((output / 'evaluation_config.json').as_posix())} --ranking-config {shlex.quote((output / 'ranking_config.json').as_posix())} --output <new-directory>",

@@ -91,12 +91,17 @@ class System:
             "user_sentences": list(state.user_texts), "status": resp.status, "reason": resp.reason,
             "rank_seconds": perf_counter() - started,
             "occupations": [asdict(o) for o in resp.occupations]})
+        if 'occupation_semantic' in resp.query_diagnostics:
+            state.ranking_trace[-1]['query_diagnostics'] = resp.query_diagnostics
         return resp.occupations if resp.status == "ranked" else []
 
     def top5(self, state: State) -> list[dict]:
         return [{"code": o.code, "title": o.title} for o in state.ranking[:5]]
 
     def _why(self, state: State) -> str:
+        if state.ranking and 'semantic' in state.ranking[0].signals and any(
+                r.get('query_diagnostics', {}).get('occupation_semantic') for r in state.ranking_trace[-1:]):
+            return 'Related to the topics and background you described; this does not establish a career preference.'
         pos = sorted((t for t, s in state.slots.items() if s.value > 0), key=lambda t: -state.slots[t].value)[:2]
         if not pos:
             return "Ranked highest against the interests you described."
@@ -105,6 +110,8 @@ class System:
     def recommendations(self, state: State) -> list[dict]:
         why = self._why(state)
         return [{"rank": o.rank, "code": o.code, "title": o.title, "why": why,
+                 **({'ranking_basis': 'semantic_association'} if state.ranking_trace and
+                    'occupation_semantic' in state.ranking_trace[-1].get('query_diagnostics', {}) else {}),
                  "tasks": [e.text for e in o.evidence[:3]],
                  "task_evidence": [asdict(e) for e in o.evidence[:3]]} for o in state.ranking[:5]]
 

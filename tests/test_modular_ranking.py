@@ -27,7 +27,8 @@ class ModularRankingTests(unittest.TestCase):
         self.assertEqual(paths["ranking"].name, "active.json")
         selected, _ = load_configuration(paths["ranking"])
         self.assertEqual(candidate.selection_config, selected)
-        live, _ = load_configuration(Path("configs/ranking.yaml"))
+        # The workflow keeps its own cosine selection; the app YAML default changed separately.
+        live, _ = load_configuration(Path("configs/ranking/m1_cosine.json"))
         self.assertEqual(selected, live)
         self.assertEqual(candidate.component_identifiers["m1"], "cosine_similarity@baseline_v1")
         promotion, _ = load_configuration(paths["promotion"])

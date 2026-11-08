@@ -1,6 +1,8 @@
 # Adding your part
 
 
+**Superseded 9 November 2026:** the live default is now RIASEC cosine + fine-tuned semantic retrieval (`occupation_dual_encoder@finetuned_v1`) fused by RRF k=60; cosine remains selectable via `configs/system.cosine.json`. See [decision](../reports/ranking/occupation_semantic_default/DECISION.md).
+
 **Ranking status update:** M3 BM25/RRF and M4 cached MiniLM/FAISS are implemented in `recommender/` and evaluated offline. The live app uses `"ranker": "configured"`; the default M1 scorer is cosine since 8 November 2026 ([decision](../reports/ranking/cosine_default/DECISION.md)). See [ranking architecture memory](RANKING_EXPERIMENT_ARCHITECTURE.md) and [M4 acceptance](../reports/ranking/m4/DECISION.md); full app activation remains M5 integration work.
 
 Read this before you add your work. How the whole system fits together, and what every function does, is in [ARCHITECTURE.md](ARCHITECTURE.md).

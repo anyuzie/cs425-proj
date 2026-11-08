@@ -23,9 +23,10 @@ from recommender.utterance.stanza_pipeline import StanzaUtteranceProcessingPipel
 from app.utterance_collection import UtteranceCollection
 from recommender.utterance.context_occupations import ContextOccupationMatcher
 from recommender.utterance.context_matching import ContextMatchingPipeline, route_clause_pipelines, below_clause_score_floor
+from recommender.utterance.pipeline import ProcessedUtterance
 
 
-def rank_utterance(text, extractor, ranker):
+def rank_utterance(text, extractor, ranker, *, top_k=50):
     """Adapt one Reading to runtime inputs; no history or confidence merging."""
     reading = extractor.read(text)
     interests = dict.fromkeys(TYPES, 0.0)
@@ -36,7 +37,7 @@ def rank_utterance(text, extractor, ranker):
     # This independent snapshot contains only the current user's utterance.
     evidence = [{"id": "e1", "turn": 1, "text": text, "status": "active"}]
     response = ranker.rank_with_evidence(
-        interests, observed, [text], evidence, top_k=50)
+        interests, observed, [text], evidence, top_k=top_k)
     return reading, interests, observed, response
 
 
@@ -106,9 +107,15 @@ def show_clause_scores(processed, classifier, context_pipeline=None, context_occ
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--clause-splitter", choices=("stanza", "spacy"), default="stanza",
+    parser.add_argument('--terminal-config', type=Path, help='Terminal preset; explicit CLI arguments take precedence')
+    parser.add_argument('--text', help='Rank one independent utterance and exit (empty text reports no signal)')
+    parser.add_argument('--json', action='store_true', help='Machine-readable one-shot response; requires --text')
+    parser.add_argument('--top-k', type=int, default=50, help='One-shot ranking depth')
+    parser.add_argument('--clause-diagnostics', action=argparse.BooleanOptionalAction, default=None,
+                        help='Enable/disable the independent legacy BERT/MPNet clause diagnostics')
+    parser.add_argument("--clause-splitter", choices=("stanza", "spacy"), default=None,
                         help="User-clause splitter; Stanza conservative baseline by default")
-    parser.add_argument("--system-config", type=Path, default=ROOT / "configs/system.json")
+    parser.add_argument("--system-config", type=Path, default=None)
     parser.add_argument("--ranking-config", type=Path, help="Override the system's ranking configuration")
     parser.add_argument("--checkpoint", type=Path, help="Override the extractor checkpoint directory")
     parser.add_argument("--occupations", type=Path, default=ROOT / "data/occupations.csv")
@@ -116,31 +123,54 @@ def main():
                         help="Trained independent task/context sigmoid classifier for user clauses")
     parser.add_argument("--context-dimensions", type=Path,
                         default=ROOT / "data/work_context/onet_31_0/compact/context_dimensions.csv")
-    parser.add_argument("--collection-dir", type=Path, default=ROOT / "data/collected/utterances",
+    parser.add_argument("--collection-dir", type=Path, default=None,
                         help="Directory for append-only utterance snapshots")
     args = parser.parse_args()
+    if args.json and args.text is None:
+        parser.error('--json requires --text')
     # Existing ranking variants resolve model/cache paths relative to the repo.
     os.chdir(ROOT)
     try:
+        terminal_config = json.loads(args.terminal_config.read_text(encoding='utf-8')) if args.terminal_config else {}
+        if (not isinstance(terminal_config, dict) or set(terminal_config) - {'system_config','clause_diagnostics','clause_splitter','collection_dir'}
+                or not isinstance(terminal_config.get('clause_diagnostics', True), bool)
+                or terminal_config.get('clause_splitter', 'stanza') not in {'stanza','spacy'}):
+            raise ValueError('invalid terminal configuration')
+        args.system_config = args.system_config or Path(terminal_config.get('system_config', ROOT/'configs/system.json'))
+        args.collection_dir = args.collection_dir or Path(terminal_config.get('collection_dir', ROOT/'data/collected/utterances'))
+        args.clause_splitter = args.clause_splitter or terminal_config.get('clause_splitter', 'stanza')
+        diagnostics = args.clause_diagnostics if args.clause_diagnostics is not None else terminal_config.get('clause_diagnostics', True)
         config = json.loads(args.system_config.read_text(encoding="utf-8"))
         if config["components"]["extractor"] != "deberta":
             raise ValueError("This script requires the configured deberta extractor")
         ranking_config = args.ranking_config or Path(config["paths"]["ranking_config"])
         checkpoint = args.checkpoint or Path(config["paths"]["extractor_checkpoint"])
-        print(f"Loading ranking configuration: {ranking_config}", flush=True)
+        print(f"Loading ranking configuration: {ranking_config}", flush=True, file=sys.stderr if args.json else sys.stdout)
         ranker = RankingPipeline(args.occupations, config=ranking_config)
-        print(f"Loading extractor: {checkpoint}", flush=True)
+        print(f"Loading extractor: {checkpoint}", flush=True, file=sys.stderr if args.json else sys.stdout)
         extractor = Extractor(checkpoint, ROOT / "data/labels.json")
-        print(f"Loading user-clause splitter: {args.clause_splitter}", flush=True)
-        utterance_processor = (StanzaUtteranceProcessingPipeline() if args.clause_splitter == "stanza"
-                               else UtteranceProcessingPipeline())
-        print(f"Loading user-clause classifier: {args.task_context_classifier}", flush=True)
-        task_context_classifier = TaskContextClassifier(args.task_context_classifier)
-        context_pipeline = ContextMatchingPipeline(args.context_dimensions)
-        context_occupations = ContextOccupationMatcher(
-            args.context_dimensions.parent / "occupation_context_vectors.csv",
-            args.context_dimensions.parent / "occupation_context_mask.csv", args.occupations,
-            context_pipeline.metadata["dimension_ids"])
+        if args.text is not None:
+            from dataclasses import asdict
+            reading, interests, observed, response = rank_utterance(args.text, extractor, ranker, top_k=args.top_k)
+            if args.json:
+                print(json.dumps({'text': args.text, 'reading': asdict(reading), 'interests': interests,
+                                  'observed_types': sorted(observed), 'response': asdict(response)}, ensure_ascii=False))
+            else:
+                show_result(reading, interests, observed, response)
+                print(json.dumps(response.query_diagnostics, indent=2, ensure_ascii=False))
+            return 0
+        utterance_processor = task_context_classifier = context_pipeline = context_occupations = None
+        if diagnostics:
+            print(f"Loading user-clause splitter: {args.clause_splitter}", flush=True)
+            utterance_processor = (StanzaUtteranceProcessingPipeline() if args.clause_splitter == "stanza"
+                                   else UtteranceProcessingPipeline())
+            print(f"Loading user-clause classifier: {args.task_context_classifier}", flush=True)
+            task_context_classifier = TaskContextClassifier(args.task_context_classifier)
+            context_pipeline = ContextMatchingPipeline(args.context_dimensions)
+            context_occupations = ContextOccupationMatcher(
+                args.context_dimensions.parent / "occupation_context_vectors.csv",
+                args.context_dimensions.parent / "occupation_context_mask.csv", args.occupations,
+                context_pipeline.metadata["dimension_ids"])
     except (OSError, ValueError, KeyError, ImportError, RuntimeError) as error:
         print(f"Startup failed: {error}", file=sys.stderr)
         return 1
@@ -148,16 +178,18 @@ def main():
         collection = UtteranceCollection(args.collection_dir, {
             "ranking_config": ranker.resolved_config,
             "extractor_checkpoint": str(checkpoint.resolve()),
-            "context_pipeline": context_pipeline.metadata,
-            "context_occupation_matching": context_occupations.metadata,
+            'terminal_config': terminal_config,
+            'clause_diagnostics': diagnostics,
+            "context_pipeline": context_pipeline.metadata if diagnostics else None,
+            "context_occupation_matching": context_occupations.metadata if diagnostics else None,
             "clause_score_floor": 0.3,
             "task_context_classifier_checkpoint": str(args.task_context_classifier.resolve()),
             "task_context_thresholds": {"task": task_context_classifier.task_threshold,
-                                        "context": task_context_classifier.context_threshold},
-            "parser_model": utterance_processor.model,
-            "parser_version": version("stanza") if args.clause_splitter == "stanza" else utterance_processor.nlp.meta.get("version"),
+                                        "context": task_context_classifier.context_threshold} if diagnostics else None,
+            "parser_model": utterance_processor.model if diagnostics else None,
+            "parser_version": (version("stanza") if args.clause_splitter == "stanza" else utterance_processor.nlp.meta.get("version")) if diagnostics else None,
             "clause_splitter": args.clause_splitter,
-            "spacy_version": version("spacy"),
+            "spacy_version": version("spacy") if diagnostics else None,
             "source_sha256": {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
                 for name in ("recommender/utterance/pipeline.py", "recommender/utterance/classification.py",
                              "app/ranking_terminal.py", "app/utterance_collection.py",
@@ -171,8 +203,11 @@ def main():
     print("\nEnabled: " + ", ".join(enabled))
     print(f"Eligible occupations: {ranker.eligible_count}")
     print("Each entry is independent. Scores are raw component scores, not probabilities.")
-    print("Clause scores are independent BERT sigmoids; routing uses checkpoint thresholds.")
-    print("Experimental clause classification is display-only and does not affect ranking.")
+    if diagnostics:
+        print("Clause scores are independent BERT sigmoids; routing uses checkpoint thresholds.")
+        print("Experimental clause classification is display-only and does not affect ranking.")
+    else:
+        print('Legacy clause diagnostics disabled; they never affect ranking.')
     print("Enter an utterance, or x to exit.")
     while True:
         try:
@@ -189,7 +224,7 @@ def main():
                 return 1
             processed = None
             try:
-                processed = utterance_processor.split(text)
+                processed = utterance_processor.split(text) if diagnostics else ProcessedUtterance(text, ())
                 result = rank_utterance(text, extractor, ranker)
                 collection.completed(entry_id, processed, *result)
             except (Exception, KeyboardInterrupt) as error:
@@ -200,7 +235,8 @@ def main():
                     return 1
                 raise
             show_result(*result)
-            show_clause_scores(processed, task_context_classifier, context_pipeline, context_occupations)
+            if diagnostics:
+                show_clause_scores(processed, task_context_classifier, context_pipeline, context_occupations)
         except (EOFError, KeyboardInterrupt):
             break
         except (OSError, ValueError, RuntimeError) as error:

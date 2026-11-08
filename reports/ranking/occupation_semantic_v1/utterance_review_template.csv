@@ -1,0 +1,10 @@
+source_group,utterance,authorship,review_status,reviewer,relevant_codes,grades,notes
+background,My degree is in chemistry and I have experience analysing laboratory samples.,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+no_preferences,"I studied information systems, cloud computing and artificial intelligence.",developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+positive,I enjoy helping students understand mathematics.,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+negation,I do not want to teach mathematics.,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+contradiction,I enjoy laboratory work but I do not want laboratory work.,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+mixed,I enjoy designing software and teaching children.,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+vague,I am not sure what I want.,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+nonsense,flibberty zargle wump 928374,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,
+empty,,developer-authored diagnostic; not independent human evaluation,unreviewed,,,,

@@ -1,7 +1,7 @@
 import re
 from typing import Literal
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 CODE_RE = re.compile(r"^[A-Za-z0-9_-]{1,32}$")
 MESSAGE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
@@ -41,6 +41,7 @@ class ChatRequest(BaseModel):
 
 
 class Rec(BaseModel):
+    model_config = ConfigDict(extra="allow")
     rank: int
     code: str
     title: str
@@ -67,6 +68,8 @@ class TraceTop(BaseModel):
 
 
 class Trace(BaseModel):
+    # Optional ranking diagnostics pass through without changing legacy trace keys.
+    model_config = ConfigDict(extra="allow")
     profile: dict[str, TraceProfileSlot]
     actions: list[TraceAction]
     top5: list[TraceTop]
