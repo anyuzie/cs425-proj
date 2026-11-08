@@ -84,6 +84,7 @@ class DebertaExtractor:
         self.neutral_idx = labels["direction_index"]["neutral"]
         saved_cfg = AutoConfig.from_pretrained(checkpoint_dir)       # reads saved config.json
         self.cfg = saved_cfg.extractor
+        
         self.load(Path(checkpoint_dir))
         
     ###################################################################
