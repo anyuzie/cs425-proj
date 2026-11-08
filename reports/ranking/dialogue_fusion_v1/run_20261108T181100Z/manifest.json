@@ -1,0 +1,234 @@
+{
+  "condition": "actual_tracker_dialogue_fusion_personas",
+  "quality_claim": "development evidence for fusion choice (#0); personas never tuned on",
+  "persona_ids": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F08",
+    "F09",
+    "F10",
+    "F11",
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F19",
+    "F20",
+    "F21",
+    "F22",
+    "F23",
+    "F24",
+    "F25"
+  ],
+  "personas_sha256": "2913c25e16c518c04c75d544ed687369facf9a7b6402e7cb8c2c83097ddbf0a8",
+  "base_config_path": "configs\\system.json",
+  "config": {
+    "components": {
+      "extractor": "deberta",
+      "tracker": "decay",
+      "rule": "rule",
+      "confirmer": "nli",
+      "ranker": "configured",
+      "policy": "manual",
+      "filler": "question-bank"
+    },
+    "settings": {
+      "max_turns": 10,
+      "confirm_threshold": 0.9,
+      "utterance_processing": true,
+      "no_probing": false,
+      "decay": 1.0,
+      "probe_reason_conf": 0.6,
+      "input_mode": "actual_tracker"
+    },
+    "paths": {
+      "ranking_config": "configs/ranking/occupation_semantic_fusion_v1.json",
+      "extractor_checkpoint": "models/extractor",
+      "nli_model": "models/nli-probing-v2/checkpoint",
+      "embedder": "all-MiniLM-L6-v2",
+      "bm25": "indexes/bm25.pkl",
+      "faiss": "indexes/faiss.idx",
+      "faiss_owners": "indexes/faiss_owners.json",
+      "t5_checkpoint": "models/t5-questions-v3b"
+    }
+  },
+  "arms": {
+    "fusion_probing": {
+      "ranking_config": "configs/ranking/occupation_semantic_fusion_v1.json",
+      "no_probing": false
+    },
+    "fusion_no_probing": {
+      "ranking_config": "configs/ranking/occupation_semantic_fusion_v1.json",
+      "no_probing": true
+    },
+    "cosine_probing": {
+      "ranking_config": "configs/ranking/m1_cosine.json",
+      "no_probing": false
+    },
+    "cosine_no_probing": {
+      "ranking_config": "configs/ranking/m1_cosine.json",
+      "no_probing": true
+    },
+    "semantic_probing": {
+      "ranking_config": "configs/ranking/occupation_semantic_finetuned_v1.json",
+      "no_probing": false
+    },
+    "semantic_no_probing": {
+      "ranking_config": "configs/ranking/occupation_semantic_finetuned_v1.json",
+      "no_probing": true
+    }
+  },
+  "resolved_ranking": {
+    "fusion": {
+      "components": {
+        "m1": {
+          "component": "m1",
+          "algorithm": "cosine_similarity",
+          "variant": "baseline_v1",
+          "parameters": {
+            "dimension_order": [
+              "R",
+              "I",
+              "A",
+              "S",
+              "E",
+              "C"
+            ],
+            "observed_only": true,
+            "occupation_scale": "supplied_z_scores",
+            "normalization": "l2_both_vectors_on_observed_dimensions",
+            "zero_user_norm": "unusable",
+            "zero_occupation_norm": "omit",
+            "tie_break": "code_ascending"
+          }
+        },
+        "m3": null,
+        "m4": {
+          "component": "m4",
+          "algorithm": "occupation_dual_encoder",
+          "variant": "finetuned_v1",
+          "parameters": {
+            "index": "artifacts/ranking/occupation_semantic_v1/finetuned_index"
+          }
+        }
+      },
+      "fusion": {
+        "algorithm": "rrf",
+        "k": 60
+      }
+    },
+    "cosine": {
+      "components": {
+        "m1": {
+          "component": "m1",
+          "algorithm": "cosine_similarity",
+          "variant": "baseline_v1",
+          "parameters": {
+            "dimension_order": [
+              "R",
+              "I",
+              "A",
+              "S",
+              "E",
+              "C"
+            ],
+            "observed_only": true,
+            "occupation_scale": "supplied_z_scores",
+            "normalization": "l2_both_vectors_on_observed_dimensions",
+            "zero_user_norm": "unusable",
+            "zero_occupation_norm": "omit",
+            "tie_break": "code_ascending"
+          }
+        },
+        "m3": null,
+        "m4": null
+      },
+      "fusion": null
+    },
+    "semantic": {
+      "components": {
+        "m1": null,
+        "m3": null,
+        "m4": {
+          "component": "m4",
+          "algorithm": "occupation_dual_encoder",
+          "variant": "finetuned_v1",
+          "parameters": {
+            "index": "artifacts/ranking/occupation_semantic_v1/finetuned_index"
+          }
+        }
+      },
+      "fusion": null
+    }
+  },
+  "ranking_config_sha256": {
+    "fusion": "e9e3498a62fa9001e0a86c9bfd8bb3132e5c500aad8ca0064fd82d26f3c67870",
+    "cosine": "a20d73a28b02a393375996cdc5ef229ec26cda68810418e243b93edbea7c8501",
+    "semantic": "877a687bc015e3190b32c495b2a1ff46c6b12818bc8a4a8b7c0177c6f4997ddb"
+  },
+  "git_revision": "9c5c5ecdf5985337973ef75ac5107e0f8b35739d",
+  "git_dirty": true,
+  "python": "3.13.16",
+  "source_sha256": {
+    "pipeline\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pipeline\\answers.py": "1a270eaff1fc3bc3e6c71e908158097bbbb4122257dd05c612726754acb853c4",
+    "pipeline\\extractor.py": "a3ea7a3fe8b041ea31a4cedbd247ea52793091b3e03d9dc905a9cf4417147f45",
+    "pipeline\\interfaces.py": "a90823626300c5e6548c0940cdb86f8e27b2558f23b20f8673128a406b51bb66",
+    "pipeline\\nli.py": "84fcfb8dd0c066d02d57e2d257ca1da12a8be92c8c6b2e00105f023ede90cdde",
+    "pipeline\\policy.py": "98811b7909deaf87a7d2f614a9e7a170583a9df2d0ffe15b2fac5d4c75e5aed8",
+    "pipeline\\registry.py": "e7e019ce21ee3e25c2d27faaee895e1c4ff557a341bc5d045924f8dd04b03f24",
+    "pipeline\\repair.py": "f28765ff212dadec4f020e33eb7fff4b4c274ca32e86e309d86a9fd4d039ef35",
+    "pipeline\\rule.py": "ac0db6d84cc464a76b30ebc9928774f51390c6f611073cbc04ebfef008d76233",
+    "pipeline\\system.py": "a9db6296c096b486becd2048e6ccc5b9c9a8484538d0ad3122e7588e8668e3e2",
+    "pipeline\\t5.py": "902bbbb1f727795140c22b5ed2b0cb7cd9e5a6908c6462467731477d40971a14",
+    "pipeline\\t5_v2.py": "4967f76a978b46c8995ae4529a7f80414c8e7dd697e021fc39d52a0d0502dbc9",
+    "pipeline\\t5_v3.py": "27977e0a0b72c37a345c022899a7e18c4bb30e7ec75418508cf4e335c8ce9a8e",
+    "pipeline\\task_questions.py": "396df19d6ed51c6a36192a1da0394200db6b5f8719c7438bb5acee7e8f733b7e",
+    "pipeline\\templates.py": "ddc179a1d38aceca75c4c52f1dba633b48b09ccdabe37fbcc8f3617299a4edd6",
+    "pipeline\\tracker.py": "76295fa5d2b2449cb762e1465a82ef631cb8255bbd3a2986e7994fe8ef66a90e",
+    "eval\\dialogue_fusion.py": "7af4cd3878d27f8aab7e1171e755fb83b5218a3b0ac20bbcf0201aed7abc555c",
+    "eval\\dialogue.py": "fd4f2838c31998067c7c993eb247375665503348d62fe4eed01a309442059a5a",
+    "data\\eval\\simulator.py": "ea1e9dd43f3b12343e38bde62976c5e8cbde435b37ece308e1e120bf5304aa4a"
+  },
+  "checkpoints": {
+    "extractor_checkpoint": {
+      "config.json": "cf81d1fea5082b8dad7a2ad3b5fdcd2aa4147cb326648a346669a6710489096e",
+      "model.safetensors": "804050d42c472009abd3e9410d1404ed7bdb2916c1686fcf1699d032526b3364"
+    },
+    "nli_model": {
+      "config.json": "8b263719da524fde882c2c92013439e0181e045b2ba009cb1072bd102c8ebbfa",
+      "model.safetensors": "d2a54b24585428ba717bed58e93a7280dc813a0a2e08bdb898a3dd4fae1cd3a2"
+    }
+  },
+  "components": {
+    "extractor": "deberta",
+    "tracker": "decay",
+    "rule": "rule",
+    "confirmer": "nli",
+    "ranker": "configured",
+    "policy": "manual",
+    "filler": "question-bank"
+  },
+  "metric_definitions": {
+    "primary": "mrr",
+    "mrr": "1 / rank of the first acceptable occupation, full eligible pool",
+    "hit_at_k": "first acceptable occupation within top k",
+    "ndcg_at_10": "binary gains over the acceptable set",
+    "target_metrics": "existing M2 metrics against target + O*NET related, for continuity"
+  },
+  "bootstrap": {
+    "samples": 10000,
+    "seed": 425,
+    "unit": "persona",
+    "ci": "percentile 95%"
+  },
+  "simulator": "eval.dialogue.DialogueUser: question-bank CLARIFY answers by hidden level; resolutions for PROBE/CHALLENGE"
+}
