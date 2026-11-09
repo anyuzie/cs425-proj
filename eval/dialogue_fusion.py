@@ -38,8 +38,42 @@ RANKERS = {  # arm name -> versioned ranking configuration
     "semantic": "configs/ranking/occupation_semantic_finetuned_v1.json",
     "fusion_tieavg": "configs/ranking/occupation_semantic_fusion_tieavg_v1.json",  # #1a rrf_tie_aware@k60_v1
     "fusion_zscore": "configs/ranking/occupation_semantic_fusion_zscore_v1.json",  # #1b zscore_sum@equal_v1 = configs/ranking.yaml default
+    "lexical": "configs/ranking/m3_bm25.json",  # L0 diagnostic: bm25@baseline_v1 alone (docs/LEXICAL_MATCHING_PLAN.md)
+    "fusion_zscore_bm25": "configs/ranking/occupation_semantic_fusion_zscore_bm25_v1.json",  # L0: default + bm25@baseline_v1
+    "fusion_zscore_bm25_ignore": "configs/ranking/occupation_semantic_fusion_zscore_bm25_signed_ignore_v1.json",  # L1 bm25_signed@ignore_negative_v1
+    "fusion_zscore_bm25_filter": "configs/ranking/occupation_semantic_fusion_zscore_bm25_signed_filter_v1.json",  # L1 bm25_signed@filter_negative_v1
+    "fusion_zscore_bm25_ignore_v2": "configs/ranking/occupation_semantic_fusion_zscore_bm25_signed_ignore_v2.json",  # + apostrophe-less cues
+    "fusion_zscore_bm25_filter_v2": "configs/ranking/occupation_semantic_fusion_zscore_bm25_signed_filter_v2.json",
 }
+# v2 arms (apostrophe-less negation cues): each against its v1 arm and the live default.
+CUE_PAIRS = [(f"fusion_zscore_bm25_{h}_v2", b) for h in ("ignore", "filter")
+             for b in (f"fusion_zscore_bm25_{h}", "fusion_zscore")] + [("fusion_zscore_bm25_filter_v2", "fusion_zscore_bm25_ignore_v2")]
+# D1 (negative clauses dropped from the semantic query): each arm against the arm it changes.
+RANKERS.update({
+    "semantic_signed": "configs/ranking/occupation_semantic_signed_finetuned_v1.json",
+    "fusion_zscore_d1": "configs/ranking/occupation_semantic_signed_fusion_zscore_v1.json",
+    "fusion_zscore_d1_bm25_ignore_v2": "configs/ranking/occupation_semantic_signed_fusion_zscore_bm25_signed_ignore_v2.json",
+})
+RANKERS.update({  # routing v3, then D2 (post-fusion dislike stage) on top
+    "d2_title_v3_nolex": "configs/ranking/occupation_semantic_signed_v2_fusion_zscore_dislike_title_v3.json",  # D1 v2 + D2 title v3, no lexical
+    "d2_title_v3_plain_semantic": "configs/ranking/occupation_semantic_fusion_zscore_dislike_title_v3.json",  # finetuned_v1 + D2 title v3, no lexical
+    "routing_v3": "configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3.json",
+    **{f"routing_v3_d2_{v}": f"configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_{v}.json"
+       for v in ("title_v1", "semantic_v1", "title_semantic_v1", "title_v2", "semantic_v2", "title_semantic_v2",
+                 "title_v3", "semantic_v3", "title_semantic_v3")},
+})
+D2_PAIRS = [("d2_title_v3_nolex", "d2_title_v3_plain_semantic"), ("d2_title_v3_plain_semantic", "fusion_zscore"),
+            ("routing_v3_d2_title_v3", "d2_title_v3_nolex"), ("d2_title_v3_nolex", "fusion_zscore"),
+            ("routing_v3", "fusion_zscore_d1_bm25_ignore_v2"), ("routing_v3", "fusion_zscore")] + [
+    (f"routing_v3_d2_{v}", b) for v in ("title_v1", "semantic_v1", "title_semantic_v1") for b in ("routing_v3", "fusion_zscore")] + [
+    (f"routing_v3_d2_{m}_{v}", f"routing_v3_d2_{m}_v1") for m in ("title", "semantic", "title_semantic") for v in ("v2", "v3")]
+D1_PAIRS = [("semantic_signed", "semantic"), ("fusion_zscore_d1", "fusion_zscore"),
+            ("fusion_zscore_d1_bm25_ignore_v2", "fusion_zscore_bm25_ignore_v2"),
+            ("fusion_zscore_d1_bm25_ignore_v2", "fusion_zscore_d1")]
 VARIANTS = ("fusion_tieavg", "fusion_zscore")  # compared against the control and semantic only
+# Lexical arms: compared against the live default (fusion_zscore), semantic only and the unsigned L0 arm.
+LEXICAL_VARIANTS = ("fusion_zscore_bm25", "fusion_zscore_bm25_ignore", "fusion_zscore_bm25_filter")
+LEXICAL_BASES = ("fusion_zscore", "semantic", "fusion_zscore_bm25", "fusion_zscore_bm25_ignore")
 PROBING = {"probing": False, "no_probing": True}  # arm suffix -> ManualPolicy(no_probing=...)
 GROUPS = ("all", "conflict", "agree")
 METRICS = ("mrr", "hit_at_5", "hit_at_10", "ndcg_at_10")
@@ -118,6 +152,9 @@ def contrasts(arms: dict) -> dict:
     pairs = [(f"fusion_{p}", f"cosine_{p}") for p in PROBING] + [(f"fusion_{p}", f"semantic_{p}") for p in PROBING] \
         + [(f"semantic_{p}", f"cosine_{p}") for p in PROBING] \
         + [(f"{v}_{p}", f"{b}_{p}") for v in VARIANTS for b in ("fusion", "semantic") for p in PROBING] \
+        + [(f"{v}_{p}", f"{b}_{p}") for i, v in enumerate(LEXICAL_VARIANTS)
+           for b in LEXICAL_BASES[:2 + i] for p in PROBING] \
+        + [(f"{v}_{p}", f"{b}_{p}") for v, b in CUE_PAIRS + D1_PAIRS + D2_PAIRS for p in PROBING] \
         + [(f"{r}_probing", f"{r}_no_probing") for r in RANKERS]
     out = {}
     for a, b in pairs:

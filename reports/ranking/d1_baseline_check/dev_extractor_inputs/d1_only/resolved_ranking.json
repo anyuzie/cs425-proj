@@ -1,0 +1,45 @@
+{
+  "components": {
+    "m1": {
+      "algorithm": "cosine_similarity",
+      "component": "m1",
+      "parameters": {
+        "dimension_order": [
+          "R",
+          "I",
+          "A",
+          "S",
+          "E",
+          "C"
+        ],
+        "normalization": "l2_both_vectors_on_observed_dimensions",
+        "observed_only": true,
+        "occupation_scale": "supplied_z_scores",
+        "tie_break": "code_ascending",
+        "zero_occupation_norm": "omit",
+        "zero_user_norm": "unusable"
+      },
+      "variant": "baseline_v1"
+    },
+    "m3": null,
+    "m4": {
+      "algorithm": "occupation_dual_encoder_signed",
+      "component": "m4",
+      "parameters": {
+        "base": "occupation_dual_encoder@finetuned_v1",
+        "early_stop": "unusable_without_positive_or_neutral_clause",
+        "extractor_revision": "explicit_scoped_v1",
+        "index": "artifacts/ranking/occupation_semantic_v1/finetuned_index",
+        "negation_cue_pattern": "n't\\b|\\b(?:dont|doesnt|didnt|wont|wouldnt|cant|couldnt|shouldnt|isnt|arent|wasnt|werent|havent|hasnt|hadnt|aint|nah|nope|not|no|never|nor|neither|none|nothing|avoid|avoiding|hate|hated|dislike|cannot|rather not|anything but|can't stand|cant stand)\\b",
+        "non_preference_pattern": "\\b(?:don't|dont|do not|wouldn't|wouldnt|would not) mind\\b|\\bnot sure\\b|\\b(?:don't|dont|do not) know\\b|\\bidk\\b|\\bno preference\\b|\\b(?:doesn't|doesnt|does not|don't|dont) matter\\b|\\bno idea\\b|\\bnot bothered\\b",
+        "query": "each user turn with its negative and skipped clauses deleted; other text unchanged; chronological newline join",
+        "routing": "same rules as bm25_signed@ignore_negative_v2"
+      },
+      "variant": "finetuned_v1"
+    }
+  },
+  "fusion": {
+    "algorithm": "zscore_sum",
+    "variant": "equal_v1"
+  }
+}

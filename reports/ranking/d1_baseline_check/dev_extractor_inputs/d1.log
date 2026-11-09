@@ -1,0 +1,21 @@
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 3560.59it/s]
+{
+  "report_path": "reports/ranking/d1_baseline_check/dev_extractor_inputs/d1_only",
+  "metrics": {
+    "profile_count": 120,
+    "hit_at_1": 0.016666666666666666,
+    "hit_at_5": 0.09166666666666666,
+    "hit_at_10": 0.18333333333333332,
+    "mrr": 0.07271298978605148,
+    "ndcg_at_5": 0.08066655298093575,
+    "ndcg_at_10": 0.10178922950551936,
+    "recall_at_5": 0.05183212209044252,
+    "recall_at_10": 0.09610216215672872,
+    "recall_at_20": 0.19273471658630328,
+    "recall_at_50": 0.4006044221301574,
+    "missing_targets": 0,
+    "ineligible_targets": 0,
+    "zero_idcg_cases": 0,
+    "unranked_targets": 0
+  }
+}

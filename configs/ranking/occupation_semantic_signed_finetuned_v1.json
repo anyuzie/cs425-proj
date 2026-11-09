@@ -1,0 +1,11 @@
+{
+  "components": {
+    "m1": null,
+    "m3": null,
+    "m4": {
+      "algorithm": "occupation_dual_encoder_signed",
+      "variant": "finetuned_v1"
+    }
+  },
+  "fusion": null
+}

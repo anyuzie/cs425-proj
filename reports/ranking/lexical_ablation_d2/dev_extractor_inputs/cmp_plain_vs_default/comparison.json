@@ -1,0 +1,100 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_extractor_tracker_dev_v1_c70c396cddb844379f85732b79064799",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "hit_at_10": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "hit_at_5": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "mrr": {
+      "ci95": [
+        0.00011899898753672239,
+        0.0006999223289696576
+      ],
+      "improved": 24,
+      "mean_difference": 0.00037838728962263755,
+      "regressed": 0
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        0.0,
+        0.00044344851369065803
+      ],
+      "improved": 2,
+      "mean_difference": 0.00016263814405327882,
+      "regressed": 0
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "recall_at_10": {
+      "ci95": [
+        0.0,
+        0.0011904761904761904
+      ],
+      "improved": 1,
+      "mean_difference": 0.0003968253968253968,
+      "regressed": 0
+    },
+    "recall_at_20": {
+      "ci95": [
+        -0.0005372704637410517,
+        0.007962962962962965
+      ],
+      "improved": 5,
+      "mean_difference": 0.0032862589480236546,
+      "regressed": 2
+    },
+    "recall_at_5": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "improved": 0,
+      "mean_difference": 0.0,
+      "regressed": 0
+    },
+    "recall_at_50": {
+      "ci95": [
+        -0.003575708061002178,
+        0.0061753034547152195
+      ],
+      "improved": 5,
+      "mean_difference": 0.0013184718331777157,
+      "regressed": 2
+    }
+  },
+  "profiles": 120,
+  "seed": 425,
+  "treatment_run_id": "m2_extractor_tracker_dev_v1_7a832be24d2845288b00dbccf5bb3dde"
+}

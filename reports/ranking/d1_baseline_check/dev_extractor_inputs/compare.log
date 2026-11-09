@@ -1,0 +1,200 @@
+{
+  "control_run_id": "m2_extractor_tracker_dev_v1_68a9c47cf1ac41eb9ded52c33bca9325",
+  "treatment_run_id": "m2_extractor_tracker_dev_v1_31832ded02f14e71a5ede70436d62c39",
+  "profiles": 120,
+  "bootstrap_samples": 2000,
+  "seed": 425,
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "mean_difference": 0.008333333333333333,
+      "ci95": [
+        -0.016666666666666666,
+        0.03333333333333333
+      ],
+      "improved": 2,
+      "regressed": 1
+    },
+    "hit_at_5": {
+      "mean_difference": -0.03333333333333333,
+      "ci95": [
+        -0.08333333333333333,
+        0.008333333333333333
+      ],
+      "improved": 2,
+      "regressed": 6
+    },
+    "hit_at_10": {
+      "mean_difference": -0.016666666666666666,
+      "ci95": [
+        -0.09166666666666666,
+        0.05
+      ],
+      "improved": 9,
+      "regressed": 11
+    },
+    "mrr": {
+      "mean_difference": -0.007397521943020007,
+      "ci95": [
+        -0.03067863554323728,
+        0.019613153851616986
+      ],
+      "improved": 43,
+      "regressed": 76
+    },
+    "ndcg_at_5": {
+      "mean_difference": -0.023720420537712828,
+      "ci95": [
+        -0.04463329883888181,
+        -0.0035170672539424934
+      ],
+      "improved": 20,
+      "regressed": 42
+    },
+    "ndcg_at_10": {
+      "mean_difference": -0.01719872031151561,
+      "ci95": [
+        -0.03723536977709436,
+        0.002380504876025394
+      ],
+      "improved": 32,
+      "regressed": 47
+    },
+    "recall_at_5": {
+      "mean_difference": -0.011733888424097401,
+      "ci95": [
+        -0.022887902073273587,
+        -0.0018429140304140293
+      ],
+      "improved": 16,
+      "regressed": 29
+    },
+    "recall_at_10": {
+      "mean_difference": -0.008997568371600878,
+      "ci95": [
+        -0.024634872065212622,
+        0.00524130818441964
+      ],
+      "improved": 26,
+      "regressed": 33
+    },
+    "recall_at_20": {
+      "mean_difference": -0.02035168349022838,
+      "ci95": [
+        -0.03864469104310435,
+        -0.002453911900506327
+      ],
+      "improved": 31,
+      "regressed": 50
+    },
+    "recall_at_50": {
+      "mean_difference": -0.036410926498968293,
+      "ci95": [
+        -0.06709115997235192,
+        -0.007896319474299352
+      ],
+      "improved": 36,
+      "regressed": 58
+    }
+  }
+}
+{
+  "control_run_id": "m2_extractor_tracker_dev_v1_68a9c47cf1ac41eb9ded52c33bca9325",
+  "treatment_run_id": "m2_extractor_tracker_dev_v1_f40430d8c37f40e4b32caf128086401b",
+  "profiles": 120,
+  "bootstrap_samples": 2000,
+  "seed": 425,
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "mean_difference": 0.008333333333333333,
+      "ci95": [
+        0.0,
+        0.025
+      ],
+      "improved": 1,
+      "regressed": 0
+    },
+    "hit_at_5": {
+      "mean_difference": 0.016666666666666666,
+      "ci95": [
+        -0.025,
+        0.058333333333333334
+      ],
+      "improved": 4,
+      "regressed": 2
+    },
+    "hit_at_10": {
+      "mean_difference": 0.03333333333333333,
+      "ci95": [
+        -0.016666666666666666,
+        0.08333333333333333
+      ],
+      "improved": 7,
+      "regressed": 3
+    },
+    "mrr": {
+      "mean_difference": 0.008450575940074886,
+      "ci95": [
+        -0.004445270178078666,
+        0.02441772665101906
+      ],
+      "improved": 58,
+      "regressed": 33
+    },
+    "ndcg_at_5": {
+      "mean_difference": 0.00637000717192294,
+      "ci95": [
+        -0.005491611352737213,
+        0.01972335557690177
+      ],
+      "improved": 20,
+      "regressed": 20
+    },
+    "ndcg_at_10": {
+      "mean_difference": 0.007807114760339647,
+      "ci95": [
+        -0.004552087430568776,
+        0.020924883845602746
+      ],
+      "improved": 33,
+      "regressed": 27
+    },
+    "recall_at_5": {
+      "mean_difference": 0.0010618694171325752,
+      "ci95": [
+        -0.004246864962809235,
+        0.006440936979830169
+      ],
+      "improved": 12,
+      "regressed": 8
+    },
+    "recall_at_10": {
+      "mean_difference": 0.0040782023560661336,
+      "ci95": [
+        -0.006004923582322963,
+        0.01374526058736585
+      ],
+      "improved": 21,
+      "regressed": 16
+    },
+    "recall_at_20": {
+      "mean_difference": 0.01092169637351526,
+      "ci95": [
+        -0.00446921460176104,
+        0.02603348477574484
+      ],
+      "improved": 33,
+      "regressed": 19
+    },
+    "recall_at_50": {
+      "mean_difference": 0.009293345292764798,
+      "ci95": [
+        -0.014707742914979755,
+        0.029408408534763023
+      ],
+      "improved": 37,
+      "regressed": 23
+    }
+  }
+}

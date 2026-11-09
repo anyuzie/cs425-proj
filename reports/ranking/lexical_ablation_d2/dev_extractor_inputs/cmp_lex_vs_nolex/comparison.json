@@ -1,0 +1,100 @@
+{
+  "bootstrap_samples": 2000,
+  "control_run_id": "m2_extractor_tracker_dev_v1_34bfdf1b886346a4a979086b5e188dd8",
+  "method": "paired profile bootstrap; percentile 95% CI; treatment minus control",
+  "metrics": {
+    "hit_at_1": {
+      "ci95": [
+        -0.03333333333333333,
+        0.03333333333333333
+      ],
+      "improved": 2,
+      "mean_difference": 0.0,
+      "regressed": 2
+    },
+    "hit_at_10": {
+      "ci95": [
+        -0.11666666666666667,
+        0.008333333333333333
+      ],
+      "improved": 5,
+      "mean_difference": -0.05,
+      "regressed": 11
+    },
+    "hit_at_5": {
+      "ci95": [
+        -0.09166666666666666,
+        -0.016666666666666666
+      ],
+      "improved": 0,
+      "mean_difference": -0.05,
+      "regressed": 6
+    },
+    "mrr": {
+      "ci95": [
+        -0.03991158418034337,
+        0.0074827099002034774
+      ],
+      "improved": 30,
+      "mean_difference": -0.016046887684787577,
+      "regressed": 84
+    },
+    "ndcg_at_10": {
+      "ci95": [
+        -0.04470764721649132,
+        -0.0064912508348775105
+      ],
+      "improved": 31,
+      "mean_difference": -0.024775620261217716,
+      "regressed": 46
+    },
+    "ndcg_at_5": {
+      "ci95": [
+        -0.05186018951045602,
+        -0.011483364701794873
+      ],
+      "improved": 20,
+      "mean_difference": -0.030737235854382473,
+      "regressed": 38
+    },
+    "recall_at_10": {
+      "ci95": [
+        -0.02852286870765973,
+        -0.0007068189092182913
+      ],
+      "improved": 24,
+      "mean_difference": -0.013902055188819895,
+      "regressed": 36
+    },
+    "recall_at_20": {
+      "ci95": [
+        -0.050663678391039066,
+        -0.01578442201216969
+      ],
+      "improved": 26,
+      "mean_difference": -0.032694823666185896,
+      "regressed": 49
+    },
+    "recall_at_5": {
+      "ci95": [
+        -0.024314657292598466,
+        -0.0034236189721870837
+      ],
+      "improved": 14,
+      "mean_difference": -0.013216949709790267,
+      "regressed": 29
+    },
+    "recall_at_50": {
+      "ci95": [
+        -0.06850495988073388,
+        -0.02578131577744581
+      ],
+      "improved": 29,
+      "mean_difference": -0.04670903042033073,
+      "regressed": 63
+    }
+  },
+  "profiles": 120,
+  "seed": 425,
+  "treatment_run_id": "m2_extractor_tracker_dev_v1_d4387a9914d14f49a855f84adc5c8682"
+}

@@ -1,0 +1,12 @@
+{
+  "base": "bm25@baseline_v1",
+  "extractor_revision": "explicit_scoped_v1",
+  "query_clauses": "explicit_positive_or_neutral_v1",
+  "negation_cue_pattern": "n't\\b|\\b(?:not|no|never|nor|neither|none|nothing|avoid|avoiding|hate|hated|dislike|cannot|rather not|anything but|can't stand)\\b",
+  "non_preference_pattern": "\\b(?:don't|do not|wouldn't|would not) mind\\b|\\bnot sure\\b|\\b(?:don't|do not) know\\b|\\bno preference\\b|\\b(?:doesn't|does not|don't) matter\\b|\\bno idea\\b|\\bnot bothered\\b",
+  "negative_clauses": "explicit_negative_or_negation_cue_v1",
+  "uncertain_with_negation_cue": "skipped",
+  "negative_handling": "ignore",
+  "early_stop": "unusable_without_positive_or_neutral_clause",
+  "non_preference": "skipped"
+}

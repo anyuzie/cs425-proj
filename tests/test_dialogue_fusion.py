@@ -88,6 +88,8 @@ class RunTests(unittest.TestCase):
         for variant in ("fusion_tieavg", "fusion_zscore"):
             self.assertIn(f"{variant}_probing_minus_fusion_probing", results["contrasts"])
             self.assertIn(f"{variant}_no_probing_minus_semantic_no_probing", results["contrasts"])
+        self.assertIn("fusion_zscore_bm25_probing_minus_fusion_zscore_probing", results["contrasts"])
+        self.assertIn("fusion_zscore_bm25_no_probing_minus_semantic_no_probing", results["contrasts"])
         self.assertIn("| F01 |", report(results))
         subset = run(system, personas[:1], bank, {"fusion": cosine, "fusion_zscore": cosine}, {"probing": False})
         self.assertEqual(set(subset["arms"]), {"fusion_probing", "fusion_zscore_probing"})

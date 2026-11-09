@@ -1,0 +1,28 @@
+{
+  "components": {
+    "extractor": "deberta",
+    "tracker": "decay",
+    "rule": "rule",
+    "confirmer": "nli",
+    "ranker": "configured",
+    "policy": "manual",
+    "filler": "t5-v3"
+  },
+  "settings": {
+    "max_turns": 10,
+    "confirm_threshold": 0.90,
+    "utterance_processing": true,
+    "no_probing": false, "decay": 1.0, "probe_reason_conf": 0.6,
+    "input_mode": "actual_tracker"
+  },
+  "paths": {
+    "ranking_config": "configs/ranking/occupation_semantic_fusion_zscore_bm25_signed_filter_v1.json",
+    "extractor_checkpoint": "models/extractor",
+    "nli_model": "models/nli-probing-v2/checkpoint",
+    "embedder": "all-MiniLM-L6-v2",
+    "bm25": "indexes/bm25.pkl",
+    "faiss": "indexes/faiss.idx",
+    "faiss_owners": "indexes/faiss_owners.json",
+    "t5_checkpoint": "models/t5-questions-v3b"
+  }
+}

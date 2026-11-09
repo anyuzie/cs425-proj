@@ -1,0 +1,24 @@
+{
+  "components": {
+    "m1": {
+      "algorithm": "cosine_similarity",
+      "variant": "baseline_v1"
+    },
+    "m3": {
+      "algorithm": "bm25_signed",
+      "variant": "ignore_negative_v3"
+    },
+    "m4": {
+      "algorithm": "occupation_dual_encoder_signed",
+      "variant": "finetuned_v2"
+    }
+  },
+  "fusion": {
+    "algorithm": "zscore_sum",
+    "variant": "equal_v1"
+  },
+  "post_fusion": {
+    "algorithm": "dislike_demotion",
+    "variant": "title_semantic_v2"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "base": "occupation_dual_encoder@finetuned_v1",
+  "index": "artifacts/ranking/occupation_semantic_v1/finetuned_index",
+  "routing": "same rules as bm25_signed@ignore_negative_v2",
+  "extractor_revision": "explicit_scoped_v1",
+  "negation_cue_pattern": "n't\\b|\\b(?:dont|doesnt|didnt|wont|wouldnt|cant|couldnt|shouldnt|isnt|arent|wasnt|werent|havent|hasnt|hadnt|aint|nah|nope|not|no|never|nor|neither|none|nothing|avoid|avoiding|hate|hated|dislike|cannot|rather not|anything but|can't stand|cant stand)\\b",
+  "non_preference_pattern": "\\b(?:don't|dont|do not|wouldn't|wouldnt|would not) mind\\b|\\bnot sure\\b|\\b(?:don't|dont|do not) know\\b|\\bidk\\b|\\bno preference\\b|\\b(?:doesn't|doesnt|does not|don't|dont) matter\\b|\\bno idea\\b|\\bnot bothered\\b",
+  "query": "each user turn with its negative and skipped clauses deleted; other text unchanged; chronological newline join",
+  "early_stop": "unusable_without_positive_or_neutral_clause"
+}
