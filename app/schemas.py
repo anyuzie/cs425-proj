@@ -46,6 +46,7 @@ class Rec(BaseModel):
     code: str
     title: str
     why: str
+    description: str = ""
     tasks: list[str]
     task_evidence: list[dict] = []
 

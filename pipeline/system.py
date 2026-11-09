@@ -1,5 +1,7 @@
+import csv
 import json
 from dataclasses import asdict, dataclass, replace
+from functools import lru_cache
 from pathlib import Path
 from time import perf_counter
 
@@ -117,18 +119,37 @@ class System:
     def top5(self, state: State) -> list[dict]:
         return [{"code": o.code, "title": o.title} for o in state.ranking[:5]]
 
-    def _why(self, state: State) -> str:
-        if state.ranking and 'semantic' in state.ranking[0].signals and any(
-                r.get('query_diagnostics', {}).get('occupation_semantic') for r in state.ranking_trace[-1:]):
-            return 'Related to the topics and background you described; this does not establish a career preference.'
-        pos = sorted((t for t, s in state.slots.items() if s.value > 0), key=lambda t: -state.slots[t].value)[:2]
-        if not pos:
-            return "Ranked highest against the interests you described."
-        return "Matches what you said about " + " and ".join(self.type_names[t].lower() for t in pos) + " work."
+    SEMANTIC_NOTE_RANK = 20   # the topic note only when the text-similarity ranker puts the job in its own top 20
+
+    def _why(self, state: State, occupation) -> str:
+        """Reason for ONE recommended job: the student's liked interest types this job also scores high on
+        (z >= 0.5), and, when the semantic ranker placed it highly, a note that it is close to what the
+        student described. Topic similarity is association only, never presented as a preference."""
+        liked = {t: s.value for t, s in state.slots.items() if s.value > 0}
+        z = occupation.occupation_z or {}
+        shared = sorted((t for t in liked if z.get(t, 0) >= 0.5), key=lambda t: -liked[t] * z[t])[:2]
+        semantic = occupation.signals.get("semantic")
+        active = any(r.get("query_diagnostics", {}).get("occupation_semantic") for r in state.ranking_trace[-1:])
+        topical = active and semantic is not None and semantic.rank <= self.SEMANTIC_NOTE_RANK
+        names = " and ".join(self.type_names[t].lower() for t in shared)
+        if shared and topical:
+            return f"Matches what you said about {names} work; also close to the topics and background you described."
+        if shared:
+            return f"Matches what you said about {names} work."
+        if topical:
+            return "Close to the topics and background you described; this does not establish a career preference."
+        return "Ranked highly against your overall interest profile."
+
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def _descriptions() -> dict[str, str]:
+        """O*NET one-paragraph job descriptions by code, shown on the recommendation cards."""
+        with open(ROOT / "data" / "occupations.csv", encoding="utf-8-sig", newline="") as handle:
+            return {row["code"]: (row.get("Description") or "").strip() for row in csv.DictReader(handle)}
 
     def recommendations(self, state: State) -> list[dict]:
-        why = self._why(state)
-        return [{"rank": o.rank, "code": o.code, "title": o.title, "why": why,
+        return [{"rank": o.rank, "code": o.code, "title": o.title, "why": self._why(state, o),
+                 "description": self._descriptions().get(o.code, ""),
                  **({'ranking_basis': 'semantic_association'} if state.ranking_trace and
                     'occupation_semantic' in state.ranking_trace[-1].get('query_diagnostics', {}) else {}),
                  "tasks": [e.text for e in o.evidence[:3]],

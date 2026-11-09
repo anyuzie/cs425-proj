@@ -136,8 +136,11 @@ class ManualPolicy(PolicyBase):
             if probe:
                 state.probed.add(probe)
                 payload = {"new_src": state.slots[probe].source}
+                source = state.slots[probe].source
+                # a short reply's source is the restated statement (pipeline/answers.py), kept in the row's readings
                 previous = next((row for row in reversed(state.task_history)
-                                 if row['slot'] == probe and state.slots[probe].source in row['reply']), None)
+                                 if row['slot'] == probe and (source in row['reply'] or any(
+                                     r.get('source') == source for r in row.get('readings', [])))), None)
                 if previous:
                     payload['task'] = dict(previous['task'])
                 return Action("PROBE", probe, _join(note, "familiarity-based reason, not yet probed"),
