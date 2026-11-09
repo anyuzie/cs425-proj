@@ -85,7 +85,13 @@ class RunTests(unittest.TestCase):
                 self.assertTrue(session["per_turn_best_acceptable_rank"])
                 self.assertEqual(set(session["per_turn_best_acceptable_rank"][0]) - {"turn", "observed_types"}, set(RANKERS))
         self.assertIn("fusion_probing_minus_cosine_probing", results["contrasts"])
+        for variant in ("fusion_tieavg", "fusion_zscore"):
+            self.assertIn(f"{variant}_probing_minus_fusion_probing", results["contrasts"])
+            self.assertIn(f"{variant}_no_probing_minus_semantic_no_probing", results["contrasts"])
         self.assertIn("| F01 |", report(results))
+        subset = run(system, personas[:1], bank, {"fusion": cosine, "fusion_zscore": cosine}, {"probing": False})
+        self.assertEqual(set(subset["arms"]), {"fusion_probing", "fusion_zscore_probing"})
+        self.assertEqual(set(subset["contrasts"]), {"fusion_zscore_probing_minus_fusion_probing"})
         for p in personas:
             for code in p["acceptable"]:
                 self.assertFalse(any(code in text for text in seen))

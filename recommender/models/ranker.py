@@ -7,7 +7,7 @@ from pathlib import Path
 from ..components import ComponentInput, ComponentRanking
 from ..configuration import load_configuration
 from ..data_loader import load_eligible_occupations
-from .fusion import select_ranking, validate_fusion
+from .fusion import build_fusion, fusion_identifier, select_ranking, validate_fusion
 from ..evidence import select_evidence
 from ..profile_policy import apply_policy, validate_policy
 from .registry import AlgorithmRegistry, default_registry
@@ -56,6 +56,7 @@ class RankingPipeline:
             self._rerankers = self._semantic_pipeline.stages
             self._reranker = self._rerankers[0]  # Preserve the single-stage compatibility handle.
         self._components = {key: registry.build(resolved, deepcopy(occupations)) for key, resolved in self._resolved.items()}
+        self._fusion = build_fusion(config["fusion"]) if config["fusion"] is not None else None
 
     @property
     def eligible_count(self):
@@ -84,7 +85,7 @@ class RankingPipeline:
     @property
     def fusion_identifier(self):
         # Experiment configuration, with actual application counts recorded by evaluation.
-        return "rrf_k60" if len(self._components) > 1 and self._config["fusion"] is not None else ""
+        return fusion_identifier(self._config["fusion"]) if len(self._components) > 1 else ""
 
     @property
     def component_metadata(self):
@@ -102,16 +103,27 @@ class RankingPipeline:
 
     def rank(self, interests: dict[str, float], observed_types: set[str],
              user_sentences: list[str], top_k: int = 100, *, slot_reasons=None, slot_weights=None) -> RankingResponse:
+        return self.rank_with_snapshot(interests, observed_types, user_sentences, top_k,
+                                       slot_reasons=slot_reasons, slot_weights=slot_weights)[0]
+
+    def rank_with_snapshot(self, interests: dict[str, float], observed_types: set[str],
+                           user_sentences: list[str], top_k: int = 100, *, slot_reasons=None, slot_weights=None):
+        """Same ranking as rank(), plus every eligible occupation's fused and component ranks.
+
+        The snapshot is read-only explanation data (SEMANTIC_LEDGER_PLAN section 10.3): it is
+        {"fused": {code: rank}, "<signal>": {code: rank}, ...}, or None when no snapshot applies.
+        It is returned separately so RankingResponse and its exports keep their schema.
+        """
         if self.evidence_filter != "raw":
             raise ValueError("active_only requires source_evidence; call rank_with_evidence")
         request = RankingRequest(interests, observed_types, user_sentences, top_k, slot_reasons=slot_reasons,
                                  slot_weights=slot_weights)
         interests, observed, weights, profile = self._profile(request)
         inputs = ComponentInput(interests, frozenset(observed), tuple(request.user_sentences), weights)
-        response = self._rank(inputs, request.top_k)
+        response, snapshot = self._rank_full(inputs, request.top_k)
         if profile:
             response.query_diagnostics = {**response.query_diagnostics, "profile": profile}
-        return response
+        return response, snapshot
 
     def rank_with_evidence(self, interests, observed_types, user_sentences, source_evidence, top_k=100, *,
                            slot_reasons=None, slot_weights=None):
@@ -135,6 +147,9 @@ class RankingPipeline:
         return self._rank(ComponentInput(dict(inputs.interests), frozenset(TYPES), tuple(inputs.user_sentences)), self.eligible_count)
 
     def _rank(self, inputs: ComponentInput, top_k: int) -> RankingResponse:
+        return self._rank_full(inputs, top_k)[0]
+
+    def _rank_full(self, inputs: ComponentInput, top_k: int):
         rankings = {}
         for key, component in self._components.items():
             # Components receive independent snapshots and cannot mutate each other.
@@ -144,7 +159,7 @@ class RankingPipeline:
             result.__post_init__()
             result.validate_pool(self.eligible_codes)
             rankings[key] = result
-        selected, fused = select_ranking(rankings, self._config["fusion"])
+        selected, fused = select_ranking(rankings, self._config["fusion"], self._fusion)
         selected.validate_pool(self.eligible_codes)
         semantic_diagnostics = {}
         if any(r.algorithm == 'occupation_dual_encoder' for r in self._resolved.values()):
@@ -153,12 +168,12 @@ class RankingPipeline:
                 'components': {key: {'status': r.status, 'reason': r.reason} for key,r in rankings.items()},
                 'model_index': self._components['m4'].metadata,
                 'query': self._components['m4'].query_diagnostics(inputs),
-                'composition': 'rrf_k60' if fused else 'single_usable_component',
+                'composition': fusion_identifier(self._config['fusion']) if fused else 'single_usable_component',
                 'observed_types': sorted(inputs.observed_types),
                 'xgboost_invoked': False, 'xgboost_reason': 'no compatible career-relevance labels/schema for semantic features',
                 'fallback_reason': '; '.join(f'{k}: {r.reason}' for k,r in rankings.items() if r.status != 'usable') or None}}
         if selected.status != "usable":
-            return RankingResponse("no_signal", reason=selected.reason, query_diagnostics=semantic_diagnostics)
+            return RankingResponse("no_signal", reason=selected.reason, query_diagnostics=semantic_diagnostics), None
         scores = {key: {item.code: item for item in ranking.occupations} for key, ranking in rankings.items()}
         evidence = {}
         for ranking in rankings.values():
@@ -174,7 +189,13 @@ class RankingPipeline:
                                             rrf_score=item.score if fused else None, signals=signals,
                                             evidence=deepcopy(evidence.get(item.code, []))))
         response = RankingResponse("ranked", occupations=results, query_diagnostics=semantic_diagnostics)
+        snapshot = None
         if self._reranker:
+            # Reranking reorders only the top of the list, so a full-pool snapshot would be wrong.
             response = self._semantic_pipeline.rerank(response, inputs.user_sentences)
+        else:
+            snapshot = {"fused": {item.code: item.rank for item in selected.occupations},
+                        **{SIGNAL_NAMES[key]: {code: item.rank for code, item in values.items()}
+                           for key, values in scores.items()}}
         response.occupations = response.occupations[:top_k]
-        return response
+        return response, snapshot

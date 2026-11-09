@@ -35,6 +35,7 @@ async def lifespan(app: FastAPI):
     app.state.system = System.load(os.environ.get("CM_DATA_DIR", ROOT / "data"),
                                   os.environ.get("CM_CONFIG", ROOT / "configs" / "system.json"))
     app.state.sessions = {}
+    app.state.occupation_map = None  # built on first request
     app.state.lock = threading.Lock()  # guards only the sessions dict lookup/insert
     yield
 
@@ -72,6 +73,18 @@ def _log(system: System, sid: str, s: Session, state: State, text: str | None, o
 def health():
     system = app.state.system
     return {"status": "ok", "eligible": system.eligible, "components": system.components}
+
+
+@app.get("/api/occupation_map")
+def occupation_map():
+    """Fixed map coordinates for the researcher panel; read-only and identical for every session."""
+    cached = getattr(app.state, "occupation_map", None)
+    if cached is None:
+        from recommender.build_occupation_map import map_payload
+        from recommender.data_loader import load_eligible_occupations
+        data_dir = Path(os.environ.get("CM_DATA_DIR", ROOT / "data"))
+        cached = app.state.occupation_map = map_payload(load_eligible_occupations(data_dir / "occupations.csv"))
+    return cached
 
 
 @app.post("/api/session", response_model=TurnResponse)

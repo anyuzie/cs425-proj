@@ -1,8 +1,8 @@
 # Plan: negation-aware, multi-turn semantic matching (semantic evidence ledger)
 
-Status: **ledger is a proposal, not implemented.** #0 (fusion evaluation) is done, see §12.5. Written 9 November 2026 against branch `feat/ranking-scoring`, commit `1948162`.
+Status: **ledger is a proposal, not implemented.** Explanations Phase A (§10) is partly implemented (9 November 2026): `rank_snapshot`, component-rank hover, the RIASEC hexagon and the t-SNE map with the turn slider; the evidence card and leave-one-turn-out are still pending, see §10.8. #0 (fusion evaluation) is done, see §12.5. #1 (fusion variants) is implemented and evaluated, and `zscore_sum@equal_v1` is the live default since 9 November 2026, see §12.6. Written 9 November 2026 against branch `feat/ranking-scoring`, commit `1948162`; §12.6 and the fusion notes in §3, §5.3, §8.2 and §10 updated 9 November 2026 on `feat/ranker-v2` (base `9fd317b`).
 This expands items 1 and 2 of [section 4 of the known-issues list](KNOWN_ISSUES_AND_PENDING.md#4-pending-improvements-suggested-order).
-Read [RANKING_EXPERIMENT_ARCHITECTURE.md](RANKING_EXPERIMENT_ARCHITECTURE.md) before implementing. Nothing here changes `occupation_dual_encoder@finetuned_v1`, the fusion default or any accepted variant.
+Read [RANKING_EXPERIMENT_ARCHITECTURE.md](RANKING_EXPERIMENT_ARCHITECTURE.md) before implementing. The ledger work does not change `occupation_dual_encoder@finetuned_v1`, the fusion default or any accepted variant. (The fusion default itself changed under #1, §12.6.)
 
 ## 1. Goals
 
@@ -41,7 +41,7 @@ user turn ──► clause split (existing UtteranceProcessingPipeline)
                  • revise statuses/weights; never delete
           ──► ComponentInput(semantic_evidence=ledger.snapshot())
           ──► occupation_semantic_ledger component       ◄── new, stateless; recomputes from the snapshot
-          ──► RRF with cosine (unchanged)
+          ──► fusion with cosine (unchanged by the ledger; the selected fusion variant, `zscore_sum@equal_v1` by default, §12.6)
 ```
 
 - **What accumulates is evidence, never occupation scores.** The ranking is recomputed from the ledger snapshot each turn, the same way cosine is recomputed from the tracker vector.
@@ -122,7 +122,7 @@ score(o) = pos(o) − λ · neg(o)
 
 ### 5.3 Known limitation that stays: fusion
 
-M4 now demotes maths teachers, but cosine (M1) still ranks them high when the user's RIASEC profile is Social. Equal-weight RRF will still pull them back up somewhat. Fixing that needs a post-fusion stage (the `reranking` slot in the selection config) that applies confirmed avoid records to the fused list. That is a separate experiment, deliberately left out of scope here so that only one variable changes at a time.
+M4 now demotes maths teachers, but cosine (M1) still ranks them high when the user's RIASEC profile is Social. Under the default `zscore_sum@equal_v1` (§12.6) a strongly demoted M4 score counts by its size rather than only its rank, which reduces this compared with equal-weight RRF, but fusion still cannot remove an occupation that cosine ranks highly. Fixing that needs a post-fusion stage (the `reranking` slot in the selection config) that applies confirmed avoid records to the fused list. That is a separate experiment, deliberately left out of scope here so that only one variable changes at a time. It is **not built** yet.
 
 ## 6. Short answers: keep the question
 
@@ -188,7 +188,7 @@ Build it from **held-out** task statements: "I don't want to {task}", "{task} is
 Metrics: rank of the owning occupation for the avoided task (target: out of the top 10), rank of A's owner in mixed statements, and the rate of collateral demotion for unrelated owners. Run it with both the rule extractor and gold polarity, to separate extractor errors from scoring errors.
 
 ### 8.2 Positive regression gate
-Single task sentences: MRR must not fall significantly below `finetuned_v1` semantic-only (.518). Development profiles: no significant regression against the current fusion. If `clauses_v1` alone regresses, the accumulation formula (mean of per-clause similarities vs one joined encoding) is the cause, and that has to be solved before adding polarity.
+Single task sentences: MRR must not fall significantly below `finetuned_v1` semantic-only (.518). Development profiles: no significant regression against the current fusion. Report the fused result under the default `zscore_sum@equal_v1` and under the `rrf_k60` control (§12.6), because the two combine M4 differently: a ledger change that helps under one may not help under the other. If `clauses_v1` alone regresses, the accumulation formula (mean of per-clause similarities vs one joined encoding) is the cause, and that has to be solved before adding polarity.
 
 ### 8.3 Multi-turn (`eval/dialogue*.py`)
 - Rank of the target at the final turn, with probing on and off.
@@ -227,7 +227,7 @@ Motivation: today the recommendations don't feel credible, because nothing shows
 
 | Data | Where | What it gives the plot or the evidence view |
 |---|---|---|
-| Fused top 100 per turn, with `signals` (component ranks and scores) and `rrf_score` | `state.ranking_trace[*].occupations` | Rank changes between turns, and which component moved an occupation |
+| Fused top 100 per turn, with `signals` (component ranks and scores) and `rrf_score` (the fused score of whichever fusion variant is selected; the name is kept for schema compatibility) | `state.ranking_trace[*].occupations` | Rank changes between turns, and which component moved an occupation |
 | Clauses with exact offsets | `turn_trace.utterance_processing` | The clause behind each piece of evidence |
 | RIASEC readings (slot, sign, strength, confidence, source quote) | `turn_trace.readings`, slot `history` | What the cosine half captured from each response |
 | Question, reply and task stance for task questions | `state.task_history` | Short answers paired with their questions |
@@ -299,7 +299,7 @@ There is one card per user response. It is stored in the trace and turn log, and
 **How the attribution is computed (faithful by construction):**
 - **M4 positive part:** this part is linear (§5.2), so each record's share of an occupation's score is exact: `w_i·(v_i·d_o)/Σw`.
 - **M4 negative part:** the record that triggers the `max` is the cause.
-- **Fused rank:** RRF is not linear, so use **leave-one-record-out**. Recompute the ledger score without record *i*, rerun RRF with the unchanged M1 ranking, and report how far each occupation's rank changes. Each record costs one `(n_records × 384) @ (384 × 378)` product plus an RRF over 378 occupations. That should take milliseconds (to be measured). Compute it for the current turn's records by default, and for older records on request.
+- **Fused rank:** fusion is not linear (RRF and z-score alike), so use **leave-one-record-out**. Recompute the ledger score without record *i*, rerun the selected fusion variant with the unchanged M1 ranking, and report how far each occupation's rank changes. Each record costs one `(n_records × 384) @ (384 × 378)` product plus one fusion over 378 occupations. That should take milliseconds (to be measured). Compute it for the current turn's records by default, and for older records on request.
 - **M1 (cosine):** in v1, report the profile change for that turn and the M1 rank changes. Leave-one-turn-out for M1 would mean replaying the tracker; that is deferred.
 
 **Wording rules:** use "associated with" and "matched task" for semantic matches, never "you prefer". Use "captured as a dislike of …" for avoid records. The card uses the same basis as the recommendation cards (`ranking_basis`), which also fixes the final-message wording mismatch listed in the known issues.
@@ -332,6 +332,14 @@ There is one card per user response. It is stored in the trace and turn log, and
 | **B** | Ledger with `signed_v1` or later | Record-level captured evidence, exact M4 contributions, fused leave-one-record-out, clause markers on the map |
 | **C** | B, with `signed_tasks_qa_v1` or later | A participant-facing "what triggered this" section on the recommendation cards, simplified from B, plus the qualitative review |
 
+### 10.8 Implementation notes (Phase A part 1, 9 November 2026)
+
+- **Snapshot:** `RankingPipeline.rank_with_snapshot` (the pipeline already computed full component rankings; `rank()` now delegates to it and returns the identical response). `System._rank` writes `rank_snapshot` = `{code_order, codes_sha256, fused, structured, semantic[, lexical]}`, arrays of ranks with `null` for unranked, plus `slot_confidence` for the bar chart. No snapshot under description reranking (it reorders only the top) or with no signal.
+- **Map artifact:** `python -m recommender.build_occupation_map` → `artifacts/ranking/occupation_semantic_v1/occupation_map_v1/` (`coords.json`, `manifest.json`). t-SNE: cosine, perplexity 30, PCA init, seed 0, 1000 iterations, coordinates scaled into [−0.5, 0.5] keeping aspect ratio. A rebuild was byte-identical. The server recomputes the hexagon from the catalog and serves the t-SNE only if the index files and checkpoint hash still match.
+- **"Moved by"** (provisional): with d = |Δ log rank| per component since the previous turn, "interest profile (M1)" if d_M1 ≥ 1.5·d_M4, "semantic match (M4)" if d_M4 ≥ 1.5·d_M1, "both" otherwise, and "neither moved much" if both are < 0.1.
+- **Hexagon marker:** same formula as the occupations, over the observed types of each `ranking_trace` row (the profile the ranker actually received). If nothing is positive it sits at the centre.
+- **Not done yet:** evidence card (§10.4), debug leave-one-turn-out, ledger markers (Phase B), and the §10.6 check that recomputes colours from logged snapshots.
+
 ## 11. Open decisions for the team
 
 - **Resolving contradictions:** should the newer statement win automatically (v1 proposal), or should both be marked `disputed` and trigger a CHALLENGE question as RIASEC conflicts do?
@@ -340,6 +348,7 @@ There is one card per user response. It is stored in the trace and turn log, and
 - **Penalty strength `λ`:** it has to be set on development data only, and that data must not be reused for the final claim.
 - **Explanation audience:** should it stay researcher-only, or should participants see the Phase C version? This affects the user study, since explanations may change how much participants trust the recommendations.
 - **Map (decided 9 November 2026):** both tabs, the semantic t-SNE map and the RIASEC hexagon, are in Phase A.
+- **Fusion default (decided 9 November 2026):** `zscore_sum@equal_v1` promoted over `rrf` k=60 by owner decision; see §12.6.
 
 ## 12. Review and priority (added 9 November 2026)
 
@@ -375,7 +384,7 @@ Re-weighting fusion on this one session would change the answer completely (e.g.
 
 Yes, as a design for M4. Recompute-from-snapshot, append-only records, polarity-aware scoring with a bounded task-level penalty, offsets instead of copies, and the faithfulness rules in §10 are all sound. Three changes:
 
-1. **It does not fix the failure above.** M4 already ranked the right occupations first, and the fused output is capped by fusion, which §5.3 defers to the end. A better M4 only helps if fusion lets M4 win when it is confident. Fusion should come before the later ledger steps (§12.3).
+1. **It does not fix the failure above.** M4 already ranked the right occupations first, and the fused output is capped by fusion, which §5.3 defers to the end. A better M4 only helps if fusion lets M4 win when it is confident. Fusion should come before the later ledger steps (§12.3). *Done as #1 (§12.6): `zscore_sum@equal_v1` lets a confident M4 match win; live default since 9 November 2026.*
 2. **Question pairing (§6) can contaminate the topic channel with the system's own questions.** Most turns answer generic probe questions whose targets come from unrelated O*NET tasks. In this session, "yes!" to a task from *Architectural and Engineering Managers* would become a positive record pulling M4 towards managers. With `pos(o)` as a weighted **mean**, each such record also dilutes the one statement that carried the topic ("research … in the domain of music"). Proposed change: give `kind=answer` records their own weight `β_answer` (start low, e.g. 0.3, and calibrate), and make paired **negative** answers feed the penalty at full weight. Then pairing mainly adds avoid evidence. Add a §8 metric: rank of the topic owner after N generic probe answers.
 3. **Add a fusion arm to the §8 evaluations.** Every ledger variant should be reported fused as well as alone. The decision that matters is the fused output the user sees.
 
@@ -386,7 +395,7 @@ Ordered by expected effect on the fused ranking per unit of work:
 | # | Fix | Why this position | Cost |
 |---|---|---|---|
 | 0 | **Done 9 Nov, §12.5.** **Multi-turn evaluation for fusion** (known issues §4 item 4), plus ~25 scripted personas across fields with acceptable-occupation lists, where profile and topic sometimes disagree. Primary metric: MRR of the first acceptable occupation (see §12.4); Hit@5 and NDCG@10 secondary; report overall, per field and conflict vs agree. | Every fix below changes the fused output. The current benchmarks each favour one component, and none tests "profile says X, topic says Y". Without this, any change is a guess. Keep the personas out of all tuning. | 1–2 days |
-| 1 | **Fusion** (new versioned variants; keep `rrf` k=60 as control): (a) tie-aware ranks, where tied cosine scores share the average rank, or M1 is excluded until ≥2 types are observed; (b) score-aware fusion, i.e. per-query normalisation of each component's scores (e.g. z-score over the eligible pool) and a weighted sum, so a peaked M4 match can beat a flat cosine lead; (c) optionally, M1 weight scaled by profile evidence (observed types × confidence). Choose using #0, not this session. | This is the step that decides the failure in §12.1, and it is general: when two signals disagree, magnitudes and confidence should decide rather than rank position alone. It touches only the fusion component, with no retraining and no index rebuild. | 1–2 days |
+| 1 | **Done 9 Nov, §12.6; `zscore_sum@equal_v1` promoted to default.** **Fusion** (new versioned variants; keep `rrf` k=60 as control): (a) tie-aware ranks, where tied cosine scores share the average rank, or M1 is excluded until ≥2 types are observed; (b) score-aware fusion, i.e. per-query normalisation of each component's scores (e.g. z-score over the eligible pool) and a weighted sum, so a peaked M4 match can beat a flat cosine lead; ~~(c) optionally, M1 weight scaled by profile evidence (observed types × confidence)~~ dropped 9 Nov, see §12.5 decisions. Main fix is (b); (a) covers sparse early turns. Choose using #0, not this session. | This is the step that decides the failure in §12.1, and it is general: when two signals disagree, magnitudes and confidence should decide rather than rank position alone. It touches only the fusion component, with no retraining and no index rebuild. | 1–2 days |
 | 2 | **Tracker input quality**: (a) do not let a weak same-sign reading lower a stronger one (e.g. merge strength as max or noisy-OR for same-sign readings, or weight by strength × confidence); (b) down-weight `reason=neither` and hedged readings, and keep the answer to the asked question when a hedge follows it; (c) keep familiarity readings out of the profile until confirmed. | Better cosine input for every user. Small, testable changes to `DecayTracker` and answer pairing, evaluated with #0. | 1 day |
 | 3 | **Ledger steps 1–2** (§9: `clauses_v1`, `signed_v1`), with the §12.2 change to answer records. | Fixes M4 drift, truncation and negation. These matter more once fusion lets M4 win. | as planned |
 | 4 | **Explanations Phase A** (§10), the `rank_snapshot` and component-rank hover at minimum. | Can run in parallel from day one. The hover would have shown this failure (M1 #1 vs M4 #26) immediately, without reading logs. | in parallel |
@@ -434,9 +443,101 @@ This section replaces a separate findings file. The raw run (`manifest.json`, `r
 **Decisions**
 - **Keep the RRF k=60 fusion default.** Do not switch to semantic only: it wins overall only because conflict personas make up 14 of 25, and it is weaker on agree personas. Do not revert to cosine only either. The fault is in the combination rule, which #1 addresses.
 - **Target for #1:** reach semantic's conflict results (MRR about .88) while keeping fusion's agree results (about .74), with `rrf` k=60 kept as the control.
+- **Drop option (c) (M1 weight scaled by profile evidence) from #1.** (1) Every persona in every arm has all six types observed by the final turn (5–6 by turn 3 for most), so the observed-types factor is constant where the evaluation measures. (2) Conflict cases have full, confident profiles that point elsewhere (§12.1: confidence .998 on a lukewarm reading), so (c) would keep M1's weight high exactly where it hurts. The failure is about which direction the signals point, not how much evidence there is. (3) Extractor confidences are currently uncalibrated (temperatures 1.0). (4) Sparse early turns are already covered by (a), with no tuned parameter. Could be revisited after #2 with a calibrated extractor, but only together with a per-turn metric, since the final-turn metric cannot show a benefit.
 - **The personas are now the decision benchmark.** Design #1 variants on other data or from first principles, then confirm them here. Do not iterate fusion weights against these 25 personas.
 
 **Caveats**
 - Conflict openings name the field outright ("I want to be a surgeon"), so .881 is probably an upper bound for semantic on real conflict cases.
 - The extractor's metadata looks unfinished (`best_epoch` 0, `best_val_score` −1, all calibration temperatures 1.0), so tracker confidences are uncalibrated. Rerun with a calibrated export when one exists.
 - With only 11 agree personas, their CIs are wide.
+
+### 12.6 Results of #1: fusion variants (9 November 2026)
+
+Full report: [reports/ranking/fusion_variants_v1/DECISION.md](../reports/ranking/fusion_variants_v1/DECISION.md).
+
+**Built** (fusion component only; `rrf` k=60 kept unchanged as the control; nothing tuned):
+- `rrf_tie_aware@k60_v1` (#1a): RRF where exactly tied component scores share their average rank.
+- `zscore_sum@equal_v1` (#1b): per-query z-score of each component's raw scores, summed with equal weights. An occupation a component did not rank gets that component's minimum z; a component with all-equal scores contributes 0.
+- Configs `configs/ranking/occupation_semantic_fusion_{tieavg,zscore}_v1.json`. The pipeline and diagnostics now report the fusion identifier actually used.
+
+**Persona dialogues** (`reports/ranking/dialogue_fusion_v2/run_20261108T184532Z/`; the control reproduces §12.5 exactly). Probing on:
+
+| Ranker | All MRR | Conflict MRR | Agree MRR | Conflict Hit@5 | Agree Hit@5 |
+|---|---|---|---|---|---|
+| fusion `rrf_k60` (control) | .391 | .114 | .743 | .21 | .91 |
+| `rrf_tie_aware@k60_v1` | .391 | .114 | .743 | .21 | .91 |
+| `zscore_sum@equal_v1` | .680 | .639 | .733 | .71 | .91 |
+| semantic only | .758 | .881 | .603 | 1.00 | .73 |
+
+- z-score − control: conflict **+.525 [+.328, +.722]**, agree −.010 [−.192, +.136] (probing off: +.556, −.066).
+- z-score − semantic: conflict −.242 [−.426, −.084], agree **+.130 [+.030, +.249]**.
+- On conflict personas, z-score puts an acceptable occupation at rank 1 in 8 of 14 (control median about 17). Accounting, which semantic alone fails, stays at 5.
+- Tie-aware is identical to the control here: personas have 2 or more types observed from their first ranked turn, so cosine ties do not occur.
+
+**Single-turn checks:**
+- **Held-out task retrieval** (MRR, test split): control .200, tie-aware .402, z-score .507, semantic .518. z-score − semantic −.010 [−.020, −.002].
+- **120 development profiles, opening turn** (labels follow RIASEC): control .096, tie-aware .097, z-score .064. z-score − control **−.032 [−.059, −.011]**.
+
+**Decision (owner, 9 November 2026): `zscore_sum@equal_v1` is the live default** in `configs/ranking.yaml` ([decision](../reports/ranking/fusion_zscore_default/DECISION.md)). It recovers most of the conflict gap at no measurable agree cost. The accepted costs are the opening-turn development regression (−.032) and the §12.5 caveat that persona openings name the field outright, so the conflict gain is probably an upper bound. Tie-aware never does worse but does not fix the conflict failure; it stays selectable and is not the default. Roll back by restoring `fusion: {algorithm: rrf, k: 60}` (or run `configs/system.rrf.json`).
+
+**Reproduce and try it:**
+- Personas: `python -m eval.dialogue_fusion` (all five rankers × probing on/off, output `reports/ranking/dialogue_fusion_v2/`); `--rankers fusion fusion_zscore --probing probing` runs a subset.
+- Task retrieval: `python -m eval.task_retrieval_fusion` (output `reports/ranking/fusion_variants_v1/task_retrieval/`).
+- Development profiles: `python -m recommender.evaluate --config reports/ranking/occupation_semantic_v1/dev_extractor_inputs/fusion/evaluation_config.json --ranking-config configs/ranking/occupation_semantic_fusion_zscore_v1.json --output <new-directory>`, then `python -m recommender.compare`.
+- Website: the default `configs/system.json` now runs z-score fusion. For the previous RRF behaviour, start the server with `$env:CM_CONFIG = 'configs/system.rrf.json'`. The debug panel's component ranks and the `composition` diagnostic (`zscore_sum@equal_v1` or `rrf_k60`) show which fusion ran.
+
+**Still open after #1:**
+- A browser check of the live site with the new default, and a qualitative look at real sessions (e.g. `logs/anon-c509a1d7.jsonl`) under both fusions.
+- Tie-aware RRF cannot be tested by the personas (no cosine ties). Only single-sentence task retrieval shows its effect.
+- The remaining conflict gap to semantic only (.639 vs .881: F07, F08, F11, F13, F14) is where cosine still strongly favours another field. That most likely points to #2 (tracker input quality) rather than to fusion; not yet checked per persona.
+- Next in §12.3 order: #2, then #3 (ledger steps 1–2) with both fusion arms reported (§8.2).
+
+## 13. Change summary: increments on `feat/ranker-v2` (9 November 2026)
+
+Summary of the changes made on top of commit `9fd317b` (all staged, nothing unstaged at the time of writing). Each increment lists what was built, how it works, and the problem it addresses. Details and numbers are in §10.8 and §12.6.
+
+### 13.1 Fusion variant registry
+- **What:** `recommender/models/fusion.py` now has `FUSION_VARIANTS`, `build_fusion` and `fusion_identifier`. `RankingPipeline` builds its fusion once from the config and reports the identifier of the fusion actually used (`fusion_identifier`, diagnostics `composition`).
+- **How:** each accepted selection (e.g. `{algorithm: zscore_sum, variant: equal_v1}`) maps to a frozen identifier and factory. Unknown selections fail with an error that lists the registered variants. New rules are added as new entries, never by editing an existing one.
+- **Problem solved:** `validate_fusion` only accepted `rrf` k=60, and `"rrf_k60"` was hard-coded in the pipeline labels. No other fusion rule could be added or evaluated without breaking variant preservation or provenance.
+
+### 13.2 Tie-aware RRF (`rrf_tie_aware@k60_v1`, #1a)
+- **What:** `TieAwareReciprocalRankFusion`, preset `configs/ranking/occupation_semantic_fusion_tieavg_v1.json`.
+- **How:** the same equal-weight RRF as the control, but occupations with exactly equal component scores share the average of the ranks they span (`average_ranks`).
+- **Problem solved:** with one observed RIASEC type, cosine gives large groups of tied scores, and plain RRF broke those ties by SOC code, an arbitrary order. Result: task retrieval MRR .200 → .402, never worse elsewhere. It does not fix the conflict failure, and the personas cannot test it (no cosine ties). Selectable, not the default.
+
+### 13.3 Z-score sum fusion (`zscore_sum@equal_v1`, #1b), now the live default
+- **What:** `ZScoreSumFusion`, preset `configs/ranking/occupation_semantic_fusion_zscore_v1.json`. `configs/ranking.yaml` now selects it (owner decision, `reports/ranking/fusion_zscore_default/DECISION.md`).
+- **How:** per query, each usable component's raw scores are z-scored over the occupations it ranked (population SD) and summed with equal weights. An occupation a component did not rank gets that component's minimum z; a component with all-equal scores contributes 0. Nothing is tuned. `RankedOccupation.rrf_score` holds the fused score so the response schema is unchanged.
+- **Problem solved:** the §12.1 failure. RRF uses rank position only, so a flat cosine (M1) lead overruled a confident semantic (M4) match whenever profile and topic disagreed (conflict persona MRR .114). Z-score lets a peaked M4 score count by its size: conflict MRR .639 (+.525 [+.328, +.722]), agree unchanged (.733 vs .743), task retrieval .507. Accepted cost: opening-turn development profiles .064 vs .096 (−.032).
+- **Rollback:** `configs/system.rrf.json` runs the previous RRF default without editing anything (`$env:CM_CONFIG = 'configs/system.rrf.json'`); or restore `fusion: {algorithm: rrf, k: 60}` in `configs/ranking.yaml`.
+
+### 13.4 Evaluation harness for fusion variants
+- **What:** `eval/dialogue_fusion.py` gains the tie-aware and z-score arms, their contrasts against the control and semantic only, and `--rankers` / `--probing` subset flags (output moves to `reports/ranking/dialogue_fusion_v2/`). New `eval/task_retrieval_fusion.py` runs held-out task retrieval for every fusion arm. Development-profile reruns via `recommender.evaluate` / `recommender.compare`.
+- **How:** each benchmark reruns the RRF control first and checks it reproduces the saved result (personas and development profiles exactly; task retrieval .200 vs .201, explained by the changed local extractor checkpoint). Paired bootstrap CIs for every contrast.
+- **Problem solved:** a variant can only be chosen fairly if it is measured on the multi-turn decision benchmark (personas) and on the single-turn checks, against a reproduced control. Results and provenance are in `reports/ranking/dialogue_fusion_v2/run_20261108T184532Z/` and `reports/ranking/fusion_variants_v1/` (`DECISION.md`, `task_retrieval/`, `dev_extractor_inputs/`).
+
+### 13.5 Explanation map, Phase A part 1 (§10)
+- **What:**
+  - `RankingPipeline.rank_with_snapshot` (`rank()` delegates to it and returns the identical response).
+  - `System._rank` stores `rank_snapshot` and `slot_confidence` in each `ranking_trace` row.
+  - New `recommender/build_occupation_map.py` builds the map artifact (t-SNE over the fine-tuned index, plus RIASEC hexagon coordinates), served by the new `GET /api/occupation_map`.
+  - The debug panel in `static/app.js` / `static/styles.css` replaces the raw JSON block with the map.
+- **How:** the snapshot holds every eligible occupation's fused and per-component ranks as integer arrays in a fixed code order with a `codes_sha256` check. It is explanation-only: no scoring change, exports keep their schema, and there is no snapshot under description reranking or with no signal. The map has semantic and hexagon tabs, a turn slider, rose/fell/top-10 colouring, component-rank hover ("moved by" M1, M4 or both), the tracker-profile marker and trail on the hexagon, and a slot confidence bar chart. The map artifact is deterministic (rebuild byte-identical) and the server only serves the t-SNE when its index and checkpoint fingerprints match.
+- **Problem solved:** recommendations did not feel credible because nothing showed why an occupation moved, and diagnosing failures like §12.1 (M1 #1 vs M4 #26) meant reading logs. The hover now shows which component pushed an occupation up or down on each turn.
+- **Still pending:** evidence card (§10.4), leave-one-turn-out, ledger markers (Phase B), the §10.6 colour check from logged snapshots.
+
+### 13.6 Tests and documentation
+- **Tests:**
+  - `tests/test_fusion.py`: the new variants, ties, missing occupations, constant components, the registry.
+  - New `tests/test_occupation_map.py`.
+  - `tests/test_configuration.py`: pins the YAML to z-score and keeps RRF and `system.rrf.json` selectable.
+  - `tests/test_ranking_app_integration.py`: the web app's ranking equals the z-score preset's.
+  - Small updates in `test_dialogue_fusion`, `test_history` and `test_integration`.
+  - The 23 pre-existing failures (offline HuggingFace, fingerprints, caches) are unchanged from `9fd317b`.
+- **Docs:** status entries in `docs/RANKING_EXPERIMENT_ARCHITECTURE.md` and `cs425-ranking-docs/README.md` (kept consistent per `AGENTS.md`), known-issues item 5 marked done, and §3, §5.3, §8.2, §10.8, §11 and §12.6 of this plan updated.
+
+### 13.7 Not done in these increments
+- Browser check of the live site with z-score fusion, and a qualitative replay of real sessions under both fusions.
+- Remaining conflict gap to semantic only (F07, F08, F11, F13, F14), probably #2 (tracker input quality).
+- Next: #2, then #3 (ledger steps 1–2) reported under both `zscore_sum@equal_v1` and `rrf_k60`.

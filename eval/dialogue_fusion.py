@@ -1,8 +1,9 @@
-"""Multi-turn fusion evaluation (#0, docs/SEMANTIC_LEDGER_PLAN.md §12.3-12.4).
+"""Multi-turn fusion evaluation (#0 and #1, docs/SEMANTIC_LEDGER_PLAN.md §12.3-12.4).
 
-Simulated dialogues with the real System on data/eval/fusion_personas_v1.jsonl. Six arms:
-{fusion (RRF k=60), cosine only, semantic only} x {probing on, probing off}. Each arm uses its
-ranker both inside the dialogue and for the final ranking.
+Simulated dialogues with the real System on data/eval/fusion_personas_v1.jsonl. Arms are
+{ranker} x {probing on, probing off}; rankers are fusion (RRF k=60, the control), cosine only,
+semantic only, and the #1 fusion variants (tie-aware RRF, z-score sum). Each arm uses its ranker
+both inside the dialogue and for the final ranking. --rankers / --probing select a subset.
 
 Primary metric (fixed before any run, §12.4): MRR of the first acceptable occupation over the
 full eligible pool. Secondary: Hit@5 and NDCG@10 against the acceptable set (binary gains).
@@ -31,11 +32,14 @@ from recommender.models.ranker import RankingPipeline
 
 ROOT = Path(__file__).resolve().parents[1]
 PERSONAS = ROOT / "data/eval/fusion_personas_v1.jsonl"
-RANKERS = {  # arm name -> versioned ranking configuration (no new variants here)
-    "fusion": "configs/ranking/occupation_semantic_fusion_v1.json",  # = configs/ranking.yaml default
+RANKERS = {  # arm name -> versioned ranking configuration
+    "fusion": "configs/ranking/occupation_semantic_fusion_v1.json",  # rrf_k60 control (default until 9 Nov 2026)
     "cosine": "configs/ranking/m1_cosine.json",
     "semantic": "configs/ranking/occupation_semantic_finetuned_v1.json",
+    "fusion_tieavg": "configs/ranking/occupation_semantic_fusion_tieavg_v1.json",  # #1a rrf_tie_aware@k60_v1
+    "fusion_zscore": "configs/ranking/occupation_semantic_fusion_zscore_v1.json",  # #1b zscore_sum@equal_v1 = configs/ranking.yaml default
 }
+VARIANTS = ("fusion_tieavg", "fusion_zscore")  # compared against the control and semantic only
 PROBING = {"probing": False, "no_probing": True}  # arm suffix -> ManualPolicy(no_probing=...)
 GROUPS = ("all", "conflict", "agree")
 METRICS = ("mrr", "hit_at_5", "hit_at_10", "ndcg_at_10")
@@ -112,9 +116,13 @@ def paired_bootstrap(a: list[float], b: list[float], seed=BOOTSTRAP_SEED, sample
 
 def contrasts(arms: dict) -> dict:
     pairs = [(f"fusion_{p}", f"cosine_{p}") for p in PROBING] + [(f"fusion_{p}", f"semantic_{p}") for p in PROBING] \
-        + [(f"semantic_{p}", f"cosine_{p}") for p in PROBING] + [(f"{r}_probing", f"{r}_no_probing") for r in RANKERS]
+        + [(f"semantic_{p}", f"cosine_{p}") for p in PROBING] \
+        + [(f"{v}_{p}", f"{b}_{p}") for v in VARIANTS for b in ("fusion", "semantic") for p in PROBING] \
+        + [(f"{r}_probing", f"{r}_no_probing") for r in RANKERS]
     out = {}
     for a, b in pairs:
+        if a not in arms or b not in arms:
+            continue
         for group in GROUPS:
             keep = [i for i, s in enumerate(arms[a]["sessions"]) if group == "all" or s["conflict"] == (group == "conflict")]
             if not keep:
@@ -126,12 +134,12 @@ def contrasts(arms: dict) -> dict:
     return out
 
 
-def run(system, personas, bank, pipelines) -> dict:
+def run(system, personas, bank, pipelines, probing=PROBING) -> dict:
     if not personas or len({p["id"] for p in personas}) != len(personas):
         raise ValueError("Expected nonempty personas with unique identifiers")
     arms = {}
     for ranker_name, pipeline in pipelines.items():
-        for suffix, no_probing in PROBING.items():
+        for suffix, no_probing in probing.items():
             candidate = copy(system)
             candidate.ranker = pipeline
             candidate.policy = ManualPolicy(system.max_turns, no_probing=no_probing,
@@ -173,8 +181,14 @@ def main():
                         help="Base System config; filler is forced to question-bank and the ranker is set per arm")
     parser.add_argument("--limit", type=int, default=None, help="First N personas (smoke runs only)")
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--rankers", nargs="+", choices=list(RANKERS), default=list(RANKERS),
+                        help="Ranker arms to run (default: all)")
+    parser.add_argument("--probing", choices=("both", *PROBING), default="both",
+                        help="Probing arms to run (default: both)")
     args = parser.parse_args()
-    output = args.output or ROOT / "reports/ranking/dialogue_fusion_v1" / datetime.now(timezone.utc).strftime("run_%Y%m%dT%H%M%SZ")
+    rankers = {name: RANKERS[name] for name in RANKERS if name in args.rankers}
+    probing = PROBING if args.probing == "both" else {args.probing: PROBING[args.probing]}
+    output = args.output or ROOT / "reports/ranking/dialogue_fusion_v2" / datetime.now(timezone.utc).strftime("run_%Y%m%dT%H%M%SZ")
     if output.exists():
         parser.error("Output exists; choose a new directory to preserve prior results")
     config_path = args.config.resolve()
@@ -190,14 +204,15 @@ def main():
     config["components"]["ranker"] = "configured"
     config["paths"]["ranking_config"] = RANKERS["fusion"]
     system = System.from_config(ROOT / "data", config)
-    pipelines = {name: RankingPipeline(ROOT / "data/occupations.csv", config=ROOT / path) for name, path in RANKERS.items()}
-    results = run(system, personas, bank, pipelines)
+    pipelines = {name: RankingPipeline(ROOT / "data/occupations.csv", config=ROOT / path) for name, path in rankers.items()}
+    results = run(system, personas, bank, pipelines, probing)
     try:
         revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
         dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip())
     except (OSError, subprocess.CalledProcessError):
         revision, dirty = None, None
-    source = [*sorted((ROOT / "pipeline").glob("*.py")), Path(__file__), ROOT / "eval/dialogue.py", ROOT / "data/eval/simulator.py"]
+    source = [*sorted((ROOT / "pipeline").glob("*.py")), Path(__file__), ROOT / "eval/dialogue.py", ROOT / "data/eval/simulator.py",
+              ROOT / "recommender/models/fusion.py", ROOT / "recommender/models/ranker.py"]
     checkpoints = {key: {p.name: sha256(p) for p in (ROOT / config["paths"][key]).glob("*")
                          if p.name in ("config.json", "model.safetensors")}
                    for key in ("extractor_checkpoint", "nli_model")}
@@ -206,9 +221,10 @@ def main():
         quality_claim="none for --limit smoke runs" if args.limit else "development evidence for fusion choice (#0); personas never tuned on",
         persona_ids=[p["id"] for p in personas], personas_sha256=sha256(PERSONAS),
         base_config_path=str(config_path.relative_to(ROOT)) if config_path.is_relative_to(ROOT) else str(config_path),
-        config=config, arms={f"{r}_{s}": dict(ranking_config=RANKERS[r], no_probing=n) for r in RANKERS for s, n in PROBING.items()},
+        config=config, arms={f"{r}_{s}": dict(ranking_config=rankers[r], no_probing=n) for r in rankers for s, n in probing.items()},
         resolved_ranking={name: p.resolved_config for name, p in pipelines.items()},
-        ranking_config_sha256={name: sha256(ROOT / path) for name, path in RANKERS.items()},
+        fusion_identifiers={name: p.fusion_identifier for name, p in pipelines.items()},
+        ranking_config_sha256={name: sha256(ROOT / path) for name, path in rankers.items()},
         git_revision=revision, git_dirty=dirty, python=platform.python_version(),
         source_sha256={str(p.relative_to(ROOT)): sha256(p) for p in source},
         checkpoints=checkpoints, components=system.components,

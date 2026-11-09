@@ -56,12 +56,13 @@ class IntegrationTests(unittest.TestCase):
 
     def test_policy_accepts_short_and_empty_lists(self):
         system = make_system()
-        rank = system.ranker.rank
+        rank = system.ranker.rank_with_snapshot   # System's entry point; rank() delegates to it
         for empty in (False, True):
-            def shortened(*args):
-                response = rank(*args)
-                return RankingResponse("no_signal", reason="fixture") if empty else RankingResponse("ranked", response.occupations[:2])
-            system.ranker.rank = shortened
+            def shortened(*args, **kwargs):
+                response = rank(*args, **kwargs)[0]
+                return (RankingResponse("no_signal", reason="fixture") if empty
+                        else RankingResponse("ranked", response.occupations[:2]), None)
+            system.ranker.rank_with_snapshot = shortened
             system.policy.max_turns = 1
             state = State()
             result = system.step(state, SCRIPTS[0][0])

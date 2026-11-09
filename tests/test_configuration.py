@@ -18,11 +18,19 @@ from recommender.ranker import BASELINE_CONFIG
 
 
 class ConfigurationTests(unittest.TestCase):
-    def test_yaml_default_is_the_cosine_semantic_fusion_selection(self):
-        # Explicit owner decision (reports/ranking/occupation_semantic_default/DECISION.md).
+    def test_yaml_default_is_the_cosine_semantic_zscore_fusion_selection(self):
+        # Explicit owner decisions (reports/ranking/occupation_semantic_default/DECISION.md,
+        # reports/ranking/fusion_zscore_default/DECISION.md).
         config, _ = load_configuration(Path("configs/ranking.yaml"))
-        fusion, _ = load_configuration(Path("configs/ranking/occupation_semantic_fusion_v1.json"))
+        fusion, _ = load_configuration(Path("configs/ranking/occupation_semantic_fusion_zscore_v1.json"))
         self.assertEqual(config, fusion)
+        self.assertEqual(config["fusion"], {"algorithm": "zscore_sum", "variant": "equal_v1"})
+
+    def test_rrf_fusion_remains_selectable_as_previous_default(self):
+        rrf, _ = load_configuration(Path("configs/ranking/occupation_semantic_fusion_v1.json"))
+        self.assertEqual(rrf["fusion"], {"algorithm": "rrf", "k": 60})
+        system, _ = load_configuration(Path("configs/system.rrf.json"))
+        self.assertEqual(system["paths"]["ranking_config"], "configs/ranking/occupation_semantic_fusion_v1.json")
 
     def test_cosine_remains_selectable_as_previous_default(self):
         cosine, _ = load_configuration(Path("configs/ranking/m1_cosine.json"))
