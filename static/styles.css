@@ -273,3 +273,48 @@ textarea:disabled { background: var(--chip-bg); }
 }
 /* Researcher-panel JSON diagnostics (occupation semantic experiment). */
 .researcher pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+
+/* Researcher-panel occupation map (SEMANTIC_LEDGER_PLAN section 10). */
+.raw-diag summary { cursor: pointer; font-size: 13px; color: var(--dark-ink-3); }
+.omap-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.omap-tab {
+  font: inherit; font-size: 13px; min-height: 36px; padding: 0 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--dark-line); background: transparent; color: var(--dark-ink-2);
+}
+.omap-tab[aria-selected="true"] { background: var(--dark-track); border-color: #4A545E; color: var(--dark-ink); font-weight: 700; }
+.omap-tab:disabled { opacity: .45; cursor: not-allowed; }
+.omap-slider { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; font-size: 13px; color: var(--dark-ink-2); }
+.omap-slider input { width: 100%; accent-color: var(--pos); }
+.omap-svg { width: 100%; height: auto; aspect-ratio: 1; background: #1C2228; border-radius: 10px; touch-action: manipulation; }
+.omap-hex { fill: none; stroke: #3A434C; stroke-width: .006; }
+.omap-corner { fill: var(--dark-ink-3); font-family: var(--font-mono); font-size: .09px; text-anchor: middle; }
+.omap-dot.flat { fill: #4A545E; fill-opacity: .55; }
+.omap-dot.rose { fill: var(--pos); }
+.omap-dot.fell { fill: var(--neg); }
+.omap-top { fill: var(--dark-ink); stroke: #0E1216; stroke-width: .012; }
+.omap-ring-in { fill: none; stroke: var(--pos); stroke-width: .014; }
+.omap-ring-out { fill: none; stroke: var(--neg); stroke-width: .014; }
+.omap-label { fill: var(--dark-ink); font-family: var(--font-mono); font-size: .065px; paint-order: stroke; stroke: #1C2228; stroke-width: .02px; }
+.omap-sel { fill: none; stroke: #FFFFFF; stroke-width: .01; stroke-dasharray: .03 .02; pointer-events: none; }
+.omap-trail { fill: none; stroke: #E6E9EC; stroke-opacity: .35; stroke-width: .012; stroke-linejoin: round; }
+.omap-trail-pt { fill: #E6E9EC; fill-opacity: .35; }
+.omap-me { fill: #FFE08A; stroke: #0E1216; stroke-width: .012; }
+.omap-info { min-height: 3.2em; font-size: 13.5px; color: var(--dark-ink-2); background: #1C2228; border-radius: 8px; padding: 8px 10px; }
+.omap-info strong { color: var(--dark-ink); }
+.omap-info .comps { margin-top: 6px; }
+.omap-code { font-family: var(--font-mono); font-size: 12px; color: var(--dark-ink-3); }
+.omap-top10 { margin: 0; padding-left: 28px; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.omap-top10 button {
+  font: inherit; background: none; border: 0; padding: 2px 0; color: var(--dark-ink-2); cursor: pointer; text-align: left;
+}
+.omap-top10 button:hover { color: var(--dark-ink); text-decoration: underline; }
+.omap-new { color: var(--pos-text); font-family: var(--font-mono); font-size: 11.5px; }
+.omap-legend { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--dark-ink-2); }
+.omap-legend li { display: flex; align-items: center; gap: 6px; }
+.omap-legend svg { overflow: visible; }
+.omap-legend .omap-ring-in, .omap-legend .omap-ring-out { stroke-width: .3; }
+.omap-legend .omap-top, .omap-legend .omap-me { stroke-width: .2; }
+.omap-legend-note { flex-basis: 100%; color: #A3AEBA; }
+.omap-bars { display: flex; flex-direction: column; gap: 6px; }
+.omap-bars .slot { grid-template-columns: 22px minmax(0, 1fr) auto; }
+.omap-bars .slot .val { white-space: nowrap; }

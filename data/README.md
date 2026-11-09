@@ -20,6 +20,7 @@ All text in this package was drafted by an LLM and checked by blind LLM readers.
 | profiles_v4.jsonl | 120 | **Final evaluation only** | Balanced test set (18 Oct): 20 students per top type, six patterns. Never tune on it. |
 | extractor_stress.jsonl | 400 | Extractor stress test only | 8 phrasing types × 50, same fields as extractor.jsonl plus `variation`; split `stress_test`. Never train on it. |
 | dev_profiles.jsonl | 120 | Tuning | Same format as the test set. D001–D060 as before; D061–D120 added 18 Oct to balance the top types (20 each). |
+| eval/fusion_personas_v1.jsonl | 25 | **Fusion evaluation only** (#0, docs/SEMANTIC_LEDGER_PLAN.md §12.3–12.4) | Hand-drafted and team-reviewed 9 Nov 2026. dev_profiles format plus `field`, `acceptable` (occupations counted as correct; first = `target`), `conflict` (best acceptable oracle-cosine rank > 20; 14 conflict, 11 agree) and `oracle_cosine_ranks`. Built by scripts/build_fusion_personas_v1.py. Never tune on it. |
 | nli_pairs.jsonl | 175 | Contradiction-check validation | dev 88 (41 contradiction, 33 elaboration incl. 20 hard, 14 unrelated); test 87 (54 contradiction, 27 elaboration incl. 20 hard, 6 unrelated). Field `source`: hand / hard / profiles / dev_profiles / profiles_v4 / dev_profiles_v4. |
 | nli_pairs_blind.jsonl | 60 | Human sort check | The hand-made pairs with no labels |
 | eval/simulator.py, eval/metrics.py, eval/lexicon_baseline.py | – | Evaluation harness | Reference simulator and metrics, plus a keyword baseline (test macro-F1 0.48) |

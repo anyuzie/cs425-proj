@@ -432,20 +432,357 @@
     var rankingRows = trace.ranking_trace || [];
     var latestRanking = rankingRows[rankingRows.length - 1];
     var semantic = latestRanking && (latestRanking.query_diagnostics || {}).occupation_semantic;
+    // occupation map (SEMANTIC_LEDGER_PLAN section 10): replaces the raw JSON block
+    var mapSection = el('section', 'omap');
+    p.appendChild(mapSection);
+    mapView.section = mapSection;
+    mapView.rows = rankingRows;
+    loadMap();
+    renderMap();
+
     if (semantic) {
-      var semanticPanel = el('section');
-      semanticPanel.appendChild(el('h2', null, 'Occupation semantic experiment'));
-      semanticPanel.appendChild(el('p', null, 'Topic/background association is independent of accepted preferences.'));
+      var semanticPanel = el('details', 'raw-diag');
+      semanticPanel.appendChild(el('summary', null, 'Raw semantic diagnostics (JSON)'));
       semanticPanel.appendChild(el('pre', null, JSON.stringify(semantic, null, 2)));
-      var scores = (latestRanking.occupations || []).slice(0, 5).map(function (o) {
-        return { code: o.code, rank: o.rank, signals: o.signals, rrf_score: o.rrf_score };
-      });
-      var scoreDetails = el('details');
-      scoreDetails.appendChild(el('summary', null, 'Component scores and ranks'));
-      scoreDetails.appendChild(el('pre', null, JSON.stringify(scores, null, 2)));
-      semanticPanel.appendChild(scoreDetails);
       p.appendChild(semanticPanel);
     }
+  }
+
+  /* ---------- occupation map: per-turn rank changes on a fixed layout ---------- */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var COMPONENT_LABEL = { structured: 'interest profile (M1)', semantic: 'semantic match (M4)', lexical: 'keywords (M3)' };
+  var mapView = {
+    map: null, loading: false, error: null, section: null, rows: [],
+    tab: null, turnIdx: null, selected: null, hover: null
+  };
+
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag);
+    Object.keys(attrs || {}).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    return n;
+  }
+
+  function loadMap() {
+    if (mapView.map || mapView.loading) return;
+    mapView.loading = true;
+    fetch('/api/occupation_map').then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function (map) {
+      mapView.map = map;
+      mapView.index = {};
+      map.codes.forEach(function (c, i) { mapView.index[c] = i; });
+      if (!mapView.tab) mapView.tab = map.semantic ? 'semantic' : 'hexagon';
+    }).catch(function (err) {
+      mapView.error = 'Occupation map unavailable (' + err.message + ').';
+    }).then(function () {
+      mapView.loading = false;
+      renderMap();
+    });
+  }
+
+  // Same formula as recommender/build_occupation_map.py hexagon_point.
+  function hexPoint(values, types, corners) {
+    var x = 0, y = 0, total = 0;
+    types.forEach(function (t) {
+      var w = Math.max(0, Number(values[t]) || 0);
+      x += w * corners[t][0]; y += w * corners[t][1]; total += w;
+    });
+    return total > 0 ? [x / total, y / total] : null;
+  }
+
+  function logChange(prev, now) {
+    return (prev == null || now == null) ? null : Math.log(prev) - Math.log(now);  // > 0 means it rose
+  }
+
+  // Section 10.3 encoding; thresholds are provisional.
+  function category(i, snap, prev) {
+    var r = snap.fused[i], top = r != null && r <= 10;
+    if (!prev) return { top: top, kind: 'flat', d: 0 };
+    var p = prev.fused[i], wasTop = p != null && p <= 10;
+    var d = logChange(p, r);
+    var kind = d == null ? 'flat' : d >= 0.5 ? 'rose' : d <= -0.5 ? 'fell' : 'flat';
+    return { top: top, kind: kind, d: d || 0, entered: top && !wasTop, left: wasTop && !top };
+  }
+
+  function movedBy(i, snap, prev) {
+    if (!prev) return null;
+    var d = {};
+    Object.keys(COMPONENT_LABEL).forEach(function (k) {
+      if (snap[k] && prev[k]) {
+        var c = logChange(prev[k][i], snap[k][i]);
+        if (c != null) d[k] = Math.abs(c);
+      }
+    });
+    var keys = Object.keys(d);
+    if (!keys.length) return 'no component ranks recorded';
+    if (keys.length === 1) return COMPONENT_LABEL[keys[0]] + ' (only usable component)';
+    var s = d.structured || 0, m = d.semantic || 0;
+    if (Math.max(s, m) < 0.1) return 'neither component moved much';
+    if (s >= 1.5 * m) return COMPONENT_LABEL.structured;
+    if (m >= 1.5 * s) return COMPONENT_LABEL.semantic;
+    return 'both';
+  }
+
+  function usableSnapshot(row, map) {
+    var s = row && row.rank_snapshot;
+    return s && s.codes_sha256 === map.codes_sha256 ? s : null;
+  }
+
+  function renderMap() {
+    var sec = mapView.section;
+    if (!sec) return;
+    while (sec.firstChild) sec.removeChild(sec.firstChild);
+    sec.appendChild(el('h2', null, 'Occupation map'));
+    var map = mapView.map, rows = mapView.rows || [];
+    if (mapView.error) { sec.appendChild(el('p', 'hint', mapView.error)); return; }
+    if (!map) { sec.appendChild(el('p', 'hint', 'Loading map…')); return; }
+    if (!rows.length) { sec.appendChild(el('p', 'hint', 'The map is coloured from the first ranked turn.')); return; }
+
+    var idx = mapView.turnIdx == null ? rows.length - 1 : Math.min(mapView.turnIdx, rows.length - 1);
+    var row = rows[idx];
+    var snap = usableSnapshot(row, map);
+    var prev = idx > 0 ? usableSnapshot(rows[idx - 1], map) : null;
+    if (mapView.tab === 'semantic' && !map.semantic) mapView.tab = 'hexagon';
+
+    // tabs
+    var tabs = el('div', 'omap-tabs');
+    tabs.setAttribute('role', 'tablist');
+    [['semantic', 'Semantic map'], ['hexagon', 'RIASEC hexagon']].forEach(function (t) {
+      var b = el('button', 'omap-tab', t[1]);
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', String(mapView.tab === t[0]));
+      if (t[0] === 'semantic' && !map.semantic) {
+        b.disabled = true;
+        b.title = map.semantic_unavailable || 'unavailable';
+      }
+      b.addEventListener('click', function () { mapView.tab = t[0]; renderMap(); });
+      tabs.appendChild(b);
+    });
+    sec.appendChild(tabs);
+    if (!map.semantic) sec.appendChild(el('p', 'hint', 'Semantic map hidden: ' + map.semantic_unavailable));
+
+    // turn slider
+    var sliderRow = el('div', 'omap-slider');
+    var sliderId = 'omapTurn';
+    var lab = el('label', null, 'Turn ' + row.turn + (idx === rows.length - 1 ? ' (latest)' : ''));
+    lab.htmlFor = sliderId;
+    var slider = el('input');
+    slider.type = 'range'; slider.id = sliderId; slider.min = '0'; slider.max = String(rows.length - 1);
+    slider.step = '1'; slider.value = String(idx); slider.disabled = rows.length < 2;
+    slider.addEventListener('input', function () {
+      var v = Number(slider.value);
+      mapView.turnIdx = v === rows.length - 1 ? null : v;   // the latest position follows new turns
+      renderMap();
+      var again = document.getElementById(sliderId);
+      if (again) again.focus();
+    });
+    sliderRow.appendChild(lab);
+    sliderRow.appendChild(slider);
+    sec.appendChild(sliderRow);
+
+    if (!snap) {
+      sec.appendChild(el('p', 'hint', row.rank_snapshot
+        ? 'This turn’s ranks use a different occupation order than the map, so they are not shown.'
+        : row.status !== 'ranked' ? 'No ranking this turn (' + (row.reason || row.status) + ').'
+        : 'No full-pool ranks were recorded for this turn.'));
+    } else if (!prev) {
+      sec.appendChild(el('p', 'hint', idx === 0 ? 'First ranked turn: only the top 10 are shown.'
+        : 'The previous turn has no ranks to compare with: only the top 10 are shown.'));
+    }
+
+    // plot
+    var hex = mapView.tab === 'hexagon';
+    var pts = hex ? map.hexagon.coords : map.semantic.map(function (c) { return [c[0] * 2, c[1] * 2]; });
+    var svg = svgEl('svg', { viewBox: '-1.2 -1.2 2.4 2.4', class: 'omap-svg', role: 'img',
+      'aria-label': (hex ? 'RIASEC hexagon' : 'Semantic map') + ' of ' + map.codes.length +
+        ' occupations, coloured by rank change at turn ' + row.turn });
+    if (hex) {
+      var corners = map.hexagon.corners;
+      svg.appendChild(svgEl('polygon', { class: 'omap-hex', points: LETTERS.map(function (L) { return corners[L].join(','); }).join(' ') }));
+      LETTERS.forEach(function (L) {
+        var t = svgEl('text', { x: corners[L][0] * 1.1, y: corners[L][1] * 1.1 + 0.035, class: 'omap-corner' });
+        t.textContent = L;
+        svg.appendChild(t);
+      });
+    }
+    var cats = map.codes.map(function (_, i) { return snap ? category(i, snap, prev) : { top: false, kind: 'flat', d: 0 }; });
+    var order = map.codes.map(function (_, i) { return i; }).sort(function (a, b) {
+      var w = function (c) { return c.top ? 3 : c.kind !== 'flat' || c.left ? 2 : 1; };
+      return w(cats[a]) - w(cats[b]);
+    });
+    var R = 0.03;
+    order.forEach(function (i) {
+      var c = cats[i], x = pts[i][0], y = pts[i][1];
+      if (c.top) {
+        if (c.entered) svg.appendChild(svgEl('circle', { cx: x, cy: y, r: R * 2.1, class: 'omap-ring-in' }));
+        svg.appendChild(svgEl('circle', { cx: x, cy: y, r: R * 1.4, class: 'omap-top' }));
+        var t = svgEl('text', { x: x + R * 1.9, y: y + 0.025, class: 'omap-label' });
+        t.textContent = String(snap.fused[i]);
+        svg.appendChild(t);
+      } else if (c.left) {
+        svg.appendChild(svgEl('circle', { cx: x, cy: y, r: R * 1.4, class: 'omap-ring-out' }));
+      } else {
+        var dot = svgEl('circle', { cx: x, cy: y, r: R, class: 'omap-dot ' + c.kind });
+        if (c.kind !== 'flat') dot.setAttribute('fill-opacity', String(Math.min(1, 0.45 + (Math.abs(c.d) - 0.5) / 2)));
+        svg.appendChild(dot);
+      }
+    });
+    if (hex) drawProfile(svg, rows, idx, map.hexagon.corners);
+    var selRing = svgEl('circle', { r: R * 2.6, class: 'omap-sel' });
+    selRing.style.display = 'none';
+    svg.appendChild(selRing);
+    sec.appendChild(svg);
+
+    // details box (hover previews, click/tap pins)
+    var info = el('div', 'omap-info');
+    info.setAttribute('aria-live', 'polite');
+    sec.appendChild(info);
+    function show(code) {
+      var i = code == null ? null : mapView.index[code];
+      if (i == null) {
+        selRing.style.display = 'none';
+        info.textContent = '';
+        info.appendChild(el('span', 'hint', 'Hover or tap an occupation for its ranks.'));
+        return;
+      }
+      selRing.setAttribute('cx', pts[i][0]); selRing.setAttribute('cy', pts[i][1]);
+      selRing.style.display = '';
+      renderDetails(info, map, i, snap, prev);
+    }
+    function nearest(evt) {
+      var ctm = svg.getScreenCTM();
+      if (!ctm) return null;
+      var pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      var q = pt.matrixTransform(ctm.inverse()), best = null, bestD = 0.09 * 0.09;
+      pts.forEach(function (p, i) {
+        var d = (p[0] - q.x) * (p[0] - q.x) + (p[1] - q.y) * (p[1] - q.y);
+        if (d < bestD) { bestD = d; best = map.codes[i]; }
+      });
+      return best;
+    }
+    svg.addEventListener('pointermove', function (e) { show(nearest(e) || mapView.selected); });
+    svg.addEventListener('pointerleave', function () { show(mapView.selected); });
+    svg.addEventListener('click', function (e) { mapView.selected = nearest(e); show(mapView.selected); });
+    show(mapView.selected);
+
+    // keyboard-reachable top 10
+    if (snap) {
+      var top = map.codes.map(function (c, i) { return i; })
+        .filter(function (i) { return snap.fused[i] != null && snap.fused[i] <= 10; })
+        .sort(function (a, b) { return snap.fused[a] - snap.fused[b]; });
+      var ol = el('ol', 'omap-top10');
+      top.forEach(function (i) {
+        var li = el('li');
+        var b = el('button', null, map.titles[i]);
+        b.type = 'button';
+        if (cats[i].entered) b.appendChild(el('span', 'omap-new', ' new'));
+        b.addEventListener('click', function () { mapView.selected = map.codes[i]; show(mapView.selected); });
+        li.appendChild(b);
+        ol.appendChild(li);
+      });
+      sec.appendChild(ol);
+    }
+
+    sec.appendChild(legend(hex));
+    if (hex) sec.appendChild(slotBars(row));
+    var notes = hex ? [
+      'Each job sits towards the types its O*NET z-scores are positive in. The diamond is your profile over observed types; the faded line is its path over earlier turns.',
+      'Six dimensions squashed into two: opposite types cancel, so a strong R + S profile and a flat one both land near the centre.',
+      'Two jobs at the same point can rank differently, and the marker shows only the cosine half. With fusion on, a far-away job can still rank highly from the semantic match; the details say which half moved it.'
+    ] : [
+      'Jobs close together have similar O*NET text under the fine-tuned encoder. t-SNE keeps neighbourhoods, not global distances: the gap between two clusters means nothing.'
+    ];
+    notes.forEach(function (n) { sec.appendChild(el('p', 'hint', n)); });
+  }
+
+  function drawProfile(svg, rows, idx, corners) {
+    var path = [];
+    for (var k = 0; k <= idx; k++) {
+      var r = rows[k];
+      path.push(hexPoint(r.interests || {}, r.observed_types || [], corners) || [0, 0]);
+    }
+    if (path.length > 1) {
+      svg.appendChild(svgEl('polyline', { class: 'omap-trail', points: path.map(function (p) { return p.join(','); }).join(' ') }));
+      path.slice(0, -1).forEach(function (p) { svg.appendChild(svgEl('circle', { cx: p[0], cy: p[1], r: 0.022, class: 'omap-trail-pt' })); });
+    }
+    var cur = path[path.length - 1], s = 0.075;
+    svg.appendChild(svgEl('polygon', { class: 'omap-me',
+      points: [[cur[0], cur[1] - s], [cur[0] + s, cur[1]], [cur[0], cur[1] + s], [cur[0] - s, cur[1]]].map(function (p) { return p.join(','); }).join(' ') }));
+  }
+
+  function rankPair(now, before, hasPrev) {
+    var a = now == null ? '—' : '#' + now;
+    if (!hasPrev) return a;
+    return a + ' (was ' + (before == null ? '—' : '#' + before) + ')';
+  }
+
+  function renderDetails(box, map, i, snap, prev) {
+    box.textContent = '';
+    box.appendChild(el('strong', null, map.titles[i]));
+    box.appendChild(el('span', 'omap-code', ' ' + map.codes[i]));
+    if (!snap) return;
+    var dl = el('dl', 'comps');
+    var add = function (k, v) { dl.appendChild(el('dt', null, k)); dl.appendChild(el('dd', null, v)); };
+    add('fused', rankPair(snap.fused[i], prev && prev.fused[i], !!prev));
+    Object.keys(COMPONENT_LABEL).forEach(function (k) {
+      if (snap[k]) add(k === 'structured' ? 'M1' : k === 'semantic' ? 'M4' : 'M3',
+        rankPair(snap[k][i], prev && prev[k] && prev[k][i], !!(prev && prev[k])));
+    });
+    var why = movedBy(i, snap, prev);
+    if (why) add('moved by', why);
+    box.appendChild(dl);
+  }
+
+  function legend(hex) {
+    var ul = el('ul', 'omap-legend');
+    [['omap-top', 'Top 10 (number = rank)'], ['omap-ring-in', 'Entered top 10'], ['omap-ring-out', 'Left top 10'],
+     ['omap-dot rose', 'Rose'], ['omap-dot fell', 'Fell'], ['omap-dot flat', 'Little change']]
+      .concat(hex ? [['omap-me', 'Your profile']] : [])
+      .forEach(function (item) {
+        var li = el('li');
+        var s = svgEl('svg', { viewBox: '-1 -1 2 2', width: '14', height: '14', 'aria-hidden': 'true' });
+        s.appendChild(item[0] === 'omap-me'
+          ? svgEl('polygon', { points: '0,-0.9 0.9,0 0,0.9 -0.9,0', class: 'omap-me' })
+          : svgEl('circle', { r: item[0].indexOf('ring') >= 0 ? 0.7 : 0.6, class: item[0] }));
+        li.appendChild(s);
+        li.appendChild(el('span', null, item[1]));
+        ul.appendChild(li);
+      });
+    var li = el('li', 'omap-legend-note', 'Rose/fell = at least a 0.5 change in log rank since the previous turn; stronger colour, bigger move.');
+    ul.appendChild(li);
+    return ul;
+  }
+
+  function slotBars(row) {
+    var box = el('div', 'omap-bars');
+    box.appendChild(el('span', 'hint', 'Profile at turn ' + row.turn + ' (exact values the marker approximates)'));
+    var observed = row.observed_types || [], conf = row.slot_confidence || {};
+    LETTERS.forEach(function (L) {
+      var line = el('div', 'slot');
+      line.appendChild(el('span', 'letter', L));
+      var track = el('div', 'track');
+      track.setAttribute('aria-hidden', 'true');
+      track.appendChild(el('div', 'mid'));
+      var label;
+      if (observed.indexOf(L) >= 0) {
+        var v = Number(row.interests[L]) || 0;
+        var fill = el('div', 'fill');
+        fill.style.width = (Math.min(1, Math.abs(v)) * 50) + '%';
+        if (v >= 0) { fill.style.left = '50%'; fill.style.background = 'var(--pos)'; }
+        else { fill.style.right = '50%'; fill.style.background = 'var(--neg)'; }
+        track.appendChild(fill);
+        label = (v >= 0 ? '+' : '') + v.toFixed(2) + (conf[L] != null ? ' · c ' + Number(conf[L]).toFixed(2) : '');
+      } else {
+        label = 'unknown';
+      }
+      line.appendChild(track);
+      line.appendChild(el('span', 'val', label));
+      box.appendChild(line);
+    });
+    return box;
   }
 
 

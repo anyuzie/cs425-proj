@@ -1,8 +1,8 @@
 components:
   # Live default since 9 November 2026 (reports/ranking/occupation_semantic_default/DECISION.md):
   # RIASEC cosine (M1) and the fine-tuned occupation dual encoder (M4) rank in parallel and are
-  # combined by equal-weight occupation-level RRF (k=60). With only one usable component (e.g. no
-  # RIASEC dimension observed yet) RRF is bypassed and that component's ranking is used.
+  # combined by fusion (below). With only one usable component (e.g. no RIASEC dimension observed
+  # yet) fusion is bypassed and that component's ranking is used.
   # M4 requires the local checkpoint/index in artifacts/ranking/occupation_semantic_v1/ (gitignored).
   # Previous default, cosine only: configs/ranking/m1_cosine.json (configs/system.cosine.json).
   # Frozen dot-product control: configs/ranking/baseline_v1.json.
@@ -14,8 +14,11 @@ components:
     algorithm: occupation_dual_encoder
     variant: finetuned_v1
 
-# Identical to configs/ranking/occupation_semantic_fusion_v1.json, the configuration evaluated in
-# reports/ranking/occupation_semantic_v1 and its dev_extractor_inputs comparison.
+# Live default since 9 November 2026 (reports/ranking/fusion_zscore_default/DECISION.md): per-query
+# z-scored component scores, equal-weight sum. Identical to
+# configs/ranking/occupation_semantic_fusion_zscore_v1.json.
+# Previous default, equal-weight RRF k=60: configs/ranking/occupation_semantic_fusion_v1.json
+# (configs/system.rrf.json). Roll back by restoring `fusion: {algorithm: rrf, k: 60}`.
 fusion:
-  algorithm: rrf
-  k: 60
+  algorithm: zscore_sum
+  variant: equal_v1

@@ -84,16 +84,35 @@ class System:
     def _rank(self, state: State, top_k: int):
         interests = {t: (state.slots[t].value if t in state.slots else 0.0) for t in TYPES}
         started = perf_counter()
-        resp = self.ranker.rank(interests, set(state.slots), list(state.user_texts), top_k)
+        with_snapshot = getattr(self.ranker, "rank_with_snapshot", None)
+        if with_snapshot is not None:
+            resp, ranks = with_snapshot(interests, set(state.slots), list(state.user_texts), top_k)
+        else:   # rankers without full-pool ranks (legacy/test) simply get no map colouring
+            resp, ranks = self.ranker.rank(interests, set(state.slots), list(state.user_texts), top_k), None
+        rank_seconds = perf_counter() - started
         state.ranking_trace.append({"turn": state.turn, "input_mode": self.input_mode,
             "text": state.user_texts[-1] if state.user_texts else "",
             "interests": interests, "observed_types": sorted(state.slots),
             "user_sentences": list(state.user_texts), "status": resp.status, "reason": resp.reason,
-            "rank_seconds": perf_counter() - started,
+            "rank_seconds": rank_seconds,
             "occupations": [asdict(o) for o in resp.occupations]})
+        # Explanation-only extras (SEMANTIC_LEDGER_PLAN section 10.3); tracker_record does not export them.
+        state.ranking_trace[-1]["slot_confidence"] = {t: round(s.confidence, 3) for t, s in state.slots.items()}
+        if ranks is not None and resp.status == "ranked":
+            state.ranking_trace[-1]["rank_snapshot"] = self._snapshot(ranks)
         if 'occupation_semantic' in resp.query_diagnostics:
             state.ranking_trace[-1]['query_diagnostics'] = resp.query_diagnostics
         return resp.occupations if resp.status == "ranked" else []
+
+    def _snapshot(self, ranks: dict) -> dict:
+        """Full-pool ranks as integer arrays (null = not ranked) in the occupation map's code order."""
+        from recommender.build_occupation_map import CODE_ORDER, codes_digest
+        codes = getattr(self, "_map_codes", None)
+        if codes is None:
+            codes = self._map_codes = sorted(self.ranker.eligible_codes)
+            self._map_digest = codes_digest(codes)
+        return {"code_order": CODE_ORDER, "codes_sha256": self._map_digest,
+                **{name: [values.get(code) for code in codes] for name, values in ranks.items()}}
 
     def top5(self, state: State) -> list[dict]:
         return [{"code": o.code, "title": o.title} for o in state.ranking[:5]]

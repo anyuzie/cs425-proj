@@ -1,0 +1,8 @@
+{
+  "components": {
+    "m1": {"algorithm": "cosine_similarity", "variant": "baseline_v1"},
+    "m3": null,
+    "m4": null
+  },
+  "fusion": null
+}

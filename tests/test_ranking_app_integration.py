@@ -40,7 +40,7 @@ class RankingAppIntegrationTests(unittest.TestCase):
                 ranker = app.state.system.ranker
                 self.assertEqual(ranker.component_identifiers,
                                  {"m1": "cosine_similarity@baseline_v1", "m3": "", "m4": "occupation_dual_encoder@finetuned_v1"})
-                expected_ranker = RankingPipeline(config=Path("configs/ranking/occupation_semantic_fusion_v1.json"))
+                expected_ranker = RankingPipeline(config=Path("configs/ranking/occupation_semantic_fusion_zscore_v1.json"))
                 self.assertEqual(ranker.selection_config, expected_ranker.selection_config)
                 self.assertEqual(client.get("/api/health").status_code, 200)
                 session = client.post("/api/session", json={"debug": True}).json()
