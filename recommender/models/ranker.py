@@ -25,8 +25,8 @@ class RankingPipeline:
         if isinstance(config, (str, Path)):
             config, _ = load_configuration(Path(config))
         config = deepcopy(BASELINE_CONFIG if config is None else config)
-        if not isinstance(config, dict) or not {"components", "fusion"} <= set(config) or set(config) - {"components", "fusion", "evidence_filter", "reranking", "profile_policy"}:
-            raise ValueError("ranking config requires components and fusion; optional evidence_filter, reranking, profile_policy")
+        if not isinstance(config, dict) or not {"components", "fusion"} <= set(config) or set(config) - {"components", "fusion", "evidence_filter", "reranking", "profile_policy", "post_fusion"}:
+            raise ValueError("ranking config requires components and fusion; optional evidence_filter, reranking, profile_policy, post_fusion")
         self.evidence_filter = config.get("evidence_filter", "raw")
         if self.evidence_filter not in ("raw", "active_only"):
             raise ValueError("evidence_filter must be raw or active_only")
@@ -45,6 +45,11 @@ class RankingPipeline:
         if self.evidence_filter == "active_only" and selections["m3"] is None and selections["m4"] is None:
             raise ValueError("active_only requires an enabled text ranker (m3 or m4)")
         validate_fusion(config["fusion"])
+        if "post_fusion" in config:
+            from .dislike_demotion import validate_post_fusion
+            validate_post_fusion(config["post_fusion"])
+            if "reranking" in config:
+                raise ValueError("post_fusion cannot be combined with description reranking")
         # Resolve all selections before loading datasets or constructing components.
         self._resolved = {key: registry.resolve(key, selection) for key, selection in selections.items()
                           if selection is not None}
@@ -57,6 +62,10 @@ class RankingPipeline:
             self._reranker = self._rerankers[0]  # Preserve the single-stage compatibility handle.
         self._components = {key: registry.build(resolved, deepcopy(occupations)) for key, resolved in self._resolved.items()}
         self._fusion = build_fusion(config["fusion"]) if config["fusion"] is not None else None
+        self._post_fusion = None
+        if "post_fusion" in config:  # D2: applied to the final ranking, after fusion (docs/LEXICAL_MATCHING_PLAN.md)
+            from .dislike_demotion import VARIANTS as DISLIKE_VARIANTS, DislikeDemotion
+            self._post_fusion = DislikeDemotion(deepcopy(occupations), DISLIKE_VARIANTS[config["post_fusion"]["variant"]])
 
     @property
     def eligible_count(self):
@@ -76,6 +85,8 @@ class RankingPipeline:
                                 for key in SIGNAL_NAMES}, "fusion": deepcopy(self._config["fusion"]),
                 **({"evidence_filter": self.evidence_filter} if "evidence_filter" in self._config else {}),
                 **({"profile_policy": self.profile_policy} if "profile_policy" in self._config else {}),
+                **({"post_fusion": {**deepcopy(self._config["post_fusion"]), "parameters": self._post_fusion.metadata["parameters"]}}
+                   if self._post_fusion else {}),
                 **({"reranking": deepcopy(self._config["reranking"])} if self._reranker else {})}
 
     @property
@@ -162,7 +173,7 @@ class RankingPipeline:
         selected, fused = select_ranking(rankings, self._config["fusion"], self._fusion)
         selected.validate_pool(self.eligible_codes)
         semantic_diagnostics = {}
-        if any(r.algorithm == 'occupation_dual_encoder' for r in self._resolved.values()):
+        if any(r.algorithm in ('occupation_dual_encoder', 'occupation_dual_encoder_signed') for r in self._resolved.values()):
             semantic_diagnostics = {'occupation_semantic': {
                 'requested': self.selection_config, 'resolved': self.component_identifiers,
                 'components': {key: {'status': r.status, 'reason': r.reason} for key,r in rankings.items()},
@@ -174,6 +185,11 @@ class RankingPipeline:
                 'fallback_reason': '; '.join(f'{k}: {r.reason}' for k,r in rankings.items() if r.status != 'usable') or None}}
         if selected.status != "usable":
             return RankingResponse("no_signal", reason=selected.reason, query_diagnostics=semantic_diagnostics), None
+        if self._post_fusion is not None:
+            selected, dislike = self._post_fusion.apply(selected, inputs.user_sentences)
+            selected.validate_pool(self.eligible_codes)
+            semantic_diagnostics = {**semantic_diagnostics, "dislike_demotion": {
+                "identifier": f"dislike_demotion@{self._config['post_fusion']['variant']}", **dislike}}
         scores = {key: {item.code: item for item in ranking.occupations} for key, ranking in rankings.items()}
         evidence = {}
         for ranking in rankings.values():

@@ -2,7 +2,7 @@
 
 Snapshot: 9 November 2026, branch `feat/ranking-scoring`, commit `1948162`.
 
-Live default (`configs/ranking.yaml`): RIASEC cosine (`cosine_similarity@baseline_v1`) and fine-tuned semantic retrieval (`occupation_dual_encoder@finetuned_v1`) rank in parallel and are fused with equal-weight RRF (k=60). See the [default decision](../reports/ranking/occupation_semantic_default/DECISION.md) and the [experiment report](../reports/ranking/occupation_semantic_v1/README.md).
+Live default (`configs/ranking.yaml`, since 9 November 2026): RIASEC cosine, signed lexical (`bm25_signed@ignore_negative_v3`) and signed semantic retrieval (`occupation_dual_encoder_signed@finetuned_v2`), fused with `zscore_sum@equal_v1`, then the post-fusion dislike stage `dislike_demotion@title_v3`. See the [default decision](../reports/ranking/d2_title_v3_default/DECISION.md). Earlier entries below describe the state when they were written.
 
 ## 1. Current errors
 
