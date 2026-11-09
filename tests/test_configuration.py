@@ -18,13 +18,22 @@ from recommender.ranker import BASELINE_CONFIG
 
 
 class ConfigurationTests(unittest.TestCase):
-    def test_yaml_default_is_the_cosine_semantic_zscore_fusion_selection(self):
-        # Explicit owner decisions (reports/ranking/occupation_semantic_default/DECISION.md,
-        # reports/ranking/fusion_zscore_default/DECISION.md).
+    def test_yaml_default_is_the_signed_lexical_semantic_dislike_selection(self):
+        # Explicit owner decision (reports/ranking/d2_title_v3_default/DECISION.md).
         config, _ = load_configuration(Path("configs/ranking.yaml"))
-        fusion, _ = load_configuration(Path("configs/ranking/occupation_semantic_fusion_zscore_v1.json"))
-        self.assertEqual(config, fusion)
+        preset, _ = load_configuration(Path("configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_title_v3.json"))
+        self.assertEqual(config, preset)
+        self.assertEqual(config["components"]["m3"], {"algorithm": "bm25_signed", "variant": "ignore_negative_v3"})
+        self.assertEqual(config["components"]["m4"], {"algorithm": "occupation_dual_encoder_signed", "variant": "finetuned_v2"})
         self.assertEqual(config["fusion"], {"algorithm": "zscore_sum", "variant": "equal_v1"})
+        self.assertEqual(config["post_fusion"], {"algorithm": "dislike_demotion", "variant": "title_v3"})
+
+    def test_zscore_default_remains_selectable_as_previous_default(self):
+        previous, _ = load_configuration(Path("configs/ranking/occupation_semantic_fusion_zscore_v1.json"))
+        self.assertEqual(previous["components"]["m4"], {"algorithm": "occupation_dual_encoder", "variant": "finetuned_v1"})
+        self.assertNotIn("post_fusion", previous)
+        system, _ = load_configuration(Path("configs/system.zscore.json"))
+        self.assertEqual(system["paths"]["ranking_config"], "configs/ranking/occupation_semantic_fusion_zscore_v1.json")
 
     def test_rrf_fusion_remains_selectable_as_previous_default(self):
         rrf, _ = load_configuration(Path("configs/ranking/occupation_semantic_fusion_v1.json"))
@@ -120,8 +129,9 @@ class ConfigurationTests(unittest.TestCase):
             with (root / "history.csv").open(newline="") as handle:
                 rows = list(csv.DictReader(handle))
             self.assertEqual(len(rows), 2)
-            self.assertEqual([rows[0]["m1"], rows[0]["m4"]],  # configs/ranking.yaml default
-                             ["cosine_similarity@baseline_v1", "occupation_dual_encoder@finetuned_v1"])
+            self.assertEqual([rows[0]["m1"], rows[0]["m3"], rows[0]["m4"]],  # configs/ranking.yaml default
+                             ["cosine_similarity@baseline_v1", "bm25_signed@ignore_negative_v3",
+                              "occupation_dual_encoder_signed@finetuned_v2"])
             self.assertEqual(rows[0]["config_hash"], manifest["config_sha256"])
 
     def test_zero_argument_cli_and_automatic_reports(self):
