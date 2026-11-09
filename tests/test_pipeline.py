@@ -51,6 +51,24 @@ class PipelineTests(unittest.TestCase):
             self.assertLessEqual(len(rec["tasks"]), 3)
             self.assertTrue(rec["why"].startswith("Matches what you said about"))
 
+    def test_why_is_written_per_job(self):
+        from pipeline.interfaces import SlotState
+        from recommender.schemas import RankedOccupation, SignalScore
+        state = State()
+        state.slots["I"] = SlotState(1.0, .9, "enjoyment", "I love research.", 1, [])
+        state.slots["S"] = SlotState(.55, .9, "enjoyment", "I like helping people.", 1, [])
+        state.ranking_trace = [{"query_diagnostics": {"occupation_semantic": {"used": True}}}]
+        z = lambda **kw: {t: kw.get(t, -1.0) for t in "RIASEC"}
+        lab = RankedOccupation("1", "Lab", 1, z(I=2.0), signals={"semantic": SignalScore(.9, 3)})
+        tutor = RankedOccupation("2", "Tutor", 2, z(S=2.0, I=.6), signals={"semantic": SignalScore(.1, 200)})
+        neither = RankedOccupation("3", "Other", 3, z(R=2.0), signals={"semantic": SignalScore(.1, 200)})
+        self.assertEqual(self.system._why(state, lab), "Matches what you said about investigative work; "
+                                                       "also close to the topics and background you described.")
+        self.assertEqual(self.system._why(state, tutor), "Matches what you said about social and investigative work.")
+        self.assertEqual(self.system._why(state, neither), "Ranked highly against your overall interest profile.")
+        state.ranking_trace = [{"query_diagnostics": {}}]           # semantic retrieval not used: no topic note
+        self.assertEqual(self.system._why(state, lab), "Matches what you said about investigative work.")
+
     def test_challenge_on_planted_contradiction(self):
         _, results = self.run_script(["I love working with machines and tools.",
                                       "I hate repairing machines, it is boring."])

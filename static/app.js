@@ -317,6 +317,7 @@
       rh.appendChild(el('h3', null, r.title));
       rh.appendChild(el('span', 'rec-code', 'O*NET ' + r.code));
       li.appendChild(rh);
+      if (r.description) li.appendChild(el('p', 'rec-desc', r.description));
       li.appendChild(el('p', 'rec-why', r.why));
       if (r.tasks && r.tasks.length) {
         var tasks = el('div', 'rec-tasks');

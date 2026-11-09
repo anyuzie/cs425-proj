@@ -185,6 +185,34 @@ class SecondReviewRegressions(unittest.TestCase):
         r = read_answer(ex, State(last_reply="Do you like working with tools?"), Action("CLARIFY", "R"), text)
         self.assertEqual([s.slot for s in r.slots], ["I"])          # no leaked R
 
+    def test_short_reply_read_with_question_becomes_a_statement(self):
+        # "Yes" alone means nothing to the contradiction check or in a quote; restate it with its question.
+        question = "Would you enjoy following clear procedures as part of your job?"
+        r = read_answer(LeakyExtractor(), State(last_reply=question), Action("CLARIFY", "C"), "Yes")
+        self.assertEqual([(s.slot, s.source) for s in r.slots],
+                         [("C", "I like following clear procedures.")])
+        self.assertEqual(r.text, "Yes")                               # the user's own text is unchanged
+
+    def test_statement_forms(self):
+        from pipeline.answers import as_statement
+        self.assertEqual(as_statement("Would a job involving checking database entries appeal to you?", "Not really", -1),
+                         "I do not like checking database entries.")
+        self.assertEqual(as_statement("No worries. Imagine a job involving creating your own approach to a task; "
+                                      "would that appeal to you?", "Yes it would", 1),
+                         "I like creating my own approach to a task.")
+        # either-or / several options: never invent which option was chosen; keep the student's own reply
+        self.assertEqual(as_statement("Would you rather fix a broken machine or write a report?", "the first one", 1),
+                         "the first one")
+        self.assertEqual(as_statement("Would you enjoy fixing engines, or writing reports?", "the first", 1), "the first")
+        # repair questions name the activity one sentence earlier
+        self.assertEqual(as_statement("Imagine spending part of a working day sorting invoices. Would you enjoy that "
+                                      "activity, dislike it, or feel unsure?", "no", -1), "I do not like sorting invoices.")
+        self.assertEqual(as_statement("For example, imagine teaching a class at work. Would you enjoy that activity, "
+                                      "dislike it, or feel unsure?", "yes", 1), "I like teaching a class.")
+        # second person becomes first person throughout
+        self.assertEqual(as_statement("Would a job involving helping customers who ask you for advice appeal to you?",
+                                      "yes", 1), "I like helping customers who ask me for advice.")
+
     def test_unsure_clarify_reply_never_borrows_the_question(self):
         ex = LeakyExtractor()
         r = read_answer(ex, State(last_reply="Do you like working with tools?"), Action("CLARIFY", "R"),

@@ -1,4 +1,5 @@
 import re
+from dataclasses import replace
 
 from .interfaces import Reading, SlotReading
 from .repair import needs_repair
@@ -120,7 +121,45 @@ def read_answer(extractor, state, last, text: str, trace: dict | None = None) ->
     paired = extractor.read(text, state.last_reply, last.slot)
     trace.update(question_attached=True, answer_path="read with the question (asked type only)",
                  paired_raw=_readings(paired))
-    return Reading(text, alone.slots + [r for r in paired.slots if r.slot == last.slot])
+    # A short reply ("Yes", "Not really") only means something with its question. Restate question + reply as
+    # one first-person statement, so the contradiction check (NLI, trained on statements) and the quotes shown
+    # to the student carry the full meaning: "I don't like checking database entries."
+    return Reading(text, alone.slots + [replace(r, source=as_statement(state.last_reply, text, r.sign))
+                                        for r in paired.slots if r.slot == last.slot])
+
+
+# "Would you enjoy X as part of your job?" and the other task-question / T5 forms that name one activity.
+_ACTIVITY = [re.compile(p, re.I) for p in (
+    r"^would you enjoy (.+?) as (?:a )?part of your (?:job|work)\??$",
+    r"^how would you feel about (.+?) during a normal working day\??$",
+    r"^would a job involving (.+?) appeal to you\??$",
+    r"^imagine a job involving (.+?)[;,] would that appeal to you\??$",
+    r"^would you enjoy ([^,]+?)\?$",
+)]
+# Repair questions name the activity in the sentence before "Would you enjoy that activity, dislike it, or feel unsure?"
+_REPAIR = re.compile(r"(?:imagine spending part of a working day|a task such as|imagine) (.+?)(?: at work)?\.\s+"
+                     r"would you enjoy that activity, dislike it, or feel unsure\?$", re.I)
+_PERSON = [(re.compile(r"\byourself\b", re.I), "myself"), (re.compile(r"\byour\b", re.I), "my"),
+           (re.compile(r"\byou\b", re.I), "me")]
+
+
+def as_statement(question: str | None, reply: str, sign: int) -> str:
+    """First-person statement for a short reply to a single-activity question, using the reading's sign.
+    Other questions (e.g. either-or) keep the student's own reply: restating them would put words in
+    the student's mouth that they never chose."""
+    question, reply = (question or "").strip(), reply.strip()
+    asked = [s for s in re.split(r"(?<=[.!?])\s+", question) if s.endswith("?")]
+    match = _REPAIR.search(question)
+    if not match and asked and " or " not in asked[-1].lower():
+        match = next((m for m in (p.match(asked[-1]) for p in _ACTIVITY) if m), None)
+    if not match:
+        return reply
+    activity = match.group(1).strip()
+    for pattern, word in _PERSON:
+        activity = pattern.sub(word, activity)
+    # Plain "I like X." / "I do not like X.": NLI scores (earlier, new) clashes far higher on this form than on
+    # hedged "I would not enjoy X as part of my job." (0.97 vs 0.00 on the same pair).
+    return f"I {'like' if sign > 0 else 'do not like'} {activity}."
 
 
 def _readings(reading: Reading) -> list[dict]:
