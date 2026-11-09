@@ -123,5 +123,14 @@ def chat(req: ChatRequest):
     return out
 
 
+class _RevalidatedStaticFiles(StaticFiles):
+    """Make browsers re-check the frontend on every load so index.html and app.js never mismatch."""
+
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 # Mounted last so it cannot shadow /api. check_dir=False lets the API run without the frontend.
-app.mount("/", StaticFiles(directory=ROOT / "static", html=True, check_dir=False))
+app.mount("/", _RevalidatedStaticFiles(directory=ROOT / "static", html=True, check_dir=False))

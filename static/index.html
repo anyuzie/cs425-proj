@@ -6,7 +6,7 @@
 <title>Career Matcher</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css?v=3">
 </head>
 <body>
 <div class="page">
@@ -27,13 +27,15 @@
       </button>
     </div>
   </header>
-  <p class="banner">Research prototype — its suggestions are not career advice.</p>
 
-  <div class="layout">
+  <div class="layout" id="layout">
     <main class="chat">
-      <div class="chat-inner">
-        <div id="transcript" class="transcript" aria-live="polite" aria-relevant="additions"></div>
-        <div id="results"></div>
+      <div class="chat-scroll" id="chatScroll">
+        <div class="chat-inner">
+          <p class="banner">Research prototype. Its suggestions are not career advice.</p>
+          <div id="transcript" class="transcript" aria-live="polite" aria-relevant="additions"></div>
+          <div id="results"></div>
+        </div>
       </div>
       <form id="composer" class="composer" autocomplete="off">
         <div class="composer-inner">
@@ -52,9 +54,36 @@
         </div>
       </form>
     </main>
-    <aside id="researcher" class="researcher" aria-label="Researcher panel" hidden></aside>
+
+    <aside id="rProfile" class="rpanel rpanel-profile" aria-label="Researcher view: profile and occupation map" hidden>
+      <section class="rcard map-card" id="mapCard"></section>
+      <section class="rcard scores-card" id="scoresCard"></section>
+      <section class="rcard rank-card" id="rankCard"></section>
+      <details class="rcard rnotes" id="mapNotes">
+        <summary>How to read the map</summary>
+        <div class="rnotes-body" id="mapNotesBody"></div>
+      </details>
+    </aside>
+
+    <aside id="rPolicy" class="rpanel rpanel-policy" aria-label="Researcher view: policy trace" hidden>
+      <section class="rcard feed-card">
+        <div class="rcard-head">
+          <h2>Policy trace</h2>
+          <span class="feed-count" id="feedCount"></span>
+        </div>
+        <ol class="feed" id="feed" aria-live="polite" aria-relevant="additions"></ol>
+      </section>
+      <details class="rcard rdetails" id="compsCard">
+        <summary>Components</summary>
+        <dl class="comps" id="compsList"></dl>
+      </details>
+      <details class="rcard rdetails" id="rawCard" hidden>
+        <summary>Raw semantic diagnostics (JSON)</summary>
+        <pre id="rawPre"></pre>
+      </details>
+    </aside>
   </div>
 </div>
-<script src="/app.js"></script>
+<script src="/app.js?v=3"></script>
 </body>
 </html>

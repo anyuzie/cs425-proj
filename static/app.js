@@ -10,8 +10,20 @@
     transcript: $('transcript'), results: $('results'), msg: $('msg'), form: $('composer'),
     send: $('sendBtn'), stop: $('stopBtn'), counter: $('counter'), error: $('errorBox'),
     chip: $('codeChip'), turnText: $('turnText'), barFill: $('barFill'), progress: $('progress'),
-    researcher: $('researcher')
+    layout: $('layout'), chatScroll: $('chatScroll'),
+    rProfile: $('rProfile'), rPolicy: $('rPolicy'),
+    mapCard: $('mapCard'), scoresCard: $('scoresCard'), rankCard: $('rankCard'), mapNotesBody: $('mapNotesBody'),
+    feed: $('feed'), feedCount: $('feedCount'), compsList: $('compsList'), rawCard: $('rawCard'), rawPre: $('rawPre')
   };
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Restart a one-shot CSS animation class on an element.
+  function replay(node, cls) {
+    node.classList.remove(cls);
+    void node.offsetWidth;
+    node.classList.add(cls);
+  }
 
   var state = {
     sessionId: null, code: null, maxTurns: 10, turn: 0,
@@ -27,8 +39,15 @@
   }
 
   function scrollToEnd() {
+    var behavior = reduceMotion ? 'auto' : 'smooth';
+    var box = els.chatScroll;
+    // Wide layouts scroll the chat column itself; narrow layouts scroll the page.
+    if (box && box.scrollHeight > box.clientHeight + 1 && getComputedStyle(box).overflowY !== 'visible') {
+      box.scrollTo({ top: box.scrollHeight, behavior: behavior });
+      return;
+    }
     var last = els.results.lastElementChild || els.transcript.lastElementChild;
-    if (last && last.scrollIntoView) last.scrollIntoView({ block: 'end', behavior: 'auto' });
+    if (last && last.scrollIntoView) last.scrollIntoView({ block: 'end', behavior: behavior });
   }
 
   /* ---------- transcript ---------- */
@@ -104,6 +123,7 @@
 
   /* ---------- header / composer state ---------- */
   function updateHeader(turn, max) {
+    if (turn !== state.turn) replay(els.progress, 'tick');
     state.turn = turn;
     state.maxTurns = max || state.maxTurns;
     var label = 'Turn ' + state.turn + ' of up to ' + state.maxTurns;
@@ -310,7 +330,8 @@
     var ol = el('ol', 'recs');
     recs.forEach(function (r, i) {
       var li = el('li', 'rec');
-      var n = el('span', 'rec-n', r.rank || (i + 1));
+      li.style.setProperty('--i', String(i));
+      var n =el('span', 'rec-n', r.rank || (i + 1));
       n.setAttribute('aria-hidden', 'true');
       li.appendChild(n);
       var rh = el('div', 'rec-head');
@@ -352,101 +373,181 @@
 
     els.results.appendChild(wrap);
     els.msg.placeholder = 'The conversation is finished.';
-    h.scrollIntoView({ block: 'start', behavior: 'auto' });
+    h.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
   }
 
   /* ---------- researcher panel ---------- */
-  function renderTrace(trace) {
-    if (!trace) return;
-    var p = els.researcher;
-    while (p.firstChild) p.removeChild(p.firstChild);
-    p.hidden = false;
-    p.appendChild(el('strong', 'r-title', 'Researcher view'));
+  // The panels are built once and then updated in place, so only what changed animates.
+  var rv = { built: false, slots: {}, feedCount: 0, prevProfile: null, scoresSub: null };
 
-    // profile
-    var s1 = el('section');
-    s1.appendChild(el('h2', null, 'Profile after turn ' + state.turn));
+  function buildResearcher() {
+    rv.built = true;
+    els.layout.classList.add('has-researcher');
+    els.rProfile.hidden = false;
+    els.rPolicy.hidden = false;
+
+    // accumulated RIASEC profile
+    var sc = els.scoresCard;
+    var head = el('div', 'rcard-head');
+    head.appendChild(el('h2', null, 'RIASEC profile'));
+    rv.scoresSub = el('span', 'rcard-sub');
+    head.appendChild(rv.scoresSub);
+    sc.appendChild(head);
+    var list = el('div', 'scores');
     LETTERS.forEach(function (L) {
-      var slot = (trace.profile && trace.profile[L]) || {};
-      var v = slot.value;
       var row = el('div', 'slot');
       row.appendChild(el('span', 'letter', L));
+      var bars = el('div', 'bars');
+      bars.setAttribute('aria-hidden', 'true');
       var track = el('div', 'track');
-      track.setAttribute('aria-hidden', 'true');
       track.appendChild(el('div', 'mid'));
+      var fill = el('div', 'fill');
+      track.appendChild(fill);
+      var conf = el('div', 'conf');
+      var confFill = el('i');
+      conf.appendChild(confFill);
+      bars.appendChild(track);
+      bars.appendChild(conf);
+      row.appendChild(bars);
+      var val = el('span', 'val', '—');
+      var delta = el('span', 'delta', '');
+      delta.setAttribute('aria-hidden', 'true');
+      row.appendChild(val);
+      row.appendChild(delta);
+      list.appendChild(row);
+      rv.slots[L] = { row: row, fill: fill, confFill: confFill, val: val, delta: delta };
+    });
+    sc.appendChild(list);
+    sc.appendChild(el('span', 'hint', 'Blue = likes, orange = dislikes. Dash = not yet observed. The thin line under each bar is confidence; the small number is the change since the last turn.'));
+
+    mapView.section = els.mapCard;
+    mapView.rankEl = els.rankCard;
+    mapView.notesEl = els.mapNotesBody;
+  }
+
+  function renderScores(profile) {
+    rv.scoresSub.textContent = 'after turn ' + state.turn;
+    var prev = rv.prevProfile;
+    LETTERS.forEach(function (L) {
+      var s = rv.slots[L];
+      var slot = profile[L] || {};
+      var v = slot.value;
       var label, color;
       if (typeof v === 'number') {
-        var fill = el('div', 'fill');
-        fill.style.width = (Math.min(1, Math.abs(v)) * 50) + '%';
-        if (v >= 0) { fill.style.left = '50%'; fill.style.background = 'var(--pos)'; color = 'var(--pos-text)'; }
-        else { fill.style.right = '50%'; fill.style.background = 'var(--neg)'; color = 'var(--neg-text)'; }
-        track.appendChild(fill);
+        var w = Math.min(1, Math.abs(v)) * 50;
+        s.fill.style.width = w + '%';
+        s.fill.style.left = (v >= 0 ? 50 : 50 - w) + '%';
+        s.fill.style.backgroundColor = v >= 0 ? 'var(--pos)' : 'var(--neg)';
+        color = v >= 0 ? 'var(--pos-text)' : 'var(--neg-text)';
         label = (v >= 0 ? '+' : '') + v.toFixed(2);
       } else {
+        s.fill.style.width = '0%';
+        s.fill.style.left = '50%';
         label = '—';
         color = '#A3AEBA';
       }
-      row.appendChild(track);
-      var val = el('span', 'val', label);
-      val.style.color = color;
-      row.appendChild(val);
-      if (slot.reason) row.title = slot.reason;
-      s1.appendChild(row);
+      s.val.textContent = label;
+      s.val.style.color = color;
+      var c = Number(slot.confidence);
+      s.confFill.style.width = (isFinite(c) ? Math.max(0, Math.min(1, c)) * 100 : 0) + '%';
+      s.row.title = slot.reason || '';
+      s.row.setAttribute('aria-label', L + ' ' + (label === '—' ? 'not yet observed' : label) +
+        (isFinite(c) ? ', confidence ' + c.toFixed(2) : ''));
+
+      // change since the previous turn
+      var before = prev && prev[L];
+      var d = (typeof v === 'number' ? v : 0) - (typeof before === 'number' ? before : 0);
+      var moved = prev && (typeof v === 'number' || typeof before === 'number') && Math.abs(d) >= 0.005;
+      s.delta.className = 'delta';
+      if (moved) {
+        s.delta.textContent = (d > 0 ? '+' : '−') + Math.abs(d).toFixed(2);
+        s.delta.classList.add(d > 0 ? 'up' : 'down');
+        replay(s.delta, 'bump');
+        replay(s.row, 'changed');
+      } else {
+        s.delta.textContent = '';
+        s.row.classList.remove('changed');
+      }
     });
-    s1.appendChild(el('span', 'hint', 'Blue = likes, orange = dislikes. Dash = not yet observed.'));
-    p.appendChild(s1);
+    rv.prevProfile = {};
+    LETTERS.forEach(function (L) { rv.prevProfile[L] = profile[L] ? profile[L].value : null; });
+  }
 
-    // policy trace
-    var s2 = el('section');
-    s2.appendChild(el('h2', null, 'Policy trace'));
-    (trace.actions || []).forEach(function (a) {
-      var row = el('div', 'trace-row');
-      row.appendChild(el('span', 't', 'T' + a.turn));
-      var act = el('span', 'a', a.action);
-      act.style.color = (a.action === 'CLARIFY' || a.action === 'RECOMMEND') ? 'var(--pos-text)' : 'var(--neg-text)';
-      row.appendChild(act);
-      row.appendChild(el('span', 'w', a.why));
-      s2.appendChild(row);
+  function isPositiveAction(action) { return action === 'CLARIFY' || action === 'RECOMMEND'; }
+
+  function renderFeed(actions) {
+    var feed = els.feed;
+    if (actions.length < rv.feedCount) {         // trace was reset: start over
+      while (feed.firstChild) feed.removeChild(feed.firstChild);
+      rv.feedCount = 0;
+    }
+    var empty = feed.querySelector('.feed-empty');
+    if (empty && actions.length) feed.removeChild(empty);
+    var fresh = actions.slice(rv.feedCount);
+    fresh.forEach(function (a) {
+      var li = el('li', 'feed-item is-new' + (isPositiveAction(a.action) ? ' pos' : ''));
+      li.appendChild(el('span', 'feed-dot'));
+      var body = el('div', 'feed-body');
+      var head = el('div', 'feed-head');
+      head.appendChild(el('span', 'feed-act', a.action));
+      head.appendChild(el('span', 'feed-turn', 'Turn ' + a.turn));
+      body.appendChild(head);
+      body.appendChild(el('p', 'feed-why', a.why));
+      li.appendChild(body);
+      feed.insertBefore(li, feed.firstChild);   // newest first
     });
-    p.appendChild(s2);
+    rv.feedCount = actions.length;
+    if (!actions.length && !feed.firstChild) feed.appendChild(el('li', 'feed-empty', 'Policy decisions appear here as the conversation goes on.'));
+    var items = feed.querySelectorAll('.feed-item');
+    for (var i = 0; i < items.length; i++) items[i].classList.toggle('is-latest', i === 0);
+    els.feedCount.textContent = actions.length + (actions.length === 1 ? ' decision' : ' decisions');
+    if (fresh.length && feed.scrollTop > 0) feed.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
 
-    // top 5
-    var s3 = el('section');
-    s3.appendChild(el('h2', null, 'Live top 5'));
-    var ol = el('ol', 'top5');
-    (trace.top5 || []).forEach(function (o) { ol.appendChild(el('li', null, o.title)); });
-    s3.appendChild(ol);
-    p.appendChild(s3);
-
-    // components
-    var comps = trace.components || {};
-    var s4 = el('section');
-    s4.appendChild(el('h2', null, 'Components'));
-    var dl = el('dl', 'comps');
+  function renderComps(comps) {
+    var dl = els.compsList;
+    while (dl.firstChild) dl.removeChild(dl.firstChild);
     Object.keys(comps).forEach(function (k) {
       dl.appendChild(el('dt', null, k));
-      var dd = el('dd', null, comps[k]);
-      dl.appendChild(dd);
+      dl.appendChild(el('dd', null, comps[k]));
     });
-    s4.appendChild(dl);
-    p.appendChild(s4);
+  }
+
+  // A researcher-panel failure must never block the conversation itself.
+  function renderTrace(trace) {
+    try {
+      renderTraceUnsafe(trace);
+    } catch (e) {
+      if (window.console && console.error) console.error('Researcher panel failed to render', e);
+      // Only researcher sessions receive a trace, so this notice never reaches participants.
+      if (!rv.failed) {
+        rv.failed = true;
+        addNotice('The researcher view failed to load. Reload with Ctrl+Shift+R; if it persists, check the browser console.');
+      }
+    }
+  }
+
+  function renderTraceUnsafe(trace) {
+    if (!trace) return;
+    var first = !rv.built;
+    if (first) buildResearcher();
+
+    renderScores(trace.profile || {});
+    renderFeed(trace.actions || []);
+    renderComps(trace.components || {});
+
     var rankingRows = trace.ranking_trace || [];
     var latestRanking = rankingRows[rankingRows.length - 1];
     var semantic = latestRanking && (latestRanking.query_diagnostics || {}).occupation_semantic;
-    // occupation map (SEMANTIC_LEDGER_PLAN section 10): replaces the raw JSON block
-    var mapSection = el('section', 'omap');
-    p.appendChild(mapSection);
-    mapView.section = mapSection;
+    els.rawCard.hidden = !semantic;
+    els.rawPre.textContent = semantic ? JSON.stringify(semantic, null, 2) : '';
+
+    // occupation map (SEMANTIC_LEDGER_PLAN section 10)
     mapView.rows = rankingRows;
+    mapView.top5 = trace.top5 || [];
+    mapView.fresh = !first;
     loadMap();
     renderMap();
-
-    if (semantic) {
-      var semanticPanel = el('details', 'raw-diag');
-      semanticPanel.appendChild(el('summary', null, 'Raw semantic diagnostics (JSON)'));
-      semanticPanel.appendChild(el('pre', null, JSON.stringify(semantic, null, 2)));
-      p.appendChild(semanticPanel);
-    }
   }
 
   /* ---------- occupation map: per-turn rank changes on a fixed layout ---------- */
@@ -454,8 +555,44 @@
   var COMPONENT_LABEL = { structured: 'interest profile (M1)', semantic: 'semantic match (M4)', lexical: 'keywords (M3)' };
   var mapView = {
     map: null, loading: false, error: null, section: null, rows: [],
-    tab: null, turnIdx: null, selected: null, hover: null
+    tab: null, turnIdx: null, selected: null, hover: null,
+    rankEl: null, notesEl: null, top5: [], fresh: false, switching: false, lastMe: null
   };
+
+  function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
+  // Live top 5 from the trace: shown when the map has no usable ranks for this turn.
+  function renderTop5Fallback() {
+    var box = mapView.rankEl;
+    if (!box) return;
+    clear(box);
+    var head = el('div', 'rcard-head');
+    head.appendChild(el('h2', null, 'Live top 5'));
+    box.appendChild(head);
+    if (!mapView.top5.length) { box.appendChild(el('p', 'hint', 'No ranking yet.')); return; }
+    var ol = el('ol', 'top5');
+    mapView.top5.forEach(function (o, i) {
+      var li = el('li', null, o.title);
+      li.style.setProperty('--i', String(i));
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+  }
+
+  function renderNotes(hex) {
+    var box = mapView.notesEl;
+    if (!box) return;
+    clear(box);
+    box.appendChild(legend(hex));
+    var notes = hex ? [
+      'Each job sits towards the types its O*NET z-scores are positive in. The diamond is your profile over observed types; the faded line is its path over earlier turns.',
+      'Six dimensions squashed into two: opposite types cancel, so a strong R + S profile and a flat one both land near the centre.',
+      'Two jobs at the same point can rank differently, and the marker shows only the cosine half. With fusion on, a far-away job can still rank highly from the semantic match; the details say which half moved it.'
+    ] : [
+      'Jobs close together have similar O*NET text under the fine-tuned encoder. t-SNE keeps neighbourhoods, not global distances: the gap between two clusters means nothing.'
+    ];
+    notes.forEach(function (n) { box.appendChild(el('p', 'hint', n)); });
+  }
 
   function svgEl(tag, attrs) {
     var n = document.createElementNS(SVGNS, tag);
@@ -533,12 +670,18 @@
   function renderMap() {
     var sec = mapView.section;
     if (!sec) return;
-    while (sec.firstChild) sec.removeChild(sec.firstChild);
+    var fresh = mapView.fresh, switching = mapView.switching;
+    mapView.fresh = false;
+    mapView.switching = false;
+    clear(sec);
     sec.appendChild(el('h2', null, 'Occupation map'));
     var map = mapView.map, rows = mapView.rows || [];
-    if (mapView.error) { sec.appendChild(el('p', 'hint', mapView.error)); return; }
-    if (!map) { sec.appendChild(el('p', 'hint', 'Loading map…')); return; }
-    if (!rows.length) { sec.appendChild(el('p', 'hint', 'The map is coloured from the first ranked turn.')); return; }
+    renderNotes(!map || !map.semantic || mapView.tab === 'hexagon');
+    if (mapView.error || !map || !rows.length) {
+      sec.appendChild(el('p', 'hint', mapView.error || (!map ? 'Loading map…' : 'The map is coloured from the first ranked turn.')));
+      renderTop5Fallback();
+      return;
+    }
 
     var idx = mapView.turnIdx == null ? rows.length - 1 : Math.min(mapView.turnIdx, rows.length - 1);
     var row = rows[idx];
@@ -558,7 +701,12 @@
         b.disabled = true;
         b.title = map.semantic_unavailable || 'unavailable';
       }
-      b.addEventListener('click', function () { mapView.tab = t[0]; renderMap(); });
+      b.addEventListener('click', function () {
+        if (mapView.tab === t[0]) return;
+        mapView.tab = t[0];
+        mapView.switching = true;
+        renderMap();
+      });
       tabs.appendChild(b);
     });
     sec.appendChild(tabs);
@@ -596,7 +744,8 @@
     // plot
     var hex = mapView.tab === 'hexagon';
     var pts = hex ? map.hexagon.coords : map.semantic.map(function (c) { return [c[0] * 2, c[1] * 2]; });
-    var svg = svgEl('svg', { viewBox: '-1.2 -1.2 2.4 2.4', class: 'omap-svg', role: 'img',
+    var svg = svgEl('svg', { viewBox: '-1.2 -1.2 2.4 2.4', role: 'img',
+      class: 'omap-svg' + (switching ? ' is-switch' : fresh ? ' is-fresh' : ''),
       'aria-label': (hex ? 'RIASEC hexagon' : 'Semantic map') + ' of ' + map.codes.length +
         ' occupations, coloured by rank change at turn ' + row.turn });
     if (hex) {
@@ -630,7 +779,7 @@
         svg.appendChild(dot);
       }
     });
-    if (hex) drawProfile(svg, rows, idx, map.hexagon.corners);
+    if (hex) drawProfile(svg, rows, idx, map.hexagon.corners, fresh && idx === rows.length - 1);
     var selRing = svgEl('circle', { r: R * 2.6, class: 'omap-sel' });
     selRing.style.display = 'none';
     svg.appendChild(selRing);
@@ -669,14 +818,22 @@
     svg.addEventListener('click', function (e) { mapView.selected = nearest(e); show(mapView.selected); });
     show(mapView.selected);
 
-    // keyboard-reachable top 10
+    // keyboard-reachable top 10 (its own card; selecting one highlights it on the map)
     if (snap) {
+      var rank = mapView.rankEl;
+      clear(rank);
+      var rh = el('div', 'rcard-head');
+      rh.appendChild(el('h2', null, 'Top 10'));
+      rh.appendChild(el('span', 'rcard-sub', 'turn ' + row.turn));
+      rank.appendChild(rh);
       var top = map.codes.map(function (c, i) { return i; })
         .filter(function (i) { return snap.fused[i] != null && snap.fused[i] <= 10; })
         .sort(function (a, b) { return snap.fused[a] - snap.fused[b]; });
       var ol = el('ol', 'omap-top10');
-      top.forEach(function (i) {
+      top.forEach(function (i, n) {
         var li = el('li');
+        if (fresh) li.style.setProperty('--i', String(n));
+        else li.style.animation = 'none';
         var b = el('button', null, map.titles[i]);
         b.type = 'button';
         if (cats[i].entered) b.appendChild(el('span', 'omap-new', ' new'));
@@ -684,22 +841,13 @@
         li.appendChild(b);
         ol.appendChild(li);
       });
-      sec.appendChild(ol);
+      rank.appendChild(ol);
+    } else {
+      renderTop5Fallback();
     }
-
-    sec.appendChild(legend(hex));
-    if (hex) sec.appendChild(slotBars(row));
-    var notes = hex ? [
-      'Each job sits towards the types its O*NET z-scores are positive in. The diamond is your profile over observed types; the faded line is its path over earlier turns.',
-      'Six dimensions squashed into two: opposite types cancel, so a strong R + S profile and a flat one both land near the centre.',
-      'Two jobs at the same point can rank differently, and the marker shows only the cosine half. With fusion on, a far-away job can still rank highly from the semantic match; the details say which half moved it.'
-    ] : [
-      'Jobs close together have similar O*NET text under the fine-tuned encoder. t-SNE keeps neighbourhoods, not global distances: the gap between two clusters means nothing.'
-    ];
-    notes.forEach(function (n) { sec.appendChild(el('p', 'hint', n)); });
   }
 
-  function drawProfile(svg, rows, idx, corners) {
+  function drawProfile(svg, rows, idx, corners, animate) {
     var path = [];
     for (var k = 0; k <= idx; k++) {
       var r = rows[k];
@@ -710,8 +858,20 @@
       path.slice(0, -1).forEach(function (p) { svg.appendChild(svgEl('circle', { cx: p[0], cy: p[1], r: 0.022, class: 'omap-trail-pt' })); });
     }
     var cur = path[path.length - 1], s = 0.075;
-    svg.appendChild(svgEl('polygon', { class: 'omap-me',
-      points: [[cur[0], cur[1] - s], [cur[0] + s, cur[1]], [cur[0], cur[1] + s], [cur[0] - s, cur[1]]].map(function (p) { return p.join(','); }).join(' ') }));
+    var me = svgEl('polygon', { class: 'omap-me',
+      points: [[cur[0], cur[1] - s], [cur[0] + s, cur[1]], [cur[0], cur[1] + s], [cur[0] - s, cur[1]]].map(function (p) { return p.join(','); }).join(' ') });
+    svg.appendChild(me);
+    // glide the diamond from where it sat last turn (CSS px = user units inside the SVG)
+    var last = mapView.lastMe;
+    if (animate && last && !reduceMotion && me.animate && (last[0] !== cur[0] || last[1] !== cur[1])) {
+      try {
+        me.animate([
+          { transform: 'translate(' + (last[0] - cur[0]) + 'px,' + (last[1] - cur[1]) + 'px)' },
+          { transform: 'translate(0px,0px)' }
+        ], { duration: 900, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      } catch (e) { /* animation is decorative */ }
+    }
+    if (idx === rows.length - 1) mapView.lastMe = cur;
   }
 
   function rankPair(now, before, hasPrev) {
@@ -755,35 +915,6 @@
     var li = el('li', 'omap-legend-note', 'Rose/fell = at least a 0.5 change in log rank since the previous turn; stronger colour, bigger move.');
     ul.appendChild(li);
     return ul;
-  }
-
-  function slotBars(row) {
-    var box = el('div', 'omap-bars');
-    box.appendChild(el('span', 'hint', 'Profile at turn ' + row.turn + ' (exact values the marker approximates)'));
-    var observed = row.observed_types || [], conf = row.slot_confidence || {};
-    LETTERS.forEach(function (L) {
-      var line = el('div', 'slot');
-      line.appendChild(el('span', 'letter', L));
-      var track = el('div', 'track');
-      track.setAttribute('aria-hidden', 'true');
-      track.appendChild(el('div', 'mid'));
-      var label;
-      if (observed.indexOf(L) >= 0) {
-        var v = Number(row.interests[L]) || 0;
-        var fill = el('div', 'fill');
-        fill.style.width = (Math.min(1, Math.abs(v)) * 50) + '%';
-        if (v >= 0) { fill.style.left = '50%'; fill.style.background = 'var(--pos)'; }
-        else { fill.style.right = '50%'; fill.style.background = 'var(--neg)'; }
-        track.appendChild(fill);
-        label = (v >= 0 ? '+' : '') + v.toFixed(2) + (conf[L] != null ? ' · c ' + Number(conf[L]).toFixed(2) : '');
-      } else {
-        label = 'unknown';
-      }
-      line.appendChild(track);
-      line.appendChild(el('span', 'val', label));
-      box.appendChild(line);
-    });
-    return box;
   }
 
 
