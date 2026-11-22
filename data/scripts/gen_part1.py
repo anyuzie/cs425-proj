@@ -1,4 +1,4 @@
-"""Generates the O*NET-independent data: 90 synthetic seeds (A4), question bank (A5), 60 NLI pairs (A7).
+"""Generates the O*NET-independent data: 90 synthetic seeds, question bank, 60 NLI pairs.
 LLM-drafted; every line still needs a human review before use."""
 import json, random, os
 random.seed(425)
@@ -6,8 +6,8 @@ OUT = "/home/claude/data/out"; os.makedirs(OUT, exist_ok=True)
 T = ["R", "I", "A", "S", "E", "C"]
 def slots(**kw): return {t: kw.get(t, "neutral") for t in T}
 
-# ---------------- A4: 90 synthetic seeds ----------------
-ENJ = [  # (text, type, polarity) — 5 per type, mixed sign, reason = enjoyment
+# 90 synthetic seeds
+ENJ = [  # (text, type, polarity); 5 per type, mixed sign, reason = enjoyment
  ("I love building things with my hands, like fixing up my bike on weekends.", "R", "positive"),
  ("Being outdoors and physically doing something all day sounds great to me.", "R", "positive"),
  ("I really enjoy assembling furniture and figuring out how the parts fit.", "R", "positive"),
@@ -113,7 +113,7 @@ for i, t in enumerate(NEU, 1):
 with open(f"{OUT}/synthetic_seeds.jsonl", "w") as f:
     for r in seeds: f.write(json.dumps(r) + "\n")
 
-# ---------------- A5: question bank ----------------
+# question bank
 CLARIFY = {
  "Realistic": [
   "Would you rather be hands-on with equipment and materials, or working through information at a desk?",
@@ -190,7 +190,7 @@ bank = {
 }
 json.dump(bank, open(f"{OUT}/question_bank.json", "w"), indent=2)
 
-# ---------------- A7: 60 NLI pairs ----------------
+# 60 NLI pairs
 CON = [  # genuine contradictions on one slot
  ("I like bouncing ideas off people", "I get more done when nobody's around and I hate group work", "Social"),
  ("I love teaching my juniors", "I really don't enjoy explaining things to people", "Social"),

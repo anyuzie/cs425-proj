@@ -1,11 +1,11 @@
-"""v3 test/dev set (8 Oct), built after the deep review.
+"""v3 test/dev set.
 - Targets: Job Zone 4-5 pool, stratified by each job's raw dominant RIASEC type (so Realistic jobs are included).
 - People are not job averages: hidden_slots = target z-row + N(0, 0.3) personal variation. The target stays the job.
 - Tier 2 writers never see the job title or description (no vocabulary leak).
 - Plants are two-sided: contradictions whose genuine side is a like OR a dislike, and familiarity cases where the
   background is misleading (low true score) OR genuine (high true score, probing should keep it).
 - 1 in 4 Tier 1 profiles mention a background that matches a genuine interest, so 'mentions family/course' is not a cue.
-New seed (2026) so nothing tuned earlier has seen these targets."""
+New seed so nothing tuned earlier has seen these targets."""
 import pandas as pd, numpy as np, json, os
 import sys
 EXTRA = len(sys.argv) > 1 and sys.argv[1] == "extra"

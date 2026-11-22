@@ -19,7 +19,6 @@ from recommender.ranker import BASELINE_CONFIG
 
 class ConfigurationTests(unittest.TestCase):
     def test_yaml_default_is_the_signed_lexical_semantic_dislike_selection(self):
-        # Explicit owner decision (reports/ranking/d2_title_v3_default/DECISION.md).
         config, _ = load_configuration(Path("configs/ranking.yaml"))
         preset, _ = load_configuration(Path("configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_title_v3.json"))
         self.assertEqual(config, preset)

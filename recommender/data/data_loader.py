@@ -48,7 +48,7 @@ def finite_number(value: str, context: str) -> float:
 
 
 def load_eligible_occupations(path: Path) -> list[Occupation]:
-    """Load M1 inputs only; preserve supplied z-scores and exclude unrated rows."""
+    """Load RIASEC ranking inputs only; keep supplied z-scores and exclude unrated rows."""
     rows = read_csv(Path(path), {"code", "Title", "job_zone", *(f"z_{t}" for t in TYPES)})
     codes, eligible = set(), []
     for row in rows:

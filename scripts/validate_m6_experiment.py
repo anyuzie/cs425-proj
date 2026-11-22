@@ -1,4 +1,4 @@
-"""Check saved M6 paired inputs, structured invariance and fallback gates."""
+"""Check the saved stress-test paired inputs, structured invariance and fallback gates."""
 import argparse
 from dataclasses import asdict
 import json

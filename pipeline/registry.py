@@ -15,7 +15,7 @@ def _rule(cfg, d):
 
 
 def _ranker_structured(cfg, d):
-    from recommender.models.structured import StructuredRanker  # the M1 baseline: no task quotes yet
+    from recommender.models.structured import StructuredRanker  # structured baseline; gives no task quotes
     ranker = StructuredRanker(d / "occupations.csv")
     ranker.name = "structured"
     return ranker
@@ -57,32 +57,32 @@ def _filler_t5_v3(cfg, d):
     return T5V3Filler(qb, names, ROOT / cfg["paths"]["t5_checkpoint"])
 
 
-# --- teammate parts: each imports its own file only when chosen in configs/system.json ---
+# Model-backed components are imported only when selected in configs/system.json.
 def _extractor_deberta(cfg, d):
-    from .extractor import Extractor  # pipeline/extractor.py
+    from .extractor import Extractor
     return Extractor(ROOT / cfg["paths"]["extractor_checkpoint"], d / "labels.json")
 
 
 def _tracker_decay(cfg, d):
-    from .tracker import DecayTracker  # pipeline/tracker.py
+    from .tracker import DecayTracker
     return DecayTracker(_settings(cfg).get("decay", 1.0))
 
 
 def _confirmer_nli(cfg, d):
-    from .nli import NliConfirmer  # pipeline/nli.py
+    from .nli import NliConfirmer
     model = cfg["paths"]["nli_model"]
     local = ROOT / model
     if (Path(model).is_absolute() or model.replace("\\", "/").startswith("models/")) and not local.is_dir():
         raise FileNotFoundError(
             f"NLI checkpoint missing: {local}. Model weights are not included in Git. "
             "Copy the shared checkpoint folder here, then run "
-            "python scripts/check_nli_checkpoint.py. See docs/NLI_DEPLOYMENT.md."
+            "python scripts/check_nli_checkpoint.py. See README.md."
         )
     return NliConfirmer(str(local) if local.is_dir() else model)
 
 
 def _policy_manual(cfg, d):
-    from .policy import ManualPolicy  # pipeline/policy.py
+    from .policy import ManualPolicy
     st = _settings(cfg)
     from .policy import PROBE_REASON_CONF
     from .task_questions import load_tasks

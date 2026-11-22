@@ -1,16 +1,16 @@
-"""Multi-turn fusion evaluation (#0 and #1, docs/SEMANTIC_LEDGER_PLAN.md §12.3-12.4).
+"""Multi-turn fusion evaluation.
 
 Simulated dialogues with the real System on data/eval/fusion_personas_v1.jsonl. Arms are
 {ranker} x {probing on, probing off}; rankers are fusion (RRF k=60, the control), cosine only,
-semantic only, and the #1 fusion variants (tie-aware RRF, z-score sum). Each arm uses its ranker
+semantic only, and two fusion variants (tie-aware RRF, z-score sum). Each arm uses its ranker
 both inside the dialogue and for the final ranking. --rankers / --probing select a subset.
 
-Primary metric (fixed before any run, §12.4): MRR of the first acceptable occupation over the
+Primary metric (fixed before any run): MRR of the first acceptable occupation over the
 full eligible pool. Secondary: Hit@5 and NDCG@10 against the acceptable set (binary gains).
 Paired bootstrap CIs over personas, reported for all personas and for conflict vs agree.
 Per-turn diagnostic: best acceptable rank under cosine, semantic and fusion for the same inputs.
 
-EVALUATION ONLY: the personas must never be used to tune any component, weight or threshold.
+Evaluation only: the personas must never be used to tune any component, weight or threshold.
 """
 import argparse
 from copy import copy
@@ -33,11 +33,11 @@ from recommender.models.ranker import RankingPipeline
 ROOT = Path(__file__).resolve().parents[1]
 PERSONAS = ROOT / "data/eval/fusion_personas_v1.jsonl"
 RANKERS = {  # arm name -> versioned ranking configuration
-    "fusion": "configs/ranking/occupation_semantic_fusion_v1.json",  # rrf_k60 control (default until 9 Nov 2026)
+    "fusion": "configs/ranking/occupation_semantic_fusion_v1.json",  # rrf_k60 control
     "cosine": "configs/ranking/m1_cosine.json",
     "semantic": "configs/ranking/occupation_semantic_finetuned_v1.json",
-    "fusion_tieavg": "configs/ranking/occupation_semantic_fusion_tieavg_v1.json",  # #1a rrf_tie_aware@k60_v1
-    "fusion_zscore": "configs/ranking/occupation_semantic_fusion_zscore_v1.json",  # #1b zscore_sum@equal_v1 = configs/ranking.yaml default
+    "fusion_tieavg": "configs/ranking/occupation_semantic_fusion_tieavg_v1.json",  # rrf_tie_aware@k60_v1
+    "fusion_zscore": "configs/ranking/occupation_semantic_fusion_zscore_v1.json",  # zscore_sum@equal_v1
 }
 VARIANTS = ("fusion_tieavg", "fusion_zscore")  # compared against the control and semantic only
 PROBING = {"probing": False, "no_probing": True}  # arm suffix -> ManualPolicy(no_probing=...)

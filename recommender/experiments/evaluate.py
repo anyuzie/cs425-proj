@@ -229,7 +229,7 @@ def run(config_path: Path = DEFAULT_EVALUATION_CONFIG, output: Path | None = Non
         "python": platform.python_version(), "dependencies": {"PyYAML": version("PyYAML"), **dense_identity.get("packages", {})},
         "model_revision": dense_identity.get("parameters", {}).get("model_revision") or dense_identity.get("revision"),
         "task_index_fingerprint": dense_metadata.get("artifact_sha256", {}).get("index.faiss"),
-        # Legacy MiniLM M4 records its task corpus; the occupation dual encoder records checkpoint/split data.
+        # The MiniLM task encoder records its task corpus; the occupation dual encoder records checkpoint/split data.
         "auxiliary_dataset_sha256": ({dense_identity["parameters"]["tasks_path"]: dense_identity["tasks_sha256"]}
                                      if "tasks_path" in dense_identity.get("parameters", {}) else
                                      {"occupation_semantic_checkpoint": dense_identity["checkpoint_sha256"],

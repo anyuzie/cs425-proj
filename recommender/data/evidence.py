@@ -1,4 +1,4 @@
-"""M6 query selection only. Lifecycle decisions remain owned by upstream components."""
+"""Evidence query selection only; lifecycle decisions stay with upstream components."""
 
 from copy import deepcopy
 

@@ -1,15 +1,12 @@
 components:
-  # Live default since 9 November 2026 (reports/ranking/d2_title_v3_default/DECISION.md): RIASEC
-  # cosine (M1), signed lexical matching (M3) and signed semantic retrieval (M4) rank in parallel,
-  # are combined by fusion (below), and the post-fusion dislike stage runs last. With only one usable
-  # component, fusion is bypassed and that component's ranking is used.
-  # M3 and M4 drop the user's negative clauses from their queries (shared routing v3,
-  # docs/LEXICAL_MATCHING_PLAN.md). M4 requires the local checkpoint/index in
-  # artifacts/ranking/occupation_semantic_v1/ (gitignored).
-  # Identical to configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_title_v3.json.
-  # Previous default (cosine + finetuned_v1, z-score fusion, no lexical, no dislike stage):
-  # configs/ranking/occupation_semantic_fusion_zscore_v1.json (configs/system.zscore.json).
-  # Frozen dot-product control: configs/ranking/baseline_v1.json.
+  # RIASEC cosine (m1), signed BM25 (m3) and the signed semantic encoder (m4) rank in parallel,
+  # their scores are fused (below), and the dislike stage runs last. If only one component has a
+  # usable signal, fusion is skipped and that component's ranking is used.
+  # m3 and m4 drop the user's negative clauses from their queries. m4 needs the checkpoint and
+  # index in artifacts/ranking/occupation_semantic_v1/ (not in Git).
+  # Same as configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_title_v3.json.
+  # Without BM25 and the dislike stage: configs/ranking/occupation_semantic_fusion_zscore_v1.json.
+  # Dot-product control: configs/ranking/baseline_v1.json.
   m1:
     algorithm: cosine_similarity
     variant: baseline_v1
@@ -20,14 +17,13 @@ components:
     algorithm: occupation_dual_encoder_signed
     variant: finetuned_v2
 
-# Since 9 November 2026 (reports/ranking/fusion_zscore_default/DECISION.md): per-query z-scored
-# component scores, equal-weight sum. Previous: equal-weight RRF k=60
-# (configs/ranking/occupation_semantic_fusion_v1.json, configs/system.rrf.json).
+# Per-query z-scored component scores, summed with equal weights. The RRF (k=60) alternative is
+# configs/ranking/occupation_semantic_fusion_v1.json (configs/system.rrf.json).
 fusion:
   algorithm: zscore_sum
   variant: equal_v1
 
-# D2 dislike stage, applied to the final ranking after fusion (docs/LEXICAL_MATCHING_PLAN.md):
+# Dislike stage, applied to the final ranking after fusion:
 # a strongly worded dislike moves title-matched jobs below every other job; a mildly worded one
 # lowers their fused score by 1.5 SD. Remove this key to disable it.
 post_fusion:

@@ -1,4 +1,4 @@
-"""M5 tracker boundary, policy integration, provenance and configuration regressions."""
+"""Tracker boundary, policy integration, provenance and configuration regressions."""
 from copy import deepcopy
 import csv
 import json

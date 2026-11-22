@@ -1,8 +1,8 @@
-"""Shared clause routing for signed text components (docs/LEXICAL_MATCHING_PLAN.md, L1 and D1).
+"""Shared clause routing for the signed BM25 and signed semantic components.
 
 Routes every user clause, split by the explicit stance extractor (``explicit_scoped_v1``), into
 ``positive`` / ``neutral`` (used as query text), ``negative`` (never used as query text) or
-``skipped`` (non-preference wording). The rules and patterns come from the caller's frozen variant
+``skipped`` (non-preference wording). The rules and patterns come from the caller's variant
 parameters, so lexical (``bm25_signed``) and semantic (``occupation_dual_encoder_signed``) variants
 that record the same patterns route identically.
 """
@@ -27,7 +27,7 @@ class ClauseRouter:
             raise ValueError("clause routing requires the explicit_scoped_v1 stance extractor")
         self.cue = re.compile(parameters["negation_cue_pattern"], re.I)
         self.non_preference = re.compile(parameters["non_preference_pattern"], re.I)
-        # Routing v3 rules; absent from v1/v2 parameters, so those versions route exactly as before.
+        # Routing v3 rules; absent from v1/v2 parameters.
         self.scope_split = re.compile(parameters["scope_split_pattern"], re.I) if "scope_split_pattern" in parameters else None
         self.anything_but = re.compile(parameters["anything_but_pattern"], re.I) if "anything_but_pattern" in parameters else None
         self.scope_tail_filler = frozenset(parameters.get("scope_tail_filler", ()))
@@ -64,8 +64,8 @@ class ClauseRouter:
         """v3: "I love biology, just not lab work" -> "I love biology" + "just not lab work".
 
         The extractor does not split at these commas, so the dislike tail would take the liked part
-        with it. Each piece is a substring of the original clause (so D1 can still delete pieces in
-        place) and is routed on its own.
+        with it. Each piece is a substring of the original clause (so the signed semantic component can
+        still delete pieces in place) and is routed on its own.
         """
         match = self.scope_split.search(clause["source_span"])
         if not match or not match.start():

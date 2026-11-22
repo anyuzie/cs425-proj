@@ -1,4 +1,4 @@
-"""Fixed 2D occupation map for the explanation panel (SEMANTIC_LEDGER_PLAN section 10.2).
+"""Fixed 2D occupation map for the explanation panel.
 
 Read-only explanation support: nothing here scores, ranks or fuses occupations.
 

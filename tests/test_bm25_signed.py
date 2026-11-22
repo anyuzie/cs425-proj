@@ -1,4 +1,4 @@
-"""L1 signed lexical matching: clause routing, early stop, ignore vs filter (docs/LEXICAL_MATCHING_PLAN.md)."""
+"""Signed lexical matching: clause routing, early stop, ignore vs filter."""
 
 from pathlib import Path
 import unittest

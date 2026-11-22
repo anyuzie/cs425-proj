@@ -1,16 +1,14 @@
-"""Sentence-to-task nearest-neighbour reranking; earlier semantic variants stay intact.
+"""Sentence-to-task nearest-neighbour reranking.
 
-Hypothesis (fixed before observing treatment metrics): a single strong match
-between one user sentence and one occupation task statement is better evidence
-than the mean similarity between the whole user history and a whole occupation
-document. Scoring therefore reuses the M4 ``minilm@mean_tasks_v1`` formula
-(per sentence, maximum task cosine within an occupation; mean over sentences),
-but applies it as a second-stage reranker inside the unchanged weighted
-dot-product groups of 10, which M4 never tested.
+Idea: a single strong match between one user sentence and one occupation task
+statement is better evidence than the mean similarity between the whole user
+history and a whole occupation document. Scoring reuses the ``minilm@mean_tasks_v1``
+formula (per sentence, maximum task cosine within an occupation; mean over
+sentences), but applies it as a second-stage reranker inside the weighted
+dot-product groups of 10.
 
-The signed treatment changes exactly one further variable: sentences that the
-existing conservative lexical preference rule labels explicitly negative
-contribute ``-max_cosine``. Unknown and positive sentences are unchanged.
+The signed treatment differs in one way: sentences that the conservative lexical
+preference rule labels explicitly negative contribute ``-max_cosine``. Unknown and positive sentences are unchanged.
 """
 from copy import deepcopy
 import os
@@ -55,7 +53,7 @@ def configure_local_models():
 
 
 def split_sentences(utterances):
-    """Identical to the frozen M4 splitter (copied to avoid importing FAISS)."""
+    """Same splitter as the dense ranker (copied to avoid importing FAISS)."""
     return [match.group().strip() for text in utterances for match in re.finditer(SENTENCE_PATTERN, text)
             if any(char.isalnum() for char in match.group())]
 
@@ -84,7 +82,7 @@ CONFIGURATIONS = {
 
 
 def base_variant(parameters):
-    """Frozen encoder/group variant underlying a clause-task treatment."""
+    """Encoder/group variant underlying a clause-task treatment."""
     return next(value for value in VARIANTS.values()
                 if parameters["variant"].startswith(value["variant"] + "_clause_tasks"))
 

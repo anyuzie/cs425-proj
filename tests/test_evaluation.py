@@ -1,4 +1,4 @@
-"""Hand-calculated metrics and M2 reproducibility acceptance tests."""
+"""Hand-calculated metrics and baseline reproducibility tests."""
 
 import json
 import csv

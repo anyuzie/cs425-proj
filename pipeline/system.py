@@ -13,7 +13,7 @@ from .repair import needs_repair
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG = ROOT / "configs" / "system.json"
 QUESTIONS = ("CLARIFY", "ABSTAIN", "PROBE", "CHALLENGE")
-POLICY_TOP_K = 100  # ranking README: the dialogue policy consumes the top 100
+POLICY_TOP_K = 100  # the dialogue policy looks at the top 100
 
 NO_SIGNAL_REPLY = ("I could not pick up enough about your preferences to suggest occupations. "
                    "Thanks for chatting, and please try again with a few more details.")
@@ -98,7 +98,7 @@ class System:
             "user_sentences": list(state.user_texts), "status": resp.status, "reason": resp.reason,
             "rank_seconds": rank_seconds,
             "occupations": [asdict(o) for o in resp.occupations]})
-        # Explanation-only extras (SEMANTIC_LEDGER_PLAN section 10.3); tracker_record does not export them.
+        # Explanation-only extras; tracker_record does not export them.
         state.ranking_trace[-1]["slot_confidence"] = {t: round(s.confidence, 3) for t, s in state.slots.items()}
         if ranks is not None and resp.status == "ranked":
             state.ranking_trace[-1]["rank_snapshot"] = self._snapshot(ranks)
@@ -170,7 +170,7 @@ class System:
         flags = []
         rule_state = state
         if state.conflict_candidates is not None:
-            # Present pending tracker evidence without changing the teammate's rule.
+            # Let the rule see pending tracker evidence without changing the rule itself.
             slots = {f.slot: replace(state.slots[f.slot], value=f.new.value,
                         confidence=f.new.confidence, reason=f.new.reason, source=f.new.source,
                         turn=state.turn, history=[f.old, f.new]) for f in state.conflict_candidates}

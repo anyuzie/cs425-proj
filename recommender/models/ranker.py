@@ -59,11 +59,11 @@ class RankingPipeline:
         if "reranking" in config:
             self._semantic_pipeline = SemanticMatchingPipeline(occupations_path, set(self._occupations), config["reranking"])
             self._rerankers = self._semantic_pipeline.stages
-            self._reranker = self._rerankers[0]  # Preserve the single-stage compatibility handle.
+            self._reranker = self._rerankers[0]  # single-stage handle kept for older callers
         self._components = {key: registry.build(resolved, deepcopy(occupations)) for key, resolved in self._resolved.items()}
         self._fusion = build_fusion(config["fusion"]) if config["fusion"] is not None else None
         self._post_fusion = None
-        if "post_fusion" in config:  # D2: applied to the final ranking, after fusion (docs/LEXICAL_MATCHING_PLAN.md)
+        if "post_fusion" in config:  # applied to the final ranking, after fusion
             from .dislike_demotion import VARIANTS as DISLIKE_VARIANTS, DislikeDemotion
             self._post_fusion = DislikeDemotion(deepcopy(occupations), DISLIKE_VARIANTS[config["post_fusion"]["variant"]])
 
@@ -104,7 +104,7 @@ class RankingPipeline:
                 **({"reranking": self._semantic_pipeline.metadata} if self._semantic_pipeline else {})}
 
     def _profile(self, request):
-        """Stage A: the only place profile_policy alters the structured input."""
+        """The only place profile_policy alters the structured input."""
         interests, observed, diagnostics = apply_policy(
             self.profile_policy, request.interests, request.observed_types, request.slot_reasons)
         # An excluded type leaves the weights with the observed set; weights are never rescaled.
@@ -121,7 +121,7 @@ class RankingPipeline:
                            user_sentences: list[str], top_k: int = 100, *, slot_reasons=None, slot_weights=None):
         """Same ranking as rank(), plus every eligible occupation's fused and component ranks.
 
-        The snapshot is read-only explanation data (SEMANTIC_LEDGER_PLAN section 10.3): it is
+        The snapshot is read-only explanation data:
         {"fused": {code: rank}, "<signal>": {code: rank}, ...}, or None when no snapshot applies.
         It is returned separately so RankingResponse and its exports keep their schema.
         """

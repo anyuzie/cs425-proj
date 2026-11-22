@@ -1,4 +1,4 @@
-"""Routing v3 and D2, the post-fusion dislike stage (docs/LEXICAL_MATCHING_PLAN.md)."""
+"""Routing v3 and the post-fusion dislike stage."""
 
 from pathlib import Path
 import unittest

@@ -1,13 +1,12 @@
 """Occupation-level fusion of usable component rankings, separate from scoring.
 
-Accepted fusion selections (each identifier keeps its meaning; add new variants, never edit one):
+Accepted fusion selections:
 
 - ``{"algorithm": "rrf", "k": 60}``: equal-weight RRF, the control and live default (``rrf_k60``).
 - ``{"algorithm": "rrf_tie_aware", "variant": "k60_v1"}``: the same RRF, but occupations with equal
-  component scores share the average of the ranks they span, so ties are not broken by SOC code
-  (docs/SEMANTIC_LEDGER_PLAN.md section 12.3, #1a).
+  component scores share the average of the ranks they span, so ties are not broken by SOC code.
 - ``{"algorithm": "zscore_sum", "variant": "equal_v1"}``: per-query z-score of each component's raw
-  scores, summed with equal weights, so a peaked component can beat a flat lead (#1b).
+  scores, summed with equal weights, so a peaked component can beat a flat lead.
 """
 
 from math import sqrt
@@ -121,7 +120,7 @@ class Fusion(Protocol):
     def fuse(self, rankings: Mapping[str, ComponentRanking]) -> ComponentRanking: ...
 
 
-# Frozen fusion variants: selection -> (identifier, factory). Never change an entry's meaning.
+# selection -> (identifier, factory)
 FUSION_VARIANTS = {
     (("algorithm", "rrf"), ("k", 60)): ("rrf_k60", lambda: ReciprocalRankFusion(60)),
     (("algorithm", "rrf_tie_aware"), ("variant", "k60_v1")): (

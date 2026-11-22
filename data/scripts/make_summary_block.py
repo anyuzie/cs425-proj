@@ -72,7 +72,7 @@ nli_c = collections.Counter((x["split"], x["label"]) for x in nli)
 LEXD = json.load(open(f"{O}/riasec_lexicon.json"))
 LEXROWS = "".join(f'<tr><td><b>{t}</b> {NAME[t]}</td><td>{", ".join(x["term"] for x in LEXD["types"][t][:14])}</td></tr>' for t in T)
 
-# ---- 18 Oct: balanced sets, patterns, stress test
+# balanced sets, patterns, stress test
 import sys, numpy as np, pandas as pd
 sys.path.insert(0, f"{O}/eval"); import metrics as MET
 V4 = L(f"{O}/profiles_v4.jsonl"); ST = L(f"{O}/extractor_stress.jsonl")

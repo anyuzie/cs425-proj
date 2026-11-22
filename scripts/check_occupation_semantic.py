@@ -1,7 +1,4 @@
-"""Real local encoder, terminal, TCP HTTP, restart and multi-turn acceptance (no mocks).
-
-Browser observation is recorded separately, never inferred from HTTP success.
-"""
+"""Acceptance check with the real local encoder: terminal, HTTP over TCP, restart and multi-turn (no mocks)."""
 import argparse
 from dataclasses import asdict
 import json

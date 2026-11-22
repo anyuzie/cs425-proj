@@ -1,5 +1,5 @@
 """Pick target occupations for Tier 1 (60), Tier 2 (40), dev (20).
-v2 (7 Oct): targets restricted to O*NET Job Zones 4-5 (usually need a bachelor's degree or more), to match
+Targets restricted to O*NET Job Zones 4-5 (usually need a bachelor's degree or more), to match
 SMU students; spread across SOC major groups by round-robin.
 Writes the agent inputs: tier1_numbers.json holds ONLY ids + six numbers + a style flag (no titles)."""
 import pandas as pd, numpy as np, json, os

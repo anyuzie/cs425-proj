@@ -45,7 +45,7 @@ class UtteranceProcessingPipeline:
             except (ImportError, OSError) as exc:
                 raise RuntimeError(
                     "Utterance processing requires requirements-utterance.txt and "
-                    "the en_core_web_sm model; see docs/UTTERANCE_PROCESSING.md"
+                    "the en_core_web_sm model; see README.md"
                 ) from exc
         if "parser" not in nlp.pipe_names:
             raise ValueError("utterance processing requires a dependency parser")

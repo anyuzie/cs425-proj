@@ -1,14 +1,14 @@
 """Dot product vs cosine when RIASEC comes from the real extractor instead of hidden slots.
 
-Usage (repository root), after ``python scripts/build_extractor_sessions.py``:
+Usage (repository root):
     python -m recommender.experiments.extractor_inputs
 
-Hypothesis (fixed before running): cosine's large oracle advantage (Hit@5 .683 vs
+Hypothesis: cosine's large oracle advantage (Hit@5 .683 vs
 .167 on 120 profiles) partly reflects benchmark construction, because oracle and
 mock-tracker vectors are the target's z-row plus noise. With vectors inferred
 from profile text, cosine should still beat the dot product, by a smaller margin.
 
-Four runs share the unchanged evaluator, pool and labels: oracle dot, oracle
+Four runs share the same evaluator, pool and labels: oracle dot, oracle
 cosine (references only; different input mode, never paired with tracker runs),
 extractor dot and extractor cosine (the paired comparison). Extraction quality is
 measured separately against hidden slots so upstream and ranking errors can be

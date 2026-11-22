@@ -1,4 +1,4 @@
-"""Assemble the v3 test/dev profiles (8 Oct) from the blind drafts."""
+"""Assemble the v3 test/dev profiles from the blind drafts."""
 import json, csv, os, numpy as np
 W, OUT = os.environ.get("V3DIR", "/home/claude/data/work/v3"), "/home/claude/data/out"
 T = ["R", "I", "A", "S", "E", "C"]

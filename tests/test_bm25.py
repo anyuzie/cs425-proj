@@ -1,4 +1,4 @@
-"""M3 lexical retrieval and integration acceptance fixtures."""
+"""BM25 lexical retrieval and integration tests."""
 
 from copy import deepcopy
 import csv

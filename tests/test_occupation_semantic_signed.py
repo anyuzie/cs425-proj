@@ -1,4 +1,4 @@
-"""D1: semantic retrieval without negative clauses (docs/LEXICAL_MATCHING_PLAN.md)."""
+"""Semantic retrieval without negative clauses."""
 
 from pathlib import Path
 import unittest

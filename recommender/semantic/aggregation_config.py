@@ -1,4 +1,4 @@
-"""Frozen score aggregation experiment; existing sequential variants are separate."""
+"""Score aggregation experiment, separate from the sequential variants."""
 from copy import deepcopy
 from ..models.description_reranker import VARIANTS
 

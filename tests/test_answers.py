@@ -248,7 +248,7 @@ class FinalReviewRegressions(unittest.TestCase):
 
 
 class ReviewRegressions(unittest.TestCase):
-    """Cases from the independent review that the first version got wrong."""
+    """Cases an earlier version got wrong."""
 
     def test_challenge_rule_ignores_now_before_and_negation(self):
         for text in ("I now enjoy hands-on work", "Not the first one", "The earlier one was a mistake",

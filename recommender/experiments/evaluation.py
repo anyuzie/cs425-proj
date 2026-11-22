@@ -1,4 +1,4 @@
-"""M2 exact-target and graded metrics. Labels stay on the evaluator side."""
+"""Exact-target and graded ranking metrics. Labels stay on the evaluator side."""
 
 import math
 

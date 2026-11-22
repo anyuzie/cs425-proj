@@ -177,7 +177,7 @@ class PipelineTests(unittest.TestCase):
 
 
 class PolicyBaseGuarantees(unittest.TestCase):
-    """What PolicyBase enforces so a teammate's _decide cannot break the conversation or the evaluation."""
+    """What PolicyBase enforces so a custom _decide cannot break the conversation or the evaluation."""
 
     @classmethod
     def setUpClass(cls):

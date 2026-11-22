@@ -1,4 +1,4 @@
-"""Independent M1 cosine similarity over observed RIASEC dimensions."""
+"""Cosine similarity over observed RIASEC dimensions."""
 
 from ..configuration import load_parameters
 

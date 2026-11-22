@@ -1,4 +1,4 @@
-"""Explanation map support (SEMANTIC_LEDGER_PLAN section 10): rank snapshots, hexagon, t-SNE artifact."""
+"""Explanation map support: rank snapshots, hexagon, t-SNE artifact."""
 from dataclasses import asdict
 import json
 import os

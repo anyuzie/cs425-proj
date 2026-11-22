@@ -1,4 +1,4 @@
-"""Reproducible development-only M6 stress test; never actual-tracker evidence.
+"""Development-only ranking stress test with synthetic tracker states; not real-tracker evidence.
 
 Run from the repository root: python scripts/run_m6_experiment.py
 """

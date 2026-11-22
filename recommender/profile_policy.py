@@ -1,15 +1,13 @@
-"""Ranking-owned Stage A: frozen transforms of the tracker vector before scoring.
+"""Fixed transforms of the tracker vector, applied before scoring.
 
 Mirrors ``evidence_filter``: a policy changes only the structured input that
 components receive; components (dot product, cosine, ...) are unchanged. Text is
 never altered. Policies read the tracker's per-slot reason; they never read
 hidden slots, targets or relevance labels.
 
-Hypothesis for the familiarity policies (fixed before running): an unconfirmed
-familiarity-based slot ("I did a lot of X at school") is weaker evidence of
-interest than an enjoyment-based slot. At a single turn the policy cannot tell
-misleading from genuine familiarity, so its net effect is expected to be mixed;
-subgroup results show how much is left for probing to resolve.
+The familiarity policies assume an unconfirmed familiarity-based slot ("I did a
+lot of X at school") is weaker evidence of interest than an enjoyment-based slot.
+At a single turn they cannot tell misleading from genuine familiarity.
 """
 from copy import deepcopy
 

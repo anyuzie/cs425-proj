@@ -1,4 +1,4 @@
-"""Text-only occupation-context/task treatment; frozen description controls stay intact."""
+"""Text-only occupation-context/task treatment."""
 from copy import deepcopy
 import hashlib
 import json
@@ -114,7 +114,7 @@ class ContextTaskReranker(DescriptionReranker):
                 self.cache[code] = np.mean(vectors[offset:offset + len(group)], axis=0)
                 self.chunk_counts[code] = len(group)
                 offset += len(group)
-        # Preserve the frozen query policy (newline join, model truncation at 256).
+        # Query policy: newline join, model truncation at 256.
         vector = self._encode([query])[0]
         return {code: float(self.cache[code] @ vector) for code in codes}
 

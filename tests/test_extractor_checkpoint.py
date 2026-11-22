@@ -47,7 +47,7 @@ class CheckpointTests(unittest.TestCase):
         class Model:
             def __call__(self, **kwargs):
                 test.assertFalse(torch.is_grad_enabled())
-                # Saved teammate checkpoint order is negative, neutral, positive.
+                # Saved checkpoint label order is negative, neutral, positive.
                 direction = torch.tensor([[0., 0., 9.], [9., 0., 0.]] + [[0., 9., 0.]] * 4)
                 strength = torch.tensor([[0., 0., 0., 9.]] * 6)
                 return SimpleNamespace(logits=torch.cat((direction.flatten(), torch.tensor([9., 0., 0.]), strength.flatten())).unsqueeze(0))

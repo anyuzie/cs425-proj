@@ -1,4 +1,4 @@
-"""Independent weighted_dot_product implementation; fixed baseline mathematics."""
+"""Weighted dot product baseline over RIASEC scores."""
 
 from ..configuration import load_parameters
 

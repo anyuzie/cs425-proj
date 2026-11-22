@@ -1,4 +1,4 @@
-"""The four agreed rules: control arm listens to everything, unsure answers get one retry,
+"""The four policy rules: control arm listens to everything, unsure answers get one retry,
 PROBE needs reason confidence above a setting, and recency decay as a setting."""
 
 import json
@@ -219,7 +219,7 @@ class ReviewRegressionsPolicy(RulesBase):
 
 
 class FullArmMergesUnconfirmedOpposites(RulesBase):
-    """Review finding 7: the two arms must differ only in asking."""
+    """The two arms must differ only in asking."""
 
     def test_rejected_by_nli_is_merged_not_dropped(self):
         self.step(reading("I like working with people", S=(1, .9)))

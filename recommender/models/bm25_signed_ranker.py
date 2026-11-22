@@ -1,6 +1,6 @@
-"""L1 signed lexical matching (docs/LEXICAL_MATCHING_PLAN.md): polarity decides which clauses reach BM25.
+"""Signed lexical matching: clause polarity decides which clauses reach BM25.
 
-Reuses the frozen ``bm25@baseline_v1`` index and scoring unchanged; only the query text differs.
+Reuses the ``bm25@baseline_v1`` index and scoring; only the query text differs.
 Each user clause is routed by the explicit stance extractor (``explicit_scoped_v1``):
 
 - ``positive``: explicit positive preference -> query.
@@ -30,7 +30,7 @@ from .task_preferences import REVISION as EXTRACTOR_REVISION
 IGNORE_PARAMETERS = load_parameters("bm25_signed_ignore_negative_v1_parameters")
 FILTER_PARAMETERS = load_parameters("bm25_signed_filter_negative_v1_parameters")
 # v2: same rules, plus apostrophe-less contractions ("dont", "cant", "isnt", ...) as negation cues and
-# in non-preference wording ("dont mind", "doesnt matter"). v1 is kept unchanged.
+# in non-preference wording ("dont mind", "doesnt matter").
 IGNORE_V2_PARAMETERS = load_parameters("bm25_signed_ignore_negative_v2_parameters")
 FILTER_V2_PARAMETERS = load_parameters("bm25_signed_filter_negative_v2_parameters")
 # v3: routing v3 (scope split for "X, just not Y", "anything but X", first-person-only "avoid").

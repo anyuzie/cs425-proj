@@ -1,7 +1,7 @@
 import re
 
 PREFERENCE = re.compile(r"\b(?:enjoy|like|love|hate|dislike|prefer|rather|satisfying|interested|appeal)\b", re.I)
-# shortcut: explicit phrase handling covers common repairs; expand with independently reviewed dialogues.
+# Hand-written phrases for the common repair requests; not exhaustive.
 REPAIR = re.compile(r"\b(?:give (?:me |us )?(?:a |an )?(?:concrete )?example|what (?:do you|does that) mean|(?:do not|don't|don’t) (?:know|understand)|not sure|unsure|undecided|hard to answer|just testing|not told you|weather|cannot decide|no preference)\b|^\s*(?:hmm+|um+|uh+)[.!?\s]*$", re.I)
 
 

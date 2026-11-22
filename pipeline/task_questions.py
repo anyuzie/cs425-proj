@@ -7,7 +7,7 @@ from .interfaces import TYPES
 
 def task_stance(text):
     """Explicit short answers concern the named task, never an inferred global interest."""
-    # shortcut: only unambiguous short forms; extend after reviewing more task-answer cases.
+    # Only unambiguous short forms are recognised.
     normalized = re.sub(r"[^\w\s']", '', text.lower().replace('’', "'")).strip()
     if normalized in {'yes', 'yes i would', 'yes definitely', 'i would enjoy that', 'i enjoy it'}:
         return 1
@@ -33,7 +33,7 @@ def load_tasks(tasks_path, catalog_path):
 
 
 def select_task(tasks, state, slot):
-    # shortcut: a developer-curated starter catalog; expand with team-reviewed associations.
+    # Tasks come from the small hand-picked catalog in configs/question_tasks.json.
     if state.turn < 3:
         return None
     for occupation in state.ranking[:100]:

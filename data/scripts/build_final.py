@@ -8,11 +8,11 @@ FULL = dict(zip(["Realistic", "Investigative", "Artistic", "Social", "Enterprisi
 def slots(**kw): return {t: kw.get(t, "neutral") for t in T}
 L = lambda p: [json.loads(x) for x in open(p)]
 
-# ---------- extractor ----------
+# extractor
 acts = {a["seed_id"]: a for a in L(f"{OUT}/activities.jsonl")}
-# audit fixes (6 Oct): supervising cooks is management; personnel records are record-keeping
+# audit fixes: supervising cooks is management; personnel records are record-keeping
 acts["IA_117"]["type"] = "E"; acts["IA_167"]["type"] = "C"
-# blind-relabel adjudication (7 Oct): activities that genuinely span two types get both labels;
+# blind-relabel adjudication: activities that genuinely span two types get both labels;
 # the 24 O*NET Career Type rows (IA_001-IA_024) keep O*NET's own label
 DUAL = {"IA_025": "RI", "IA_061": "RI", "IA_062": "RI", "IA_063": "RI", "IA_064": "RI",
         "IA_139": "SC", "IA_140": "SC", "IA_153": "EA", "IA_175": "EC", "IA_178": "EA",
@@ -32,7 +32,7 @@ FIX = {"ENJ_014": slots(A="negative", C="positive"), "FAM_029": slots(E="positiv
 for r in L(f"{OUT}/synthetic_seeds.jsonl"):
     if r["seed_id"] in FIX: r["slots"] = FIX[r["seed_id"]]
     rows.append({**r, "kind": "seed"})
-# extra seeds (6 Oct): negatives, forced-choice answers, familiarity, neutral/lukewarm
+# extra seeds: negatives, forced-choice answers, familiarity, neutral/lukewarm
 cnt = Counter()
 for x in json.load(open(f"{W}/extra_A.json")) + json.load(open(f"{W}/extra_B.json")):
     if x["reason"] == "familiarity": pre = "FAM"
@@ -44,14 +44,14 @@ for x in json.load(open(f"{W}/extra_A.json")) + json.load(open(f"{W}/extra_B.jso
     rows.append({"text": x["text"], "slots": sl, "reason": x["reason"],
                  "seed_id": f"{pre}_{base_n + cnt[pre]:03d}", "kind": "seed"})
 
-# extra Conventional seeds (7 Oct): 80 positive -> ENJ_031+, 20 negative -> NEG_116+
+# extra Conventional seeds: 80 positive -> ENJ_031+, 20 negative -> NEG_116+
 cp = cn = 0
 for x in json.load(open(f"{W}/extra_C.json")):
     if x["polarity"] == "positive": cp += 1; sid = f"ENJ_{30 + cp:03d}"
     else: cn += 1; sid = f"NEG_{115 + cn:03d}"
     rows.append({"text": x["text"], "slots": slots(C=x["polarity"]), "reason": "enjoyment", "seed_id": sid, "kind": "seed"})
 
-# 7 Oct critical-review additions
+# critical-review additions
 qa = json.load(open(f"{W}/qa_pairs.json")); xd = json.load(open(f"{W}/extra_D.json"))
 for i, x in enumerate(qa["qa"], 1):     # replies that only make sense with the question: train on the pair
     rows.append({"text": x["answer"], "context": x["question"],
@@ -64,24 +64,23 @@ for i, x in enumerate(xd["fam_neg"], 1):
     rows.append({"text": x["text"], "slots": slots(**{x["type"]: "negative"}), "reason": "familiarity", "seed_id": f"FAM_{72 + i:03d}", "kind": "seed"})
 for i, x in enumerate(xd["lukewarm"], 1):
     rows.append({"text": x["text"], "slots": slots(**{x["type_mentioned"]: "positive"}), "strength": {x["type_mentioned"]: "dontmind"},
-                 "reason": "enjoyment", "seed_id": f"NEU_{72 + i:03d}", "kind": "seed"})   # 'I don't mind X' = weak positive (team decision 7 Oct)
+                 "reason": "enjoyment", "seed_id": f"NEU_{72 + i:03d}", "kind": "seed"})   # 'I don't mind X' = weak positive
 
 gr = json.load(open(f"{W}/graded.json"))
 NM2L = {"Realistic": "R", "Investigative": "I", "Artistic": "A", "Social": "S", "Enterprising": "E", "Conventional": "C"}
 POL = {"pos": "positive", "neg": "negative", "positive": "positive", "negative": "negative"}
 for i, x in enumerate(gr["mild"], 1):
-    tl = NM2L.get(x["type"], x["type"]); pol = POL[x["polarity"]]          # fix 8 Oct: names/short forms were silently dropped
+    tl = NM2L.get(x["type"], x["type"]); pol = POL[x["polarity"]]          # accept full type names as well as letters
     rows.append({"text": x["text"], "slots": slots(**{tl: pol}), "strength": {tl: "mild"},
                  "reason": "enjoyment", "seed_id": f"MILD_{i:03d}", "kind": "seed"})
-# 8 Oct: strong S/A dislikes, long multi-clause sentences, lexicon-coverage sentences
+# strong S/A dislikes, long multi-clause sentences, lexicon-coverage sentences
 for k, x in enumerate(json.load(open(f"{W}/extra_E.json")), 1):
     pre = "XDS" if k <= 30 else "LONG" if k <= 90 else "COV"
     rows.append({"text": x["text"], "slots": slots(**{t: v[0] for t, v in x["labels"].items()}),
                  "strength": {t: v[1] for t, v in x["labels"].items()}, "reason": "enjoyment",
                  "seed_id": f"{pre}_{k:03d}", "kind": "seed"})
-# 8 Oct: only "don't mind / either is fine" is a weak positive; uncertainty ("not sure", "depends") is no stance
 import re as _re
-# 9 Oct: indifference ("neutral", "no strong preference", "just okay") = don't mind (+0.2); only uncertainty is no stance
+# indifference ("neutral", "no strong preference", "just okay") = don't mind (+0.2); only uncertainty is no stance
 UNSURE = _re.compile(r"not sure|depends|dunno|\bidk\b|no idea|hard to say|unsure|never thought", _re.I)
 for r_ in rows:
     if r_.get("strength") and "dontmind" in r_["strength"].values() and UNSURE.search(r_["text"]):
@@ -93,7 +92,7 @@ for r in rows:
         got = SM.get(r.get("context", "") + " || " + r["text"], {})
         r["strength"] = {t: got.get(t, "strong") for t in T if r["slots"][t] != "neutral"}
 
-# 8 Oct: second, rule-guided strength pass is authoritative (consistent strong/mild boundary)
+# second, rule-guided strength pass overrides the first (consistent strong/mild boundary)
 SM2 = json.load(open(f"{W}/strength_map_v2.json"))
 for r in rows:
     got = SM2.get(r.get("context", "") + " || " + r["text"])
@@ -101,8 +100,8 @@ for r in rows:
         for t, v in got.items():
             if t in r["strength"] and r["strength"][t] != "dontmind": r["strength"][t] = v
 
-# 9 Oct: third-vote adjudication in the presence/strength scheme (majority of data + 2 blind readers).
-# Kept as designed: two-type activities stay two-type, and O*NET's own Career Type labels (IA_001-IA_024) stay.
+# third-vote adjudication in the presence/strength scheme (majority of data + 2 blind readers).
+# Two-type activities stay two-type, and O*NET's own Career Type labels (IA_001-IA_024) stay.
 LV = {1.0: ("positive", "strong"), 0.55: ("positive", "mild"), 0.2: ("positive", "dontmind"),
       -0.55: ("negative", "mild"), -1.0: ("negative", "strong")}
 OV = json.load(open(f"{W}/liking_override.json"))
@@ -177,7 +176,7 @@ rows = [r for r in rows if not (r["kind"] == "seed" and r["seed_id"].startswith(
 for r in rows:
     r["weight"] = 0.5 if (r["kind"] == "seed" and r["seed_id"].startswith("IA_") and "+" not in r["seed_id"]) else 1.0
     r.setdefault("context", "")
-# 9 Oct (team decision): direction + strength
+# labels: direction + strength
 #   slots    : per type positive / neutral / negative  (3-class head; confidence = softmax prob of the chosen class)
 #   strength : per non-neutral type, how much, 0..1    (sigmoid head): strong 1.0, mild 0.55, don't mind 0.2
 SV = {"strong": 1.0, "mild": 0.55, "dontmind": 0.2}
@@ -199,4 +198,4 @@ print("seeds per split", Counter(split.values()))
 pc = Counter((t, r["slots"][t]) for r in rows for t in T if r["slots"][t] != "neutral")
 print("non-neutral labels", dict(sorted(pc.items())))
 
-# profiles are built by build_profiles_v3.py (8 Oct)
+# profiles are built by build_profiles_v3.py

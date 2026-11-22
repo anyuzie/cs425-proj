@@ -72,7 +72,7 @@ class DialogueIntegrationTests(unittest.TestCase):
         self.assertEqual(self.step(reading('I enjoy teaching after all', S=(.8, .9))).action, 'CHALLENGE')
 
     def test_familiarity_probe_needs_reason_confidence_and_targeted_answer(self):
-        # manual section 7: only probe when the reason head is fairly sure it is familiarity (> 0.60)
+        # only probe when the reason head is fairly sure it is familiarity (> 0.60)
         result = self.step(reading('I studied sales', reason='familiarity', reason_conf=.6, E=(.7, 0)))
         self.assertNotEqual(result.action, 'PROBE')
         self.state = State()

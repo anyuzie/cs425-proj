@@ -1,4 +1,4 @@
-"""M0 contracts. No ranking or evidence-selection algorithms live here."""
+"""Ranking contracts. No ranking or evidence-selection algorithms live here."""
 
 from dataclasses import dataclass, field
 from math import isfinite

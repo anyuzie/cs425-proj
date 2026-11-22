@@ -1,4 +1,4 @@
-"""Frozen M4 configuration; safe to import without model dependencies."""
+"""Dense task retrieval configuration; safe to import without model dependencies."""
 
 from ..configuration import load_parameters
 

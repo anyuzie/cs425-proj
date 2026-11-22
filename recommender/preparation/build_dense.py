@@ -1,4 +1,4 @@
-"""Explicit M4 model download and immutable task-cache build; never invoked by a turn."""
+"""Explicit dense model download and immutable task-cache build; never invoked by a turn."""
 
 import argparse
 from dataclasses import asdict

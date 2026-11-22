@@ -65,7 +65,7 @@ class HistoryTests(unittest.TestCase):
             self.assertEqual([rows[0][k] for k in ("m1", "m3", "m4")],  # configs/ranking.yaml default
                              ["cosine_similarity@baseline_v1", "bm25_signed@ignore_negative_v3",
                               "occupation_dual_encoder_signed@finetuned_v2"])
-            self.assertEqual(rows[0]["fusion"], "zscore_sum@equal_v1")  # default since 9 Nov 2026
+            self.assertEqual(rows[0]["fusion"], "zscore_sum@equal_v1")
             self.assertEqual(float(rows[0]["hit_at_1"]), metrics["hit_at_1"])
             self.assertFalse(append_history(report, history=history))
             self.assertEqual(history.read_bytes(), original)

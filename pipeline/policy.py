@@ -4,7 +4,7 @@ from .interfaces import MAX_TURNS, TYPES, Action, SlotState, State
 from .repair import needs_repair
 from .task_questions import select_task
 
-PROBE_REASON_CONF = 0.60   # default for settings.probe_reason_conf (manual section 7)
+PROBE_REASON_CONF = 0.60   # default for settings.probe_reason_conf
 
 
 class PolicyBase:
@@ -57,7 +57,7 @@ class ManualPolicy(PolicyBase):
         if isinstance(probe_reason_conf, bool) or not isinstance(probe_reason_conf, (int, float)) \
                 or not 0 <= probe_reason_conf <= 1:
             raise ValueError("probe_reason_conf must be a number in [0, 1]")
-        self.probe_reason_conf = float(probe_reason_conf)   # manual section 7: PROBE needs reason confidence above this
+        self.probe_reason_conf = float(probe_reason_conf)   # PROBE needs reason confidence above this
         self.task_questions = task_questions
 
     def _finish(self, state: State) -> None:
@@ -71,7 +71,7 @@ class ManualPolicy(PolicyBase):
         if retry == "CHALLENGE":
             flag = next((f for f in state.flags if f.slot == slot), None)
             state.flags = [f for f in state.flags if f.slot != slot]
-            if flag:   # manual section 7: keep the newer statement at half confidence, log it as unresolved
+            if flag:   # keep the newer statement at half confidence, log it as unresolved
                 new = flag.new
                 old = state.slots.get(slot)
                 history = old.history if old else [new]   # the tracker already recorded the newer reading
@@ -107,7 +107,7 @@ class ManualPolicy(PolicyBase):
                 payload = {**last.payload, "retry": retry, "previous_question": state.last_reply}
                 asked_meaning = bool(state.user_texts) and needs_repair(state.user_texts[-1])
                 if retry == "CLARIFY" and not asked_meaning and not last.payload.get('task'):
-                    # an unreadable answer: next phrasing (manual section 7). "What do you mean?" / "not sure"
+                    # an unreadable answer: next phrasing. "What do you mean?" / "not sure"
                     # keeps the same question and gets the concrete-example wording instead.
                     payload["clarify_index"] = last.payload.get("clarify_index", 0) + 1
                 why = ("asked what it means: same question with an example" if asked_meaning

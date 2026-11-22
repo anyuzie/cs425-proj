@@ -1,4 +1,4 @@
-"""Derive additional metrics while preserving frozen historical experiment files."""
+"""Derive additional metrics without modifying saved experiment files."""
 import hashlib
 import json
 from pathlib import Path
