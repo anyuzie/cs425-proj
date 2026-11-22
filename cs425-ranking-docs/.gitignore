@@ -1,4 +1,0 @@
-# Suggested exclusions if copied to project root
-artifacts/ranking/
-__pycache__/
-.pytest_cache/

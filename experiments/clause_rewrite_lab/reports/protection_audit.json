@@ -1,9 +1,0 @@
-{
-  "original_files_verified_unchanged": 192,
-  "changed_original_files": [],
-  "scope": "standalone lab only; no integration or existing report changes",
-  "resource_manifest_sha256": "de8d6e407c4c3e5320d71cfa36a4d23496418c42f51c98250b0fe66b89a1e82b",
-  "resource_files": 55,
-  "unit_tests": "passed; see unit_tests.txt",
-  "gpu": "NVIDIA GeForce RTX 4060, 8188 MiB, 610.88"
-}

@@ -1,5 +1,0 @@
-{
-  "operation": "recompute all ten metrics from frozen predictions using m2-v4",
-  "predictions_sha256": "11034256ee13174cb81c09efb9817ab045f087a52ca399f6955074c66a43614b",
-  "source_report": "reports/ranking/description_blocks_v1/top100"
-}
