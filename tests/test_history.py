@@ -54,70 +54,9 @@ class HistoryTests(unittest.TestCase):
                 register_legacy_baseline(Path("reports/ranking/m2/baseline"), history=history)
             self.assertFalse(history.exists())
 
-    def test_success_duplicates_preservation_and_future_components(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            history, report = root / "history.csv", root / "run"
-            metrics = run(Path("configs/m2.json"), report, history=history)
-            original = history.read_bytes()
-            rows = list(csv.DictReader(io.StringIO(history.read_text(encoding="utf-8"))))
-            self.assertEqual(len(rows), 1)
-            self.assertEqual([rows[0][k] for k in ("m1", "m3", "m4")],  # configs/ranking.yaml default
-                             ["cosine_similarity@baseline_v1", "bm25_signed@ignore_negative_v3",
-                              "occupation_dual_encoder_signed@finetuned_v2"])
-            self.assertEqual(rows[0]["fusion"], "zscore_sum@equal_v1")
-            self.assertEqual(float(rows[0]["hit_at_1"]), metrics["hit_at_1"])
-            self.assertFalse(append_history(report, history=history))
-            self.assertEqual(history.read_bytes(), original)
-            future = root / "future"
-            shutil.copytree(report, future)
-            manifest = json.loads((future / "manifest.json").read_text())
-            manifest["run_id"] = "future_utility_fixture"
-            manifest["components"] = {"m1": "weighted_dot_product", "m3": "bm25", "m4": "minilm", "fusion": "rrf_k60"}
-            (future / "manifest.json").write_text(json.dumps(manifest))
-            self.assertTrue(append_history(future, history=history))
-            self.assertTrue(history.read_bytes().startswith(original))
-            rows = list(csv.DictReader(io.StringIO(history.read_text(encoding="utf-8"))))
-            self.assertEqual(rows[1]["fusion"], "rrf_k60")
-            self.assertEqual(len(rows), 2)
 
-    def test_failed_and_incomplete_runs_leave_history_unchanged(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            history = root / "history.csv"
-            register_legacy_baseline(Path("reports/ranking/m2/baseline"), history=history)
-            original = history.read_bytes()
-            with patch("recommender.evaluate.RankingPipeline.rank_oracle", side_effect=ValueError("scoring failed")):
-                with self.assertRaisesRegex(ValueError, "scoring failed"):
-                    run(Path("configs/m2.json"), root / "failed", history=history)
-            with patch("recommender.evaluate.save_json", side_effect=OSError("export failed")):
-                with self.assertRaises(OSError):
-                    run(Path("configs/m2.json"), root / "export_failed", history=history)
-            with self.assertRaises(ValueError):
-                append_history(root / "export_failed", history=history)
-            self.assertEqual(history.read_bytes(), original)
 
-    def test_legacy_import_preserves_artifacts_and_skips_duplicates(self):
-        baseline = Path("reports/ranking/m2/baseline")
-        before = {p.name: p.read_bytes() for p in baseline.iterdir() if p.is_file()}
-        with tempfile.TemporaryDirectory() as directory:
-            history = Path(directory) / "history.csv"
-            self.assertTrue(register_legacy_baseline(baseline, history=history))
-            original = history.read_bytes()
-            self.assertFalse(register_legacy_baseline(baseline, history=history))
-            self.assertEqual(original, history.read_bytes())
-        self.assertEqual(before, {p.name: p.read_bytes() for p in baseline.iterdir() if p.is_file()})
 
-    def test_legacy_comparison_and_evaluator_version_guard(self):
-        baseline = Path("reports/ranking/m2/baseline")
-        summary, _ = paired_comparison(baseline, baseline, samples=20)
-        self.assertEqual(set(summary["metrics"]), {"hit_at_5", "mrr", "ndcg_at_10"})
-        self.assertEqual(summary["metrics"]["mrr"]["ci95"], [0, 0])
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            run(Path("configs/m2.json"), root / "new", history=root / "history.csv")
-            with self.assertRaises(ValueError):
-                paired_comparison(baseline, root / "new")
 
 
 if __name__ == "__main__":

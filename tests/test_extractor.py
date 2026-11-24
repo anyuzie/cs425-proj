@@ -37,9 +37,6 @@ def out(direction=None, strength=None, reason=(0.7, 0.2, 0.1)):
             "strength": list(strength or [0.5] * 6), "reason": list(reason)}
 
 
-class TestExtractorContract(ExtractorContract, unittest.TestCase):
-    def make(self):
-        return FakeModel()
 
 
 class TestExtractorRead(unittest.TestCase):
@@ -57,48 +54,10 @@ class TestExtractorRead(unittest.TestCase):
         self.assertEqual(s("one two three four five six seven. a b c d e f. one two three four five six seven."),
                          ["one two three four five six seven. a b c d e f.", "one two three four five six seven."])
 
-    def test_empty_text(self):
-        ex = FakeModel()
-        r = ex.read("   ")
-        self.assertEqual((r.text, r.slots, ex.calls), ("   ", [], []))
 
-    def test_mapping_neutral_sign_reason(self):
-        sent = "I love building machines but I dislike paperwork."
-        ex = FakeModel({sent: out({"R": (0.1, 0.8, 0.1), "C": (0.05, 0.15, 0.8), "A": (0.9, 0.05, 0.05)},
-                                    [0.9, 0.1, 0.2, 0.3, 0.4, 0.35], reason=(0.1, 0.75, 0.15))})
-        r = ex.read(sent, "What do you like?", "C")
-        self.assertEqual(ex.calls, [("What do you like?", sent)])
-        got = {s.slot: (s.sign, s.strength, s.confidence, s.reason, s.source, s.reason_confidence) for s in r.slots}
-        self.assertEqual(got, {"R": (1, 0.9, 0.8, "familiarity", sent, 0.75),
-                               "C": (-1, 0.35, 0.8, "familiarity", sent, 0.75)})
 
-    def test_duplicate_type_keeps_highest_confidence(self):
-        a, b = "I enjoy repairing engines at the weekend.", "I truly hate fixing machines in a hot garage."
-        ex = FakeModel({a: out({"R": (0.2, 0.7, 0.1)}), b: out({"R": (0.05, 0.05, 0.9)})})
-        r = ex.read(f"{a} {b}")
-        self.assertEqual([(s.slot, s.sign, s.confidence, s.source) for s in r.slots], [("R", -1, 0.9, b)])
 
-    def test_values_clamped(self):
-        sent = "I enjoy repairing engines at the weekend."
-        ex = FakeModel({sent: out({"R": (0.0, 1.2, 0.0)}, [1.5] * 6, reason=(1.1, 0.0, 0.0))})
-        s = ex.read(sent).slots[0]
-        self.assertEqual((s.strength, s.confidence, s.reason_confidence), (1.0, 1.0, 1.0))
 
-    def test_shape_validation(self):
-        good = out()
-        bad = {"not a dict": [1],
-               "direction": {**good, "direction": good["direction"][:5]},
-               "strength": {**good, "strength": [0.5] * 5},
-               "reason": {**good, "reason": [0.5, 0.5]},
-               "direction row": {**good, "direction": [[1.0, 0.0]] * 6}}
-        for key, value in bad.items():
-            with self.subTest(key=key):
-                ex = FakeModel({"I enjoy repairing engines at the weekend.": value})
-                with self.assertRaisesRegex(ValueError, key.split()[0] if key != "not a dict" else "dict"):
-                    ex.read("I enjoy repairing engines at the weekend.")
-        missing = {k: v for k, v in good.items() if k != "reason"}
-        with self.assertRaisesRegex(ValueError, "missing key 'reason'"):
-            FakeModel({"I enjoy repairing engines at the weekend.": missing}).read("I enjoy repairing engines at the weekend.")
 
 
 

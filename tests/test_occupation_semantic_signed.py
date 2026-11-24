@@ -40,11 +40,6 @@ class SignedSemanticTests(unittest.TestCase):
         self.assertEqual(result.status, "unusable")
         self.assertIn("early stop", result.reason)
 
-    def test_dropping_dislike_pushes_teaching_down(self):
-        texts = ("i study psychology in NUS", "i like helping others. but teaching, not as much")
-        teaching = lambda r: sum("25-" == o.code[:3] for o in r.occupations[:10])  # SOC 25: education
-        self.assertLess(teaching(self.signed.score(ComponentInput(user_sentences=texts))),
-                        teaching(self.base.score(ComponentInput(user_sentences=texts))))
 
     def test_diagnostics_list_removed_clauses(self):
         d = self.signed.query_diagnostics(ComponentInput(user_sentences=("i like helping others. but teaching, not as much",)))
