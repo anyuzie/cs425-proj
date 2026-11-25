@@ -34,6 +34,8 @@ class T5Filler(QuestionBankFiller):
         kind = getattr(action, "kind", action)
         if kind == 'ABSTAIN' and payload.get('repair'):
             return fallback
+        if kind == "ABSTAIN" and payload.get("retry") == "OPENING":
+            return fallback
         if kind in ("OPENING", "RECOMMEND"):
             return fallback
         retry = kind == "ABSTAIN"

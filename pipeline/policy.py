@@ -88,8 +88,15 @@ class ManualPolicy(PolicyBase):
 
     def _decide(self, state: State) -> Action:
         last = state.last_action
-        pending = last and last.kind in ("CLARIFY", "CHALLENGE", "PROBE", "ABSTAIN")
         latest_task = state.task_history[-1] if state.task_history else None
+        if (last and last.kind == "OPENING" and state.last_reading_empty
+                and not (latest_task and latest_task['turn'] == state.turn)):
+            # The opening reply named no interest: ask once for a concrete example (both arms alike).
+            return Action("ABSTAIN", None, "opening reply named no interest; ask once for an example",
+                          {"retry": "OPENING"})
+        # The opening retry is not a slot question: an empty answer to it moves on to CLARIFY.
+        pending = (last and last.kind in ("CLARIFY", "CHALLENGE", "PROBE", "ABSTAIN")
+                   and last.payload.get("retry") != "OPENING")
         task_only = bool(pending and last.payload.get('task') and latest_task
                          and latest_task['turn'] == state.turn and latest_task.get('preference') is not None
                          and not any(r['slot'] == last.slot for r in latest_task['readings']))

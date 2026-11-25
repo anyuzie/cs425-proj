@@ -34,8 +34,16 @@ folders exist:
 ```
 models/extractor/                        RoBERTa extractor checkpoint and tokenizer
 models/nli-probing-v2/checkpoint/        fine-tuned NLI checkpoint
-models/t5-questions-v3b/                 fine-tuned T5 question writer
+models/t5-questions-v3b/                 fine-tuned T5 question writer (the chosen model)
 artifacts/ranking/occupation_semantic_v1/  fine-tuned MiniLM encoder and occupation index
+data/work_context/onet_31_0/prepared/occupation_work_context.jsonl   O*NET work context (the index checks its hash)
+```
+
+Only needed to retrain T5 (see `training/t5/README.md`):
+
+```
+models/t5-stage6-balanced/               T5 starting checkpoint for the final fine-tune
+models/t5-small-pretrained/              pretrained T5-small, for retraining from stage 1
 ```
 
 Check that the NLI checkpoint is the right one:
@@ -90,6 +98,7 @@ python -m unittest discover -s tests
 | Contradiction NLI | `python scripts/finetune_nli.py train --data data/nli_natural_v1.jsonl --output <dir> --epochs 2 --batch-size 8 --learning-rate 1.75e-5 --seed 425 --allow-unreviewed` | `python scripts/finetune_nli.py compare --data data/nli_natural_v1.jsonl --tuned <dir>/checkpoint --output <dir2>` |
 | Semantic encoder | `python -m training.occupation_semantic prepare\|train\|index --config configs/occupation_semantic_v1.json` | `python -m training.occupation_semantic evaluate --config configs/occupation_semantic_v1.json` |
 | Ranker | no training (BM25 index is built at load time) | `python -m eval.task_retrieval_fusion` |
+| T5 question writer | `python -m training.t5.train --model models/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42` | `python -m training.t5.evaluate --model runs/t5-chosen --benchmark data/t5/benchmarks/development_432.json --decode data/t5/decode.json --output runs/t5-chosen-eval --application-suites` (details: `training/t5/README.md`) |
 | End-to-end | | `python -m eval.dialogue_fusion --probing both` (simulated students, with and without probing) |
 
 The live ranker is chosen in `configs/ranking.yaml`.
@@ -103,7 +112,7 @@ recommender/  ranking models, fusion and ranking evaluation
 static/       web chat page
 configs/      system and ranking configurations
 data/         O*NET catalogue, training data and data-building scripts
-training/     training code for the semantic encoder and classifiers
+training/     training code for the semantic encoder, classifiers and T5 (training/t5/)
 eval/         end-to-end and component evaluations
 scripts/      NLI fine-tuning and checkpoint checks
 tests/        unit and integration tests

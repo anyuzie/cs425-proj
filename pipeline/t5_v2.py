@@ -58,6 +58,8 @@ class T5V2Filler(T5Filler):
         fallback = QuestionBankFiller.fill(self,action,payload)
         if kind == 'ABSTAIN' and payload.get('repair'):
             return fallback
+        if kind == 'ABSTAIN' and payload.get('retry') == 'OPENING':
+            return fallback
         if kind in ('OPENING','RECOMMEND'):
             return fallback
         fields = self.fields(kind,payload)

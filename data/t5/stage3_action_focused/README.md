@@ -1,0 +1,1 @@
+AI-authored synthetic curriculum, not human reviewed. 432 train, 108 validation, 108 test rows. Target wording families separated; focus activities shared. No independent human generalisation claim. The real-input regression cases are not training examples.
