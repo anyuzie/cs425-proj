@@ -1,0 +1,176 @@
+{
+  "synthetic": true,
+  "human_reviewed": false,
+  "generated_groups": {
+    "R": [
+      "adjusting safety harnesses for indoor climbing sessions",
+      "restoring hand tools used in a community garden",
+      "assembling rainwater filters for small greenhouses",
+      "testing emergency lighting along warehouse evacuation routes",
+      "repairing hand-operated pumps beside rural footpaths",
+      "fitting reusable insulation panels around laboratory pipes"
+    ],
+    "I": [
+      "comparing soil acidity measurements from rooftop vegetable plots",
+      "investigating why rechargeable batteries lose capacity in cold weather",
+      "analysing microscopic fibres collected from river sediment",
+      "modelling how shade changes temperatures around urban bus stops",
+      "examining how night lighting affects moth movement",
+      "comparing dissolved oxygen readings in fish breeding tanks"
+    ],
+    "A": [
+      "designing tactile museum maps for visitors with limited vision",
+      "composing short musical cues for an interactive history exhibit",
+      "illustrating instructions for a community seed library",
+      "creating stage backdrops from donated cardboard packaging",
+      "arranging photographs for a neighbourhood oral history exhibition",
+      "designing ceramic patterns inspired by coastal rock formations"
+    ],
+    "S": [
+      "guiding older adults through accessible ticket booking systems",
+      "helping new volunteers practise respectful telephone support",
+      "coaching school leavers through their first workplace presentation",
+      "teaching recently arrived families how to use a local library",
+      "supporting carers who are learning basic relaxation exercises",
+      "helping neighbours practise emergency communication routines"
+    ],
+    "E": [
+      "negotiating shared delivery schedules with independent shop owners",
+      "presenting a reusable container service to cafe managers",
+      "coordinating sponsorship pitches for a student robotics festival",
+      "persuading venue owners to host a travelling science exhibition",
+      "selling subscriptions to a community bicycle repair service",
+      "organising a fundraising campaign for an accessible playground"
+    ],
+    "C": [
+      "reconciling equipment hire invoices against signed return forms",
+      "checking archived consent records for missing renewal dates",
+      "organising delivery documents for temperature sensitive medicines",
+      "maintaining version records for translated instruction booklets",
+      "verifying scholarship payment records against approval letters",
+      "updating inspection schedules for shared workshop equipment"
+    ]
+  },
+  "group_split": {
+    "train_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "validation_indices": [
+      4
+    ],
+    "audit_indices": [
+      5
+    ]
+  },
+  "train_target_families": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "heldout_target_families": [
+    4,
+    5
+  ],
+  "limitations": [
+    "Schema, global RIASEC focus labels and legacy wording families are shared.",
+    "Original replay has repeated inputs with alternate targets; those are retained.",
+    "Template-family separation applies to new target families, not the full original replay lineage.",
+    "No embedding-based semantic leakage detector or human review was used."
+  ],
+  "variants": {
+    "full_replay": {
+      "rows": {
+        "train": 1512,
+        "validation": 378,
+        "audit": 162,
+        "development": 432
+      },
+      "new_rows": 648,
+      "replay_rows": 864,
+      "canonical_overlaps": {
+        "train/validation": 0,
+        "train/audit": 0,
+        "train/development": 0,
+        "validation/audit": 0,
+        "validation/development": 0,
+        "audit/development": 0
+      },
+      "exact_overlaps": {
+        "train/validation": 0,
+        "train/audit": 0,
+        "train/development": 0,
+        "validation/audit": 0,
+        "validation/development": 0,
+        "audit/development": 0
+      },
+      "unique_inputs": {
+        "train": 1290,
+        "validation": 378,
+        "audit": 162,
+        "development": 432
+      },
+      "sha256": {
+        "audit.jsonl": "a11de8e9d38acea33ade86f5f7c417c9a68fb9ad41a5f4cc98b36c84d6aa9329",
+        "train.jsonl": "6ede1c0927783ae09cd864a53f23a8e3e28a7985c34a18eb50c9f9880a8d7586",
+        "validation.jsonl": "bf3c01f6d361379111a3ef8cecb1d48bb6b539d53c9ebae64f8dc316b651473f"
+      },
+      "action_retry_counts": {
+        "CLARIFY/False": 252,
+        "CLARIFY/True": 324,
+        "PROBE/False": 252,
+        "PROBE/True": 324,
+        "CHALLENGE/False": 144,
+        "CHALLENGE/True": 216
+      }
+    },
+    "lower_replay": {
+      "rows": {
+        "train": 864,
+        "validation": 378,
+        "audit": 162,
+        "development": 432
+      },
+      "new_rows": 648,
+      "replay_rows": 216,
+      "canonical_overlaps": {
+        "train/validation": 0,
+        "train/audit": 0,
+        "train/development": 0,
+        "validation/audit": 0,
+        "validation/development": 0,
+        "audit/development": 0
+      },
+      "exact_overlaps": {
+        "train/validation": 0,
+        "train/audit": 0,
+        "train/development": 0,
+        "validation/audit": 0,
+        "validation/development": 0,
+        "audit/development": 0
+      },
+      "unique_inputs": {
+        "train": 813,
+        "validation": 378,
+        "audit": 162,
+        "development": 432
+      },
+      "sha256": {
+        "audit.jsonl": "a11de8e9d38acea33ade86f5f7c417c9a68fb9ad41a5f4cc98b36c84d6aa9329",
+        "train.jsonl": "fd9558807ecb62ed5559a1c0de55816863bcb1c5d26bd9c51b5fe93f0ea67a4e",
+        "validation.jsonl": "bf3c01f6d361379111a3ef8cecb1d48bb6b539d53c9ebae64f8dc316b651473f"
+      },
+      "action_retry_counts": {
+        "CLARIFY/False": 108,
+        "CLARIFY/True": 180,
+        "PROBE/False": 108,
+        "PROBE/True": 180,
+        "CHALLENGE/False": 108,
+        "CHALLENGE/True": 180
+      }
+    }
+  }
+}

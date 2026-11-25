@@ -1,3 +1,7 @@
+OPENING_RETRY = ('That is okay. Think of a class, hobby or everyday task. '
+                 'What did you enjoy or dislike about it?')
+
+
 def _pick(options: list[str], index: int) -> str:
     return options[index % len(options)]
 
@@ -17,6 +21,8 @@ def fill(action, payload: dict, question_bank: dict, type_names: dict[str, str])
     index = payload.get("index", 0)
     if kind == "OPENING":
         return _pick(question_bank["OPENING"], index)
+    if kind == "ABSTAIN" and effective == "OPENING":
+        return OPENING_RETRY
     if kind == "ABSTAIN" and payload.get("retry") in ("CHALLENGE", "PROBE"):
         return f"{_pick(question_bank['ABSTAIN'], index)} {fill(payload['retry'], payload, question_bank, type_names)}"
     if kind in ("CLARIFY", "ABSTAIN"):
