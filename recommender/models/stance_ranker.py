@@ -1,4 +1,4 @@
-"""Independent task preference scoring; only user_sentences supplies evidence."""
+"""Task preference scoring; only user_sentences supplies evidence."""
 
 from copy import deepcopy
 from dataclasses import asdict

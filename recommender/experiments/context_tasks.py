@@ -1,4 +1,4 @@
-"""Run six frozen text treatments and append to the existing comparison CSV."""
+"""Run six text treatments and append to the existing comparison CSV."""
 import argparse
 import csv
 from dataclasses import asdict
@@ -25,7 +25,7 @@ def main():
         reader = csv.DictReader(handle)
         fields, old = reader.fieldnames, list(reader)
     labels = {p["id"]: p for p in map(json.loads, Path("data/dev_profiles.jsonl").read_text().splitlines())}
-    # Re-evaluate frozen predictions with today's evaluator, without giving labels
+    # Re-evaluate saved predictions with the current evaluator, without giving labels
     # to the scorer. Require matching raw inputs before historical comparisons.
     for row in old:
         if row["experiment"].endswith("__context_tasks_v1"):
@@ -50,7 +50,7 @@ def main():
         control.mkdir(parents=True, exist_ok=False)
         save_json(control / "per_profile.json", profiles)
         save_json(control / "metrics.json", metrics)
-        # Explicitly identify this as a re-evaluation, not a new encoder run.
+        # Mark this as a re-evaluation, not a new encoder run.
         save_json(control / "provenance.json", {"source_report": row["report_path"],
             "predictions_sha256": digest(directory / "predictions.jsonl"),
             "operation": "recompute all ten metrics from frozen predictions using m2-v4"})
@@ -91,7 +91,7 @@ def main():
                "dataset_fingerprint": dataset_fingerprint(manifest["dataset_sha256"]), "report_path": report.as_posix()}
         new_rows.append(row)
         print(json.dumps({"experiment": name, **{key: metrics[key] for key in METRICS}}), flush=True)
-    # Preserve every byte of existing rows; append only after all runs succeed.
+    # Leave existing rows untouched; append only after all runs succeed.
     if csv_path.read_bytes() != original:
         raise ValueError("CSV changed during experiment")
     (root / "semantic_experiments_consolidated.before.csv").write_bytes(original)

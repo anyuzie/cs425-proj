@@ -50,12 +50,12 @@ def atomic_write(path, content):
 
 def evaluate_and_promote(evaluation, candidate, active, *, policy="hit5_no_regression",
                          output=None, history=DEFAULT_HISTORY):
-    """Re-evaluate both selections under today's conditions; never edit variants.
+    """Re-evaluate both selections under the same conditions; never edit variants.
 
-    The active file is a mutable JSON deployment selection, never a baseline preset.
-    An exclusive lock covers the complete round. Original bytes, reports and the
-    decision are durable before atomic replacement. The decision records intended
-    bytes/hash so an interrupted publication can be audited against the active file.
+    The active file is a mutable JSON deployment selection, not a baseline preset.
+    An exclusive lock covers the whole round, and the reports and decision are
+    written before the active file is atomically replaced. The decision records
+    the intended bytes/hash so an interrupted publish can be checked later.
     """
     active, candidate = Path(active), Path(candidate)
     if active.suffix.lower() != ".json":

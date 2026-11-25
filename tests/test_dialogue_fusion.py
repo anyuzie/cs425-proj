@@ -39,7 +39,7 @@ class MetricTests(unittest.TestCase):
         self.assertEqual(m["acceptable_ranks"], {"g": 7, "c": 3})
         self.assertAlmostEqual(acceptable_metrics(["x", "a"], ["x", "a"])["ndcg_at_10"], 1.0)
 
-    def test_rank_seven_is_a_hit_at_ten_but_not_at_five(self):  # the §12.1 case that motivated MRR
+    def test_rank_seven_is_a_hit_at_ten_but_not_at_five(self):  # the case that motivated MRR
         m = acceptable_metrics([str(i) for i in range(1, 20)], ["7"])
         self.assertEqual((m["hit_at_5"], m["hit_at_10"]), (0, 1))
         self.assertAlmostEqual(m["mrr"], 1 / 7)

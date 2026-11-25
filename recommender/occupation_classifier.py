@@ -68,7 +68,7 @@ class OccupationAnnotations:
             clauses, seen = [], set()
             for field, text in self.sources.get(code, []):
                 # Occupation prose keeps coordinated actions/shared arguments
-                # together. User-utterance splitting remains completely unchanged.
+                # together. User-utterance splitting is separate.
                 if getattr(self.splitter, 'nlp', None) is not None:
                     spans = []
                     for sentence in self.splitter.nlp(text).sents:

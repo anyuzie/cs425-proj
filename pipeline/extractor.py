@@ -1,26 +1,8 @@
-"""STEP 1 · Preference extractor (DeBERTa).  STATUS: waiting for your model.
+"""Preference extractor: a fine-tuned RoBERTa-base model that reads RIASEC stances sentence by sentence.
 
-Model: microsoft/deberta-v3-base, fine-tuned on data/extractor.jsonl (manual section 4).
-Switch: already on ("extractor": "deberta" in configs/system.json). The server will not start until you finish.
-
-How to integrate your model (you fill ONLY load() and predict(); read() below is ours):
-  1. Put your checkpoint in models/extractor/ (gitignored). Share it via Drive, with a hash in the folder name.
-  2. Create pipeline/extractor_model.py with your model class (the 3-head DeBERTa: direction, strength, reason).
-  3. Fill in load() and predict() below, then delete their `raise NotImplementedError` lines.
-  4. pip install -r requirements-models.txt
-  5. .venv/bin/python -m unittest discover -s tests
-  6. Start the server (.venv/bin/uvicorn app.server:app) and open /api/health: "extractor" must read "deberta".
-
-Do not import torch or transformers at the top of this file; import them inside load() and predict().
+Loads the checkpoint (config, tokenizer, weights) from models/extractor/ or paths.extractor_checkpoint;
+it must output 45 named logits (direction 18, reason 3, strength 24).
 """
-
-# Original teammate hand-off instructions above are preserved verbatim from main.
-# Current adapter: load()/predict() are implemented using Hugging Face AutoModel,
-# so a separate extractor_model.py is not required by this implementation.
-# Supply the complete local checkpoint (config, tokenizer and trained weights),
-# directly in models/extractor/ or at configs/system.json paths.extractor_checkpoint.
-# The adapter expects 45 semantically labelled logits and config.extractor calibration.
-# See reports/ranking/m5/EXTRACTOR_INTEGRATION.md for implementation and validation status.
 
 import json
 import math
@@ -41,7 +23,7 @@ import torch.nn as nn
 from transformers import AutoModel
 
 _SEGMENT = re.compile(r"[^.!?\n]+[.!?]*")
-JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before (manual revision 33)
+JOIN_MAX_WORDS = 6   # pieces of six words or fewer are joined to the sentence before
 
 
 def _clamp(x: float) -> float:
@@ -96,15 +78,12 @@ class Extractor:
         
         self.load(Path(checkpoint_dir))
         
-    ###################################################################
-    # Load Tokenizer, Model
-    ###################################################################
     def load(self, checkpoint_dir: Path) -> None:
         if not checkpoint_dir.is_dir() or not (checkpoint_dir / "config.json").is_file():
             raise FileNotFoundError(
                 f"Extractor checkpoint missing at {checkpoint_dir.resolve()}. "
                 "Place the trained config.json, tokenizer files and weights directly in this folder, "
-                "or set paths.extractor_checkpoint in the system config (docs/INTEGRATION.md).")
+                "or set paths.extractor_checkpoint in the system config (see README.md).")
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.use_bf16 = self.device.type == "cuda" and torch.cuda.is_bf16_supported()
@@ -150,16 +129,11 @@ class Extractor:
                                  for name in ("dontmind", "mild", "strong")]
 
     def predict(self, context: str | None, sentence: str) -> dict:
-        """Run the trained model on ONE sentence and return exactly:
+        """Run the model on one sentence (paired with the question as context, if given).
 
-            {"direction": [[p_neutral, p_positive, p_negative], ...],   # 6 lists of 3, types in R I A S E C order,
-                                                                       # class order = data/labels.json direction_index
-             "strength":  [s, ...],                                    # 6 mapped strengths 0..1, same type order
-             "reason":    [p_enjoyment, p_familiarity, p_neither]}     # 3 probabilities, labels.json reason_index order
-
-        Probabilities must already be softmaxed. Return plain Python floats/lists (tensor.tolist()).
-        Input: tokenizer(context, sentence) when context is not None, else tokenizer(sentence);
-        max_length=128, truncation=True. Wrap the forward pass in torch.no_grad().
+        Returns {"direction": 6 lists of [p_neutral, p_positive, p_negative] in R I A S E C order,
+        "strength": 6 strengths in 0..1 (0 where the direction is neutral),
+        "reason": [p_enjoyment, p_familiarity, p_neither]}, as plain Python floats.
         """
         import torch
 
@@ -193,11 +167,9 @@ class Extractor:
 
         return final_dict
 
-    # ---- below: ours, do not edit ----
-
     @staticmethod
     def sentences(text: str) -> list[str]:
-        """Split on . ! ? and newlines; pieces of six words or fewer join the sentence before. Verbatim spans."""
+        """Split on . ! ? and newlines; pieces of six words or fewer join the sentence before."""
         spans: list[list[int]] = []
         for m in _SEGMENT.finditer(text):
             if not m.group().strip(" \t\r.!?"):

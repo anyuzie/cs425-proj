@@ -1,4 +1,4 @@
-"""A1-A3 + activities: O*NET 31.0 -> occupations.csv, tasks.csv, activities.jsonl"""
+"""O*NET 31.0 -> occupations.csv, tasks.csv, activities.jsonl"""
 import pandas as pd, json, os
 D = "/home/claude/data/onet"; OUT = "/home/claude/data/out"; os.makedirs(OUT, exist_ok=True)
 T = ["R", "I", "A", "S", "E", "C"]
@@ -29,7 +29,7 @@ df.drop(columns=["tasks_text"]).reset_index().rename(columns={"O*NET-SOC Code": 
 tasks.rename(columns={"O*NET-SOC Code": "code"})[["code", "Title", "Task ID", "Task", "Task Type"]].to_csv(f"{OUT}/tasks.csv", index=False)
 
 # 188 activities. Career Type rows carry their type; Specific Area rows mapped to one RIASEC type
-# (LLM-assigned, to be reviewed — the 31.0 file labels these by Specific Area, not RIASEC).
+# (LLM-assigned, still to be reviewed; the 31.0 file labels these by Specific Area, not RIASEC).
 AREA = {
  "Mechanics/Electronics": "R", "Construction/Woodwork": "R", "Transportation/Machine Operation": "R",
  "Physical/Manual Labor": "R", "Protective Service": "R", "Agriculture": "R", "Nature/Outdoors": "R",

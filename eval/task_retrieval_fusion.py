@@ -1,4 +1,4 @@
-"""Single-turn task-retrieval check for the #1 fusion variants (docs/SEMANTIC_LEDGER_PLAN.md §12.3).
+"""Single-turn task-retrieval check for the fusion variants.
 
 Repeats the held-out task-retrieval protocol of `python -m training.occupation_semantic evaluate`
 (reports/ranking/occupation_semantic_v1/evaluation.json) for fusion arms only: one task sentence per
@@ -7,7 +7,7 @@ paired group bootstrap (2,000 resamples, seed 425). The control and semantic-onl
 saved run, so the comparison is on identical inputs.
 
 Formal task retrieval, not conversational career relevance. No parameter is chosen here: the
-variants are fixed from first principles, and this run only reports them.
+variants are fixed in advance and this run only reports them.
 """
 import argparse
 from datetime import datetime, timezone

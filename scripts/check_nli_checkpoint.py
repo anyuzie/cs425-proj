@@ -49,7 +49,7 @@ def main():
             print(json.dumps({"scores": scores, "threshold": threshold,
                               "confirmed": scores["contradiction"] > threshold}, indent=2))
     except (ValueError, OSError, ImportError, RuntimeError) as exc:
-        parser.exit(1, f"{exc}\nSee docs/NLI_DEPLOYMENT.md for checkpoint setup.\n")
+        parser.exit(1, f"{exc}\nSee README.md for checkpoint setup.\n")
 
 
 if __name__ == "__main__":

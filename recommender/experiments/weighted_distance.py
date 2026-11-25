@@ -1,9 +1,9 @@
-"""Confidence-weighted z-space distance versus the frozen dot product and cosine (Tier 2).
+"""Confidence-weighted z-space distance versus the dot product and cosine.
 
-Usage (repository root), after ``python scripts/replay_extractor_sessions.py``:
+Usage (repository root):
     python -m recommender.experiments.weighted_distance
 
-Fixed before running: ``weighted_distance@kappa3_v1`` scores
+``weighted_distance@kappa3_v1`` scores
 -sum_t w_t (3 u_t - z_t)^2 over observed types, using the tracker's slot weight
 w_t. Cosine discards magnitude (one observed type ties every same-sign
 occupation at 1) and the dot product rewards a large z on one type regardless

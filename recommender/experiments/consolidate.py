@@ -1,4 +1,4 @@
-"""Export comparable semantic experiment metrics without changing frozen runs."""
+"""Export comparable semantic experiment metrics without changing saved runs."""
 import argparse
 import csv
 import json

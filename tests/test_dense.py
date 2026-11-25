@@ -1,4 +1,4 @@
-"""M4 aggregation/cache correctness; fake embeddings only in isolated fixtures."""
+"""Dense aggregation/cache correctness; fake embeddings only in isolated fixtures."""
 
 from copy import deepcopy
 import csv

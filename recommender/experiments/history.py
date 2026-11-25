@@ -39,7 +39,7 @@ def append_history(report: Path, *, history: Path = DEFAULT_HISTORY,
                    description: str | None = None) -> bool:
     """Register a complete run; return False for an already registered run ID.
 
-    Future rankers use manifest.components with m1/m3/m4/fusion algorithm IDs.
+    Rankers list their algorithm IDs in manifest.components (m1/m3/m4/fusion).
     Optional overrides support verified imports of older saved runs.
     A sibling exclusive lock serializes writers; a busy registry raises an error.
     """

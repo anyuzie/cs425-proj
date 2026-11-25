@@ -1,4 +1,4 @@
-"""Assemble v4 profiles (18 Oct): new dev D061-D120 (appended to dev_profiles.jsonl) and test v4 V001-V120 (profiles_v4.jsonl).
+"""Assemble v4 profiles: new dev D061-D120 (appended to dev_profiles.jsonl) and test v4 V001-V120 (profiles_v4.jsonl).
 Also adds `pattern` and `nearest_by_profile` to every profile in all three files."""
 import json, csv, os, glob, numpy as np
 D = "/home/claude/data"; W = f"{D}/work/v4"; OUT = f"{D}/out"

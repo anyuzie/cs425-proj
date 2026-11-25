@@ -1,4 +1,4 @@
-"""Independent M1 confidence-weighted distance in occupation z-space.
+"""Confidence-weighted distance in occupation z-space.
 
 score(occ) = -sum_{t in observed} w_t * (kappa * u_t - z_t)^2
 

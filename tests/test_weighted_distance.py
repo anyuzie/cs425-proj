@@ -1,6 +1,4 @@
-"""weighted_distance@kappa3_v1 scorer and slot-weight threading through the ranking pipeline (ranking only).
-
-Tracker reason, coverage-gate and terminal tests live with those (separately committed) changes."""
+"""weighted_distance@kappa3_v1 scorer and slot-weight threading through the ranking pipeline (ranking only)."""
 from pathlib import Path
 import unittest
 

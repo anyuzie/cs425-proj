@@ -1,4 +1,4 @@
-"""Backward-compatible M1-only runtime and oracle entry point."""
+"""Structured (RIASEC-only) runtime and oracle entry point."""
 
 from pathlib import Path
 

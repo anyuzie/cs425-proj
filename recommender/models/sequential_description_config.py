@@ -1,4 +1,4 @@
-"""Frozen ordered stage selection; each block is formed from the prior output."""
+"""Ordered stage selection; each block is formed from the prior output."""
 from copy import deepcopy
 
 from .description_reranker import VARIANTS

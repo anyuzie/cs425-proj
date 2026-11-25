@@ -1,6 +1,6 @@
-"""Freeze the M5 ranking boundary using explicitly mocked upstream conversation fixtures.
+"""Freeze the ranking baseline using mocked upstream conversation fixtures.
 
-Run from repository root. Never substitutes these fixtures for actual-tracker evidence.
+Run from repository root. These fixtures are not evidence about the real tracker.
 """
 import argparse
 from datetime import datetime, timezone

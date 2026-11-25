@@ -1,19 +1,18 @@
-"""Build data/eval/fusion_personas_v1.jsonl: scripted personas for the #0 fusion evaluation.
+"""Build data/eval/fusion_personas_v1.jsonl: scripted personas for the fusion evaluation.
 
-See docs/SEMANTIC_LEDGER_PLAN.md §12.3 (#0) and §12.4. EVALUATION ONLY: never tune any
-component, weight or threshold on these personas.
+Evaluation only: never tune any component, weight or threshold on these personas.
 
-Authored by hand (drafted and team-reviewed 9 November 2026): opening text, hidden RIASEC
-slots, per-slot resolutions, field, intended conflict and the acceptable-occupation list.
+Written by hand: opening text, hidden RIASEC slots, per-slot resolutions, field, intended
+conflict and the acceptable-occupation list.
 Computed here: target (first acceptable code), target_profile, O*NET related lists, and the
 observed conflict label.
 
-Conflict label (objective, not authored): rank of the best acceptable occupation under oracle
+Conflict label (computed, not authored): rank of the best acceptable occupation under oracle
 cosine (hidden_slots, all six types observed, full eligible pool). conflict = rank > CONFLICT_RANK.
 A persona whose intent and observed label disagree is reported, not silently relabelled.
 
-Persona text was written without looking at any M4 (semantic) ranking, so the set does not
-favour the semantic component by construction.
+Persona text was written without looking at any semantic ranking, so the set does not
+favour the semantic component.
 
 Usage: python data/scripts/build_fusion_personas_v1.py [--check]
 """
@@ -45,7 +44,7 @@ def slots(R, I, A, S, E, C):
 
 # fmt: off
 PERSONAS = [
-    # ---------------- intended conflict: stated topic and RIASEC profile point different ways ----------------
+    # intended conflict: stated topic and RIASEC profile point different ways
     dict(id="F01", field="music", conflict_intended=True, style="full",
          text="I've been writing music since I was twelve, mostly arranging pieces for small string groups and lately scoring short student films. The part I love is sitting with a score and working out why a harmony works, I could analyse that for hours. I'm not a performer and crowds drain me, and I hate having to sell myself. I want a career where music is the centre of it.",
          hidden=slots(-0.9, 1.4, 1.6, -0.9, -1.2, 0.2),
@@ -117,7 +116,7 @@ PERSONAS = [
          res=dict(R=UNSURE, I="Breaking down match footage and stats is what I love.", A="I'm not really a creative person.", S="I'm not a people person.", E=UNSURE, C="Building spreadsheets of player stats is fun for me."),
          acceptable=["27-2022.00"]),
 
-    # ---------------- intended agree: stated topic and RIASEC profile point the same way ----------------
+    # intended agree: stated topic and RIASEC profile point the same way
     dict(id="F15", field="nursing", conflict_intended=False, style="full",
          text="I want to be a nurse. I looked after my grandmother through her illness and found I liked learning the medical side, why each medicine was given and what to watch for. I stay calm in a crisis and I'm good at keeping track of details. Art and performing aren't me.",
          hidden=slots(-0.4, 0.9, -0.5, 1.7, -0.2, 0.3),

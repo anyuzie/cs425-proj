@@ -1,4 +1,4 @@
-"""M4 exact semantic task retrieval; model/cache loaded once, never rebuilt per turn."""
+"""Exact semantic task retrieval; model/cache loaded once, never rebuilt per turn."""
 
 from dataclasses import dataclass
 from importlib.metadata import version

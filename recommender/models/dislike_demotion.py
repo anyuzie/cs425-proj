@@ -1,4 +1,4 @@
-"""D2 (docs/LEXICAL_MATCHING_PLAN.md): post-fusion dislike stage.
+"""Post-fusion dislike stage.
 
 Runs after fusion, on the final ranking, so a dislike is enforced whatever the components scored.
 Every clause routed ``negative`` (routing v3, shared with ``bm25_signed@ignore_negative_v3`` and
@@ -13,15 +13,14 @@ matches a target by
 Matched occupations move below every non-matched occupation, keeping their relative order
 (``placement: after_all_non_matched``); nothing is removed. With no target the ranking is unchanged.
 
-v2 variants (owner review, 9 November 2026: "mainly reduce the scoring; remove only if the phrasing
-is very strongly negative") grade each dislike by its wording:
+v2 variants grade each dislike by its wording:
 - ``strong`` (hate, never, can't stand, not for me, don't want, anything but, just not, except ...):
   matched jobs move below every other job, as in v1;
 - ``mild`` (not as much, not really, not a fan, rather not, don't care much ...; also the default
   when neither pattern matches): the job's fused score drops by ``mild_penalty_sd`` standard
   deviations of this query's fused scores, then the list is re-sorted.
 A job matched by both keeps the strongest treatment.
-v3 variants: as v2 with ``mild_penalty_sd`` 1.5 instead of 1.0 (owner decision, 9 November 2026).
+v3 variants: as v2 with ``mild_penalty_sd`` 1.5 instead of 1.0.
 """
 
 from copy import deepcopy

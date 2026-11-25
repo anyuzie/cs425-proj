@@ -85,7 +85,7 @@ def default_registry() -> AlgorithmRegistry:
             'index': 'artifacts/ranking/occupation_semantic_v1/' + name + '_index'})
     from .occupation_semantic_signed import (SignedOccupationSemantic, PARAMETERS as SIGNED_SEMANTIC_PARAMETERS,
                                              PARAMETERS_V2 as SIGNED_SEMANTIC_PARAMETERS_V2)
-    registry.register_algorithm('m4', 'occupation_dual_encoder_signed', SignedOccupationSemantic)  # D1
+    registry.register_algorithm('m4', 'occupation_dual_encoder_signed', SignedOccupationSemantic)
     registry.register_variant('m4', 'occupation_dual_encoder_signed', 'finetuned_v1', SIGNED_SEMANTIC_PARAMETERS)
     registry.register_variant('m4', 'occupation_dual_encoder_signed', 'finetuned_v2', SIGNED_SEMANTIC_PARAMETERS_V2)  # routing v3
     registry.register_algorithm("m1", "weighted_dot_product", WeightedDotProduct)
@@ -101,7 +101,7 @@ def default_registry() -> AlgorithmRegistry:
     registry.register_variant("m3", "bm25", "baseline_v1", BM25_PARAMETERS)
     from .bm25_signed_ranker import (SignedBM25Ranker, IGNORE_PARAMETERS, FILTER_PARAMETERS,
                                      IGNORE_V2_PARAMETERS, FILTER_V2_PARAMETERS, IGNORE_V3_PARAMETERS)
-    registry.register_algorithm("m3", "bm25_signed", SignedBM25Ranker)  # L1, docs/LEXICAL_MATCHING_PLAN.md
+    registry.register_algorithm("m3", "bm25_signed", SignedBM25Ranker)
     registry.register_variant("m3", "bm25_signed", "ignore_negative_v1", IGNORE_PARAMETERS)
     registry.register_variant("m3", "bm25_signed", "filter_negative_v1", FILTER_PARAMETERS)
     registry.register_variant("m3", "bm25_signed", "ignore_negative_v2", IGNORE_V2_PARAMETERS)  # + apostrophe-less cues

@@ -1,4 +1,4 @@
-"""Run M0 schema audit; no ranking metrics or held-out text inspection."""
+"""Run the schema audit; no ranking metrics or held-out text inspection."""
 
 import argparse
 import hashlib

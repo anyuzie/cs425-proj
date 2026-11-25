@@ -1,11 +1,10 @@
-"""Run the four frozen sentence-to-task treatments and derive their performance measures.
+"""Run the four sentence-to-task treatments and derive their performance measures.
 
 Usage (repository root):  python -m recommender.experiments.clause_tasks
 
-Outputs go to reports/ranking/clause_tasks_v1/. The run refuses to overwrite a
-completed experiment. All ten permanent M2 metrics come from the unchanged
-evaluator; the extra diagnostics below are derived from saved per-profile
-results and never feed back into scoring.
+The run refuses to overwrite a completed experiment. The ten standard metrics
+come from the shared evaluator; the extra diagnostics below are derived from
+saved per-profile results and never feed back into scoring.
 """
 import argparse
 import csv

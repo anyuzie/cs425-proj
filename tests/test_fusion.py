@@ -84,7 +84,7 @@ class FusionVariantTests(unittest.TestCase):
         self.assertEqual(TieAwareReciprocalRankFusion().fuse(plain), ReciprocalRankFusion().fuse(plain))
 
     def test_zscore_lets_a_peaked_component_beat_a_flat_lead(self):
-        # The section 12.1 shape: flat cosine favours x, peaked semantic favours y; RRF picks the overlap.
+        # Flat cosine favours x, peaked semantic favours y; RRF picks the overlap.
         # y is mid-pool under the flat ranking (rank 13 of 43) and far ahead under the peaked one.
         filler = [f"f{i:02d}" for i in range(40)]
         flat = scored([("x", .714), ("o", .70), ("y", .60)] + [(c, .69 - i * .01) for i, c in enumerate(filler)])

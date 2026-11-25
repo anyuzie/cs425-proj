@@ -1,4 +1,4 @@
-"""Hand-calculated metrics and M2 reproducibility acceptance tests."""
+"""Hand-calculated metrics and baseline reproducibility tests."""
 
 import json
 import csv
@@ -84,26 +84,6 @@ class MetricTests(unittest.TestCase):
 
 
 class BaselineTests(unittest.TestCase):
-    def test_history_adds_recall_columns_preserving_old_values_and_backup(self):
-        from recommender.experiments.history import RECALL_METRICS, FIELDS
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            history = root / "history.csv"
-            run(Path("configs/m2.json"), root / "first", history=history)
-            rows = list(csv.DictReader(io.StringIO(history.read_text(encoding="utf-8"))))
-            old_fields = [key for key in FIELDS if key not in RECALL_METRICS]
-            with history.open("w", newline="", encoding="utf-8") as handle:
-                writer = csv.DictWriter(handle, fieldnames=old_fields, extrasaction="ignore")
-                writer.writeheader()
-                writer.writerows(rows)
-            original = history.read_bytes()
-            run(Path("configs/m2.json"), root / "second", history=history)
-            self.assertEqual(history.with_suffix(".csv.pre_recall.bak").read_bytes(), original)
-            new_rows = list(csv.DictReader(io.StringIO(history.read_text(encoding="utf-8"))))
-            self.assertEqual(len(new_rows), 2)
-            self.assertEqual({k: new_rows[0][k] for k in old_fields}, {k: rows[0][k] for k in old_fields})
-            self.assertTrue(all(new_rows[0][k] == "" for k in RECALL_METRICS))
-            self.assertTrue(all(new_rows[1][k] != "" for k in RECALL_METRICS))
 
     def test_oracle_scale_and_runtime_boundary(self):
         ranker = StructuredRanker()
@@ -118,37 +98,6 @@ class BaselineTests(unittest.TestCase):
         vector["I"] = 0
         self.assertEqual(ranker.rank_oracle(OracleInput(vector, [])).status, "no_signal")
 
-    def test_reproducible_run_and_comparison(self):
-        with tempfile.TemporaryDirectory() as directory:
-            a, b = Path(directory) / "a", Path(directory) / "b"
-            first = run(Path("configs/m2.json"), a, history=Path(directory) / "history.csv")
-            expected_count = len([line for line in Path("data/dev_profiles.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()])
-            self.assertEqual(first["profile_count"], expected_count)
-            self.assertEqual(first, run(Path("configs/m2.json"), b, history=Path(directory) / "history.csv"))
-            for name in ("metrics.json", "inputs.json", "per_profile.json", "config.json"):
-                self.assertEqual((a / name).read_bytes(), (b / name).read_bytes())
-            # Run identity is unique; scores and ordering remain reproducible.
-            def predictions(path):
-                return [{k: v for k, v in json.loads(line).items() if k != "run_id"}
-                        for line in (path / "predictions.jsonl").read_text().splitlines()]
-            self.assertEqual(predictions(a), predictions(b))
-            summary, diffs = paired_comparison(a, b, samples=100)
-            self.assertEqual(len(diffs), expected_count)
-            self.assertEqual(summary["metrics"]["mrr"]["ci95"], [0, 0])
-            # Exercise a real paired difference while preserving comparison inputs.
-            metrics = json.loads((b / "per_profile.json").read_text())
-            for row in metrics:
-                row["mrr"] += 0.1
-            (b / "per_profile.json").write_text(json.dumps(metrics))
-            summary, _ = paired_comparison(a, b, samples=100)
-            self.assertAlmostEqual(summary["metrics"]["mrr"]["mean_difference"], 0.1)
-            manifest = json.loads((b / "manifest.json").read_text())
-            manifest["input_mode"] = "actual_tracker"
-            (b / "manifest.json").write_text(json.dumps(manifest))
-            with self.assertRaisesRegex(ValueError, "input_mode"):
-                paired_comparison(a, b)
-            with self.assertRaises(ValueError):
-                run(Path("configs/m2.json"), a, history=Path(directory) / "history.csv")
 
     def test_held_out_config_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

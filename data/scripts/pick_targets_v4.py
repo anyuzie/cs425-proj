@@ -1,4 +1,4 @@
-"""v4 profiles (18 Oct): balanced by the STUDENT's top z-type (hidden_slots), built around six patterns.
+"""v4 profiles: balanced by the STUDENT's top z-type (hidden_slots), built around six patterns.
 - dev: +60 students (D061-D120) so dev reaches 20 per top type; test v4: 120 new students (V001-V120), 20 per top type.
 - Target = a degree-level job (Job Zone 4-5) where the student's top type is in the job's top 3 z-scores and z >= 0.3.
   No degree-level job has Realistic as its top z-score, so R-led students get the most Realistic degree jobs (engineers etc.).

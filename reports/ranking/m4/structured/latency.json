@@ -1,7 +1,0 @@
-{
-  "load_seconds": 0.041150900011416525,
-  "method": "one rank call per development profile; nearest-rank p95; excludes metrics/export",
-  "preloaded_rank_median_seconds": 0.0013095500180497766,
-  "preloaded_rank_p95_seconds": 0.0015405000012833625,
-  "sample_count": 60
-}

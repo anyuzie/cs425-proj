@@ -1,4 +1,4 @@
-"""Stage A profile policies: frozen transforms, pipeline wiring and evaluator guards."""
+"""Profile policies: frozen transforms, pipeline wiring and evaluator guards."""
 from dataclasses import asdict
 from unittest import TestCase
 

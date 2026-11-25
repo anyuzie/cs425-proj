@@ -1,4 +1,4 @@
-"""Interface contract mixins. Subclass one with your own make() (see docs/INTEGRATION.md):
+"""Interface contract mixins. Subclass one with your own make():
 
     class TestMyExtractor(ExtractorContract, unittest.TestCase):
         def make(self):

@@ -542,7 +542,7 @@
     els.rawCard.hidden = !semantic;
     els.rawPre.textContent = semantic ? JSON.stringify(semantic, null, 2) : '';
 
-    // occupation map (SEMANTIC_LEDGER_PLAN section 10)
+    // occupation map
     mapView.rows = rankingRows;
     mapView.top5 = trace.top5 || [];
     mapView.fresh = !first;
@@ -633,7 +633,7 @@
     return (prev == null || now == null) ? null : Math.log(prev) - Math.log(now);  // > 0 means it rose
   }
 
-  // Section 10.3 encoding; thresholds are provisional.
+  // Rank-change category for each map point; thresholds are provisional.
   function category(i, snap, prev) {
     var r = snap.fused[i], top = r != null && r <= 10;
     if (!prev) return { top: top, kind: 'flat', d: 0 };

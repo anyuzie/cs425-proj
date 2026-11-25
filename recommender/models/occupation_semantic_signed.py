@@ -1,4 +1,4 @@
-"""D1 (docs/LEXICAL_MATCHING_PLAN.md): semantic retrieval without the user's negative clauses.
+"""Semantic retrieval without the user's negative clauses.
 
 ``occupation_dual_encoder_signed@finetuned_v1`` uses the same fine-tuned checkpoint and index as
 ``occupation_dual_encoder@finetuned_v1``, and routes clauses exactly like
@@ -8,8 +8,8 @@ and ranking. "i like helping others. but teaching, not as much" is encoded as
 "i like helping others. but".
 
 Early stop: with no positive or neutral clause the component is ``unusable``. It wraps
-``OccupationSemantic`` and never edits ``recommender/occupation_semantic.py`` (its bytes are part
-of the index identity).
+``OccupationSemantic`` rather than changing it, because ``occupation_semantic.py`` is hashed into
+the index identity.
 """
 
 from copy import deepcopy

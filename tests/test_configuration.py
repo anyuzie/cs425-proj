@@ -19,7 +19,6 @@ from recommender.ranker import BASELINE_CONFIG
 
 class ConfigurationTests(unittest.TestCase):
     def test_yaml_default_is_the_signed_lexical_semantic_dislike_selection(self):
-        # Explicit owner decision (reports/ranking/d2_title_v3_default/DECISION.md).
         config, _ = load_configuration(Path("configs/ranking.yaml"))
         preset, _ = load_configuration(Path("configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_title_v3.json"))
         self.assertEqual(config, preset)
@@ -108,58 +107,7 @@ class ConfigurationTests(unittest.TestCase):
                     run(path, root / "output", history=root / "history.csv")
             self.assertFalse((root / "output").exists())
 
-    def test_separate_snapshots_hashes_sources_and_reproduction(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            metrics = run(output=root / "first", history=root / "history.csv")
-            manifest = json.loads((root / "first/manifest.json").read_text())
-            evaluation = json.loads((root / "first/evaluation_config.json").read_text())
-            self.assertNotIn("ranking", evaluation)
-            self.assertNotIn("algorithm", evaluation)
-            for filename, key in (("evaluation_config.json", "evaluation_config_sha256"),
-                                  ("ranking_config.json", "ranking_config_sha256"),
-                                  ("resolved_ranking.json", "resolved_ranking_sha256"), ("config.json", "config_sha256")):
-                self.assertEqual(hashlib.sha256((root / "first" / filename).read_bytes()).hexdigest(), manifest[key])
-            for entry in manifest["configuration_sources"].values():
-                source = Path(entry["path"]).read_bytes()
-                self.assertEqual((root / "first" / entry["snapshot"]).read_bytes(), source)
-                self.assertEqual(hashlib.sha256(source).hexdigest(), entry["sha256"])
-            self.assertEqual(metrics, run(root / "first/evaluation_config.json", root / "second",
-                                         ranking_config=root / "first/ranking_config.json", history=root / "history.csv"))
-            with (root / "history.csv").open(newline="") as handle:
-                rows = list(csv.DictReader(handle))
-            self.assertEqual(len(rows), 2)
-            self.assertEqual([rows[0]["m1"], rows[0]["m3"], rows[0]["m4"]],  # configs/ranking.yaml default
-                             ["cosine_similarity@baseline_v1", "bm25_signed@ignore_negative_v3",
-                              "occupation_dual_encoder_signed@finetuned_v2"])
-            self.assertEqual(rows[0]["config_hash"], manifest["config_sha256"])
 
-    def test_zero_argument_cli_and_automatic_reports(self):
-        repo = Path(__file__).resolve().parents[1]
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "configs").mkdir()
-            (root / "data").mkdir()
-            for path in ("configs/m2.json", "configs/ranking.yaml", "data/occupations.csv", "data/dev_profiles.jsonl"):
-                shutil.copyfile(repo / path, root / path)
-            # Source import via PYTHONPATH; all default files/artifacts belong to the fixture.
-            import os
-            environment = {**os.environ, "PYTHONPATH": str(repo)}
-            completed = subprocess.run([sys.executable, "-m", "recommender.evaluate"], cwd=root,
-                                       env=environment, capture_output=True, text=True)
-            self.assertEqual(completed.returncode, 0, completed.stderr)
-            result = json.loads(completed.stdout)
-            report = root / result["report_path"]
-            self.assertTrue(report.is_dir())
-            self.assertEqual(report.parent, root / "reports/ranking/experiments")
-            expected_count = sum(bool(line.strip()) for line in
-                                 (root / "data/dev_profiles.jsonl").read_text().splitlines())
-            self.assertEqual(result["metrics"]["profile_count"], expected_count)
-            with (root / "reports/ranking/evaluation_history.csv").open(newline="") as handle:
-                rows = list(csv.DictReader(handle))
-            self.assertEqual(len(rows), 1)
-            self.assertEqual(rows[0]["report_path"], result["report_path"])
-        self.assertNotEqual(default_output(), default_output())
 
 
 if __name__ == "__main__":

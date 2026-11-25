@@ -1,11 +1,11 @@
-"""Familiarity-aware profile policies (Stage A) on extractor-derived inputs.
+"""Familiarity-aware profile policies on extractor-derived inputs.
 
-Usage (repository root), after ``python scripts/build_extractor_sessions.py``:
+Usage (repository root):
     python -m recommender.experiments.familiarity_policy
 
-Fixed before running: two frozen policies from recommender/profile_policy.py
+Two policies from recommender/profile_policy.py
 (``familiarity_excluded_v1``, ``familiarity_half_v1``) are each applied in front of
-the unchanged dot product and cosine, and compared with the same scorer on the
+the dot product and cosine, and compared with the same scorer on the
 raw tracker vector. Primary metric: MRR; NDCG@10 secondary. Subgroups use hidden
 slots on the evaluation side only, to separate profiles whose familiarity slots
 are misleading (sign contradicts hidden) from those where they are genuine.

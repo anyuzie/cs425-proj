@@ -1,4 +1,4 @@
-"""M3 independent BM25 baseline over eligible prepared occupation documents."""
+"""BM25 baseline over eligible prepared occupation documents."""
 
 from ..configuration import load_parameters
 
@@ -9,7 +9,7 @@ import re
 from ..components import ComponentInput, ComponentRanking, ComponentScore
 from ..schemas import Occupation
 
-# Frozen lexical-only preprocessing. Negators are deliberately retained.
+# Lexical-only preprocessing. Negators are deliberately kept.
 STOPWORDS = tuple(sorted(set("""a an the and or but if then than as at by for from in into of on
 to with is am are was were be been being do does did doing have has had having
 i me my mine myself we us our ours ourselves you your yours yourself yourselves

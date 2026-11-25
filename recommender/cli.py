@@ -1,4 +1,4 @@
-"""Run the fixed M1 mock tracker demo without touching evaluation profiles."""
+"""Run the fixed mock tracker demo without touching evaluation profiles."""
 
 import argparse
 from dataclasses import asdict

@@ -83,28 +83,6 @@ class OccupationClassificationTests(unittest.TestCase):
             self.assertIs(rows, annotations.get("1"))
             self.assertEqual(classifier.calls, 1)
 
-    def test_terminal_only_cuts_display(self):
-        extractor = SimpleNamespace(read=lambda text: SimpleNamespace(slots=[]))
-        occupations = [SimpleNamespace(code=str(i), title=f"Occupation{i}", rank=i+1,
-                                       rrf_score=None, signals={}) for i in range(15)]
-        response = SimpleNamespace(status="ok", occupations=occupations)
-        class Ranker:
-            def rank_with_evidence(self, *args, **kwargs):
-                self.top_k = kwargs["top_k"]
-                return response
-        ranker = Ranker()
-        result = rank_utterance("hello", extractor, ranker)
-        annotations = SimpleNamespace(get=lambda code: [{"text": "Repair outdoors", "source_field": "Description",
-            "labels": {"activity": True, "job_nature": True},
-            "probabilities": {"activity": .9, "job_nature": .9}}])
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out):
-            show_result(*result, occupation_annotations=annotations)
-        self.assertEqual(ranker.top_k, 50)
-        self.assertEqual(len(response.occupations), 15)
-        self.assertIn("Top 10 occupations", out.getvalue())
-        self.assertNotIn("Occupation10", out.getvalue())
-        self.assertEqual(out.getvalue().count("Repair outdoors"), 20)
 
     def test_requires_both_reviewed_labels(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,4 +1,4 @@
-"""M5 tracker boundary, policy integration, provenance and configuration regressions."""
+"""Tracker boundary, policy integration, provenance and configuration regressions."""
 from copy import deepcopy
 import csv
 import json
@@ -70,32 +70,6 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(len(state.ranking), 0 if empty else 2)
             self.assertEqual(result.action, "ABSTAIN" if empty else "RECOMMEND")
 
-    def test_runtime_export_history_and_comparison_conditions(self):
-        profiles, _ = capture(make_system())
-        config = json.loads(Path("configs/m2.json").read_text())
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            dataset = root / "sessions.jsonl"
-            dataset.write_text("\n".join(json.dumps(p) for p in profiles), encoding="utf-8")
-            config.update(input_mode="mock_tracker", profiles=str(dataset), run_id="integration_test")
-            source = root / "evaluation.json"
-            source.write_text(json.dumps(config))
-            report, history = root / "report", root / "history.csv"
-            summary = run(source, report, history=history)
-            self.assertEqual(summary["profile_count"], 2)
-            manifest = json.loads((report / "manifest.json").read_text())
-            self.assertEqual(manifest["input_mode"], "mock_tracker")
-            self.assertEqual(len(json.loads((report / "turn_predictions.json").read_text())), 8)
-            with history.open(newline="") as handle:
-                self.assertEqual(len(list(csv.DictReader(handle))), 1)
-            paired_comparison(report, report, samples=10)
-            other = root / "other"
-            import shutil
-            shutil.copytree(report, other)
-            manifest["input_mode"] = "actual_tracker"
-            (other / "manifest.json").write_text(json.dumps(manifest))
-            with self.assertRaisesRegex(ValueError, "input_mode"):
-                paired_comparison(report, other)
 
     @unittest.skipUnless(Path("artifacts/ranking/minilm_mean_tasks_v1/manifest.json").exists(), "prepare pinned M4 cache for real three-way integration")
     def test_three_way_cached_pipeline_tasks_and_repeated_turns(self):

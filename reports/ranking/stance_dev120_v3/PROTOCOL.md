@@ -1,9 +1,0 @@
-# Prespecified stance experiment v3
-
-Hypothesis: explicit task preference phrases reduce raw-text semantic matching of dislikes and background. New independent algorithm minilm_stance, variants positive_internal_v1 and stance_internal_v1, leaves minilm@mean_tasks_v1 unchanged. Runtime extraction uses only ComponentInput.user_sentences. No annotation or derived stance fields enter runtime inputs.
-
-Before evaluation: negative weight=1.0; clipped task cosine; maximum over tasks per occupation; separate arithmetic means for positive and negative phrases; missing polarity mean=0; score=positive-negative. Positive-only variant excludes negatives, with no other parameter changes. Neither polarity usable -> unusable. Missing-task occupations stay unranked. Cosine fusion is equal-weight occupation RRF k=60, with ordinary single-signal fallback. No parameter search.
-
-Required conditions: frozen dense standalone, positive-only stance, signed stance, frozen cosine standalone, cosine+signed stance. Only unchanged current data/dev_profiles.jsonl is allowed. Expected count=120; the runner refuses another count unless the user explicitly authorizes --expected-count. All conditions must have matching dataset/input fingerprints, pool, mode, metrics and evaluator. No held-out or alternative stance datasets are read. Source and configuration snapshots are retained.
-
-Stance precision/recall is unverified without independent review labels. Automatic counts and candidate review samples are descriptive only. No career suitability, novelty discovery or multi-turn progression claims. Preserve defaults and history rows. Negligible coverage or major scope/polarity errors trigger a stop rather than score tuning. Exact activity contradictions are withheld; paraphrase conflicts are a known limitation requiring review.

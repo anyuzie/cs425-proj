@@ -1,4 +1,4 @@
-"""M6 lifecycle-aware query selection and controlled ranking tests."""
+"""Lifecycle-aware query selection and controlled ranking tests."""
 
 from copy import deepcopy
 import json
