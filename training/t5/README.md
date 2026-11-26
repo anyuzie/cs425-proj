@@ -19,12 +19,12 @@ PowerShell, cmd, bash and zsh.
 | `training/t5/controlled.py` | The 112-case controlled dialogue check |
 | `data/t5/` | All training splits, the benchmarks and the decoding settings |
 
-Model folders (not in Git; copy them from the team drive into `models/`):
+Model folders (not in Git; copy the `models/` and `generator_training/` folders from the team drive into the repository root):
 
 | Folder | Role |
 |---|---|
-| `models/t5-small-pretrained/` | Pretrained T5-small, the start of stage 1 |
-| `models/t5-stage6-balanced/` | Stage 6 (balanced full replay), the starting checkpoint for model selection |
+| `generator_training/t5-small-pretrained/` | Pretrained T5-small, the start of stage 1 |
+| `generator_training/t5-stage6-balanced/` | Stage 6 (balanced full replay), the starting checkpoint for model selection |
 | `models/t5-questions-v3b/` | **The chosen model, used by the app** (`configs/system.json`) |
 
 ## Data (`data/t5/`)
@@ -55,7 +55,7 @@ How the varied pairs were built: `data/t5/varied_construction.md`.
 
 ```
 # 1. train: one more epoch on the 864 standard pairs, starting from stage 6
-python -m training.t5.train --model models/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --learning-rate 1e-5
+python -m training.t5.train --model generator_training/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --learning-rate 1e-5
 
 # 2. evaluate on the 432 development prompts and the app suites
 python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites
@@ -105,7 +105,7 @@ projections (294,912 trainable parameters, against about 60.5 million for full t
 
 ## Comparison runs (Section 6.4)
 
-Every comparison starts from `models/t5-stage6-balanced`, runs one epoch with seed 42,
+Every comparison starts from `generator_training/t5-stage6-balanced`, runs one epoch with seed 42,
 and is evaluated with the step-2 command.
 
 | Report row | `--data` | Other flags |
@@ -116,7 +116,7 @@ and is evaluated with the step-2 command.
 | LoRA, 864 standard + 648 varied | `data/t5/standard_plus_varied` | `--method lora --learning-rate 3e-4` |
 
 To evaluate a LoRA run, pass the base and the adapter:
-`--model models/t5-stage6-balanced --adapter runs/<lora run>`.
+`--model generator_training/t5-stage6-balanced --adapter runs/<lora run>`.
 
 ## Earlier stages (Section 6.2)
 
@@ -128,7 +128,7 @@ with earlier versions of this script.
 Only stages 2, 4, 5 and 6 lead to the chosen model (stages 1 and 3 were not carried forward):
 
 ```
-python -m training.t5.train --model models/t5-small-pretrained --data data/t5/stage2_contextual --output runs/s2
+python -m training.t5.train --model generator_training/t5-small-pretrained --data data/t5/stage2_contextual --output runs/s2
 python -m training.t5.train --model runs/s2 --data data/t5/stage4_action_revised --output runs/s4 --epochs 2
 python -m training.t5.train --model runs/s4 --data data/t5/stage5_task_retry --output runs/s5
 python -m training.t5.train --model runs/s5 --data data/t5/standard --output runs/s6 --epochs 1 --learning-rate 3e-5
@@ -153,8 +153,8 @@ The supplied checkpoints are the reference for the reported results.
 
 | Stage | `--model` (start) | `--data` | Epochs (kept) | LR |
 |---|---|---|---|---|
-| 1. Exploratory | `models/t5-small-pretrained` | `data/t5/stage1_exploratory` | 3 (3) | 1e-4 |
-| 2. Contextual | `models/t5-small-pretrained` | `data/t5/stage2_contextual` | 3 (3) | 1e-4 |
+| 1. Exploratory | `generator_training/t5-small-pretrained` | `data/t5/stage1_exploratory` | 3 (3) | 1e-4 |
+| 2. Contextual | `generator_training/t5-small-pretrained` | `data/t5/stage2_contextual` | 3 (3) | 1e-4 |
 | 3. Action-focused | stage 2 output | `data/t5/stage3_action_focused` | 2 (1) | 1e-4 |
 | 4. Revised action-focused | stage 2 output | `data/t5/stage4_action_revised` | 2 (1) | 1e-4 |
 | 5. Task and retry refinement | stage 4 output | `data/t5/stage5_task_retry` | 3 (3) | 1e-4 |

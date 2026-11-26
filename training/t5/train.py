@@ -19,12 +19,12 @@ def read_rows(path):
 def looks_local(value):
     """True for a local folder path (models/..., runs/..., absolute); False for a Hugging Face id such as google-t5/t5-small."""
     path = Path(value)
-    return path.is_absolute() or path.parts[0] in ('models', 'runs', '.', '..') or '\\' in str(value)
+    return path.is_absolute() or path.parts[0] in ('models', 'generator_training', 'runs', '.', '..') or '\\' in str(value)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default=str(ROOT/'models/t5-stage6-balanced'), help="Starting checkpoint (default: the stage-6 balanced checkpoint)")
+    parser.add_argument("--model", default=str(ROOT/'generator_training/t5-stage6-balanced'), help="Starting checkpoint (default: the stage-6 balanced checkpoint)")
     parser.add_argument("--data", type=Path, default=ROOT / "data/t5/standard", help="Folder with train.jsonl and validation.jsonl")
     parser.add_argument("--output", type=Path, required=True, help="New, empty output folder")
     parser.add_argument("--epochs", type=int, default=3)
@@ -65,7 +65,7 @@ def main():
     for name, value in (('--model', args.model), ('--adapter', args.adapter)):
         if value and looks_local(value) and not Path(value).exists():
             parser.error(f"{name} folder not found: {value}. Run from the repository root, and unzip the "
-                         "T5 model files there so that models/t5-stage6-balanced/ exists (not inside a nested folder).")
+                         "T5 model files there so that generator_training/t5-stage6-balanced/ exists (not inside a nested folder).")
     if not args.data.is_dir():
         parser.error(f"--data folder not found: {args.data}. Run from the repository root.")
 
