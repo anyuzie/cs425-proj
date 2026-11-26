@@ -5,8 +5,9 @@ T5-small (Raffel et al., 2020) phrases the question for the action the policy ch
 falls back to a template when a generated question fails its checks
 (`pipeline/t5_v2.py`, `pipeline/t5_v3.py`). See report Section 6.
 
-Run every command from the repository root with the project virtual environment
-(`.venv\Scripts\python` on Windows, `.venv/bin/python` elsewhere).
+Activate the project virtual environment (see the root README), then run every command
+from the repository root. Each command is a single line, so it works the same in
+PowerShell, cmd, bash and zsh.
 
 ## Files
 
@@ -18,12 +19,12 @@ Run every command from the repository root with the project virtual environment
 | `training/t5/controlled.py` | The 112-case controlled dialogue check |
 | `data/t5/` | All training splits, the benchmarks and the decoding settings |
 
-Model folders (not in Git; copy them from the team drive into `models/`):
+Model folders (not in Git; copy the `models/` and `generator_training/` folders from the team drive into the repository root):
 
 | Folder | Role |
 |---|---|
-| `models/t5-small-pretrained/` | Pretrained T5-small, the start of stage 1 |
-| `models/t5-stage6-balanced/` | Stage 6 (balanced full replay), the starting checkpoint for model selection |
+| `generator_training/t5-small-pretrained/` | Pretrained T5-small, the start of stage 1 |
+| `generator_training/t5-stage6-balanced/` | Stage 6 (balanced full replay), the starting checkpoint for model selection |
 | `models/t5-questions-v3b/` | **The chosen model, used by the app** (`configs/system.json`) |
 
 ## Data (`data/t5/`)
@@ -52,20 +53,25 @@ How the varied pairs were built: `data/t5/varied_construction.md`.
 
 ## Reproduce the chosen model
 
-```bash
+```
 # 1. train: one more epoch on the 864 standard pairs, starting from stage 6
-python -m training.t5.train --model models/t5-stage6-balanced --data data/t5/standard \
-    --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42
+python -m training.t5.train --model generator_training/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --learning-rate 1e-5
 
 # 2. evaluate on the 432 development prompts and the app suites
-python -m training.t5.evaluate --model runs/t5-chosen \
-    --benchmark data/t5/benchmarks/development_432.json --decode data/t5/decode.json \
-    --output runs/t5-chosen-eval --application-suites
+python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites
 
 # 3. deploy: copy runs/t5-chosen/ to models/t5-questions-v3b/, then
 python -m unittest discover -s tests -p "test_t5*.py"
 python run.py
 ```
+
+On Windows, `train_t5.bat` in the repository root runs steps 1 and 2 (model in `runs/t5/`,
+results in `runs/t5_eval/metrics.json`), and `train_t5_from_scratch.bat` runs the full
+rebuild below (model in `runs/t5_scratch/final/`, results in `runs/t5_scratch/eval/metrics.json`).
+
+Defaults: batch size 8, seed 42, 3 epochs and learning rate 1e-4 for training;
+`--benchmark data/t5/benchmarks/development_432.json` and `--decode data/t5/decode.json`
+for evaluation. Pass `--benchmark data/t5/benchmarks/reserved_216.json` for the held-out set.
 
 `train.py` refuses to write into a non-empty output folder, and `evaluate.py` refuses an
 existing one. Pass `--device cpu` or `--device cuda` to choose; the default is CUDA when
@@ -99,7 +105,7 @@ projections (294,912 trainable parameters, against about 60.5 million for full t
 
 ## Comparison runs (Section 6.4)
 
-Every comparison starts from `models/t5-stage6-balanced`, runs one epoch with seed 42,
+Every comparison starts from `generator_training/t5-stage6-balanced`, runs one epoch with seed 42,
 and is evaluated with the step-2 command.
 
 | Report row | `--data` | Other flags |
@@ -110,7 +116,7 @@ and is evaluated with the step-2 command.
 | LoRA, 864 standard + 648 varied | `data/t5/standard_plus_varied` | `--method lora --learning-rate 3e-4` |
 
 To evaluate a LoRA run, pass the base and the adapter:
-`--model models/t5-stage6-balanced --adapter runs/<lora run>`.
+`--model generator_training/t5-stage6-balanced --adapter runs/<lora run>`.
 
 ## Earlier stages (Section 6.2)
 
@@ -121,14 +127,13 @@ with earlier versions of this script.
 
 Only stages 2, 4, 5 and 6 lead to the chosen model (stages 1 and 3 were not carried forward):
 
-```bash
-T="python -m training.t5.train --batch-size 8 --seed 42"
-$T --model models/t5-small-pretrained --data data/t5/stage2_contextual --output runs/s2 --epochs 3 --learning-rate 1e-4
-$T --model runs/s2 --data data/t5/stage4_action_revised --output runs/s4 --epochs 2 --learning-rate 1e-4
-$T --model runs/s4 --data data/t5/stage5_task_retry --output runs/s5 --epochs 3 --learning-rate 1e-4
-$T --model runs/s5 --data data/t5/standard --output runs/s6 --epochs 1 --learning-rate 3e-5
-$T --model runs/s6 --data data/t5/standard --output runs/t5-rebuilt --epochs 1 --learning-rate 1e-5
-# then evaluate runs/t5-rebuilt with the step-2 command
+```
+python -m training.t5.train --model generator_training/t5-small-pretrained --data data/t5/stage2_contextual --output runs/s2
+python -m training.t5.train --model runs/s2 --data data/t5/stage4_action_revised --output runs/s4 --epochs 2
+python -m training.t5.train --model runs/s4 --data data/t5/stage5_task_retry --output runs/s5
+python -m training.t5.train --model runs/s5 --data data/t5/standard --output runs/s6 --epochs 1 --learning-rate 3e-5
+python -m training.t5.train --model runs/s6 --output runs/t5-rebuilt --epochs 1 --learning-rate 1e-5
+python -m training.t5.evaluate --model runs/t5-rebuilt --output runs/t5-rebuilt-eval --application-suites
 ```
 
 The data in each folder matches the hashes saved with the original stage runs. The chain runs
@@ -148,8 +153,8 @@ The supplied checkpoints are the reference for the reported results.
 
 | Stage | `--model` (start) | `--data` | Epochs (kept) | LR |
 |---|---|---|---|---|
-| 1. Exploratory | `models/t5-small-pretrained` | `data/t5/stage1_exploratory` | 3 (3) | 1e-4 |
-| 2. Contextual | `models/t5-small-pretrained` | `data/t5/stage2_contextual` | 3 (3) | 1e-4 |
+| 1. Exploratory | `generator_training/t5-small-pretrained` | `data/t5/stage1_exploratory` | 3 (3) | 1e-4 |
+| 2. Contextual | `generator_training/t5-small-pretrained` | `data/t5/stage2_contextual` | 3 (3) | 1e-4 |
 | 3. Action-focused | stage 2 output | `data/t5/stage3_action_focused` | 2 (1) | 1e-4 |
 | 4. Revised action-focused | stage 2 output | `data/t5/stage4_action_revised` | 2 (1) | 1e-4 |
 | 5. Task and retry refinement | stage 4 output | `data/t5/stage5_task_retry` | 3 (3) | 1e-4 |
