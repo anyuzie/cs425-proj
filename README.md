@@ -21,25 +21,23 @@ Python 3.11 or newer.
 ### 1. Download the model files
 
 The trained models and ranking artifacts are too large for Git. After pulling the
-repository, download **only** the `models` and `artifacts` folders and the
-`occupation_work_context.jsonl` file from the restricted
+repository, download the `models` and `artifacts` folders from the restricted
 [team Google Drive folder](https://drive.google.com/drive/folders/1r_4NHUjsxD4TsezeASW82okh1d1IKwvy?usp=drive_link).
-You must sign in with an authorized SMU account, ask the project team for access
+Sign in with an authorized SMU account and ask the project team for access
 if needed.
 
-Place the two folders directly in the repository root (beside this README), and
-put the JSONL file at
-`data/work_context/onet_31_0/prepared/occupation_work_context.jsonl`. Do not edit
-or re-save the JSONL file. The resulting paths should include:
+Place both folders in the repository root, beside this README. The resulting
+paths should include:
 
 ```
 models/
+  nli-probing-v2/
+    checkpoint/
   occupation_semantics_v1/
     finetuned/
     finetuned_index/
     data.json
 artifacts/
-data/work_context/onet_31_0/prepared/occupation_work_context.jsonl
 ```
 
 If the downloaded bundle contains the semantic encoder under
@@ -47,7 +45,18 @@ If the downloaded bundle contains the semantic encoder under
 `models/occupation_semantics_v1/`. In `finetuned_index/manifest.json`, set the
 top-level `checkpoint` field to `models/occupation_semantics_v1/finetuned`.
 
-### 2. Install dependencies and run the app
+### 2. Add the O\*NET Work Context file
+
+Download `occupation_work_context.jsonl` from the same team Drive folder. Git
+ignores this file, so copy it manually to the following path relative to the
+repository root. Create the `prepared` directory if needed and keep the file
+contents as downloaded.
+
+```text
+data/work_context/onet_31_0/prepared/occupation_work_context.jsonl
+```
+
+### 3. Install dependencies and run the app
 
 On **Windows**, open a terminal in the repository root and run the batch launcher
 (`run_pipeline.bat` in Command Prompt, or `.\run_pipeline.bat` in PowerShell). It
@@ -66,7 +75,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt -r requirements-models.txt \
   -r requirements-ranking.txt -r requirements-utterance.txt
-python scripts/check_nli_checkpoint.py --smoke
 python run.py
 ```
 
@@ -109,9 +117,11 @@ python -m unittest discover -s tests
 | Component | Training | Evaluation |
 |---|---|---|
 | Extractor | `model_training_code/Extractor_training_code.ipynb` | `python data/eval/lexicon_baseline.py test` (keyword baseline) |
-| Contradiction NLI | `python scripts/finetune_nli.py train --data data/nli_natural_v1.jsonl --output <dir> --epochs 2 --batch-size 8 --learning-rate 1.75e-5 --seed 425 --allow-unreviewed` | `python scripts/finetune_nli.py compare --data data/nli_natural_v1.jsonl --tuned <dir>/checkpoint --output <dir2>` |
+| Contradiction NLI | See the fine-tuning command below. | Compare the stock and tuned models on the test split. |
 | Semantic encoder | Run the four stages below with a fresh experiment config. | The `evaluate` stage writes the held-out results. |
 | Ranker | no training (BM25 index is built at load time) | `python -m eval.task_retrieval_fusion` |
+| T5 question writer | `python -m training.t5.train --model generator_training/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42` | `python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites`. Or run `train_t5.bat` (chosen model) or `train_t5_from_scratch.bat` (from pretrained T5-small). Details: `training/t5/README.md` |
+| End-to-end | | `python -m eval.dialogue_fusion --probing both` (simulated students, with and without probing) |
 
 ### Retrain the semantic encoder
 
@@ -128,8 +138,6 @@ python -m training.occupation_semantic train --config configs/occupation_semanti
 python -m training.occupation_semantic index --config configs/occupation_semantic_v2.json
 python -m training.occupation_semantic evaluate --config configs/occupation_semantic_v2.json
 ```
-| T5 question writer | `python -m training.t5.train --model generator_training/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42` | `python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites`. Or run `train_t5.bat` (chosen model) or `train_t5_from_scratch.bat` (from pretrained T5-small). Details: `training/t5/README.md` |
-| End-to-end | | `python -m eval.dialogue_fusion --probing both` (simulated students, with and without probing) |
 
 The live ranker is chosen in `configs/ranking.yaml`.
 
