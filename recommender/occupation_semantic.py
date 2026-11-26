@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT = ROOT / 'models/occupation_semantics_v1'
 REVISION = '1110a243fdf4706b3f48f1d95db1a4f5529b4d41'
 MODEL_ID = 'sentence-transformers/all-MiniLM-L6-v2'
-PRETRAINED = ROOT / 'artifacts/ranking/models/all-MiniLM-L6-v2_1110a243'
+PRETRAINED = EXPERIMENT / 'all-MiniLM-L6-v2_1110a243'
 BUILDER = 'field_budget_excluded_sources_v1'
 
 

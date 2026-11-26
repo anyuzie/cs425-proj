@@ -36,7 +36,7 @@ def protected_fingerprints():
     paths = [Path("data/dev_profiles.jsonl"), Path("data/occupations.csv"), Path("data/tasks.csv"),
              Path("data/labels.json"), Path("reports/ranking/evaluation_history.csv")]
     for folder in ("reports/ranking/m2", "reports/ranking/m3", "reports/ranking/m4", "recommender",
-                   "artifacts/ranking/minilm_mean_tasks_v1", "artifacts/ranking/models/all-MiniLM-L6-v2_1110a243"):
+                   "artifacts/ranking/minilm_mean_tasks_v1", "models/occupation_semantics_v1/all-MiniLM-L6-v2_1110a243"):
         paths.extend(p for p in Path(folder).rglob("*") if p.is_file() and "__pycache__" not in p.parts and ".cache" not in p.parts)
     return {p.as_posix(): sha(p) for p in sorted(set(paths))}
 

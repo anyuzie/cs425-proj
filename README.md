@@ -117,7 +117,7 @@ python -m unittest discover -s tests
 
 Use the dependencies in `requirements-occupation-semantic.txt` and place the
 pretrained MiniLM checkpoint at
-`artifacts/ranking/models/all-MiniLM-L6-v2_1110a243/`. Copy
+`models/occupation_semantics_v1/all-MiniLM-L6-v2_1110a243/`. Copy
 `configs/occupation_semantic_v1.json` to `configs/occupation_semantic_v2.json`
 and set `artifacts` to `models/occupation_semantics_v2` and `report` to
 `reports/ranking/occupation_semantic_v2` to preserve the supplied v1 outputs.

@@ -35,7 +35,7 @@ SIGNED_POLICY = {**BASE_POLICY, "preference": "explicit_negative_sign_v1"}
 
 
 LOCAL_MODEL_DEFAULTS = {
-    "CONTEXT_TASK_MINILM_MODEL": Path("artifacts/ranking/models/all-MiniLM-L6-v2_1110a243"),
+    "CONTEXT_TASK_MINILM_MODEL": Path("models/occupation_semantics_v1/all-MiniLM-L6-v2_1110a243"),
     "CONTEXT_TASK_MPNET_MODEL": Path.home() / ".cache/huggingface/hub/models--sentence-transformers--all-mpnet-base-v2"
                                 / "snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130",
 }
