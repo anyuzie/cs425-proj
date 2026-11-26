@@ -18,55 +18,53 @@ Each turn goes through:
 
 Python 3.11 or newer.
 
-Create and activate a virtual environment, then install the dependencies.
+### 1. Download the model files
 
-macOS / Linux:
+The trained models and ranking artifacts are too large for Git. After pulling the
+repository, download **only** the `models` and `artifacts` folders and the
+`occupation_work_context.jsonl` file from the restricted
+[team Google Drive folder](https://drive.google.com/drive/folders/1r_4NHUjsxD4TsezeASW82okh1d1IKwvy?usp=drive_link).
+You must sign in with an authorized SMU account, ask the project team for access
+if needed.
+
+Place the two folders directly in the repository root (beside this README), and
+put the JSONL file at
+`data/work_context/onet_31_0/prepared/occupation_work_context.jsonl`. Do not edit
+or re-save the JSONL file. The resulting paths should include:
+
+```
+models/
+artifacts/
+data/work_context/onet_31_0/prepared/occupation_work_context.jsonl
+```
+
+### 2. Install dependencies and run the app
+
+On **Windows**, open a terminal in the repository root and run the batch launcher
+(`run_pipeline.bat` in Command Prompt, or `.\run_pipeline.bat` in PowerShell). It
+creates `.venv` if needed, installs dependencies, checks the NLI checkpoint, and
+starts the app:
+
+```bat
+.\run_pipeline.bat
+```
+
+On **macOS/Linux**, create and activate a virtual environment, install dependencies,
+then start the app:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt -r requirements-models.txt \
-            -r requirements-ranking.txt -r requirements-utterance.txt
-```
-
-Windows PowerShell:
-
-```powershell
-py -3 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt -r requirements-models.txt `
-            -r requirements-ranking.txt -r requirements-utterance.txt
-```
-
-### Install the model files
-
-The trained models and ranking artifacts are too large for Git. They are kept in
-the restricted [team Google Drive folder](https://drive.google.com/drive/folders/1r_4NHUjsxD4TsezeASW82okh1d1IKwvy?usp=drive_link);
-ask the project team for access if you cannot open it.
-
-1. Sign in to Google Drive with an account that has access.
-2. Download the models and artifacts folde from the Drive. Drive downloads folders as a ZIP archive.
-3. Extract the archive into the repository root (the folder containing this README).
-   The paths below should exist directly under the repository root, not inside an
-   additional nested folder:
-
-```
-models/extractor/                        RoBERTa extractor checkpoint and tokenizer
-models/nli-probing-v2/checkpoint/         fine-tuned NLI checkpoint
-models/t5-questions-v3b/                  fine-tuned T5 question writer
-artifacts/ranking/occupation_semantic_v1/ fine-tuned MiniLM encoder and occupation index
-data/work_context/onet_31_0/prepared/occupation_work_context.jsonl
-```
-
-Check that the NLI checkpoint loads:
-
-```bash
+  -r requirements-ranking.txt -r requirements-utterance.txt
 python scripts/check_nli_checkpoint.py --smoke
+python run.py
 ```
 
-The Drive folder is access-restricted, so users download the files in a browser
-after signing in; the project does not store Google credentials or download them
-automatically. Keep the virtual environment active for the remaining commands.
+The `.bat` launcher is specific to Windows; on macOS/Linux use the commands above.
+Once the terminal reports "Application startup complete", open
+http://127.0.0.1:8000. Model loading can take a little while on CPU. Keep the
+terminal open while using the app.
 
 Only needed to retrain T5 (see `training/t5/README.md`):
 
@@ -74,15 +72,6 @@ Only needed to retrain T5 (see `training/t5/README.md`):
 generator_training/t5-stage6-balanced/   T5 starting checkpoint for the final fine-tune
 generator_training/t5-small-pretrained/  pretrained T5-small, for retraining from stage 1
 ```
-
-## Running the app
-
-```bash
-python run.py
-```
-
-Open http://127.0.0.1:8000 once the terminal shows "Application startup complete".
-The models load at start-up, which takes a little while on CPU.
 
 To chat in the terminal instead:
 
