@@ -18,38 +18,61 @@ Each turn goes through:
 
 Python 3.11 or newer.
 
+Create and activate a virtual environment, then install the dependencies.
+
+macOS / Linux:
+
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt -r requirements-models.txt \
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r requirements-models.txt \
             -r requirements-ranking.txt -r requirements-utterance.txt
 ```
 
-### Model files
+Windows PowerShell:
 
-The trained models are too large for Git. Download the shared model folder from the
-team drive ([link to be added]) and copy it into the repository so that these
-folders exist:
+```powershell
+py -3 -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt -r requirements-models.txt `
+            -r requirements-ranking.txt -r requirements-utterance.txt
+```
+
+### Install the model files
+
+The trained models and ranking artifacts are too large for Git. They are kept in
+the restricted [team Google Drive folder](https://drive.google.com/drive/folders/1r_4NHUjsxD4TsezeASW82okh1d1IKwvy?usp=drive_link);
+ask the project team for access if you cannot open it.
+
+1. Sign in to Google Drive with an account that has access.
+2. Download the shared model folder. Drive downloads folders as a ZIP archive.
+3. Extract the archive into the repository root (the folder containing this README).
+   The paths below should exist directly under the repository root, not inside an
+   additional nested folder:
 
 ```
 models/extractor/                        RoBERTa extractor checkpoint and tokenizer
-models/nli-probing-v2/checkpoint/        fine-tuned NLI checkpoint
-models/t5-questions-v3b/                 fine-tuned T5 question writer (the chosen model)
-artifacts/ranking/occupation_semantic_v1/  fine-tuned MiniLM encoder and occupation index
-data/work_context/onet_31_0/prepared/occupation_work_context.jsonl   O*NET work context (the index checks its hash)
+models/nli-probing-v2/checkpoint/         fine-tuned NLI checkpoint
+models/t5-questions-v3b/                  fine-tuned T5 question writer
+artifacts/ranking/occupation_semantic_v1/ fine-tuned MiniLM encoder and occupation index
+data/work_context/onet_31_0/prepared/occupation_work_context.jsonl
 ```
+
+Check that the NLI checkpoint loads:
+
+```bash
+python scripts/check_nli_checkpoint.py --smoke
+```
+
+The Drive folder is access-restricted, so users download the files in a browser
+after signing in; the project does not store Google credentials or download them
+automatically. Keep the virtual environment active for the remaining commands.
 
 Only needed to retrain T5 (see `training/t5/README.md`):
 
 ```
 models/t5-stage6-balanced/               T5 starting checkpoint for the final fine-tune
 models/t5-small-pretrained/              pretrained T5-small, for retraining from stage 1
-```
-
-Check that the NLI checkpoint is the right one:
-
-```bash
-python scripts/check_nli_checkpoint.py --smoke
 ```
 
 ## Running the app
@@ -76,13 +99,6 @@ Environment variables:
 | `CM_STUDY_MODE=1` | Hide the researcher panel (used for the user study) |
 
 Each conversation is logged to `logs/<participant_code>.jsonl`.
-
-To try the interface without the model files (mock extractor and NLI, everything
-else real):
-
-```bash
-python -m devtools.run_mock serve
-```
 
 ## Tests
 

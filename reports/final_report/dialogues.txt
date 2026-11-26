@@ -1,0 +1,87 @@
+===== 4eb8728a
+T1 U: 'i studied nursing and i enjoy flexible and easy jobs' | PROBE: 'You said "i studied nursing and i enjoy flexible and easy jobs". Is helping people something you enjoy, rather than mainly something you already know?'
+T2 U: 'i already know' | CLARIFY: 'Would you enjoy following clear procedures as part of your job?'
+T3 U: 'no' | CLARIFY: 'Imagine a job involving creating your own approach to a task; would that appeal to you?'
+T4 U: 'yes' | CLARIFY: 'Would you enjoy working with equipment and materials as part of your job?'
+T5 U: 'no' | CLARIFY: 'Imagine a job involving investigating why something happens; would that appeal to you?'
+T6 U: 'no' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T7 U: 'maybe' | CLARIFY: 'Would a working day involving leading a team and making decisions feel satisfying to you?'
+T8 U: 'no' | CLARIFY: 'Would you enjoy designing graphics and animation as part of your job?'
+T9 U: 'maybe' | CLARIFY: 'How would you feel about writing original stories or other creative prose during a normal working day?'
+T10 U: 'yes' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Nursing Instructors and Teachers, Postsecondary; Clinical Nurse Specialists; Nurse Midwives; Registered Nurses; Nurse Practitioners
+===== 5b010d4e
+T1 U: 'Architecture and design' | CLARIFY: 'Would you enjoy helping or teaching people as part of your job?'
+T2 U: 'yes' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T3 U: 'pitching ideas, persuading ok la' | CLARIFY: "Would a working day involving investigating the needs of a design project's audience feel satisfying to you?"
+T4 U: 'yes' | CLARIFY: 'Would you enjoy working with equipment and materials as part of your job?'
+T5 U: 'yes' | CLARIFY: 'How would you feel about maintaining an organised archive of images and previous designs during a normal working day?'
+T6 U: 'hmm sounds like something ai could do for me, but i do like organization' | CLARIFY: 'Would you enjoy analysing research data using statistical software as part of your job?'
+T7 U: 'not as much' | CLARIFY: 'Imagine a job involving leading a team and making decisions; would that appeal to you?'
+T8 U: 'yes but i probably need more practice for that' | CLARIFY: 'Would a working day involving negotiating deals or selling feel satisfying to you?'
+T9 U: 'hmmm nah' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T10 U: 'ok yes' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Architects, Except Landscape and Naval; Architecture Teachers, Postsecondary; Art Directors; Interior Designers; Landscape Architects
+===== 678c2746
+T1 U: 'i studied Aircraft systems engineering, i like collaborative work and having team discussion' | PROBE: 'You said "i studied Aircraft systems engineering, i like collaborative work and having team discussion". Is doing practical work something you enjoy, rather than simply something you already know?'
+T2 U: 'yes' | ABSTAIN: 'No worries, let me put it another way. You said "i studied Aircraft systems engineering, i like collaborative work and having team discussion" — is that something you\'d enjoy, or mainly what you\'ve had experience with so far?'
+T3 U: 'enjoy' | PROBE: 'You said "i studied Aircraft systems engineering, i like collaborative work and having team discussion". Is doing research something you enjoy, rather than mainly something you already know?'
+T4 U: 'i hate research' | CLARIFY: 'Would you enjoy designing graphics and animation as part of your job?'
+T5 U: 'no' | CLARIFY: 'How would you feel about negotiating contracts with suppliers during a normal working day?'
+T6 U: 'not really but doable' | CLARIFY: 'Would a working day involving teaching staff or customers about electronics equipment standards feel satisfying to you?'
+T7 U: 'it feels alright' | ABSTAIN: "That's fair, it's a tricky one. Let me ask differently. How would you feel about teaching staff or customers about electronics equipment standards during a normal working day?"
+T8 U: 'okay' | CLARIFY: 'Would you enjoy checking data for completeness and accuracy as part of your job?'
+T9 U: 'yup' | CLARIFY: 'Imagine a job involving talking with people throughout the day; would that appeal to you?'
+T10 U: 'yes' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Airline Pilots, Copilots, and Flight Engineers; Transportation Inspectors; Teaching Assistants, Postsecondary; Biological Technicians; Geological Technicians, Except Hydrologic Technicians
+===== c8fdec4e
+T1 U: 'i like doing creative things' | CLARIFY: 'Would you enjoy helping or teaching people as part of your job?'
+T2 U: 'sure' | CLARIFY: 'Imagine a job involving investigating why something happens; would that appeal to you?'
+T3 U: 'sure' | CLARIFY: 'Would a working day involving maintaining an organised archive of images and previous designs feel satisfying to you?'
+T4 U: 'not really' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T5 U: 'sure' | CLARIFY: 'Would you enjoy working with equipment and materials as part of your job?'
+T6 U: 'yes' | CLARIFY: 'Would you enjoy maintaining accurate and complete student records as part of your job?'
+T7 U: 'no' | CLARIFY: 'Would you enjoy working to a predictable routine as part of your job?'
+T8 U: 'yes' | CLARIFY: 'Would you enjoy following clear procedures as part of your job?'
+T9 U: 'sure' | CLARIFY: 'Would a working day involving organising records and schedules feel satisfying or tedious?'
+T10 U: 'ok' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Art Directors; Art, Drama, and Music Teachers, Postsecondary; Commercial and Industrial Designers; Special Effects Artists and Animators; Video Game Designers
+===== de5e1065
+T1 U: 'I studied Politics, Law and Economics, and i see myself enjoying working in a non-profit organisation, like a church, doing event planning, team building and volunteer management work' | CLARIFY: 'Would you enjoy following clear procedures as part of your job?'
+T2 U: 'no' | CLARIFY: 'Imagine a job involving creating your own approach to a task; would that appeal to you?'
+T3 U: 'yes' | CLARIFY: 'Would a working day involving investigating why something happens feel satisfying to you?'
+T4 U: 'i would enjoy investigating why something happens, but would find more fulfilment working with people' | CLARIFY: 'Would you enjoy working with equipment and materials as part of your job?'
+T5 U: 'no' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T6 U: 'yes' | CLARIFY: 'Would a working day involving leading a team and making decisions feel satisfying to you?'
+T7 U: 'i would love being part of the team, but i do not enjoy making decisions' | CLARIFY: 'Would a working day involving negotiating deals or selling feel satisfying to you?'
+T8 U: 'no' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T9 U: 'yes' | CLARIFY: 'Would a working day involving leading a team and making decisions feel satisfying to you?'
+T10 U: 'yes' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Sociologists; Political Scientists; Social Work Teachers, Postsecondary; Fundraisers; Political Science Teachers, Postsecondary
+===== fc10207b
+T1 U: 'i like flexible jobs' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T2 U: 'maybe' | CLARIFY: 'Imagine a job involving creating your own approach to a task; would that appeal to you?'
+T3 U: 'yes' | CLARIFY: 'Would a working day involving investigating why something happens feel satisfying to you?'
+T4 U: 'no' | CLARIFY: 'Would you enjoy working with equipment and materials as part of your job?'
+T5 U: 'no' | CLARIFY: 'Would you enjoy helping or teaching people as part of your job?'
+T6 U: 'no' | CLARIFY: 'Would you enjoy checking data for completeness and accuracy as part of your job?'
+T7 U: 'no' | CLARIFY: 'Would you enjoy helping clients clarify their design needs as part of your job?'
+T8 U: 'no' | CLARIFY: 'How would you feel about maintaining an organised archive of images and previous designs during a normal working day?'
+T9 U: 'its alright' | CLARIFY: 'Would a working day involving working to a predictable routine feel satisfying to you?'
+T10 U: 'no' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Compensation, Benefits, and Job Analysis Specialists; Industrial-Organizational Psychologists; Compensation and Benefits Managers; Human Resources Specialists; Equal Opportunity Representatives and Officers
+===== d567bcb7
+T1 U: 'I study social sciences and I like interacting with people' | CLARIFY: 'Would you enjoy helping or teaching people as part of your job?'
+T2 U: 'I like helping people' | CLARIFY: 'Would you enjoy following clear procedures as part of your job?'
+T3 U: 'Yes' | CLARIFY: 'Would you enjoy pitching ideas and persuading people as part of your job?'
+T4 U: 'No, I dont like talking to people' | CHALLENGE: 'Earlier you said "I like helping people" and then "No, I dont like talking to people". Which statement better describes whether you want work involving helping people?'
+T5 U: 'Sorry, yes i like helping people' | CLARIFY: 'Imagine a job involving creating your own approach to a task; would that appeal to you?'
+T6 U: 'Yes it would' | CLARIFY: 'Would you enjoy working with equipment and materials as part of your job?'
+T7 U: 'Not really' | CLARIFY: 'Would you enjoy checking database entries and correcting errors as part of your job?'
+T8 U: 'Not really' | CHALLENGE: 'Earlier you said "Yes" and then "Not really". Which statement better describes whether you want work involving organising information?'
+T9 U: 'I like creating my own approach to a task but not checking database entries' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Social Science Research Assistants; Sociologists; Survey Researchers; Health Informatics Specialists; Data Scientists
+===== demo-v3a
+T1 U: "I love analysing data. My dad runs a sales company so that's what I know." | PROBE: 'You said "My dad runs a sales company so that\'s what I know.". Is persuading people something you enjoy, rather than simply something you already know?'
+T2 U: "It's just what I know." | CLARIFY: 'Would you enjoy following clear procedures as part of your job?'
+T3 U: 'hmm, not sure' | ABSTAIN: 'By following clear procedures, I mean a task such as checking forms against a written checklist. Would you enjoy that activity, dislike it, or feel unsure?'
+T4 U: "Yes, I'd enjoy that." | CLARIFY: 'Would you enjoy working with equipment and materials as part of your job?'
+T5 U: "Actually, I don't enjoy analysing data at all." | CHALLENGE: 'Earlier you said "I love analysing data." and then "Actually, I don\'t enjoy analysing data at all.". Which statement better describes whether you want work involving doing research?'
+T6 U: 'I do love analysing data, I was just tired today.' | CLARIFY: 'Would you enjoy installing or repairing network cables as part of your job?'
+T7 U: "Yes, I'd enjoy that." | CLARIFY: 'Imagine a job involving creating your own approach to a task; would that appeal to you?'
+T8 U: 'No' | CLARIFY: 'How would you feel about teaching staff or customers about electronics equipment standards during a normal working day?'
+T9 U: 'Yes' | CLARIFY: 'Would a working day involving helping a colleague who is struggling feel satisfying to you?'
+T10 U: 'No' | RECOMMEND: 'Here are five occupations to explore based on the preferences you described:' | RECS: Statistical Assistants; Financial Examiners; Database Administrators; Computer and Information Research Scientists; Occupational Health and Safety Specialists
