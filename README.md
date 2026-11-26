@@ -45,7 +45,7 @@ the restricted [team Google Drive folder](https://drive.google.com/drive/folders
 ask the project team for access if you cannot open it.
 
 1. Sign in to Google Drive with an account that has access.
-2. Download the shared model folder. Drive downloads folders as a ZIP archive.
+2. Download the models and artifacts folde from the Drive. Drive downloads folders as a ZIP archive.
 3. Extract the archive into the repository root (the folder containing this README).
    The paths below should exist directly under the repository root, not inside an
    additional nested folder:
