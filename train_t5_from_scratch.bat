@@ -1,7 +1,7 @@
 @echo off
 REM Retrain the T5 question writer from pretrained T5-small: report Section 6.2 stages 2, 4, 5
 REM and 6, then the final step from Section 6.4, then evaluate.
-REM Needs models\t5-small-pretrained\ (from the T5 model zip, unzipped into this folder).
+REM Needs generator_training\t5-small-pretrained\ (from the T5 model zip, unzipped into this folder).
 REM Output: runs\t5_scratch\final\ (model) and runs\t5_scratch\eval\metrics.json (results).
 REM Results can differ slightly from the supplied checkpoints (see report Section 6.5).
 cd /d "%~dp0"
@@ -13,8 +13,8 @@ if exist ".venv\Scripts\python.exe" set "PY=.venv\Scripts\python.exe"
     goto fail
 )
 
-if not exist "models\t5-small-pretrained\model.safetensors" (
-    echo models\t5-small-pretrained\ not found. Unzip the T5 model files into %CD% first.
+if not exist "generator_training\t5-small-pretrained\model.safetensors" (
+    echo generator_training\t5-small-pretrained\ not found. Unzip the T5 model files into %CD% first.
     goto fail
 )
 if exist "runs\t5_scratch" (
@@ -24,7 +24,7 @@ if exist "runs\t5_scratch" (
 set OUT=runs/t5_scratch
 
 echo [1/6] Stage 2: contextual
-"%PY%" -m training.t5.train --model models/t5-small-pretrained --data data/t5/stage2_contextual --output %OUT%/s2 || goto fail
+"%PY%" -m training.t5.train --model generator_training/t5-small-pretrained --data data/t5/stage2_contextual --output %OUT%/s2 || goto fail
 echo [2/6] Stage 4: revised action-focused
 "%PY%" -m training.t5.train --model %OUT%/s2 --data data/t5/stage4_action_revised --output %OUT%/s4 --epochs 2 || goto fail
 echo [3/6] Stage 5: task and retry refinement
