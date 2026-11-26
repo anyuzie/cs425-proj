@@ -114,7 +114,7 @@ python -m unittest discover -s tests
 | Contradiction NLI | `python scripts/finetune_nli.py train --data data/nli_natural_v1.jsonl --output <dir> --epochs 2 --batch-size 8 --learning-rate 1.75e-5 --seed 425 --allow-unreviewed` | `python scripts/finetune_nli.py compare --data data/nli_natural_v1.jsonl --tuned <dir>/checkpoint --output <dir2>` |
 | Semantic encoder | `python -m training.occupation_semantic prepare\|train\|index --config configs/occupation_semantic_v1.json` | `python -m training.occupation_semantic evaluate --config configs/occupation_semantic_v1.json` |
 | Ranker | no training (BM25 index is built at load time) | `python -m eval.task_retrieval_fusion` |
-| T5 question writer | `python -m training.t5.train --model models/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42` | `python -m training.t5.evaluate --model runs/t5-chosen --benchmark data/t5/benchmarks/development_432.json --decode data/t5/decode.json --output runs/t5-chosen-eval --application-suites` (details: `training/t5/README.md`) |
+| T5 question writer | `python -m training.t5.train --model models/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42` | `python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites`. Or run `train_t5.bat` (chosen model) or `train_t5_from_scratch.bat` (from pretrained T5-small). Details: `training/t5/README.md` |
 | End-to-end | | `python -m eval.dialogue_fusion --probing both` (simulated students, with and without probing) |
 
 The live ranker is chosen in `configs/ranking.yaml`.

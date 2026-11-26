@@ -5,8 +5,9 @@ T5-small (Raffel et al., 2020) phrases the question for the action the policy ch
 falls back to a template when a generated question fails its checks
 (`pipeline/t5_v2.py`, `pipeline/t5_v3.py`). See report Section 6.
 
-Run every command from the repository root with the project virtual environment
-(`.venv\Scripts\python` on Windows, `.venv/bin/python` elsewhere).
+Activate the project virtual environment (see the root README), then run every command
+from the repository root. Each command is a single line, so it works the same in
+PowerShell, cmd, bash and zsh.
 
 ## Files
 
@@ -52,20 +53,25 @@ How the varied pairs were built: `data/t5/varied_construction.md`.
 
 ## Reproduce the chosen model
 
-```bash
+```
 # 1. train: one more epoch on the 864 standard pairs, starting from stage 6
-python -m training.t5.train --model models/t5-stage6-balanced --data data/t5/standard \
-    --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42
+python -m training.t5.train --model models/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --learning-rate 1e-5
 
 # 2. evaluate on the 432 development prompts and the app suites
-python -m training.t5.evaluate --model runs/t5-chosen \
-    --benchmark data/t5/benchmarks/development_432.json --decode data/t5/decode.json \
-    --output runs/t5-chosen-eval --application-suites
+python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites
 
 # 3. deploy: copy runs/t5-chosen/ to models/t5-questions-v3b/, then
 python -m unittest discover -s tests -p "test_t5*.py"
 python run.py
 ```
+
+On Windows, `train_t5.bat` in the repository root runs steps 1 and 2 (model in `runs/t5/`,
+results in `runs/t5_eval/metrics.json`), and `train_t5_from_scratch.bat` runs the full
+rebuild below (model in `runs/t5_scratch/final/`, results in `runs/t5_scratch/eval/metrics.json`).
+
+Defaults: batch size 8, seed 42, 3 epochs and learning rate 1e-4 for training;
+`--benchmark data/t5/benchmarks/development_432.json` and `--decode data/t5/decode.json`
+for evaluation. Pass `--benchmark data/t5/benchmarks/reserved_216.json` for the held-out set.
 
 `train.py` refuses to write into a non-empty output folder, and `evaluate.py` refuses an
 existing one. Pass `--device cpu` or `--device cuda` to choose; the default is CUDA when
@@ -121,14 +127,13 @@ with earlier versions of this script.
 
 Only stages 2, 4, 5 and 6 lead to the chosen model (stages 1 and 3 were not carried forward):
 
-```bash
-T="python -m training.t5.train --batch-size 8 --seed 42"
-$T --model models/t5-small-pretrained --data data/t5/stage2_contextual --output runs/s2 --epochs 3 --learning-rate 1e-4
-$T --model runs/s2 --data data/t5/stage4_action_revised --output runs/s4 --epochs 2 --learning-rate 1e-4
-$T --model runs/s4 --data data/t5/stage5_task_retry --output runs/s5 --epochs 3 --learning-rate 1e-4
-$T --model runs/s5 --data data/t5/standard --output runs/s6 --epochs 1 --learning-rate 3e-5
-$T --model runs/s6 --data data/t5/standard --output runs/t5-rebuilt --epochs 1 --learning-rate 1e-5
-# then evaluate runs/t5-rebuilt with the step-2 command
+```
+python -m training.t5.train --model models/t5-small-pretrained --data data/t5/stage2_contextual --output runs/s2
+python -m training.t5.train --model runs/s2 --data data/t5/stage4_action_revised --output runs/s4 --epochs 2
+python -m training.t5.train --model runs/s4 --data data/t5/stage5_task_retry --output runs/s5
+python -m training.t5.train --model runs/s5 --data data/t5/standard --output runs/s6 --epochs 1 --learning-rate 3e-5
+python -m training.t5.train --model runs/s6 --output runs/t5-rebuilt --epochs 1 --learning-rate 1e-5
+python -m training.t5.evaluate --model runs/t5-rebuilt --output runs/t5-rebuilt-eval --application-suites
 ```
 
 The data in each folder matches the hashes saved with the original stage runs. The chain runs

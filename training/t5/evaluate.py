@@ -2,7 +2,8 @@
 the app suites (112 controlled dialogue cases, 23 catalogue tasks with a retry each).
 
 Run from the repository root:
-  python -m training.t5.evaluate --model <checkpoint> --benchmark data/t5/benchmarks/development_432.json \n      --decode data/t5/decode.json --output <new dir> --application-suites
+  python -m training.t5.evaluate --model <checkpoint> --output <new dir> --application-suites
+--benchmark defaults to data/t5/benchmarks/development_432.json and --decode to data/t5/decode.json.
 """
 import argparse
 import collections
@@ -102,10 +103,19 @@ def evaluate(model,adapter,benchmark,output,device,threads,decode,application_su
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--model',required=True);p.add_argument('--adapter')
-    p.add_argument('--benchmark',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
+    p.add_argument('--benchmark',type=Path,default=ROOT/'data/t5/benchmarks/development_432.json',
+                   help='Benchmark prompts (default: the 432 development prompts)')
+    p.add_argument('--output',type=Path,required=True)
     p.add_argument('--device',choices=['auto','cpu','cuda'],default='auto');p.add_argument('--threads',type=int,default=4)
-    p.add_argument('--decode',type=Path,required=True);p.add_argument('--application-suites',action='store_true')
+    p.add_argument('--decode',type=Path,default=ROOT/'data/t5/decode.json',help='Decoding settings (default: data/t5/decode.json)')
+    p.add_argument('--application-suites',action='store_true')
     p.add_argument('--seed',type=int,default=42)
     a=p.parse_args()
     if a.output.exists():p.error('Evaluation output exists; use a new directory')
+    from training.t5.train import looks_local
+    for name,value in (('--model',a.model),('--adapter',a.adapter)):
+        if value and looks_local(value) and not Path(value).exists():
+            p.error(f'{name} folder not found: {value}. Run from the repository root, and unzip the T5 model files there (not inside a nested folder).')
+    for name,value in (('--benchmark',a.benchmark),('--decode',a.decode)):
+        if not value.is_file():p.error(f'{name} file not found: {value}')
     evaluate(a.model,a.adapter,a.benchmark,a.output,a.device,a.threads,read(a.decode),a.application_suites,a.seed)
