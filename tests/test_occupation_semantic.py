@@ -51,7 +51,7 @@ class SemanticTests(unittest.TestCase):
         self.assertEqual(r['mrr'],.5);self.assertEqual(r['recall@5'],1.);self.assertEqual(r['hit@1'],0.)
 
     def test_prepared_split_and_final_index_leakage(self):
-        root=Path('artifacts/ranking/occupation_semantic_v1')
+        root=Path('models/occupation_semantics_v1')
         if not (root/'data.json').exists(): self.skipTest('Prepare experiment first')
         data=json.loads((root/'data.json').read_text())
         groups=[e['group'] for e in data['examples']];self.assertEqual(len(groups),len(set(groups)))

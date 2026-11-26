@@ -3,7 +3,7 @@ components:
   # their scores are fused (below), and the dislike stage runs last. If only one component has a
   # usable signal, fusion is skipped and that component's ranking is used.
   # m3 and m4 drop the user's negative clauses from their queries. m4 needs the checkpoint and
-  # index in artifacts/ranking/occupation_semantic_v1/ (not in Git).
+  # index in models/occupation_semantics_v1/ (not in Git).
   # Same as configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_title_v3.json.
   # Without BM25 and the dislike stage: configs/ranking/occupation_semantic_fusion_zscore_v1.json.
   # Dot-product control: configs/ranking/baseline_v1.json.

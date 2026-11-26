@@ -1,6 +1,6 @@
 {
   "base": "occupation_dual_encoder@finetuned_v1",
-  "index": "artifacts/ranking/occupation_semantic_v1/finetuned_index",
+  "index": "models/occupation_semantics_v1/finetuned_index",
   "routing": "same rules as bm25_signed@ignore_negative_v3",
   "extractor_revision": "explicit_scoped_v1",
   "negation_cue_pattern": "^\\s*(?:except|apart from|other than|aside from)\\b|n't\\b|\\b(?:i|i'd|i'll|i would|rather|try to|prefer to|like to)\\s+(?:really\\s+|just\\s+|always\\s+)?avoid(?:ing)?\\b|\\b(?:dont|doesnt|didnt|wont|wouldnt|cant|couldnt|shouldnt|isnt|arent|wasnt|werent|havent|hasnt|hadnt|aint|nah|nope|not|no|never|nor|neither|none|nothing|hate|hated|dislike|cannot|rather not|anything but|can't stand|cant stand)\\b",

@@ -24,8 +24,8 @@ from pathlib import Path
 from .schemas import TYPES
 
 ROOT = Path(__file__).resolve().parents[1]
-INDEX = ROOT / "artifacts/ranking/occupation_semantic_v1/finetuned_index"
-OUTPUT = ROOT / "artifacts/ranking/occupation_semantic_v1/occupation_map_v1"
+INDEX = ROOT / "models/occupation_semantics_v1/finetuned_index"
+OUTPUT = ROOT / "models/occupation_semantics_v1/occupation_map_v1"
 CATALOG = ROOT / "data/occupations.csv"
 MAP_VERSION = "occupation_map_v1"
 CODE_ORDER = "eligible_code_ascending"

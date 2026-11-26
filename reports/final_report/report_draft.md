@@ -101,7 +101,7 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt -r requirements-models.txt -r requirements-ranking.txt
 # Model folders are not in git; copy the shared folders into place:
 #   models/extractor/   models/nli-probing-v2/checkpoint/   models/t5-questions-v3b/
-#   artifacts/ranking/occupation_semantic_v1/   (semantic encoder checkpoint + index)
+#   models/occupation_semantics_v1/   (semantic encoder checkpoint + index)
 .venv/bin/python scripts/check_nli_checkpoint.py --smoke   # verifies the NLI checkpoint hash
 .venv/bin/python run.py                                    # web app on http://127.0.0.1:8000
 .venv/bin/python chat_cli.py                               # terminal chat

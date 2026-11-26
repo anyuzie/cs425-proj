@@ -1,4 +1,4 @@
-# The occupation semantic index (artifacts/ranking/occupation_semantic_v1) validates the exact
+# The occupation semantic index (models/occupation_semantics_v1) validates the exact
 # SHA-256 of these files; pin their line endings so checkouts reproduce the hashed bytes on every OS.
 recommender/occupation_semantic.py text eol=lf
 training/occupation_semantic.py text eol=lf

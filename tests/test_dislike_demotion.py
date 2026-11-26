@@ -153,7 +153,7 @@ class ConfigTests(unittest.TestCase):
 
     def test_pipeline_without_post_fusion_unchanged(self):
         from recommender.configuration import load_configuration
-        if not (ROOT / "artifacts/ranking/occupation_semantic_v1/finetuned_index/manifest.json").exists():
+        if not (ROOT / "models/occupation_semantics_v1/finetuned_index/manifest.json").exists():
             self.skipTest("semantic index not available locally")
         best, _ = load_configuration(ROOT / "configs/ranking/occupation_semantic_signed_v2_fusion_zscore_bm25_signed_ignore_v3_dislike_title_v3.json")
         base = {k: v for k, v in best.items() if k != "post_fusion"}

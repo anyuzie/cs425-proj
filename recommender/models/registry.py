@@ -82,7 +82,7 @@ def default_registry() -> AlgorithmRegistry:
     registry.register_algorithm('m4', 'occupation_dual_encoder', OccupationSemantic)
     for name in ('pretrained', 'finetuned'):
         registry.register_variant('m4', 'occupation_dual_encoder', name + '_v1', {
-            'index': 'artifacts/ranking/occupation_semantic_v1/' + name + '_index'})
+            'index': 'models/occupation_semantics_v1/' + name + '_index'})
     from .occupation_semantic_signed import (SignedOccupationSemantic, PARAMETERS as SIGNED_SEMANTIC_PARAMETERS,
                                              PARAMETERS_V2 as SIGNED_SEMANTIC_PARAMETERS_V2)
     registry.register_algorithm('m4', 'occupation_dual_encoder_signed', SignedOccupationSemantic)

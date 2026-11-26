@@ -34,9 +34,18 @@ or re-save the JSONL file. The resulting paths should include:
 
 ```
 models/
+  occupation_semantics_v1/
+    finetuned/
+    finetuned_index/
+    data.json
 artifacts/
 data/work_context/onet_31_0/prepared/occupation_work_context.jsonl
 ```
+
+If the downloaded bundle contains the semantic encoder under
+`artifacts/ranking/occupation_semantic_v1/`, move that entire folder to
+`models/occupation_semantics_v1/`. In `finetuned_index/manifest.json`, set the
+top-level `checkpoint` field to `models/occupation_semantics_v1/finetuned`.
 
 ### 2. Install dependencies and run the app
 
@@ -101,8 +110,24 @@ python -m unittest discover -s tests
 |---|---|---|
 | Extractor | `model_training_code/Extractor_training_code.ipynb` | `python data/eval/lexicon_baseline.py test` (keyword baseline) |
 | Contradiction NLI | `python scripts/finetune_nli.py train --data data/nli_natural_v1.jsonl --output <dir> --epochs 2 --batch-size 8 --learning-rate 1.75e-5 --seed 425 --allow-unreviewed` | `python scripts/finetune_nli.py compare --data data/nli_natural_v1.jsonl --tuned <dir>/checkpoint --output <dir2>` |
-| Semantic encoder | `python -m training.occupation_semantic prepare\|train\|index --config configs/occupation_semantic_v1.json` | `python -m training.occupation_semantic evaluate --config configs/occupation_semantic_v1.json` |
+| Semantic encoder | Run the four stages below with a fresh experiment config. | The `evaluate` stage writes the held-out results. |
 | Ranker | no training (BM25 index is built at load time) | `python -m eval.task_retrieval_fusion` |
+
+### Retrain the semantic encoder
+
+Use the dependencies in `requirements-occupation-semantic.txt` and place the
+pretrained MiniLM checkpoint at
+`artifacts/ranking/models/all-MiniLM-L6-v2_1110a243/`. Copy
+`configs/occupation_semantic_v1.json` to `configs/occupation_semantic_v2.json`
+and set `artifacts` to `models/occupation_semantics_v2` and `report` to
+`reports/ranking/occupation_semantic_v2` to preserve the supplied v1 outputs.
+
+```bash
+python -m training.occupation_semantic prepare --config configs/occupation_semantic_v2.json
+python -m training.occupation_semantic train --config configs/occupation_semantic_v2.json
+python -m training.occupation_semantic index --config configs/occupation_semantic_v2.json
+python -m training.occupation_semantic evaluate --config configs/occupation_semantic_v2.json
+```
 | T5 question writer | `python -m training.t5.train --model generator_training/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42` | `python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites`. Or run `train_t5.bat` (chosen model) or `train_t5_from_scratch.bat` (from pretrained T5-small). Details: `training/t5/README.md` |
 | End-to-end | | `python -m eval.dialogue_fusion --probing both` (simulated students, with and without probing) |
 

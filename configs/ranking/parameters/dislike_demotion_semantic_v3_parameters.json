@@ -147,7 +147,7 @@
   ],
   "stemming": "suffix strip leaving at least 4 letters (no final e/es); match on equal stems, a >=5-letter stem prefix, or a >=4-letter stem prefix differing by one letter",
   "placement": "after_all_non_matched",
-  "semantic_index": "artifacts/ranking/occupation_semantic_v1/finetuned_index",
+  "semantic_index": "models/occupation_semantics_v1/finetuned_index",
   "matcher": "semantic",
   "semantic_threshold": 0.35,
   "calibrated": true,

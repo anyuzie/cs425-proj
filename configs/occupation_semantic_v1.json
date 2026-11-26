@@ -1,6 +1,6 @@
 {
   "seed": 425,
-  "artifacts": "artifacts/ranking/occupation_semantic_v1",
+  "artifacts": "models/occupation_semantics_v1",
   "report": "reports/ranking/occupation_semantic_v1",
   "near_duplicate_cosine": 0.85,
   "split": {"train": 0.70, "validation": 0.15, "test": 0.15},
