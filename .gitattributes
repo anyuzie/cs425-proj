@@ -5,3 +5,4 @@ training/occupation_semantic.py text eol=lf
 data/occupations.csv text eol=lf
 data/tasks.csv text eol=lf
 data/work_context/onet_31_0/source_manifest.json text eol=crlf
+*.bat text eol=crlf
