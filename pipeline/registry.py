@@ -25,7 +25,15 @@ def _ranker_configured(cfg, d):
     from recommender.models.ranker import RankingPipeline
     path = Path(cfg.get("paths", {}).get("ranking_config", "configs/ranking.yaml"))
     ranker = RankingPipeline(d / "occupations.csv", config=path if path.is_absolute() else ROOT / path)
-    ranker.name = "configured"
+    semantic = ranker.component_metadata.get("m4", {})
+    checkpoint = (semantic.get("identity") or {}).get("checkpoint")
+    if checkpoint:
+        bundle = Path(checkpoint).parent.name
+        ranker.name = f"{bundle}/{Path(checkpoint).name}"
+    elif semantic.get("resource_error"):
+        ranker.name = f"{ranker.component_identifiers['m4']} (unavailable)"
+    else:
+        ranker.name = ranker.component_identifiers["m4"] or path.stem
     return ranker
 
 
