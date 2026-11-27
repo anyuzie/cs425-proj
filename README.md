@@ -18,40 +18,37 @@ Each turn goes through:
 
 Python 3.11 or newer.
 
-### 1. Download the model files
+### 1. Download and place the required files
 
-The trained models and ranking artifacts are too large for Git. After pulling the
-repository, download the `models` and `artifacts` folders from the restricted
-[team Google Drive folder](https://drive.google.com/drive/folders/1r_4NHUjsxD4TsezeASW82okh1d1IKwvy?usp=drive_link).
-Sign in with an authorized SMU account and ask the project team for access
-if needed.
-
-Place both folders in the repository root, beside this README. The resulting
-paths should include:
+After pulling from the repository, download the `models` folder,
+`generator_training` folder and `occupation_work_context.jsonl` from the restricted
+[team Google Drive folder](https://drive.google.com/drive/folders/1r_4NHUjsxD4TsezeASW82okh1d1IKwvy?usp=drive_link)
+(SMU account only). Place the two folders in the repository root, beside this README.
+Save the JSONL file at
+`data/work_context/onet_31_0/prepared/occupation_work_context.jsonl` without modifying it.
+The resulting paths should include:
 
 ```
 models/
+  extractor/
   nli-probing-v2/
     checkpoint/
+  t5-questions-v3b/
   occupation_semantics_v1/
     finetuned/
     finetuned_index/
     data.json
-artifacts/
+generator_training/
+  t5-small-pretrained/
+  t5-stage6-balanced/
+data/
+  work_context/
+    onet_31_0/
+      prepared/
+        occupation_work_context.jsonl
 ```
 
-### 2. Add the O\*NET Work Context file
-
-Download `occupation_work_context.jsonl` from the same team Drive folder. Git
-ignores this file, so copy it manually to the following path relative to the
-repository root. Create the `prepared` directory if needed and keep the file
-contents as downloaded.
-
-```text
-data/work_context/onet_31_0/prepared/occupation_work_context.jsonl
-```
-
-### 3. Install dependencies and run the app
+### 2. Install dependencies and run the app
 
 On **Windows**, open a terminal in the repository root and run the batch launcher
 (`run_pipeline.bat` in Command Prompt, or `.\run_pipeline.bat` in PowerShell). It
