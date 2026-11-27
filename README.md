@@ -120,6 +120,33 @@ python -m unittest discover -s tests
 | T5 question writer | `python -m training.t5.train --model generator_training/t5-stage6-balanced --data data/t5/standard --output runs/t5-chosen --epochs 1 --batch-size 8 --learning-rate 1e-5 --seed 42` | `python -m training.t5.evaluate --model runs/t5-chosen --output runs/t5-chosen-eval --application-suites`. Or run `train_t5.bat` (chosen model) or `train_t5_from_scratch.bat` (from pretrained T5-small). Details: `training/t5/README.md` |
 | End-to-end | | `python -m eval.dialogue_fusion --probing both` (simulated students, with and without probing) |
 
+### Retrain the contradiction NLI model
+
+From the repository root, activate the project virtual environment and run the
+following in Bash (Git Bash on Windows). Choose a fresh run name for each retraining run.
+
+```bash
+run_name=nli-probing-retrain-v2
+bash scripts/create_nli_config.sh "$run_name"
+python scripts/finetune_nli.py train "@configs/nli/${run_name}.args"
+```
+
+The first script copies the training arguments recorded in
+`configs/nli/probing_v2.json` into a new `.args` file. The trainer reads that
+file with `@`, trains on `data/nli_natural_v1.jsonl`, and saves the best
+checkpoint to `models/<run-name>/checkpoint`. Use a new run name if the config
+file or output directory already exists.
+
+After training completes, run the following to use the new checkpoint in the
+default web app configuration.
+
+```bash
+bash scripts/use_nli_config.sh "$run_name"
+```
+
+This updates `paths.nli_model` in `configs/system.json`. Restart the web app
+to load the new weights.
+
 ### Retrain the semantic encoder
 
 This section uses the dependencies in `requirements-occupation-semantic.txt` 

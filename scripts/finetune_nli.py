@@ -209,7 +209,11 @@ def compare(args, rows):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        fromfile_prefix_chars="@",
+        epilog="Use @PATH to read saved arguments (one argument per line).",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
     for command in ("train", "compare"):
         p = sub.add_parser(command)
