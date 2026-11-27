@@ -40,11 +40,6 @@ models/
 artifacts/
 ```
 
-If the downloaded bundle contains the semantic encoder under
-`artifacts/ranking/occupation_semantic_v1/`, move that entire folder to
-`models/occupation_semantics_v1/`. In `finetuned_index/manifest.json`, set the
-top-level `checkpoint` field to `models/occupation_semantics_v1/finetuned`.
-
 ### 2. Add the O\*NET Work Context file
 
 Download `occupation_work_context.jsonl` from the same team Drive folder. Git
@@ -67,14 +62,16 @@ starts the app:
 .\run_pipeline.bat
 ```
 
-On **macOS/Linux**, create and activate a virtual environment, install dependencies,
-then start the app:
-
+On **macOS/Linux**, create and activate a virtual environment, install dependencies:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt -r requirements-models.txt \
   -r requirements-ranking.txt -r requirements-utterance.txt
+```
+
+Then start the app:
+```bash
 python run.py
 ```
 
@@ -125,21 +122,25 @@ python -m unittest discover -s tests
 
 ### Retrain the semantic encoder
 
-Use the dependencies in `requirements-occupation-semantic.txt` and place the
-pretrained MiniLM checkpoint at
-`models/occupation_semantics_v1/all-MiniLM-L6-v2_1110a243/`. Copy
-`configs/occupation_semantic_v1.json` to `configs/occupation_semantic_v2.json`
-and set `artifacts` to `models/occupation_semantics_v2` and `report` to
-`reports/ranking/occupation_semantic_v2` to preserve the supplied v1 outputs.
-
+This section uses the dependencies in `requirements-occupation-semantic.txt` 
+To fine tune the pretrained miniLM encoder, run:
 ```bash
-python -m training.occupation_semantic prepare --config configs/occupation_semantic_v2.json
-python -m training.occupation_semantic train --config configs/occupation_semantic_v2.json
-python -m training.occupation_semantic index --config configs/occupation_semantic_v2.json
-python -m training.occupation_semantic evaluate --config configs/occupation_semantic_v2.json
+scripts\create_occupation_semantic_config.sh <new config name>
+```
+This duplicates the configs for pretraining from `configs/occupation_semantic_v1.json` and forms a new config file with selected name (eg. `occupation_semantic_v2`). This name is to be reused for the following steps.
+
+Run the following commands to execute the end to end fine tuning workflow (work context and task data preprocessing, training, indexing of manifest, evaluation of finetuned model)
+```bash
+python -m training.occupation_semantic prepare --config configs/<new config name>.json
+python -m training.occupation_semantic train --config configs/<new config name>.json
+python -m training.occupation_semantic index --config configs/<new config name>.json
+python -m training.occupation_semantic evaluate --config configs/<new config name>.json
 ```
 
-The live ranker is chosen in `configs/ranking.yaml`.
+The live ranker is chosen in `configs/ranking.yaml`. To use the new config file, from the root repository, run:
+```bash
+bash scripts/use_occupation_semantic_config.sh <new config name>
+```
 
 ## Repository layout
 
